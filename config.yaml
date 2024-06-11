@@ -1,0 +1,33 @@
+config:
+  ADM:
+      dir: C:\Users\thanakit\Downloads\RAW\ADM
+      file: ADM.txt
+      depend_on: []
+  BOS:
+      dir: C:\Users\thanakit\Downloads\RAW\BOS
+      file: BOS.xlsx
+      depend_on: []
+  CUM:
+      dir: C:\Users\thanakit\Downloads\RAW\CUM
+      file: CUM.xls
+      depend_on: []
+  DOC:
+      dir: C:\Users\thanakit\Downloads\RAW\DOC
+      file: DocImage.txt
+      depend_on: [ADM, BOS]
+  ICAS:
+      dir: C:\Users\thanakit\Downloads\RAW\ICAS
+      file: ICAS-NCR.xlsx
+      depend_on: [DOC]
+# IIC:
+#     curr: 5
+#     volt: 5
+# LDS:
+#     curr: 5
+#     volt: 5
+# LEAD:
+#     curr: 5
+#     volt: 5
+# MOC:
+#     curr: 5
+#     volt: 5

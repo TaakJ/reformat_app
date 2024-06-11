@@ -21,7 +21,7 @@ from PyQt6.QtCore import (
     pyqtSignal
 )
 from qt_material import apply_stylesheet
-from setup import setup_parser, setup_folder, setup_log, Folder
+from setup import setup_parser, setup_folder, setup_log, setup_config, Folder
 from method import run_batch
 from pathlib import Path
 from os.path import join
@@ -38,14 +38,14 @@ class Jobber(QObject):
     def __init__(self, params):
         super().__init__()
         self.param = params
-        self._status = False
+        self.state = False
 
     def run(self):
         method = run_batch(self.param)
-        self._status = method._status
+        self.state = method.state
         read_bytes = 0
         chunk_size = 1024
-        if self._status:
+        if self.state:
             self.set_total_progress.emit(Path(join(Folder.EXPORT, Folder._FILE)).stat().st_size)
             while read_bytes <= Path(join(Folder.EXPORT, Folder._FILE)).stat().st_size:
                 time.sleep(1)
@@ -60,6 +60,7 @@ class setup_app(QWidget):
         super().__init__()
 
         params = setup_parser().parsed_params
+        setattr(params, 'config', setup_config())
         self.__thread = QThread()
         
         if params.manual is False:
@@ -274,12 +275,12 @@ class setup_app(QWidget):
         tasks.set_total_progress.connect(self.progress.setMaximum)
         tasks.set_current_progress.connect(self.progress.setValue)
         tasks.finished.connect(
-            lambda _status=tasks._status: self.run_job_finished(tasks._status)
+            lambda state=tasks.state: self.run_job_finished(tasks.state)
             )
 
         return thread
 
-    def run_job_finished(self, _status):
+    def run_job_finished(self, state):
         self.groupbox1.setChecked(True)
         self.groupbox2.setChecked(True)
         self.groupbox3.setChecked(True)
@@ -289,7 +290,7 @@ class setup_app(QWidget):
         self.log.setHidden(False)
         self.time_label.setText(f"Last Updated: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
         
-        if _status:
+        if state:
             self.label.setText("Job has been succeed.")
             self.file.setHidden(False)
         else:

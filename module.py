@@ -1,5 +1,5 @@
 from exception import CustomException
-from setup import Folder, clear_tmp
+from setup import Folder, clear_tmp, setup_config
 from log import call_logging
 import glob 
 import shutil
@@ -22,19 +22,20 @@ class convert_2_files(call_logging):
         
         logging.info(f"Command for run: {params}")
         logging.info(f"Start run batch date: {self.batch_date}")
+        
         self.date = datetime.now()
         self.skip_rows = []
         self.upsert_rows = {}
         
-        self._status = True
+        self.state = True
         try:
             if self.store_tmp is False:
-                clear_tmp() 
-            self.get_list_files()
-            self.get_data_files()
-            # self.mapping_data()
-            self.write_data_to_tmp_file()
-            self.write_data_to_target_file()
+                clear_tmp()
+            self.get_list_config()
+            # self.get_list_files()
+            # self.get_data_files()
+            # self.write_data_to_tmp_file()
+            # self.write_data_to_target_file()
         
         except CustomException as errors:
             self._status = False
@@ -57,37 +58,37 @@ class convert_2_files(call_logging):
 
             success_file = []
             for key in func(*args):
-                filename = key['full_path']
-                full_path = join(Folder.RAW, filename)
+                full_path = key['full_path']
                 
                 if glob.glob(full_path, recursive=True):
-                    status = "succeed"
-                    success_file.append(status)
+                    file_status = "succeed"
+                    success_file.append(file_status)
                 else:
-                    status = "missing"
-                    success_file.append(status)
-                key.update({'full_path': full_path, 'function': "check_success_files",  'status': status})
-
-            if success_file.__contains__("missing"):
-                raise CustomException(errors=func(*args))
-            else:
-                logging.info(f"File found count {len(success_file)} status: succeed.")
+                    file_status = "skipped"
+                    success_file.append(file_status)
+                key.update({'full_path': full_path, 'function': "check_success_files",  'file_status': file_status})
 
             return func(*args)
         return wrapper_success_files
 
-    @check_success_files
-    def get_list_files(self) -> list[dict]:
+    # @check_success_files
+    # def get_list_files(self) -> list[dict]:
         
-        if self.logging == []:
-            log_files = []
-            for file in Folder.LIST_FILE:
-                source = Path(file).stem
-                log_files.append({'source': source, 'full_path': file})
+    #     if self.logging == []:
+    #         log_files = []
+    #         for dirs, files in zip(Folder.LIST_DIR, Folder.LIST_FILE):
+    #             source = Path(files).stem
+    #             log_files.append({'source': source, 'full_path': join(dirs, files)})
                 
-            self._log_setter(log_files)
-        return self.logging
-
+    #         self._log_setter(log_files)
+    #     return self.logging
+    
+    def get_list_config(self):
+        # search = self.source.split(',')
+        print(self.source.split(','))
+        print(self.config)
+    
+    
     def mock_data(func):
 
         logging.info("Mock Data")
@@ -106,33 +107,33 @@ class convert_2_files(call_logging):
 
         return wrapper_mock_data
 
-    @mock_data
+    # @mock_data
     def get_data_files(self) -> list[dict]:
 
         logging.info("Get Data from files..")
-        status = "failed"
+        state = "failed"
         
         for i, key in enumerate(self.logging):
-            key.update({'function': "get_data_files", 'status': status})
+            key.update({'function': "get_data_files", 'state': state})
             full_path = key['full_path']
+            file_status = key['file_status']
             types = Path(key['full_path']).suffix
-            
-            try:
-                if ['.xlsx', '.xls'].__contains__(types):
-                    logging.info(f"Read Excel files: '{full_path}'.")
-                    clean_data = self.generate_excel_data(i)
-                else:
-                    logging.info(f"Read Text files: '{full_path}'.")
-                    clean_data = self.generate_text_data(i)
+            # try:
+            #     if ['.xlsx', '.xls'].__contains__(types):
+            #         logging.info(f"Read Excel files: '{full_path}'.")
+            #         clean_data = self.generate_excel_data(i)
+            #     else:
+            #         logging.info(f"Read Text files: '{full_path}'.")
+            #         clean_data = self.generate_text_data(i)
                 
-                status = "succeed"
-                key.update({'status': status, 'data': clean_data})
+            #     status = "succeed"
+            #     key.update({'status': status, 'data': clean_data})
                 
-            except Exception as err:
-                key.update({'errors': err})
+            # except Exception as err:
+            #     key.update({'errors': err})
         
-            if "errors" in key:
-                raise CustomException(errors=self.logging)
+            # if "errors" in key:
+            #     raise CustomException(errors=self.logging)
             
         return self.logging
     

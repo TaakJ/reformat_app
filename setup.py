@@ -5,16 +5,69 @@ import os
 from os.path import join
 from datetime import datetime
 
-CURRENT_DIR = os.getcwd()
-LOGGER_CONFIG = join(CURRENT_DIR, "logging_config.yaml")
+def setup_config() -> list:
+    config_list  = []
+    config_yaml  = None
+    config_dir   = Folder._CONFIG_DIR
+    
+    if os.path.exists(config_dir):
+        with open(config_dir, 'rb') as conf:
+            config_yaml  = yaml.safe_load(conf.read())
+    
+            for i in (config_yaml["config"].keys()):
+                setattr(Folder, f'_{i}', join(config_yaml["config"][i]["dir"], config_yaml["config"][i]["file"])    )
+                config_yaml["config"][i]['dir'] = [getattr(Folder, f'_{i}')]
+                
+                extend_dir = []
+                for j in config_yaml["config"][i]["depend_on"]:
+                    extend_dir += config_yaml["config"][j]["dir"]
+                config_yaml["config"][i]["run_path"] = config_yaml["config"][i]["dir"] + extend_dir
+    else:
+        raise Exception(f"Yaml config file path: '{config_dir}' doesn't exist.")
+    
+    for source, config in config_yaml["config"].items():
+        config_list.append({'source': source, 'run_path': config['run_path']})
+    return config_list
+
+def setup_log() -> None:
+    log_yaml  = None
+    log_dir   = Folder._LOGGER_CONFIG_DIR
+    log_name  = f'log-{datetime.today().strftime("%d%m%Y")}.log'
+
+    if os.path.exists(log_dir):
+        with open(log_dir, 'rb') as logger:
+            log_yaml  = yaml.safe_load(logger.read())
+            
+            for i in (log_yaml["handlers"].keys()):
+                if "filename" in log_yaml["handlers"][i]:
+                    log_path = log_yaml["handlers"][i]["filename"] + log_name
+                    
+            log_yaml["handlers"][i]["filename"] = log_path
+            logging.config.dictConfig(log_yaml)
+    else:
+        raise Exception(f"Yaml log file path: '{log_dir}' doesn't exist.")
+
+def setup_folder() -> None:
+    _folders = [value for name, value in vars(Folder).items() if isinstance(value, str) and not name.startswith("_")]
+    for folder in _folders:
+        os.makedirs(folder, exist_ok=True)
+    
+def clear_tmp() -> None:
+    _folders = [value for name, value in vars(Folder).items() if isinstance(value, str) and not name.startswith("_") and value.endswith("TMP/")]
+    for file_path in [join(folder, files) for folder in _folders for files in os.listdir(folder) if os.path.isfile(join(folder, files))]:
+        os.remove(file_path)
+
 class Folder:
-    RAW         = join(CURRENT_DIR, "RAW/")
-    EXPORT      = join(CURRENT_DIR, "EXPORT/")
-    TEMPLATE    = join(CURRENT_DIR, "TEMPLATE/")
-    TMP         = join(CURRENT_DIR, "TMP/")
-    LOG         = join(CURRENT_DIR, "LOG/")
-    LIST_FILE   = ['ADM.txt', 'BOS.xlsx', 'CUM.xls', 'DocImage.txt', 'ICAS-NCR.xlsx', 'IIC.xlsx', 'LDS-P_UserDetail.txt', 'Lead-Management.xlsx', 'MOC.xlsx']
-    _FILE       = "schedule_export.xlsx"
+    
+    _CURRENT_DIR        = os.getcwd()
+    _CONFIG_DIR         = join(_CURRENT_DIR, "config.yaml")
+    _LOGGER_CONFIG_DIR  = join(_CURRENT_DIR, "logging_config.yaml")
+    
+    TEMPLATE    =  join(_CURRENT_DIR, "TEMPLATE/")
+    TMP         =  join(_CURRENT_DIR, "TMP/")
+    LOG         =  join(_CURRENT_DIR, "LOG/")
+    EXPORT      =  join(_CURRENT_DIR, "EXPORT/")
+    
 class ArgumentParams:
     SHORT_NAME = 'short_name'
     NAME = 'name'
@@ -34,6 +87,14 @@ class setup_parser:
     @staticmethod
     def get_args_list() -> list[dict]:
         return [
+            {
+                ArgumentParams.SHORT_NAME : "-s",
+                ArgumentParams.NAME : "--source",
+                ArgumentParams.DESCRIPTION : "-s: source",
+                ArgumentParams.REQUIRED : False,
+                ArgumentParams.ISFLAG : True,
+                ArgumentParams.DEFAULT: 'ADM, BOS, CUM'
+            },
             {
                 ArgumentParams.SHORT_NAME : "-m",
                 ArgumentParams.NAME : "--manual",
@@ -91,31 +152,3 @@ class setup_parser:
                 else:
                     self.parser.add_argument(short_name, name, help=description, required=required,
                                         default=default, action=action, choices=choices)
-
-def setup_log() -> None:
-    config_yaml  = None
-    date = datetime.today().strftime("%d%m%Y")
-    log_name = f'log_{date}.log'
-
-    if os.path.exists(LOGGER_CONFIG):
-        with open(LOGGER_CONFIG, 'rb') as logger:
-            config_yaml  = yaml.safe_load(logger.read())
-            for i in (config_yaml["handlers"].keys()):
-                if "filename" in config_yaml['handlers'][i]:
-                    log_path = config_yaml["handlers"][i]["filename"]
-                    log_file = log_path + log_name
-            config_yaml["handlers"][i]["filename"] = log_file
-
-            logging.config.dictConfig(config_yaml)
-    else:
-        raise Exception(f"Yaml file file_path: '{LOGGER_CONFIG}' doesn't exist.")
-
-def setup_folder() -> None:
-    _folders = [name for name, value in vars(Folder).items() if isinstance(value, str) and not name.startswith("_") and name]
-    for folder in _folders:
-        os.makedirs(folder, exist_ok=True)
-
-def clear_tmp() -> None:
-    _folders = [value for name, value in vars(Folder).items() if isinstance(value, str) and not name.startswith("_") and value.endswith("TMP/")]
-    for file_path in [join(folder, files) for folder in _folders for files in os.listdir(folder) if os.path.isfile(join(folder, files))]:
-        os.remove(file_path)
