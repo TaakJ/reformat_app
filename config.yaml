@@ -1,24 +1,30 @@
 config:
-  ADM:
-      dir: C:\Users\thanakit\Downloads\RAW\ADM
-      file: ADM.txt
-      depend_on: []
-  BOS:
-      dir: C:\Users\thanakit\Downloads\RAW\BOS
-      file: BOS.xlsx
-      depend_on: []
-  CUM:
-      dir: C:\Users\thanakit\Downloads\RAW\CUM
-      file: CUM.xls
-      depend_on: []
-  DOC:
-      dir: C:\Users\thanakit\Downloads\RAW\DOC
-      file: DocImage.txt
-      depend_on: [ADM, BOS]
-  ICAS:
-      dir: C:\Users\thanakit\Downloads\RAW\ICAS
-      file: ICAS-NCR.xlsx
-      depend_on: [DOC]
+    ADM:
+        dir_input: C:\Users\thanakit\Downloads\RAW\ADM
+        dir_output: C:\Users\thanakit\Downloads\EXPORT\ADM
+        file: ADM.txt
+        depend_on: []
+    BOS:
+        dir_input: C:\Users\thanakit\Downloads\RAW\BOS
+        dir_output: C:\Users\thanakit\Downloads\EXPORT\BOS
+        file: BOS.xlsx
+        depend_on: []
+    CUM:
+        dir_input: C:\Users\thanakit\Downloads\RAW\CUM
+        dir_output: C:\Users\thanakit\Downloads\EXPORT\CUM
+        file: CUM.xls
+        depend_on: []
+    DOC:
+        dir_input: C:\Users\thanakit\Downloads\RAW\DOC
+        dir_output: C:\Users\thanakit\Downloads\EXPORT\DOC
+        file: DocImage.txt
+        depend_on: [ADM, BOS]
+    ICAS:
+        dir_input: C:\Users\thanakit\Downloads\RAW\ICAS
+        dir_output: C:\Users\thanakit\Downloads\EXPORT\ICAS
+        file: ICAS-NCR.xlsx
+        depend_on: [DOC]
+
 # IIC:
 #     curr: 5
 #     volt: 5

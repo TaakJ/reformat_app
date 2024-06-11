@@ -5,29 +5,61 @@ import os
 from os.path import join
 from datetime import datetime
 
-def setup_config() -> list:
-    config_list  = []
+class ArgumentParams:
+    SHORT_NAME = 'short_name'
+    NAME = 'name'
+    DESCRIPTION = 'description'
+    REQUIRED = 'required'
+    DEFAULT = 'default'
+    ISFLAG = 'flag'
+    TYPE = 'type'
+    CHOICES = 'choices'
+    
+class Folder:
+    _CURRENT_DIR        = os.getcwd()
+    _CONFIG_DIR         = join(_CURRENT_DIR, "config.yaml")
+    _LOGGER_CONFIG_DIR  = join(_CURRENT_DIR, "logging_config.yaml")
+    TEMPLATE    =  join(_CURRENT_DIR, "TEMPLATE/")
+    TMP         =  join(_CURRENT_DIR, "TMP/")
+    LOG         =  join(_CURRENT_DIR, "LOG/")
+
+
+def setup_folder() -> None:
+    _folders = [value for name, value in vars(Folder).items() if isinstance(value, str) and not name.startswith("_")]
+    for folder in _folders:
+        os.makedirs(folder, exist_ok=True)
+    
+    
+def clear_tmp() -> None:
+    _folders = [value for name, value in vars(Folder).items() if isinstance(value, str) and not name.startswith("_") and value.endswith("TMP/")]
+    for file_path in [join(folder, files) for folder in _folders for files in os.listdir(folder) if os.path.isfile(join(folder, files))]:
+        os.remove(file_path)
+        
+        
+def setup_config() -> list[dict]:
     config_yaml  = None
     config_dir   = Folder._CONFIG_DIR
+    config_list  = []
     
     if os.path.exists(config_dir):
         with open(config_dir, 'rb') as conf:
             config_yaml  = yaml.safe_load(conf.read())
     
             for i in (config_yaml["config"].keys()):
-                setattr(Folder, f'_{i}', join(config_yaml["config"][i]["dir"], config_yaml["config"][i]["file"])    )
-                config_yaml["config"][i]['dir'] = [getattr(Folder, f'_{i}')]
+                setattr(Folder, f'_{i}', join(config_yaml["config"][i]["dir_input"], config_yaml["config"][i]["file"])    )
+                config_yaml["config"][i]['dir_input'] = [getattr(Folder, f'_{i}')]
                 
                 extend_dir = []
                 for j in config_yaml["config"][i]["depend_on"]:
-                    extend_dir += config_yaml["config"][j]["dir"]
-                config_yaml["config"][i]["run_path"] = config_yaml["config"][i]["dir"] + extend_dir
+                    extend_dir += config_yaml["config"][j]["dir_input"]
+                config_yaml["config"][i]["dir_path"] = config_yaml["config"][i]["dir_input"] + extend_dir
     else:
         raise Exception(f"Yaml config file path: '{config_dir}' doesn't exist.")
     
     for source, config in config_yaml["config"].items():
-        config_list.append({'source': source, 'run_path': config['run_path']})
+        config_list.append({'source': source, 'dir_path': config['dir_path'], 'dir_output': config['dir_output']})
     return config_list
+
 
 def setup_log() -> None:
     log_yaml  = None
@@ -47,36 +79,6 @@ def setup_log() -> None:
     else:
         raise Exception(f"Yaml log file path: '{log_dir}' doesn't exist.")
 
-def setup_folder() -> None:
-    _folders = [value for name, value in vars(Folder).items() if isinstance(value, str) and not name.startswith("_")]
-    for folder in _folders:
-        os.makedirs(folder, exist_ok=True)
-    
-def clear_tmp() -> None:
-    _folders = [value for name, value in vars(Folder).items() if isinstance(value, str) and not name.startswith("_") and value.endswith("TMP/")]
-    for file_path in [join(folder, files) for folder in _folders for files in os.listdir(folder) if os.path.isfile(join(folder, files))]:
-        os.remove(file_path)
-
-class Folder:
-    
-    _CURRENT_DIR        = os.getcwd()
-    _CONFIG_DIR         = join(_CURRENT_DIR, "config.yaml")
-    _LOGGER_CONFIG_DIR  = join(_CURRENT_DIR, "logging_config.yaml")
-    
-    TEMPLATE    =  join(_CURRENT_DIR, "TEMPLATE/")
-    TMP         =  join(_CURRENT_DIR, "TMP/")
-    LOG         =  join(_CURRENT_DIR, "LOG/")
-    EXPORT      =  join(_CURRENT_DIR, "EXPORT/")
-    
-class ArgumentParams:
-    SHORT_NAME = 'short_name'
-    NAME = 'name'
-    DESCRIPTION = 'description'
-    REQUIRED = 'required'
-    DEFAULT = 'default'
-    ISFLAG = 'flag'
-    TYPE = 'type'
-    CHOICES = 'choices'
 
 class setup_parser:
     def __init__(self):
@@ -92,8 +94,9 @@ class setup_parser:
                 ArgumentParams.NAME : "--source",
                 ArgumentParams.DESCRIPTION : "-s: source",
                 ArgumentParams.REQUIRED : False,
-                ArgumentParams.ISFLAG : True,
-                ArgumentParams.DEFAULT: 'ADM, BOS, CUM'
+                ArgumentParams.ISFLAG : False,
+                ArgumentParams.TYPE : lambda s: [str(item).upper() for item in s.split(',')],
+                ArgumentParams.DEFAULT: '*'
             },
             {
                 ArgumentParams.SHORT_NAME : "-m",

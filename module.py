@@ -31,9 +31,9 @@ class convert_2_files(call_logging):
         try:
             if self.store_tmp is False:
                 clear_tmp()
-            self.get_list_config()
-            # self.get_list_files()
-            # self.get_data_files()
+                
+            self.check_success_files()
+            self.get_data_files()
             # self.write_data_to_tmp_file()
             # self.write_data_to_target_file()
         
@@ -51,42 +51,27 @@ class convert_2_files(call_logging):
     def _log_setter(self, log):
         self._log = log
         
-    def check_success_files(func):
-        def wrapper_success_files(*args: tuple) -> list[dict]:
-
-            logging.info("Check Success files..")
-
+        
+    def check_success_files(self):
+        
+        logging.info("Check Success files..")
+        
+        map_item = []
+        for key in [s for s in self.config if s['source'] in self.source]:
+            
             success_file = []
-            for key in func(*args):
-                full_path = key['full_path']
-                
-                if glob.glob(full_path, recursive=True):
+            for dir_path in key['dir_path']:
+                if glob.glob(dir_path, recursive=True):
                     file_status = "succeed"
                     success_file.append(file_status)
                 else:
                     file_status = "skipped"
                     success_file.append(file_status)
-                key.update({'full_path': full_path, 'function': "check_success_files",  'file_status': file_status})
-
-            return func(*args)
-        return wrapper_success_files
-
-    # @check_success_files
-    # def get_list_files(self) -> list[dict]:
-        
-    #     if self.logging == []:
-    #         log_files = []
-    #         for dirs, files in zip(Folder.LIST_DIR, Folder.LIST_FILE):
-    #             source = Path(files).stem
-    #             log_files.append({'source': source, 'full_path': join(dirs, files)})
+                    
+                key.update({'dir_path': dir_path, 'function': "check_success_files", 'file_status': file_status})
+                map_item.append(key)
                 
-    #         self._log_setter(log_files)
-    #     return self.logging
-    
-    def get_list_config(self):
-        # search = self.source.split(',')
-        print(self.source.split(','))
-        print(self.config)
+        self._log_setter(map_item)
     
     
     def mock_data(func):
@@ -114,10 +99,12 @@ class convert_2_files(call_logging):
         state = "failed"
         
         for i, key in enumerate(self.logging):
-            key.update({'function': "get_data_files", 'state': state})
-            full_path = key['full_path']
-            file_status = key['file_status']
-            types = Path(key['full_path']).suffix
+            print(key['source'])
+            print(key['depend_path'])
+            # key.update({'function': "get_data_files", 'state': state})
+            # full_path = key['full_path']
+            # file_status = key['file_status']
+            # types = Path(key['full_path']).suffix
             # try:
             #     if ['.xlsx', '.xls'].__contains__(types):
             #         logging.info(f"Read Excel files: '{full_path}'.")
