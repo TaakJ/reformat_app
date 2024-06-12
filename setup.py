@@ -56,6 +56,7 @@ def setup_config() -> dict:
         raise Exception(f"Yaml config file path: '{config_dir}' doesn't exist.")
     return config_yaml
 
+
 def setup_log() -> None:
     log_yaml  = None
     log_dir   = Folder._LOGGER_CONFIG_DIR
