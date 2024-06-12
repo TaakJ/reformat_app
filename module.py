@@ -78,52 +78,33 @@ class convert_2_files(call_logging):
     def retrieve_data_from_source_files(self) -> list[dict]:
 
         logging.info("Retrieve Data from Source files..")
+        
         state = "failed"
-
         for i, item in enumerate(self.logging):
             item.update({'function': "retrieve_data_from_source_files", 'state': state})
-            print(item)
-            
-            # dir_path = item['dir_path']
-            # print(dir_path)
-            # types = Path(item['dir_path']).suffix
-            # status_file = item['status_file']
-            
-            # try:
-            #     if status_file == "found":
-            #         if ['.xlsx', '.xls'].__contains__(types):
-            #             logging.info(f'Read Excel file: "{dir_path}".')
-            #             clean_data = self.generate_excel_data(i)
+    
+            try:
+                if item["status_file"] == "found":
+                    if [".xlsx", ".xls"].__contains__(Path(item["dir_input"]).suffix):
+                        logging.info(f'Read Excel file: "{item["dir_input"]}".')
+                        _data = self.generate_excel_data(i)
                         
-            #         else:
-            #             logging.info(f'Read Text file: "{dir_path}".')
-            #             print(dir_path)
-            #             # clean_data = self.generate_text_data(i)
-            #     else:
-            #         continue
+                    else:
+                        logging.info(f'Read Text file: "{item["dir_input"]}".')
+                        _data = self.text_data_cleaning(i)
+                        print(_data)
+                else:
+                    continue
                 
-            # print(clean_data)
-                # state = "succeed"
-                # item.update({'state': state, 'data': clean_data})
+                state = "succeed"
+                item.update({"data": _data, "state": state})
 
-            # except Exception as err:
-            #    item.update({'errors': err})
+            except Exception as err:
+                item.update({'errors': err})
 
-            # if "errors" in key:
-            #     raise CustomException(errors=self.logging)
-
+            if "errors" in item:
+                raise CustomException(errors=self.logging)
         return self.logging
-
-    # def mapping_data(self):
-    #     for key in self.logging:
-    #         print(f"source: {key['source']}")
-    #         for sheet, data in key['data'].items():
-    #             print(f"sheet: {sheet}")
-    #             df = pd.DataFrame(data)
-    #             # df.columns = df.iloc[0].values
-    #             # df = df[1:]
-    #             # df = df.reset_index(drop=True)
-    #             print(df)
 
 
     def write_data_to_tmp_file(self) -> None:

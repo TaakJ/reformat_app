@@ -27,6 +27,7 @@ class method_files:
             return clean_data
         return wrapper_clean_lines
 
+
     @clean_lines_excel
     def generate_excel_data(self, i: int) -> any:
 
@@ -36,85 +37,90 @@ class method_files:
         workbook = xlrd.open_workbook(self.logging[i]['full_path']);
         sheet_list = [sheet for sheet in workbook.sheet_names() if sheet != "StyleSheet"]
         
-        clean_data = {}
+        _data = {}
         for sheets in sheet_list:
             cells = workbook.sheet_by_name(sheets)
             for row in range(0, cells.nrows):
-                clean_data = {sheets: [cells.cell(row, col).value for col in range(cells.ncols)]}
-                yield clean_data
+                _data = {sheets: [cells.cell(row, col).value for col in range(cells.ncols)]}
+                yield _data
 
-    def clean_lines_text(func):
-        def wrapper_clean_lines(*args: tuple, **kwargs: dict) -> dict:
-            clean_lines = iter(func(*args, **kwargs))
 
-            clean_data = {}
+    def read_text_by_line(func):
+        def wrapper(*args: tuple, **kwargs:dict) -> dict:  
+            
+            _data = {}
+            by_lines = iter(func(*args, **kwargs))
+            
             rows = 0
             while True:
                 try:
-                    lines = []
-                    for sheets, data in  next(clean_lines).items():
-                        ## LDS-P_USERDETAIL
-                        if sheets == "LDS-P_USERDETAIL":
+                    lines_list = []
+                    for sheets, data in  next(by_lines).items():
+                        
+                        if sheets == "LDS":
                             if rows == 0:
-                                lines = " ".join(data).split(' ') # column
+                                # column
+                                lines_list = " ".join(data).split(' ')
                             else:
-                                for idx, value in enumerate(data): # fix value
+                                # value
+                                for idx, value in enumerate(data):
                                     if idx == 0:
                                         value = re.sub(r'\s+',',', value).split(',')
-                                        lines.extend(value)
+                                        lines_list.extend(value)
                                     else:
-                                        lines.append(value)
-                        ## DOCIMAGE
-                        elif sheets == "DOCIMAGE":
+                                        lines_list.append(value)
+                                        
+                        elif sheets == "DOC":
                             if rows == 1:
-                                lines = " ".join(data).split(' ') # column
+                                # column
+                                lines_list = " ".join(data).split(' ')
                             elif rows > 1:
-                                for idx, value in enumerate(data): # fix value
+                                # value
+                                for idx, value in enumerate(data):
                                     if idx == 3:
                                         value = re.sub(r'\s+',',', value).split(',')
-                                        lines.extend(value)
+                                        lines_list.extend(value)
                                     else:
-                                        lines.append(value)
-                        ## ADM
+                                        lines_list.append(value)
+                                        
                         elif sheets == "ADM":
-                            lines = data
+                            lines_list = data
                             
-                        if sheets not in clean_data:
-                            clean_data[sheets] = [lines]
+                        if sheets not in _data:
+                            _data[sheets] = [lines_list]
                         else:
-                            clean_data[sheets].append(lines)
-                            
+                            _data[sheets].append(lines_list)
                     rows += 1
-
+                    
                 except StopIteration:
                     break
+                
+            return _data
+        return wrapper
 
-            return clean_data
-        return wrapper_clean_lines
+    
+    @read_text_by_line
+    def text_data_cleaning(self, i: int) -> any:
 
-    # @clean_lines_text
-    def generate_text_data(self, i: int) -> any:
+        logging.info("Cleansing Data From Text file..")
+        
+        self.logging[i].update({'function': "text_data_cleaning"})
+        
+        _dir = self.logging[i]['dir_input']
+        files = open(_dir, 'rb')
+        encoded = chardet.detect(files.read())['encoding']
+        files.seek(0)
+        decode_data = StringIO(files.read().decode(encoded))
+        sheets =  self.logging[i]['source']
+        
+        _data = {}
+        for line in decode_data:
+            regex = re.compile(r'\w+.*')
+            find_lines = regex.findall(line)
+            if find_lines != []:
+                _data = {sheets: re.sub(r'\W\s+','||',"".join(find_lines).strip()).split('||')}
+                yield _data
 
-        logging.info("Cleansing Data From Text file To Dataframe..")
-        
-        self.logging[i].update({'function': "generate_text_data"})
-        
-        dir_path = self.logging[i]['dir_path']
-        
-        # files = open(self.logging[i]['dir_path'], 'rb')
-        # encoded = chardet.detect(files.read())['encoding']
-        # files.seek(0)
-        # decode_data = StringIO(files.read().decode(encoded))
-        # sheets =  self.logging[i]['source']
-        
-        # clean_data = {}
-        # for line in decode_data:
-        #    print(line)
-        #     regex = re.compile(r'\w+.*')
-        #     find_lines = regex.findall(line)
-        #     if find_lines != []:
-        #         clean_data = {sheets: re.sub(r'\W\s+','||',"".join(find_lines).strip()).split('||')}
-        #         yield clean_data
 
     def validation_data(self, valid_df: pd.DataFrame, new_df: pd.DataFrame) -> dict:
 
