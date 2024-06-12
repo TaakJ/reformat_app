@@ -3,7 +3,7 @@ config:
         dir_input: C:\Users\thanakit\Downloads\RAW\ADM
         dir_output: C:\Users\thanakit\Downloads\EXPORT\ADM
         file: ADM.txt
-        depend_on: []
+        depend_on: [DOC]
     BOS:
         dir_input: C:\Users\thanakit\Downloads\RAW\BOS
         dir_output: C:\Users\thanakit\Downloads\EXPORT\BOS

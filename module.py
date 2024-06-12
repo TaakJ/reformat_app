@@ -33,7 +33,7 @@ class convert_2_files(call_logging):
             if self.store_tmp is False:
                 clear_tmp()
 
-            self.check_source_files()
+            # self.check_source_files()
             # self.retrieve_data_from_source_files()
             # self.write_data_to_tmp_file()
             # self.write_data_to_target_file()
@@ -60,18 +60,22 @@ class convert_2_files(call_logging):
         for source, value in self.config["config"].items():
             if source in self.source:
                 
-                status_file = "skipped"
+                status_file = "not_found"
                 for dir_path in value["dir_path"]:
                     if glob.glob(dir_path, recursive=True):
-                        status_file = "succeed"
+                        status_file = "found"
                         
                     item = {"source": source, 
                             "dir_path": dir_path, 
+                            "status_file": status_file,
                             "dir_output": value["dir_output"], 
-                            "function": "check_source_files",  
-                            "status_file": status_file}
+                            "function": "check_source_files"}
                         
                     map_item.append(item)
+        
+        for x in map_item:
+            print(x)
+        
         self._log_setter(map_item)
 
     def retrieve_data_from_source_files(self) -> list[dict]:
@@ -79,30 +83,34 @@ class convert_2_files(call_logging):
         logging.info("Retrieve Data from Source files..")
         state = "failed"
 
-        for i, key in enumerate(self.logging):
-            print(key["source"])
-            print(key["depend_on"])
-            print(key["dir_path"])
-            print(key["status_file"])
-            print()
-
-            # key.update({'function': "get_data_files", 'state': state})
-            # full_path = key['full_path']
-            # file_status = key['file_status']
-            # types = Path(key['full_path']).suffix
+        for i, item in enumerate(self.logging):
+            print(item)
+            item.update({'function': "retrieve_data_from_source_files", 'state': state})
+            
+            # dir_path = item['dir_path']
+            # print(dir_path)
+            # types = Path(item['dir_path']).suffix
+            # status_file = item['status_file']
+            
             # try:
-            #     if ['.xlsx', '.xls'].__contains__(types):
-            #         logging.info(f"Read Excel files: '{full_path}'.")
-            #         clean_data = self.generate_excel_data(i)
+            #     if status_file == "found":
+            #         if ['.xlsx', '.xls'].__contains__(types):
+            #             logging.info(f'Read Excel file: "{dir_path}".')
+            #             clean_data = self.generate_excel_data(i)
+                        
+            #         else:
+            #             logging.info(f'Read Text file: "{dir_path}".')
+            #             print(dir_path)
+            #             # clean_data = self.generate_text_data(i)
             #     else:
-            #         logging.info(f"Read Text files: '{full_path}'.")
-            #         clean_data = self.generate_text_data(i)
-
-            #     status = "succeed"
-            #     key.update({'status': status, 'data': clean_data})
+            #         continue
+                
+            # print(clean_data)
+                # state = "succeed"
+                # item.update({'state': state, 'data': clean_data})
 
             # except Exception as err:
-            #     key.update({'errors': err})
+            #    item.update({'errors': err})
 
             # if "errors" in key:
             #     raise CustomException(errors=self.logging)

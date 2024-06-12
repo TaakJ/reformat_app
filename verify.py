@@ -30,7 +30,7 @@ class method_files:
     @clean_lines_excel
     def generate_excel_data(self, i: int) -> any:
 
-        logging.info("Cleansing Data in Excel files to Dataframe..")
+        logging.info("Cleansing Data From Excel file To Dataframe..")
         self.logging[i].update({'function': "generate_excel_data"})
         
         workbook = xlrd.open_workbook(self.logging[i]['full_path']);
@@ -92,25 +92,29 @@ class method_files:
             return clean_data
         return wrapper_clean_lines
 
-    @clean_lines_text
+    # @clean_lines_text
     def generate_text_data(self, i: int) -> any:
 
-        logging.info("Cleansing Data in Text files to Dataframe..")
+        logging.info("Cleansing Data From Text file To Dataframe..")
+        
         self.logging[i].update({'function': "generate_text_data"})
         
-        files = open(self.logging[i]['full_path'], 'rb')
-        encoded = chardet.detect(files.read())['encoding']
-        files.seek(0)
-        decode_data = StringIO(files.read().decode(encoded))
-        sheets =  str(Path(self.logging[i]['full_path']).stem).upper()
-
-        clean_data = {}
-        for line in decode_data:
-            regex = re.compile(r'\w+.*')
-            find_lines = regex.findall(line)
-            if find_lines != []:
-                clean_data = {sheets: re.sub(r'\W\s+','||',"".join(find_lines).strip()).split('||')}
-                yield clean_data
+        dir_path = self.logging[i]['dir_path']
+        
+        # files = open(self.logging[i]['dir_path'], 'rb')
+        # encoded = chardet.detect(files.read())['encoding']
+        # files.seek(0)
+        # decode_data = StringIO(files.read().decode(encoded))
+        # sheets =  self.logging[i]['source']
+        
+        # clean_data = {}
+        # for line in decode_data:
+        #    print(line)
+        #     regex = re.compile(r'\w+.*')
+        #     find_lines = regex.findall(line)
+        #     if find_lines != []:
+        #         clean_data = {sheets: re.sub(r'\W\s+','||',"".join(find_lines).strip()).split('||')}
+        #         yield clean_data
 
     def validation_data(self, valid_df: pd.DataFrame, new_df: pd.DataFrame) -> dict:
 

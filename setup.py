@@ -43,17 +43,27 @@ def setup_config() -> dict:
     if os.path.exists(config_dir):
         with open(config_dir, "rb") as conf:
             config_yaml  = yaml.safe_load(conf.read())
-    
-            for i in (config_yaml["config"].keys()):
-                setattr(Folder, f'_{i}', join(config_yaml["config"][i]["dir_input"], config_yaml["config"][i]["file"])    )
-                config_yaml["config"][i]['dir_input'] = [getattr(Folder, f'_{i}')]
+            
+            for i in config_yaml["config"].keys():
+                _folder = join(config_yaml["config"][i]["dir_input"], config_yaml["config"][i]["file"])
+                setattr(Folder, f'_{i}', _folder)
+                # config_yaml["config"][i]["dir_input"] = [getattr(Folder, f"_{i}")]
                 
                 extend_dir = []
-                for j in config_yaml["config"][i]["depend_on"]:
-                    extend_dir += config_yaml["config"][j]["dir_input"]
-                config_yaml["config"][i]["dir_path"] = config_yaml["config"][i]["dir_input"] + extend_dir
-    else:
-        raise Exception(f"Yaml config file path: '{config_dir}' doesn't exist.")
+                # source = config_yaml["config"][i]["depend_on"]
+                
+                # for j in config_yaml["config"][i]["depend_on"]:
+                #    print(k)
+                
+                # a = config_yaml["config"][i]["dir_input"]
+                # print(a)
+                # config_yaml["config"][i]["dir_path"] = config_yaml["config"][i]["dir_input"] + extend_dir
+                
+        # for x, y in config_yaml['config'].items():
+        #    print(x)
+        #    print(y)
+    #else:
+    #    raise Exception(f"Yaml config file path: '{config_dir}' doesn't exist.")
     return config_yaml
 
 
