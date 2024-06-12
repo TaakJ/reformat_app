@@ -12,7 +12,6 @@ from datetime import datetime
 import openpyxl
 from openpyxl.styles import Font
 
-
 class convert_2_files(call_logging):
     def __init__(self, params: dict):
         super().__init__()
@@ -33,8 +32,8 @@ class convert_2_files(call_logging):
             if self.store_tmp is False:
                 clear_tmp()
 
-            # self.check_source_files()
-            # self.retrieve_data_from_source_files()
+            self.check_source_files()
+            self.retrieve_data_from_source_files()
             # self.write_data_to_tmp_file()
             # self.write_data_to_target_file()
 
@@ -52,6 +51,7 @@ class convert_2_files(call_logging):
     def _log_setter(self, log):
         self._log = log
 
+
     def check_source_files(self) -> None:
 
         logging.info("Check Source files..")
@@ -61,22 +61,19 @@ class convert_2_files(call_logging):
             if source in self.source:
                 
                 status_file = "not_found"
-                for dir_path in value["dir_path"]:
-                    if glob.glob(dir_path, recursive=True):
+                for _dir in value["dir"]:
+                    if glob.glob(_dir, recursive=True):
                         status_file = "found"
                         
                     item = {"source": source, 
-                            "dir_path": dir_path, 
+                            "dir_input": _dir, 
                             "status_file": status_file,
                             "dir_output": value["dir_output"], 
                             "function": "check_source_files"}
                         
                     map_item.append(item)
-        
-        for x in map_item:
-            print(x)
-        
         self._log_setter(map_item)
+
 
     def retrieve_data_from_source_files(self) -> list[dict]:
 
@@ -84,8 +81,8 @@ class convert_2_files(call_logging):
         state = "failed"
 
         for i, item in enumerate(self.logging):
-            print(item)
             item.update({'function': "retrieve_data_from_source_files", 'state': state})
+            print(item)
             
             # dir_path = item['dir_path']
             # print(dir_path)
@@ -127,6 +124,7 @@ class convert_2_files(call_logging):
     #             # df = df[1:]
     #             # df = df.reset_index(drop=True)
     #             print(df)
+
 
     def write_data_to_tmp_file(self) -> None:
 
