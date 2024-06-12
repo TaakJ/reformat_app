@@ -23,7 +23,7 @@ config:
         dir_input: C:\Users\thanakit\Downloads\RAW\ICAS
         dir_output: C:\Users\thanakit\Downloads\EXPORT\ICAS
         file: ICAS-NCR.xlsx
-        depend_on: [DOC]
+        depend_on: [CUM]
 
 # IIC:
 #     curr: 5

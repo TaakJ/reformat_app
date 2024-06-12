@@ -60,7 +60,7 @@ class setup_app(QWidget):
         super().__init__()
 
         params = setup_parser().parsed_params
-        setattr(params, 'config', setup_config())
+        setattr(params, "config", setup_config())
         self.__thread = QThread()
         
         if params.manual is False:
