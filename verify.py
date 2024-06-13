@@ -54,47 +54,50 @@ class method_files:
             rows = 0
             while True:
                 try:
-                    lines_list = []
-                    for sheets, data in  next(by_lines).items():
+                    list_by_lines = []
+                    for source, data in  next(by_lines).items():
                         
-                        if sheets == "LDS":
+                        if source == "LDS":
                             if rows == 0:
-                                # column
-                                lines_list = " ".join(data).split(' ')
+                                ## herder column
+                                list_by_lines = " ".join(data).split(' ')
                             else:
-                                # value
+                                ## row value
                                 for idx, value in enumerate(data):
                                     if idx == 0:
                                         value = re.sub(r'\s+',',', value).split(',')
-                                        lines_list.extend(value)
+                                        list_by_lines.extend(value)
                                     else:
-                                        lines_list.append(value)
+                                        list_by_lines.append(value)
                                         
-                        elif sheets == "DOC":
+                        elif source == "DOC":
                             if rows == 1:
-                                # column
-                                lines_list = " ".join(data).split(' ')
+                                ## herder column
+                                list_by_lines = " ".join(data).split(' ')
                             elif rows > 1:
-                                # value
+                                ## row value
                                 for idx, value in enumerate(data):
                                     if idx == 3:
                                         value = re.sub(r'\s+',',', value).split(',')
-                                        lines_list.extend(value)
+                                        list_by_lines.extend(value)
                                     else:
-                                        lines_list.append(value)
+                                        list_by_lines.append(value)
                                         
-                        elif sheets == "ADM":
-                            lines_list = data
-                            
-                        if sheets not in _data:
-                            _data[sheets] = [lines_list]
+                        elif source == "ADM":
+                            ## row value
+                            list_by_lines = data
+                        
+                        if list_by_lines != []:
+                            if source not in _data:
+                                _data[source] = [list_by_lines]
+                            else:
+                                _data[source].append(list_by_lines)
                         else:
-                            _data[sheets].append(lines_list)
+                            continue
+                        
                     rows += 1
-                    
                 except StopIteration:
                     break
-                
             return _data
         return wrapper
 
@@ -103,23 +106,21 @@ class method_files:
     def text_data_cleaning(self, i: int) -> any:
 
         logging.info("Cleansing Data From Text file..")
+        self.logging[i].update({"function": "text_data_cleaning"})
         
-        self.logging[i].update({'function': "text_data_cleaning"})
+        _dir = self.logging[i]["dir_input"]
+        source = self.logging[i]["source"]
         
-        _dir = self.logging[i]['dir_input']
-        files = open(_dir, 'rb')
-        encoded = chardet.detect(files.read())['encoding']
+        files = open(_dir, "rb")
+        encoded = chardet.detect(files.read())["encoding"]
         files.seek(0)
         decode_data = StringIO(files.read().decode(encoded))
-        sheets =  self.logging[i]['source']
         
-        _data = {}
-        for line in decode_data:
-            regex = re.compile(r'\w+.*')
-            find_lines = regex.findall(line)
-            if find_lines != []:
-                _data = {sheets: re.sub(r'\W\s+','||',"".join(find_lines).strip()).split('||')}
-                yield _data
+        for lines in decode_data:
+            regex = re.compile(r"\w+.*")
+            find_regex = regex.findall(lines)
+            if find_regex != []:
+                yield {source: re.sub(r"\W\s+","||","".join(find_regex).strip()).split("||")}
 
 
     def validation_data(self, valid_df: pd.DataFrame, new_df: pd.DataFrame) -> dict:

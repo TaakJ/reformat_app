@@ -5,7 +5,7 @@ class CustomException(Exception):
         for key, value in self.__dict__.items():
             setattr(self, key, value)
         
-        self.msg_err = self.generate_meg_err()
+        self.msg_err = self.generate_error_message()
     
     def __iter__(self):
         return self
@@ -13,7 +13,7 @@ class CustomException(Exception):
     def __next__(self):
         return next(self.msg_err)
 
-    def generate_meg_err(self):
+    def generate_error_message(self):
         for i in  range(len(self.errors)):
-            msg_err = f"Path::{self.errors[i]['source']} - Function::{self.errors[i]['function']} - Status::{self.errors[i]['state']} - Error::{self.errors[i].get('errors')}"
-            yield msg_err
+            error_message = f"Source::{self.errors[i]['source']} - Path::{self.errors[i]['dir_input']} - Function::{self.errors[i]['function']} - State::{self.errors[i]['state']} - Error::{self.errors[i].get('errors')}"
+            yield error_message

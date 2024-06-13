@@ -42,8 +42,8 @@ class convert_2_files(call_logging):
             logging.error("Error Exception")
             while True:
                 try:
-                    msg_err = next(errors)
-                    logging.error(msg_err)
+                    error_message = next(errors)
+                    logging.error(error_message)
                 except StopIteration:
                     break
         logging.info(f"stop batch date: {self.batch_date}\n##### End #####\n")
@@ -82,20 +82,22 @@ class convert_2_files(call_logging):
         state = "failed"
         for i, item in enumerate(self.logging):
             item.update({'function': "retrieve_data_from_source_files", 'state': state})
-    
+
+            _data = []
+            _dir = item["dir_input"]
+            types = Path(_dir).suffix
             try:
                 if item["status_file"] == "found":
-                    if [".xlsx", ".xls"].__contains__(Path(item["dir_input"]).suffix):
-                        logging.info(f'Read Excel file: "{item["dir_input"]}".')
+                    if [".xlsx", ".xls"].__contains__(types):
+                        logging.info(f'Read Excel file: "{_dir}".')
                         _data = self.generate_excel_data(i)
-                        
                     else:
-                        logging.info(f'Read Text file: "{item["dir_input"]}".')
+                        logging.info(f'Read Text file: "{_dir}".')
                         _data = self.text_data_cleaning(i)
-                        print(_data)
                 else:
                     continue
                 
+                print(_data)
                 state = "succeed"
                 item.update({"data": _data, "state": state})
 

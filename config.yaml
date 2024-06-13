@@ -18,7 +18,7 @@ config:
         dir_input: C:\Users\thanakit\Downloads\RAW\DOC
         dir_output: C:\Users\thanakit\Downloads\EXPORT\DOC
         file: DocImage.txt
-        depend_on: [ADM, BOS]
+        depend_on: [ADM]
     ICAS:
         dir_input: C:\Users\thanakit\Downloads\RAW\ICAS
         dir_output: C:\Users\thanakit\Downloads\EXPORT\ICAS
