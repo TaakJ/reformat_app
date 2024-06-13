@@ -44,17 +44,10 @@ def setup_config() -> dict:
         with open(config_dir, "rb") as conf:
             config_yaml  = yaml.safe_load(conf.read())
             
-            for i in config_yaml["config"].keys():
-                # update value dir 
-                _dir = join(config_yaml["config"][i]["dir_input"], config_yaml["config"][i]["file"])
+            for i in config_yaml.keys():
+                _dir = join(config_yaml[i]["dir_input"], config_yaml[i]["file"])
                 setattr(Folder, f'_{i}', _dir)
-                
-                extend_dir = []
-                for j in config_yaml["config"][i]["depend_on"]:
-                    _dir = [join(config_yaml["config"][j]["dir_input"], config_yaml["config"][j]["file"])]
-                    extend_dir += _dir
-                    
-                config_yaml["config"][i]["dir"] = [getattr(Folder, f"_{i}")] + extend_dir
+                config_yaml[i]["dir"] = getattr(Folder, f"_{i}")
     else:
         raise Exception(f"Yaml config file path: '{config_dir}' doesn't exist.")
     return config_yaml

@@ -16,7 +16,7 @@ handlers:
     level: DEBUG
     formatter: verbose
     backupCount: 0
-    mode: a+
+    mode: w+
     filename: ./log/
 root: 
   level: INFO

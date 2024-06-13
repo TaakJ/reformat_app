@@ -1,112 +1,74 @@
 from exception import CustomException
-from setup import Folder, clear_tmp, setup_config
-from log import call_logging
+from setup import Folder, clear_tmp
 import glob
 import shutil
 from pathlib import Path
 from os.path import join
-import warnings
 import logging
 import pandas as pd
-from datetime import datetime
 import openpyxl
 from openpyxl.styles import Font
 
-class convert_2_files(call_logging):
-    def __init__(self, params: dict):
-        super().__init__()
+class convert_2_files:
 
-        self.__dict__.update(params)
-        for key, value in self.__dict__.items():
-            setattr(self, key, value)
-
-        logging.info(f"Command for run: {params}")
-        logging.info(f"Start run batch date: {self.batch_date}")
-
-        self.date = datetime.now()
-        self.skip_rows = []
-        self.upsert_rows = {}
-
-        self.state = True
-        try:
-            if self.store_tmp is False:
-                clear_tmp()
-
-            self.check_source_files()
-            self.retrieve_data_from_source_files()
-            # self.write_data_to_tmp_file()
-            # self.write_data_to_target_file()
-
-        except CustomException as errors:
-            self._status = False
-            logging.error("Error Exception")
-            while True:
-                try:
-                    error_message = next(errors)
-                    logging.error(error_message)
-                except StopIteration:
-                    break
-        logging.info(f"stop batch date: {self.batch_date}\n##### End #####\n")
-
-    def _log_setter(self, log):
-        self._log = log
-
-
-    def check_source_files(self) -> None:
-
+    async def check_source_files(self) -> None:
+        
         logging.info("Check Source files..")
         
-        map_item = []
-        for source, value in self.config["config"].items():
+        set_log = []
+        for source, value in self.config.items():
             if source in self.source:
+                _dir = value["dir"]
                 
                 status_file = "not_found"
-                for _dir in value["dir"]:
-                    if glob.glob(_dir, recursive=True):
-                        status_file = "found"
-                        
-                    item = {"source": source, 
-                            "dir_input": _dir, 
-                            "status_file": status_file,
-                            "dir_output": value["dir_output"], 
-                            "function": "check_source_files"}
-                        
-                    map_item.append(item)
-        self._log_setter(map_item)
-
+                if glob.glob(_dir, recursive=True):
+                    status_file = "found"
+                    
+                item =  {
+                    "source": source,
+                    "dir_input": value["dir"],
+                    "status_file": status_file,
+                    "dir_output": value["dir_output"],
+                    "function": "check_source_files"
+                }
+                set_log.append(item)
+                logging.info(f'Source file: "{_dir}", Status: "{status_file}".')
+                
+        self._log_setter(set_log) 
+        
 
     def retrieve_data_from_source_files(self) -> list[dict]:
 
         logging.info("Retrieve Data from Source files..")
+        print(self.logging)
         
-        state = "failed"
-        for i, item in enumerate(self.logging):
-            item.update({'function': "retrieve_data_from_source_files", 'state': state})
+        # state = "failed"
+        # for i, item in enumerate(self.logging):
+        #     item.update({'function': "retrieve_data_from_source_files", 'state': state})
 
-            _data = []
-            _dir = item["dir_input"]
-            types = Path(_dir).suffix
-            try:
-                if item["status_file"] == "found":
-                    if [".xlsx", ".xls"].__contains__(types):
-                        logging.info(f'Read Excel file: "{_dir}".')
-                        _data = self.generate_excel_data(i)
-                    else:
-                        logging.info(f'Read Text file: "{_dir}".')
-                        _data = self.text_data_cleaning(i)
-                else:
-                    continue
-                
-                print(_data)
-                state = "succeed"
-                item.update({"data": _data, "state": state})
+        #     _data = []
+        #     _dir = item["dir_input"]
+        #     types = Path(_dir).suffix
+        #     status_file = item["status_file"]
+        #     try:
+        #         if status_file == "found":
+        #             if [".xlsx", ".xls"].__contains__(types):
+        #                 logging.info(f'Read Excel file: "{_dir}".')
+        #                 _data = self.excel_data_cleaning(i)
+        #             else:
+        #                 logging.info(f'Read Text file: "{_dir}".')
+        #                 _data = self.text_data_cleaning(i)
+                        
+        #         state = "succeed"
+        #         item.update({"data": _data, "state": state})
 
-            except Exception as err:
-                item.update({'errors': err})
+        #     except Exception as err:
+        #         item.update({'errors': err})
 
-            if "errors" in item:
-                raise CustomException(errors=self.logging)
-        return self.logging
+        #     if "errors" in item:
+        #         raise CustomException(errors=self.logging)
+            
+        # return self.logging
 
 
     def write_data_to_tmp_file(self) -> None:
@@ -177,6 +139,7 @@ class convert_2_files(call_logging):
             if "errors" in key:
                 raise CustomException(errors=self.logging)
 
+
     def write_worksheet(self, sheet: any, new_data: dict) -> str:
 
         self.logging[-1].update({"function": "write_worksheet"})
@@ -220,6 +183,7 @@ class convert_2_files(call_logging):
             raise KeyError(f"Can not Write rows: {err} in Tmp files.")
         return status
 
+
     def copy_worksheet(self, source_name: str, target_name: str) -> str:
         try:
             if not glob.glob(target_name, recursive=True):
@@ -230,11 +194,13 @@ class convert_2_files(call_logging):
 
         return status
 
+
     def remove_row_empty(self, sheet: any) -> None:
         for row in sheet.iter_rows():
             if not all(cell.value for cell in row):
                 sheet.delete_rows(row[0].row, 1)
                 self.remove_row_empty(sheet)
+
 
     def write_data_to_target_file(self) -> None:
 

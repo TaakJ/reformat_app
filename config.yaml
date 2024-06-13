@@ -1,29 +1,23 @@
-config:
-    ADM:
-        dir_input: C:\Users\thanakit\Downloads\RAW\ADM
-        dir_output: C:\Users\thanakit\Downloads\EXPORT\ADM
-        file: ADM.txt
-        depend_on: []
-    BOS:
-        dir_input: C:\Users\thanakit\Downloads\RAW\BOS
-        dir_output: C:\Users\thanakit\Downloads\EXPORT\BOS
-        file: BOS.xlsx
-        depend_on: []
-    CUM:
-        dir_input: C:\Users\thanakit\Downloads\RAW\CUM
-        dir_output: C:\Users\thanakit\Downloads\EXPORT\CUM
-        file: CUM.xls
-        depend_on: []
-    DOC:
-        dir_input: C:\Users\thanakit\Downloads\RAW\DOC
-        dir_output: C:\Users\thanakit\Downloads\EXPORT\DOC
-        file: DocImage.txt
-        depend_on: [ADM]
-    ICAS:
-        dir_input: C:\Users\thanakit\Downloads\RAW\ICAS
-        dir_output: C:\Users\thanakit\Downloads\EXPORT\ICAS
-        file: ICAS-NCR.xlsx
-        depend_on: [CUM]
+ADM:
+    dir_input: C:\Users\thanakit\Downloads\RAW\ADM
+    dir_output: C:\Users\thanakit\Downloads\EXPORT\ADM
+    file: ADM.txt
+BOS:
+    dir_input: C:\Users\thanakit\Downloads\RAW\BOS
+    dir_output: C:\Users\thanakit\Downloads\EXPORT\BOS
+    file: BOS.xlsx
+CUM:
+    dir_input: C:\Users\thanakit\Downloads\RAW\CUM
+    dir_output: C:\Users\thanakit\Downloads\EXPORT\CUM
+    file: CUM.xls
+DOC:
+    dir_input: C:\Users\thanakit\Downloads\RAW\DOC
+    dir_output: C:\Users\thanakit\Downloads\EXPORT\DOC
+    file: DocImage.txt
+ICAS:
+    dir_input: C:\Users\thanakit\Downloads\RAW\ICAS
+    dir_output: C:\Users\thanakit\Downloads\EXPORT\ICAS
+    file: ICAS-NCR.xlsx
 
 # IIC:
 #     curr: 5

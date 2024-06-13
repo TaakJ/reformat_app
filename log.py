@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
 
-class call_logging(ABC):
+class record_log(ABC):
     def __init__(self):
         self._log = []
 

@@ -9,43 +9,43 @@ import numpy as np
 
 class method_files:
     
-    def clean_lines_excel(func):
-        def wrapper_clean_lines(*args: tuple, **kwargs:dict) -> dict:
-            clean_lines = iter(func(*args, **kwargs))
-
-            clean_data = {}
+    def read_excle_files(func):
+        def wrapper(*args: tuple, **kwargs:dict) -> dict:
+            
+            _data = {}
+            by_sheets = iter(func(*args, **kwargs))
+            
             while True:
                 try:
-                    for sheets, data in next(clean_lines).items():
+                    for sheets, data in next(by_sheets).items():
                         if not all(dup == data[0] for dup in data) and not data.__contains__("Centralized User Management : User List."):
-                            if sheets not in clean_data:
-                                clean_data[sheets] = [data]
+                            if sheets not in _data:
+                                _data[sheets] = [data]
                             else:
-                                clean_data[sheets].append(data)
+                                _data[sheets].append(data)
                 except StopIteration:
                     break
-            return clean_data
-        return wrapper_clean_lines
+                
+            return _data
+        return wrapper
 
 
-    @clean_lines_excel
-    def generate_excel_data(self, i: int) -> any:
+    @read_excle_files
+    def excel_data_cleaning(self, i: int) -> any:
 
-        logging.info("Cleansing Data From Excel file To Dataframe..")
-        self.logging[i].update({'function': "generate_excel_data"})
+        logging.info("Cleansing Data From Excle files..")
+        self.logging[i].update({"function": "excel_data_cleaning"})
         
-        workbook = xlrd.open_workbook(self.logging[i]['full_path']);
+        workbook = xlrd.open_workbook(self.logging[i]['dir_input']);
         sheet_list = [sheet for sheet in workbook.sheet_names() if sheet != "StyleSheet"]
         
-        _data = {}
         for sheets in sheet_list:
             cells = workbook.sheet_by_name(sheets)
             for row in range(0, cells.nrows):
-                _data = {sheets: [cells.cell(row, col).value for col in range(cells.ncols)]}
-                yield _data
+                yield {sheets: [cells.cell(row, col).value for col in range(cells.ncols)]}
 
 
-    def read_text_by_line(func):
+    def read_text_files(func):
         def wrapper(*args: tuple, **kwargs:dict) -> dict:  
             
             _data = {}
@@ -94,15 +94,16 @@ class method_files:
                                 _data[source].append(list_by_lines)
                         else:
                             continue
-                        
                     rows += 1
+                    
                 except StopIteration:
                     break
+                
             return _data
         return wrapper
 
     
-    @read_text_by_line
+    @read_text_files
     def text_data_cleaning(self, i: int) -> any:
 
         logging.info("Cleansing Data From Text file..")

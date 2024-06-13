@@ -22,7 +22,7 @@ from PyQt6.QtCore import (
 )
 from qt_material import apply_stylesheet
 from setup import setup_parser, setup_folder, setup_log, setup_config, Folder
-from method import run_batch
+from method import start
 from pathlib import Path
 from os.path import join
 import sys
@@ -41,7 +41,8 @@ class Jobber(QObject):
         self.state = False
 
     def run(self):
-        method = run_batch(self.param)
+        # method = run_batch(self.param)
+        method = start(self.param)
         self.state = method.state
         read_bytes = 0
         chunk_size = 1024
@@ -64,7 +65,8 @@ class setup_app(QWidget):
         self.__thread = QThread()
         
         if params.manual is False:
-            run_batch(vars(params))
+            start(vars(params))
+            # run_batch(vars(params))
         else:
             self.ui()
             sys.exit(app.exec())
