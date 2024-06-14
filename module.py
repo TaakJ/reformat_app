@@ -39,20 +39,18 @@ class convert_2_files:
 
         self._log_setter(set_log)
 
+
     async def retrieve_data_from_source_files(self) -> None:
 
         logging.info("Retrieve Data from Source files..")
 
         state = "failed"
         for i, record in enumerate(self.logging):
-            record.update(
-                {"function": "retrieve_data_from_source_files", "state": state}
-            )
+            record.update({"function": "retrieve_data_from_source_files", "state": state})
 
             _dir = record["input_dir"]
             types = Path(_dir).suffix
             status_file = record["status_file"]
-
             try:
                 if status_file == "found":
                     if [".xlsx", ".xls"].__contains__(types):
@@ -73,6 +71,7 @@ class convert_2_files:
 
             if "errors" in record:
                 raise CustomException(errors=self.logging)
+
 
     def read_text_files(func):
         def wrapper(*args: tuple, **kwargs: dict) -> dict:
@@ -128,8 +127,8 @@ class convert_2_files:
                 except StopIteration:
                     break
             return _data
-
         return wrapper
+
 
     @read_text_files
     def text_data_cleaning(self, i: int) -> any:
@@ -151,6 +150,7 @@ class convert_2_files:
             if find_regex != []:
                 yield {source: re.sub(r"\W\s+", "||", "".join(find_regex).strip()).split("||")}
 
+
     def read_excle_files(func):
         def wrapper(*args: tuple, **kwargs: dict) -> dict:
 
@@ -169,8 +169,8 @@ class convert_2_files:
                 except StopIteration:
                     break
             return _data
-
         return wrapper
+
 
     @read_excle_files
     def excel_data_cleaning(self, i: int) -> any:
@@ -179,36 +179,26 @@ class convert_2_files:
         self.logging[i].update({"function": "excel_data_cleaning"})
 
         workbook = xlrd.open_workbook(self.logging[i]["input_dir"])
-        sheet_list = [
-            sheet for sheet in workbook.sheet_names() if sheet != "StyleSheet"
-        ]
+        sheet_list = [sheet for sheet in workbook.sheet_names() if sheet != "StyleSheet"]
 
         for sheets in sheet_list:
             cells = workbook.sheet_by_name(sheets)
             for row in range(0, cells.nrows):
                 yield {sheets: [cells.cell(row, col).value for col in range(cells.ncols)]}
 
+
     async def write_data_to_tmp_file(self) -> None:
 
         logging.info("Write Data to Tmp files..")
 
         template_name = join(Folder.TEMPLATE, "Application Data Requirements.xlsx")
-        tmp_name = join(
-            Folder.TMP, f"TMP_{self.source}-{self.batch_date.strftime('%d%m%y')}.xlsx"
-        )
-
+        tmp_name = join(Folder.TMP, f"TMP_{self.source}-{self.batch_date.strftime('%d%m%y')}.xlsx")
         state = "failed"
+        
         for record in self.logging:
-
             try:
                 if record["source"] == "Target_file":
-                    record.update(
-                        {
-                            "input_dir": tmp_name,
-                            "function": "write_data_to_tmp_file",
-                            "state": state,
-                        }
-                    )
+                    record.update({"input_dir": tmp_name, "function": "write_data_to_tmp_file", "state": state,})
                     ## get new data.
                     new_df = pd.DataFrame(record["data"])
                     new_df["remark"] = "Inserted"
@@ -295,21 +285,21 @@ class convert_2_files:
                     ## data[1] = value
                     if df.loc[idx, "count_change"] != 14:
 
+                        ## No_changed rows.
                         if df.loc[idx, "count_change"] <= 1:
-                            ## No_changed rows.
                             df.at[idx, data[0]] = data[1].iloc[idx]
                             df.loc[idx, "remark"] = "No_changed"
 
                         else:
+                            ## Updated rows.
                             if data[1][idx] != change_data[1][idx]:
                                 record.update({data[0]: f"{data[1][idx]} -> {change_data[1][idx]}"})
-                            ## Updated rows.
                             df.at[idx, data[0]] = change_data[1].iloc[idx]
                             df.loc[idx, "remark"] = "Updated"
 
                     else:
-                        record.update({data[0]: change_data[1][idx]})
                         ## Inserted rows.
+                        record.update({data[0]: change_data[1][idx]})
                         df.at[idx, data[0]] = change_data[1].iloc[idx]
                         df.loc[idx, "remark"] = "Inserted"
 
