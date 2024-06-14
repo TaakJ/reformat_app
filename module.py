@@ -14,107 +14,108 @@ from io import StringIO
 import re
 import xlrd
 
+
 class convert_2_files:
 
     async def check_source_files(self) -> None:
-        
+
         logging.info("Check Source files..")
-        
+
         set_log = []
         for _dir in self.input_dir:
-            
+
             status_file = "not_found"
             if glob.glob(_dir, recursive=True):
                 status_file = "found"
 
-            record =  {
+            record = {
                 "source": self.source,
                 "input_dir": _dir,
                 "status_file": status_file,
-                "function": "check_source_files"
+                "function": "check_source_files",
             }
             set_log.append(record)
             logging.info(f'Source file: "{_dir}", Status: "{status_file}"')
-                
-        self._log_setter(set_log) 
 
-    
+        self._log_setter(set_log)
+
     async def retrieve_data_from_source_files(self) -> None:
 
         logging.info("Retrieve Data from Source files..")
-        
+
         state = "failed"
         for i, record in enumerate(self.logging):
-            record.update({'function': "retrieve_data_from_source_files", 'state': state})
+            record.update(
+                {"function": "retrieve_data_from_source_files", "state": state}
+            )
 
             _dir = record["input_dir"]
             types = Path(_dir).suffix
             status_file = record["status_file"]
-            
+
             try:
                 if status_file == "found":
                     if [".xlsx", ".xls"].__contains__(types):
                         logging.info(f'Read Excel file: "{_dir}"')
                         _data = self.excel_data_cleaning(i)
-                        
+
                     else:
                         logging.info(f'Read Text file: "{_dir}"')
                         _data = self.text_data_cleaning(i)
                 else:
                     continue
-                
+
                 state = "succeed"
                 record.update({"data": _data, "state": state})
-                
+
             except Exception as err:
-                record.update({'errors': err})
+                record.update({"errors": err})
 
             if "errors" in record:
                 raise CustomException(errors=self.logging)
-            
-        
+
     def read_text_files(func):
-        def wrapper(*args:tuple, **kwargs:dict) -> dict:  
-            
+        def wrapper(*args: tuple, **kwargs: dict) -> dict:
+
             by_lines = iter(func(*args, **kwargs))
             _data = {}
-            
+
             rows = 0
             while True:
                 try:
                     list_by_lines = []
-                    for source, data in  next(by_lines).items():
-                        
+                    for source, data in next(by_lines).items():
+
                         if source == "LDS":
                             if rows == 0:
                                 ## herder column
-                                list_by_lines = " ".join(data).split(' ')
+                                list_by_lines = " ".join(data).split(" ")
                             else:
                                 ## row value
                                 for idx, value in enumerate(data):
                                     if idx == 0:
-                                        value = re.sub(r'\s+',',', value).split(',')
+                                        value = re.sub(r"\s+", ",", value).split(",")
                                         list_by_lines.extend(value)
                                     else:
                                         list_by_lines.append(value)
-                                        
+
                         elif source == "DOC":
                             if rows == 1:
                                 ## herder column
-                                list_by_lines = " ".join(data).split(' ')
+                                list_by_lines = " ".join(data).split(" ")
                             elif rows > 1:
                                 ## row value
                                 for idx, value in enumerate(data):
                                     if idx == 3:
-                                        value = re.sub(r'\s+',',', value).split(',')
+                                        value = re.sub(r"\s+", ",", value).split(",")
                                         list_by_lines.extend(value)
                                     else:
                                         list_by_lines.append(value)
-                                        
+
                         elif source == "ADM":
                             ## row value
                             list_by_lines = data
-                        
+
                         if list_by_lines != []:
                             if source not in _data:
                                 _data[source] = [list_by_lines]
@@ -123,40 +124,39 @@ class convert_2_files:
                         else:
                             continue
                     rows += 1
-                    
+
                 except StopIteration:
                     break
             return _data
+
         return wrapper
-        
-    
+
     @read_text_files
-    def text_data_cleaning(self, i:int) -> any:
+    def text_data_cleaning(self, i: int) -> any:
 
         # logging.info("Cleansing Data From Text file..")
         self.logging[i].update({"function": "text_data_cleaning"})
-        
+
         _dir = self.logging[i]["input_dir"]
         source = self.logging[i]["source"]
-        
+
         files = open(_dir, "rb")
         encoded = chardet.detect(files.read())["encoding"]
         files.seek(0)
         decode_data = StringIO(files.read().decode(encoded))
-        
+
         for lines in decode_data:
             regex = re.compile(r"\w+.*")
             find_regex = regex.findall(lines)
             if find_regex != []:
-                yield {source: re.sub(r"\W\s+","||","".join(find_regex).strip()).split("||")}
-    
-    
+                yield {source: re.sub(r"\W\s+", "||", "".join(find_regex).strip()).split("||")}
+
     def read_excle_files(func):
-        def wrapper(*args:tuple, **kwargs:dict) -> dict:
-            
+        def wrapper(*args: tuple, **kwargs: dict) -> dict:
+
             by_sheets = iter(func(*args, **kwargs))
             _data = {}
-            
+
             while True:
                 try:
                     for sheets, data in next(by_sheets).items():
@@ -165,45 +165,54 @@ class convert_2_files:
                                 _data[sheets] = [data]
                             else:
                                 _data[sheets].append(data)
-                                
+
                 except StopIteration:
                     break
             return _data
+
         return wrapper
-    
-    
+
     @read_excle_files
-    def excel_data_cleaning(self, i:int) -> any:
+    def excel_data_cleaning(self, i: int) -> any:
 
         # logging.info("Cleansing Data From Excle files..")
         self.logging[i].update({"function": "excel_data_cleaning"})
-        
-        workbook = xlrd.open_workbook(self.logging[i]['input_dir'])
-        sheet_list = [sheet for sheet in workbook.sheet_names() if sheet != "StyleSheet"]
-        
+
+        workbook = xlrd.open_workbook(self.logging[i]["input_dir"])
+        sheet_list = [
+            sheet for sheet in workbook.sheet_names() if sheet != "StyleSheet"
+        ]
+
         for sheets in sheet_list:
             cells = workbook.sheet_by_name(sheets)
             for row in range(0, cells.nrows):
                 yield {sheets: [cells.cell(row, col).value for col in range(cells.ncols)]}
 
-
     async def write_data_to_tmp_file(self) -> None:
 
         logging.info("Write Data to Tmp files..")
-        
+
         template_name = join(Folder.TEMPLATE, "Application Data Requirements.xlsx")
-        tmp_name = join(Folder.TMP, f"TMP_{self.source}-{self.batch_date.strftime('%d%m%y')}.xlsx")
-        
+        tmp_name = join(
+            Folder.TMP, f"TMP_{self.source}-{self.batch_date.strftime('%d%m%y')}.xlsx"
+        )
+
         state = "failed"
         for record in self.logging:
-            
+
             try:
-                if record['source'] == "Target_file":
-                    record.update({"input_dir": tmp_name, "function": "write_data_to_tmp_file", "state": state})
+                if record["source"] == "Target_file":
+                    record.update(
+                        {
+                            "input_dir": tmp_name,
+                            "function": "write_data_to_tmp_file",
+                            "state": state,
+                        }
+                    )
                     ## get new data.
                     new_df = pd.DataFrame(record["data"])
-                    new_df['remark'] = "Inserted"
-                    
+                    new_df["remark"] = "Inserted"
+
                     try:
                         workbook = openpyxl.load_workbook(tmp_name)
                         get_sheet = workbook.get_sheet_names()
@@ -229,14 +238,15 @@ class convert_2_files:
                     tmp_df = pd.DataFrame(data, columns=columns)
 
                     if state != "succeed":
-                        tmp_df = tmp_df.loc[tmp_df['remark'] != "Removed"]
+                        tmp_df = tmp_df.loc[tmp_df["remark"] != "Removed"]
                         ## create new sheet.
                         sheet_name = f"RUN_TIME_{sheet_num}"
                         sheet = workbook.create_sheet(sheet_name)
                     else:
-                        tmp_df['remark'] = "Inserted"
-                    
+                        tmp_df["remark"] = "Inserted"
+
                     _data = self.validation_data(tmp_df, new_df)
+                    print(_data)
                     # ## write to tmp files.
                     # status = self.write_worksheet(sheet, new_data)
                     # workbook.move_sheet(workbook.active, offset=-sheet_num)
@@ -246,34 +256,34 @@ class convert_2_files:
                     # logging.info(f"Write to Tmp files state: {state}.")
 
             except Exception as err:
-                record.update({'errors': err})
+                record.update({"errors": err})
 
             if "errors" in record:
                 raise CustomException(errors=self.logging)
-    
-    
+
     def validation_data(self, df: pd.DataFrame, change_df: pd.DataFrame) -> dict:
 
         logging.info("Verify Changed information..")
-        self.logging[-1].update({'function': "validation_data"})
-        
+        self.logging[-1].update({"function": "validation_data"})
+
         self.skip_rows = []
+        self.upsert_rows = {}
         if len(df.index) > len(change_df.index):
             self.skip_rows = [idx for idx in list(df.index) if idx not in list(change_df.index)]
-        
+
         ## reset index data.
         union_index = np.union1d(df.index, change_df.index)
         ## target / tmp data.
-        df = df.reindex(index=union_index, columns=df.columns).iloc[:,:-1]
+        df = df.reindex(index=union_index, columns=df.columns).iloc[:, :-1]
         ## change data.
-        change_df = change_df.reindex(index=union_index, columns=change_df.columns).iloc[:,:-1]
+        change_df = change_df.reindex(index=union_index, columns=change_df.columns).iloc[:, :-1]
 
         # compare data rows by rows.
-        df['count_change'] = pd.DataFrame(np.where(df.ne(change_df), True, False), index=df.index, columns=df.columns)\
-            .apply(lambda x: (x==True).sum(), axis=1)
-        
+        df["count_change"] = pd.DataFrame(np.where(df.ne(change_df), True, False), index=df.index, columns=df.columns)\
+            .apply(lambda x: (x == True).sum(), axis=1)
+
         def format_record(record):
-            return  "{" + "\n".join("{!r}: {!r},".format(columns, values) for columns, values in record.items()) + "}"
+            return ("{"+ "\n".join("{!r}: {!r},".format(columns, values) for columns, values in record.items())+ "}")
 
         start_rows = 2
         for idx in union_index:
@@ -281,42 +291,42 @@ class convert_2_files:
                 
                 record = {}
                 for data, change_data in zip(df.items(), change_df.items()):
+                    ## data[0] = column_name
+                    ## data[1] = value
                     if df.loc[idx, "count_change"] != 14:
-                        
+
                         if df.loc[idx, "count_change"] <= 1:
                             ## No_changed rows.
                             df.at[idx, data[0]] = data[1].iloc[idx]
                             df.loc[idx, "remark"] = "No_changed"
-                            
+
                         else:
-                            ## Updated rows.
                             if data[1][idx] != change_data[1][idx]:
                                 record.update({data[0]: f"{data[1][idx]} -> {change_data[1][idx]}"})
-                            
-                            df.at[idx, data[0]] = change_df[1].iloc[idx]
+                            ## Updated rows.
+                            df.at[idx, data[0]] = change_data[1].iloc[idx]
                             df.loc[idx, "remark"] = "Updated"
-                            
+
                     else:
+                        record.update({data[0]: change_data[1][idx]})
                         ## Inserted rows.
-                        record.update({data[0]: change_df[1][idx]})
-                        df.at[idx, data[0]] = change_df[1].iloc[idx]
-                        df.loc[idx, 'remark'] = "Inserted"
+                        df.at[idx, data[0]] = change_data[1].iloc[idx]
+                        df.loc[idx, "remark"] = "Inserted"
 
                 if record != {}:
                     self.upsert_rows[start_rows + idx] = format_record(record)
-                    
+
             else:
                 ## Removed rows.
                 df.loc[idx, "remark"] = "Removed"
         self.skip_rows = [idx + start_rows for idx in self.skip_rows]
 
-        df = df.drop(['count_change'], axis=1)
+        df = df.drop(["count_change"], axis=1)
         df.index += start_rows
-        _data = df.to_dict('index')
-        
-        self.logging[-1].update({'status': "verify"})
-        return _data
+        _data = df.to_dict("index")
 
+        self.logging[-1].update({"status": "verify"})
+        return _data
 
     def write_worksheet(self, sheet: any, new_data: dict) -> str:
 
@@ -361,7 +371,6 @@ class convert_2_files:
             raise KeyError(f"Can not Write rows: {err} in Tmp files.")
         return status
 
-
     def copy_worksheet(self, source_name: str, target_name: str) -> str:
         try:
             if not glob.glob(target_name, recursive=True):
@@ -372,13 +381,11 @@ class convert_2_files:
 
         return status
 
-
     def remove_row_empty(self, sheet: any) -> None:
         for row in sheet.iter_rows():
             if not all(cell.value for cell in row):
                 sheet.delete_rows(row[0].row, 1)
                 self.remove_row_empty(sheet)
-
 
     def write_data_to_target_file(self) -> None:
 
