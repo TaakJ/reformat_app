@@ -45,7 +45,6 @@ class module_adm(record_log):
         state = "failed"
         for record in self.logging:
             record.update({"function": "mapping_module_adm", "state": state})
-            
             try:
                 for sheet, data in record["data"].items():
                     logging.info(f'Mapping Column From Sheet: "{sheet}"')
@@ -107,7 +106,6 @@ class module_bos(record_log):
         state = "failed"
         for record in self.logging:
             record.update({"function": "mapping_module_bos", "state": state})
-            
             try:
                 for sheet, data in record["data"].items():
                     logging.info(f'Mapping Column From Sheet: "{sheet}"')
@@ -157,7 +155,6 @@ class module_cum(record_log):
         state = "failed"
         for record in self.logging:
             record.update({"function": "mapping_module_cum", "state": state})
-            
             try:
                 for sheet, data in record["data"].items():
                     logging.info(f'Mapping Column From Sheet: "{sheet}"')

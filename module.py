@@ -236,7 +236,6 @@ class convert_2_files:
                         tmp_df["remark"] = "Inserted"
 
                     _data = self.validation_data(tmp_df, new_df)
-                    print(_data)
                     # ## write to tmp files.
                     # status = self.write_worksheet(sheet, new_data)
                     # workbook.move_sheet(workbook.active, offset=-sheet_num)
