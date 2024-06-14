@@ -46,7 +46,6 @@ class convert_2_files:
         for i, record in enumerate(self.logging):
             record.update({'function': "retrieve_data_from_source_files", 'state': state})
 
-            _data = []
             _dir = record["input_dir"]
             types = Path(_dir).suffix
             status_file = record["status_file"]
@@ -126,7 +125,6 @@ class convert_2_files:
                     
                 except StopIteration:
                     break
-                
             return _data
         return wrapper
         
@@ -161,7 +159,6 @@ class convert_2_files:
             while True:
                 try:
                     for sheets, data in next(by_sheets).items():
-                        
                         if not all(dup == data[0] for dup in data) and not data.__contains__("Centralized User Management : User List."):
                             if sheets not in _data:
                                 _data[sheets] = [data]
@@ -170,7 +167,6 @@ class convert_2_files:
                                 
                 except StopIteration:
                     break
-                
             return _data
         return wrapper
     
@@ -199,45 +195,49 @@ class convert_2_files:
         
         state = "failed"
         for record in self.logging:
+            
             try:
-                ''
-                # if key['source'] == "Target_file":
-                #     key.update({'full_path': tmp_name, 'function': "write_data_to_tmp_file", 'status': status})
-                #     ## get new data.
-                #     new_df = pd.DataFrame(key["data"])
-                #     new_df['remark'] = "Inserted"
-                #     try:
-                #         workbook = openpyxl.load_workbook(tmp_name)
-                #         get_sheet = workbook.get_sheet_names()
-                #         sheet_num = len(get_sheet)
-                #         sheet_name = f"RUN_TIME_{sheet_num - 1}"
-                #         sheet = workbook.get_sheet_by_name(sheet_name)
-                #         workbook.active = sheet_num
-
-                #     except FileNotFoundError:
-                #         ## copy files from template.
-                #         status = self.copy_worksheet(source_name, tmp_name)
-                #         workbook = openpyxl.load_workbook(tmp_name)
-                #         sheet = workbook.worksheets[0]
-                #         sheet_name = "RUN_TIME_1"
-                #         sheet_num = 1
-                #         sheet.title = sheet_name
-
-                #     logging.info(f"Generate Sheet_name: {sheet_name} in Tmp files.")
-
-                    # # read tmp files.
-                    # data = sheet.values
-                    # columns = next(data)[0:]
-                    # tmp_df = pd.DataFrame(data, columns=columns)
-
-                    # if status != "succeed":
-                    #     tmp_df = tmp_df.loc[tmp_df['remark'] != "Removed"]
-                    #     ## create new sheet.
-                    #     sheet_name = f"RUN_TIME_{sheet_num}"
-                    #     sheet = workbook.create_sheet(sheet_name)
-                    # else:
-                    #     tmp_df['remark'] = "Inserted"
+                if record['source'] == "Target_file":
+                    record.update({"tmp_dir": tmp_name, "function": "write_data_to_tmp_file", "state": state})
+                    ## get new data.
+                    new_df = pd.DataFrame(record["data"])
+                    new_df['remark'] = "Inserted"
                     
+                    try:
+                        workbook = openpyxl.load_workbook(tmp_name)
+                        get_sheet = workbook.get_sheet_names()
+                        sheet_num = len(get_sheet)
+                        sheet_name = f"RUN_TIME_{sheet_num - 1}"
+                        sheet = workbook.get_sheet_by_name(sheet_name)
+                        workbook.active = sheet_num
+
+                    except FileNotFoundError:
+                        ## copy files from template.
+                        state = self.copy_worksheet(template_name, tmp_name)
+                        workbook = openpyxl.load_workbook(tmp_name)
+                        sheet = workbook.worksheets[0]
+                        sheet_name = "RUN_TIME_1"
+                        sheet_num = 1
+                        sheet.title = sheet_name
+
+                    logging.info(f"Generate Sheet_name: {sheet_name} in Tmp files.")
+
+                    # read tmp files.
+                    data = sheet.values
+                    columns = next(data)[0:]
+                    tmp_df = pd.DataFrame(data, columns=columns)
+
+                    if state != "succeed":
+                        tmp_df = tmp_df.loc[tmp_df['remark'] != "Removed"]
+                        ## create new sheet.
+                        sheet_name = f"RUN_TIME_{sheet_num}"
+                        sheet = workbook.create_sheet(sheet_name)
+                    else:
+                        tmp_df['remark'] = "Inserted"
+                    
+                    print(tmp_df)
+                    print()
+                    print(new_df)
                     # new_data = self.validation_data(tmp_df, new_df)
                     # ## write to tmp files.
                     # status = self.write_worksheet(sheet, new_data)
