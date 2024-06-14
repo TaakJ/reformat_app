@@ -50,11 +50,11 @@ def setup_config() -> dict:
     return config_yaml
 
 
-def setup_log() -> None:
+def setup_log(source) -> None:
     log_yaml  = None
     log_dir   = Folder._LOGGER_CONFIG_DIR
-    date = datetime.today().strftime('%Y%m%d')
-    print(date)
+    date_dir = datetime.today().strftime('%Y%m%d')
+    
     # log_name  = f"log-{datetime.today().strftime('%d%m%Y')}.log"
 
     # if os.path.exists(log_dir):

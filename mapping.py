@@ -1,6 +1,7 @@
 from log import record_log
 from exception import CustomException
 from setup import setup_log, Folder, clear_tmp
+from datetime import datetime
 import pandas as pd
 import logging
 
@@ -14,18 +15,16 @@ class module_adm(record_log):
         for key, value in param.items():
             setattr(self, key, value)
         
-        setup_log()
-        ## adjust source
-        self.require_source = ["ADM"]
+        self.require_source = ["ADM","BOS"] ## adjust source
+        self.date = datetime.now()
         self.state = True
         logging.info(f'Run Module: "ADM", manual: "{self.manual}", batch_date: "{self.batch_date}", store_tmp: "{self.store_tmp}, write_mode: "{self.write_mode}"')
         
         try:
-            ''
-            # self.require_source = ["ADM"]
-            # await self.check_source_files()
-            # await self.retrieve_data_from_source_files()
-            # await self.mapping_module_adm()
+            await self.check_source_files()
+            await self.retrieve_data_from_source_files()
+            await self.mock_data_adm()
+            await self.write_data_to_tmp_file("ADM")
                 
         except CustomException as error: 
             logging.error("Error Exception")
@@ -39,22 +38,34 @@ class module_adm(record_log):
                 
         logging.info("Stop Run Module\n##### End #####\n")
     
-    async def mapping_module_adm(self):
+    # async def mapping_module_adm(self) -> None:
         
-        state = "failed"
-        for record in self.logging:
-
-            record.update({"function": "mapping_module_adm", "state": state})
-            try:
-                for sheet, data in record["data"].items():
-                    logging.info(f'Mapping Column From Sheet: "{sheet}"')
-                    
-                    if "ADM" in sheet:
-                        print(data)
-                        
-            except Exception as err:
-                record.update({'errors': err})
+    #     state = "failed"
+    #     for record in self.logging:
+    #         record.update({"function": "mapping_module_adm", "state": state})
             
+    #         try:
+    #             for sheet, data in record["data"].items():
+    #                 logging.info(f'Mapping Column From Sheet: "{sheet}"')
+                    
+    #                 if "ADM" in sheet:
+    #                     print(data)
+                        
+    #         except Exception as err:
+    #             record.update({'errors': err})
+                
+    async def mock_data_adm(self) -> None:
+        
+            mock_data = [['ApplicationCode',	'AccountOwner', 'AccountName',	'AccountType',	'EntitlementName',	'SecondEntitlementName','ThirdEntitlementName', 'AccountStatus',	'IsPrivileged',	'AccountDescription',
+                        'CreateDate','LastLogin','LastUpdatedDate',	'AdditionalAttribute'],
+                        [1,2,3,4,5,6,7,8,9,10,self.batch_date.strftime('%Y-%m-%d'),12, self.date,14],
+                        [15,16,17,18,19,20,21,22,23,24,self.batch_date.strftime('%Y-%m-%d'),26, self.date,28],
+                        ]
+            df = pd.DataFrame(mock_data)
+            df.columns = df.iloc[0].values
+            df = df[1:]
+            df = df.reset_index(drop=True)
+            self.logging.append({'target': df.to_dict('list')})
     
     
 class module_bos(record_log):
@@ -65,7 +76,7 @@ class module_bos(record_log):
         for key, value in param.items():
             setattr(self, key, value)
         
-        setup_log()
+        # setup_log()
         ## adjust source
         self.require_source = ["BOS"]
         self.state = True
@@ -93,8 +104,8 @@ class module_bos(record_log):
         
         state = "failed"
         for record in self.logging:
-
             record.update({"function": "mapping_module_bos", "state": state})
+            
             try:
                 for sheet, data in record["data"].items():
                     logging.info(f'Mapping Column From Sheet: "{sheet}"')
@@ -116,7 +127,7 @@ class module_cum(record_log):
         for key, value in param.items():
             setattr(self, key, value)
         
-        setup_log()
+        # setup_log()
         ## adjust source
         self.require_source = ["CUM"] 
         self.state = True
@@ -144,8 +155,8 @@ class module_cum(record_log):
         
         state = "failed"
         for record in self.logging:
-
             record.update({"function": "mapping_module_cum", "state": state})
+            
             try:
                 for sheet, data in record["data"].items():
                     logging.info(f'Mapping Column From Sheet: "{sheet}"')

@@ -193,73 +193,82 @@ class convert_2_files:
                 yield {sheets: [cells.cell(row, col).value for col in range(cells.ncols)]}
 
 
-    def write_data_to_tmp_file(self) -> None:
+    async def write_data_to_tmp_file(self, source) -> None:
 
         logging.info("Write Data to Tmp files..")
-
+        
         source_name = join(Folder.TEMPLATE, "Application Data Requirements.xlsx")
-        tmp_name = join(Folder.TMP, f"TMP_{self.batch_date.strftime('%d%m%Y')}.xlsx")
-        status = "failed"
-
-        for key in self.logging:
+        tmp_name = join(Folder.TMP, f"{source}_TMP-{self.batch_date.strftime('%Y%m%d')}.xlsx")
+        print(tmp_name)
+        state = "failed"
+        
+        for record in self.logging:
             try:
-                if key["source"] == "Target_file":
-                    key.update(
-                        {
-                            "full_path": tmp_name,
-                            "function": "write_data_to_tmp_file",
-                            "status": status,
-                        }
-                    )
-                    ## get new data.
-                    new_df = pd.DataFrame(key["data"])
-                    new_df["remark"] = "Inserted"
-                    try:
-                        workbook = openpyxl.load_workbook(tmp_name)
-                        get_sheet = workbook.get_sheet_names()
-                        sheet_num = len(get_sheet)
-                        sheet_name = f"RUN_TIME_{sheet_num - 1}"
-                        sheet = workbook.get_sheet_by_name(sheet_name)
-                        workbook.active = sheet_num
-
-                    except FileNotFoundError:
-                        ## copy files from template.
-                        status = self.copy_worksheet(source_name, tmp_name)
-                        workbook = openpyxl.load_workbook(tmp_name)
-                        sheet = workbook.worksheets[0]
-                        sheet_name = "RUN_TIME_1"
-                        sheet_num = 1
-                        sheet.title = sheet_name
-
-                    logging.info(f"Generate Sheet_name: {sheet_name} in Tmp files.")
-
-                    # read tmp files.
-                    data = sheet.values
-                    columns = next(data)[0:]
-                    tmp_df = pd.DataFrame(data, columns=columns)
-
-                    if status != "succeed":
-                        tmp_df = tmp_df.loc[tmp_df["remark"] != "Removed"]
-                        ## create new sheet.
-                        sheet_name = f"RUN_TIME_{sheet_num}"
-                        sheet = workbook.create_sheet(sheet_name)
-                    else:
-                        tmp_df["remark"] = "Inserted"
-
-                    new_data = self.validation_data(tmp_df, new_df)
-                    ## write to tmp files.
-                    status = self.write_worksheet(sheet, new_data)
-                    workbook.move_sheet(workbook.active, offset=-sheet_num)
-                    workbook.save(tmp_name)
-
-                    key.update({"sheet_name": sheet_name, "status": status})
-                    logging.info(f"Write to Tmp files status: {status}.")
-
+                target = record["target"]
+                print(target)
+                
             except Exception as err:
-                key.update({"errors": err})
+                record.update({"errors": err})
 
-            if "errors" in key:
-                raise CustomException(errors=self.logging)
+        # for key in self.logging:
+        #     try:
+        #         if key["source"] == "Target_file":
+        #             key.update(
+        #                 {
+        #                     "full_path": tmp_name,
+        #                     "function": "write_data_to_tmp_file",
+        #                     "status": status,
+        #                 }
+        #             )
+        #             ## get new data.
+        #             new_df = pd.DataFrame(key["data"])
+        #             new_df["remark"] = "Inserted"
+        #             try:
+        #                 workbook = openpyxl.load_workbook(tmp_name)
+        #                 get_sheet = workbook.get_sheet_names()
+        #                 sheet_num = len(get_sheet)
+        #                 sheet_name = f"RUN_TIME_{sheet_num - 1}"
+        #                 sheet = workbook.get_sheet_by_name(sheet_name)
+        #                 workbook.active = sheet_num
+
+        #             except FileNotFoundError:
+        #                 ## copy files from template.
+        #                 status = self.copy_worksheet(source_name, tmp_name)
+        #                 workbook = openpyxl.load_workbook(tmp_name)
+        #                 sheet = workbook.worksheets[0]
+        #                 sheet_name = "RUN_TIME_1"
+        #                 sheet_num = 1
+        #                 sheet.title = sheet_name
+
+        #             logging.info(f"Generate Sheet_name: {sheet_name} in Tmp files.")
+
+        #             # read tmp files.
+        #             data = sheet.values
+        #             columns = next(data)[0:]
+        #             tmp_df = pd.DataFrame(data, columns=columns)
+
+        #             if status != "succeed":
+        #                 tmp_df = tmp_df.loc[tmp_df["remark"] != "Removed"]
+        #                 ## create new sheet.
+        #                 sheet_name = f"RUN_TIME_{sheet_num}"
+        #                 sheet = workbook.create_sheet(sheet_name)
+        #             else:
+        #                 tmp_df["remark"] = "Inserted"
+
+        #             new_data = self.validation_data(tmp_df, new_df)
+        #             ## write to tmp files.
+        #             status = self.write_worksheet(sheet, new_data)
+        #             workbook.move_sheet(workbook.active, offset=-sheet_num)
+        #             workbook.save(tmp_name)
+
+        #             key.update({"sheet_name": sheet_name, "status": status})
+        #             logging.info(f"Write to Tmp files status: {status}.")
+
+        #     except Exception as err:
+        #         key.update({"errors": err})
+
+        #     if "errors" in key:
+        #         raise CustomException(errors=self.logging)
 
 
     def write_worksheet(self, sheet: any, new_data: dict) -> str:
