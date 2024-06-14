@@ -6,6 +6,7 @@ from os.path import join
 import glob
 import shutil
 import pandas as pd
+import numpy as np
 import openpyxl
 from openpyxl.styles import Font
 import chardet
@@ -198,7 +199,7 @@ class convert_2_files:
             
             try:
                 if record['source'] == "Target_file":
-                    record.update({"tmp_dir": tmp_name, "function": "write_data_to_tmp_file", "state": state})
+                    record.update({"input_dir": tmp_name, "function": "write_data_to_tmp_file", "state": state})
                     ## get new data.
                     new_df = pd.DataFrame(record["data"])
                     new_df['remark'] = "Inserted"
@@ -235,23 +236,86 @@ class convert_2_files:
                     else:
                         tmp_df['remark'] = "Inserted"
                     
-                    print(tmp_df)
-                    print()
-                    print(new_df)
-                    # new_data = self.validation_data(tmp_df, new_df)
+                    _data = self.validation_data(tmp_df, new_df)
                     # ## write to tmp files.
                     # status = self.write_worksheet(sheet, new_data)
                     # workbook.move_sheet(workbook.active, offset=-sheet_num)
                     # workbook.save(tmp_name)
 
-                    # key.update({'sheet_name': sheet_name, 'status': status})
-                    # logging.info(f"Write to Tmp files status: {status}.")
+                    # key.update({'sheet_name': sheet_name, 'state': state})
+                    # logging.info(f"Write to Tmp files state: {state}.")
 
             except Exception as err:
                 record.update({'errors': err})
 
             if "errors" in record:
                 raise CustomException(errors=self.logging)
+    
+    
+    def validation_data(self, df: pd.DataFrame, change_df: pd.DataFrame) -> dict:
+
+        logging.info("Verify Changed information..")
+        self.logging[-1].update({'function': "validation_data"})
+        
+        self.skip_rows = []
+        if len(df.index) > len(change_df.index):
+            self.skip_rows = [idx for idx in list(df.index) if idx not in list(change_df.index)]
+        
+        ## reset index data.
+        union_index = np.union1d(df.index, change_df.index)
+        ## target / tmp data.
+        df = df.reindex(index=union_index, columns=df.columns).iloc[:,:-1]
+        ## change data.
+        change_df = change_df.reindex(index=union_index, columns=change_df.columns).iloc[:,:-1]
+
+        # compare data rows by rows.
+        df['count_change'] = pd.DataFrame(np.where(df.ne(change_df), True, False), index=df.index, columns=df.columns)\
+            .apply(lambda x: (x==True).sum(), axis=1)
+        
+        def format_record(record):
+            return  "{" + "\n".join("{!r}: {!r},".format(columns, values) for columns, values in record.items()) + "}"
+
+        start_rows = 2
+        for idx in union_index:
+            if idx not in self.skip_rows:
+                
+                record = {}
+                for data, change_data in zip(df.items(), change_df.items()):
+                    if df.loc[idx, "count_change"] != 14:
+                        
+                        if df.loc[idx, "count_change"] <= 1:
+                            ## No_changed rows.
+                            df.at[idx, data[0]] = data[1].iloc[idx]
+                            df.loc[idx, "remark"] = "No_changed"
+                            
+                        else:
+                            ## Updated rows.
+                            if data[1][idx] != change_data[1][idx]:
+                                record.update({data[0]: f"{data[1][idx]} -> {change_data[1][idx]}"})
+                            
+                            df.at[idx, data[0]] = change_df[1].iloc[idx]
+                            df.loc[idx, "remark"] = "Updated"
+                            
+                    else:
+                        ## Inserted rows.
+                        record.update({data[0]: change_df[1][idx]})
+                        df.at[idx, data[0]] = change_df[1].iloc[idx]
+                        df.loc[idx, 'remark'] = "Inserted"
+
+                if record != {}:
+                    self.upsert_rows[start_rows + idx] = format_record(record)
+                    
+            else:
+                ## Removed rows.
+                df.loc[idx, "remark"] = "Removed"
+        self.skip_rows = [idx + start_rows for idx in self.skip_rows]
+
+        df = df.drop(['count_change'], axis=1)
+        df.index += start_rows
+        _data = df.to_dict('index')
+        
+        self.logging[-1].update({'status': "verify"})
+        return _data
 
 
     def write_worksheet(self, sheet: any, new_data: dict) -> str:
