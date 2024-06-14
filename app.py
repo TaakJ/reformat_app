@@ -21,7 +21,7 @@ from PyQt6.QtCore import (
     pyqtSignal
 )
 from qt_material import apply_stylesheet
-from setup import setup_parser, setup_folder, setup_log, setup_config, Folder
+from setup import setup_parser, setup_folder, setup_config, Folder
 from method import start
 from pathlib import Path
 from os.path import join

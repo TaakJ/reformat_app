@@ -21,8 +21,6 @@ class Folder:
     _LOGGER_CONFIG_DIR  =  join(_CURRENT_DIR, "logging_config.yaml")
     TEMPLATE            =  join(_CURRENT_DIR, "TEMPLATE/")
     TMP                 =  join(_CURRENT_DIR, "TMP/")
-    LOG                 =  join(_CURRENT_DIR, "LOG/")
-
 
 def setup_folder() -> None:
     _folders = [value for name, value in vars(Folder).items() if isinstance(value, str) and not name.startswith("_")]
@@ -55,20 +53,22 @@ def setup_config() -> dict:
 def setup_log() -> None:
     log_yaml  = None
     log_dir   = Folder._LOGGER_CONFIG_DIR
-    log_name  = f"log-{datetime.today().strftime('%d%m%Y')}.log"
+    date = datetime.today().strftime('%Y%m%d')
+    print(date)
+    # log_name  = f"log-{datetime.today().strftime('%d%m%Y')}.log"
 
-    if os.path.exists(log_dir):
-        with open(log_dir, "rb") as logger:
-            log_yaml  = yaml.safe_load(logger.read())
+    # if os.path.exists(log_dir):
+    #     with open(log_dir, "rb") as logger:
+    #         log_yaml  = yaml.safe_load(logger.read())
             
-            for i in (log_yaml["handlers"].keys()):
-                if "filename" in log_yaml["handlers"][i]:
-                    log_path = log_yaml["handlers"][i]["filename"] + log_name
+    #         for i in (log_yaml["handlers"].keys()):
+    #             if "filename" in log_yaml["handlers"][i]:
+    #                 log_path = log_yaml["handlers"][i]["filename"] + log_name
                     
-            log_yaml["handlers"][i]["filename"] = log_path
-            logging.config.dictConfig(log_yaml)
-    else:
-        raise Exception(f"Yaml log file path: '{log_dir}' doesn't exist.")
+    #         log_yaml["handlers"][i]["filename"] = log_path
+    #         logging.config.dictConfig(log_yaml)
+    # else:
+    #     raise Exception(f"Yaml log file path: '{log_dir}' doesn't exist.")
 
 class setup_parser:
     def __init__(self):
