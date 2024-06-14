@@ -16,9 +16,9 @@ class ArgumentParams:
     CHOICES     = 'choices'
     
 class Folder:
-    _CURRENT_DIR        = os.getcwd()
-    _CONFIG_DIR         = join(_CURRENT_DIR, "config.yaml")
-    _LOGGER_CONFIG_DIR  = join(_CURRENT_DIR, "logging_config.yaml")
+    _CURRENT_DIR        =  os.getcwd()
+    _CONFIG_DIR         =  join(_CURRENT_DIR, "config.yaml")
+    _LOGGER_CONFIG_DIR  =  join(_CURRENT_DIR, "logging_config.yaml")
     TEMPLATE            =  join(_CURRENT_DIR, "TEMPLATE/")
     TMP                 =  join(_CURRENT_DIR, "TMP/")
     LOG                 =  join(_CURRENT_DIR, "LOG/")
@@ -44,10 +44,9 @@ def setup_config() -> dict:
         with open(config_dir, "rb") as conf:
             config_yaml  = yaml.safe_load(conf.read())
             
-            for i in config_yaml.keys():
-                _dir = join(config_yaml[i]["dir_input"], config_yaml[i]["file"])
-                setattr(Folder, f'_{i}', _dir)
-                config_yaml[i]["dir"] = getattr(Folder, f"_{i}")
+            for source in config_yaml.keys():
+                _dir = join(config_yaml[source]["dir_input"], config_yaml[source]["file"])
+                config_yaml[source]["dir"] = _dir
     else:
         raise Exception(f"Yaml config file path: '{config_dir}' doesn't exist.")
     return config_yaml

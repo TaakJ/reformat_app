@@ -1,13 +1,17 @@
 from exception import CustomException
-from setup import Folder, clear_tmp
-import glob
-import shutil
+from setup import Folder
+import logging
 from pathlib import Path
 from os.path import join
-import logging
+import glob
+import shutil
 import pandas as pd
 import openpyxl
 from openpyxl.styles import Font
+import chardet
+from io import StringIO
+import re
+import xlrd
 
 class convert_2_files:
 
@@ -17,7 +21,7 @@ class convert_2_files:
         
         set_log = []
         for source, value in self.config.items():
-            if source in self.source:
+            if source in self.require_source:
                 _dir = value["dir"]
                 
                 status_file = "not_found"
@@ -32,43 +36,161 @@ class convert_2_files:
                     "function": "check_source_files"
                 }
                 set_log.append(item)
-                logging.info(f'Source file: "{_dir}", Status: "{status_file}".')
+                logging.info(f'Source file: "{_dir}", Status: "{status_file}"')
                 
         self._log_setter(set_log) 
-        
 
-    def retrieve_data_from_source_files(self) -> list[dict]:
+    
+    async def retrieve_data_from_source_files(self) -> None:
 
         logging.info("Retrieve Data from Source files..")
-        print(self.logging)
         
-        # state = "failed"
-        # for i, item in enumerate(self.logging):
-        #     item.update({'function': "retrieve_data_from_source_files", 'state': state})
+        state = "failed"
+        for key, record in enumerate(self.logging):
+            record.update({'function': "retrieve_data_from_source_files", 'state': state})
 
-        #     _data = []
-        #     _dir = item["dir_input"]
-        #     types = Path(_dir).suffix
-        #     status_file = item["status_file"]
-        #     try:
-        #         if status_file == "found":
-        #             if [".xlsx", ".xls"].__contains__(types):
-        #                 logging.info(f'Read Excel file: "{_dir}".')
-        #                 _data = self.excel_data_cleaning(i)
-        #             else:
-        #                 logging.info(f'Read Text file: "{_dir}".')
-        #                 _data = self.text_data_cleaning(i)
-                        
-        #         state = "succeed"
-        #         item.update({"data": _data, "state": state})
-
-        #     except Exception as err:
-        #         item.update({'errors': err})
-
-        #     if "errors" in item:
-        #         raise CustomException(errors=self.logging)
+            _data = []
+            _dir = record["dir_input"]
+            types = Path(_dir).suffix
+            status_file = record["status_file"]
             
-        # return self.logging
+            try:
+                if status_file == "found":
+                    if [".xlsx", ".xls"].__contains__(types):
+                        logging.info(f'Read Excel file: "{_dir}"')
+                        _data = self.excel_data_cleaning(key)
+                        
+                    else:
+                        logging.info(f'Read Text file: "{_dir}"')
+                        _data = self.text_data_cleaning(key)
+                else:
+                    continue
+                
+                state = "succeed"
+                record.update({"data": _data, "state": state})
+                
+            except Exception as err:
+                record.update({'errors': err})
+
+            if "errors" in record:
+                raise CustomException(errors=self.logging)
+            
+        
+    def read_text_files(func):
+        def wrapper(*args:tuple, **kwargs:dict) -> dict:  
+            
+            by_lines = iter(func(*args, **kwargs))
+            _data = {}
+            
+            rows = 0
+            while True:
+                try:
+                    list_by_lines = []
+                    for source, data in  next(by_lines).items():
+                        
+                        if source == "LDS":
+                            if rows == 0:
+                                ## herder column
+                                list_by_lines = " ".join(data).split(' ')
+                            else:
+                                ## row value
+                                for idx, value in enumerate(data):
+                                    if idx == 0:
+                                        value = re.sub(r'\s+',',', value).split(',')
+                                        list_by_lines.extend(value)
+                                    else:
+                                        list_by_lines.append(value)
+                                        
+                        elif source == "DOC":
+                            if rows == 1:
+                                ## herder column
+                                list_by_lines = " ".join(data).split(' ')
+                            elif rows > 1:
+                                ## row value
+                                for idx, value in enumerate(data):
+                                    if idx == 3:
+                                        value = re.sub(r'\s+',',', value).split(',')
+                                        list_by_lines.extend(value)
+                                    else:
+                                        list_by_lines.append(value)
+                                        
+                        elif source == "ADM":
+                            ## row value
+                            list_by_lines = data
+                        
+                        if list_by_lines != []:
+                            if source not in _data:
+                                _data[source] = [list_by_lines]
+                            else:
+                                _data[source].append(list_by_lines)
+                        else:
+                            continue
+                    rows += 1
+                    
+                except StopIteration:
+                    break
+                
+            return _data
+        return wrapper
+        
+    
+    @read_text_files
+    def text_data_cleaning(self, key:int) -> any:
+
+        # logging.info("Cleansing Data From Text file..")
+        self.logging[key].update({"function": "text_data_cleaning"})
+        
+        _dir = self.logging[key]["dir_input"]
+        source = self.logging[key]["source"]
+        
+        files = open(_dir, "rb")
+        encoded = chardet.detect(files.read())["encoding"]
+        files.seek(0)
+        decode_data = StringIO(files.read().decode(encoded))
+        
+        for lines in decode_data:
+            regex = re.compile(r"\w+.*")
+            find_regex = regex.findall(lines)
+            if find_regex != []:
+                yield {source: re.sub(r"\W\s+","||","".join(find_regex).strip()).split("||")}
+    
+    
+    def read_excle_files(func):
+        def wrapper(*args:tuple, **kwargs:dict) -> dict:
+            
+            by_sheets = iter(func(*args, **kwargs))
+            _data = {}
+            
+            while True:
+                try:
+                    for sheets, data in next(by_sheets).items():
+                        
+                        if not all(dup == data[0] for dup in data) and not data.__contains__("Centralized User Management : User List."):
+                            if sheets not in _data:
+                                _data[sheets] = [data]
+                            else:
+                                _data[sheets].append(data)
+                                
+                except StopIteration:
+                    break
+                
+            return _data
+        return wrapper
+    
+    
+    @read_excle_files
+    def excel_data_cleaning(self, key:int) -> any:
+
+        # logging.info("Cleansing Data From Excle files..")
+        self.logging[key].update({"function": "excel_data_cleaning"})
+        
+        workbook = xlrd.open_workbook(self.logging[key]['dir_input'])
+        sheet_list = [sheet for sheet in workbook.sheet_names() if sheet != "StyleSheet"]
+        
+        for sheets in sheet_list:
+            cells = workbook.sheet_by_name(sheets)
+            for row in range(0, cells.nrows):
+                yield {sheets: [cells.cell(row, col).value for col in range(cells.ncols)]}
 
 
     def write_data_to_tmp_file(self) -> None:
