@@ -20,23 +20,20 @@ class convert_2_files:
         logging.info("Check Source files..")
         
         set_log = []
-        for source, value in self.config.items():
-            if source in self.require_source:
-                _dir = value["dir"]
-                
-                status_file = "not_found"
-                if glob.glob(_dir, recursive=True):
-                    status_file = "found"
-                    
-                item =  {
-                    "source": source,
-                    "dir_input": value["dir"],
-                    "status_file": status_file,
-                    "dir_output": value["dir_output"],
-                    "function": "check_source_files"
-                }
-                set_log.append(item)
-                logging.info(f'Source file: "{_dir}", Status: "{status_file}"')
+        for _dir in self.input_dir:
+            
+            status_file = "not_found"
+            if glob.glob(_dir, recursive=True):
+                status_file = "found"
+
+            record =  {
+                "source": self.source,
+                "input_dir": _dir,
+                "status_file": status_file,
+                "function": "check_source_files"
+            }
+            set_log.append(record)
+            logging.info(f'Source file: "{_dir}", Status: "{status_file}"')
                 
         self._log_setter(set_log) 
 
@@ -46,11 +43,11 @@ class convert_2_files:
         logging.info("Retrieve Data from Source files..")
         
         state = "failed"
-        for key, record in enumerate(self.logging):
+        for i, record in enumerate(self.logging):
             record.update({'function': "retrieve_data_from_source_files", 'state': state})
 
             _data = []
-            _dir = record["dir_input"]
+            _dir = record["input_dir"]
             types = Path(_dir).suffix
             status_file = record["status_file"]
             
@@ -58,11 +55,11 @@ class convert_2_files:
                 if status_file == "found":
                     if [".xlsx", ".xls"].__contains__(types):
                         logging.info(f'Read Excel file: "{_dir}"')
-                        _data = self.excel_data_cleaning(key)
+                        _data = self.excel_data_cleaning(i)
                         
                     else:
                         logging.info(f'Read Text file: "{_dir}"')
-                        _data = self.text_data_cleaning(key)
+                        _data = self.text_data_cleaning(i)
                 else:
                     continue
                 
@@ -135,13 +132,13 @@ class convert_2_files:
         
     
     @read_text_files
-    def text_data_cleaning(self, key:int) -> any:
+    def text_data_cleaning(self, i:int) -> any:
 
         # logging.info("Cleansing Data From Text file..")
-        self.logging[key].update({"function": "text_data_cleaning"})
+        self.logging[i].update({"function": "text_data_cleaning"})
         
-        _dir = self.logging[key]["dir_input"]
-        source = self.logging[key]["source"]
+        _dir = self.logging[i]["input_dir"]
+        source = self.logging[i]["source"]
         
         files = open(_dir, "rb")
         encoded = chardet.detect(files.read())["encoding"]
@@ -179,12 +176,12 @@ class convert_2_files:
     
     
     @read_excle_files
-    def excel_data_cleaning(self, key:int) -> any:
+    def excel_data_cleaning(self, i:int) -> any:
 
         # logging.info("Cleansing Data From Excle files..")
-        self.logging[key].update({"function": "excel_data_cleaning"})
+        self.logging[i].update({"function": "excel_data_cleaning"})
         
-        workbook = xlrd.open_workbook(self.logging[key]['dir_input'])
+        workbook = xlrd.open_workbook(self.logging[i]['input_dir'])
         sheet_list = [sheet for sheet in workbook.sheet_names() if sheet != "StyleSheet"]
         
         for sheets in sheet_list:
@@ -193,82 +190,68 @@ class convert_2_files:
                 yield {sheets: [cells.cell(row, col).value for col in range(cells.ncols)]}
 
 
-    async def write_data_to_tmp_file(self, source) -> None:
+    async def write_data_to_tmp_file(self) -> None:
 
         logging.info("Write Data to Tmp files..")
         
-        source_name = join(Folder.TEMPLATE, "Application Data Requirements.xlsx")
-        tmp_name = join(Folder.TMP, f"{source}_TMP-{self.batch_date.strftime('%Y%m%d')}.xlsx")
-        print(tmp_name)
-        state = "failed"
+        template_name = join(Folder.TEMPLATE, "Application Data Requirements.xlsx")
+        tmp_name = join(Folder.TMP, f"TMP_{self.source}-{self.batch_date.strftime('%d%m%y')}.xlsx")
         
+        state = "failed"
         for record in self.logging:
             try:
-                target = record["target"]
-                print(target)
-                
+                ''
+                # if key['source'] == "Target_file":
+                #     key.update({'full_path': tmp_name, 'function': "write_data_to_tmp_file", 'status': status})
+                #     ## get new data.
+                #     new_df = pd.DataFrame(key["data"])
+                #     new_df['remark'] = "Inserted"
+                #     try:
+                #         workbook = openpyxl.load_workbook(tmp_name)
+                #         get_sheet = workbook.get_sheet_names()
+                #         sheet_num = len(get_sheet)
+                #         sheet_name = f"RUN_TIME_{sheet_num - 1}"
+                #         sheet = workbook.get_sheet_by_name(sheet_name)
+                #         workbook.active = sheet_num
+
+                #     except FileNotFoundError:
+                #         ## copy files from template.
+                #         status = self.copy_worksheet(source_name, tmp_name)
+                #         workbook = openpyxl.load_workbook(tmp_name)
+                #         sheet = workbook.worksheets[0]
+                #         sheet_name = "RUN_TIME_1"
+                #         sheet_num = 1
+                #         sheet.title = sheet_name
+
+                #     logging.info(f"Generate Sheet_name: {sheet_name} in Tmp files.")
+
+                    # # read tmp files.
+                    # data = sheet.values
+                    # columns = next(data)[0:]
+                    # tmp_df = pd.DataFrame(data, columns=columns)
+
+                    # if status != "succeed":
+                    #     tmp_df = tmp_df.loc[tmp_df['remark'] != "Removed"]
+                    #     ## create new sheet.
+                    #     sheet_name = f"RUN_TIME_{sheet_num}"
+                    #     sheet = workbook.create_sheet(sheet_name)
+                    # else:
+                    #     tmp_df['remark'] = "Inserted"
+                    
+                    # new_data = self.validation_data(tmp_df, new_df)
+                    # ## write to tmp files.
+                    # status = self.write_worksheet(sheet, new_data)
+                    # workbook.move_sheet(workbook.active, offset=-sheet_num)
+                    # workbook.save(tmp_name)
+
+                    # key.update({'sheet_name': sheet_name, 'status': status})
+                    # logging.info(f"Write to Tmp files status: {status}.")
+
             except Exception as err:
-                record.update({"errors": err})
+                record.update({'errors': err})
 
-        # for key in self.logging:
-        #     try:
-        #         if key["source"] == "Target_file":
-        #             key.update(
-        #                 {
-        #                     "full_path": tmp_name,
-        #                     "function": "write_data_to_tmp_file",
-        #                     "status": status,
-        #                 }
-        #             )
-        #             ## get new data.
-        #             new_df = pd.DataFrame(key["data"])
-        #             new_df["remark"] = "Inserted"
-        #             try:
-        #                 workbook = openpyxl.load_workbook(tmp_name)
-        #                 get_sheet = workbook.get_sheet_names()
-        #                 sheet_num = len(get_sheet)
-        #                 sheet_name = f"RUN_TIME_{sheet_num - 1}"
-        #                 sheet = workbook.get_sheet_by_name(sheet_name)
-        #                 workbook.active = sheet_num
-
-        #             except FileNotFoundError:
-        #                 ## copy files from template.
-        #                 status = self.copy_worksheet(source_name, tmp_name)
-        #                 workbook = openpyxl.load_workbook(tmp_name)
-        #                 sheet = workbook.worksheets[0]
-        #                 sheet_name = "RUN_TIME_1"
-        #                 sheet_num = 1
-        #                 sheet.title = sheet_name
-
-        #             logging.info(f"Generate Sheet_name: {sheet_name} in Tmp files.")
-
-        #             # read tmp files.
-        #             data = sheet.values
-        #             columns = next(data)[0:]
-        #             tmp_df = pd.DataFrame(data, columns=columns)
-
-        #             if status != "succeed":
-        #                 tmp_df = tmp_df.loc[tmp_df["remark"] != "Removed"]
-        #                 ## create new sheet.
-        #                 sheet_name = f"RUN_TIME_{sheet_num}"
-        #                 sheet = workbook.create_sheet(sheet_name)
-        #             else:
-        #                 tmp_df["remark"] = "Inserted"
-
-        #             new_data = self.validation_data(tmp_df, new_df)
-        #             ## write to tmp files.
-        #             status = self.write_worksheet(sheet, new_data)
-        #             workbook.move_sheet(workbook.active, offset=-sheet_num)
-        #             workbook.save(tmp_name)
-
-        #             key.update({"sheet_name": sheet_name, "status": status})
-        #             logging.info(f"Write to Tmp files status: {status}.")
-
-        #     except Exception as err:
-        #         key.update({"errors": err})
-
-        #     if "errors" in key:
-        #         raise CustomException(errors=self.logging)
+            if "errors" in record:
+                raise CustomException(errors=self.logging)
 
 
     def write_worksheet(self, sheet: any, new_data: dict) -> str:

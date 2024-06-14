@@ -1,23 +1,28 @@
 ADM:
-    dir_input: C:\Users\thanakit\Downloads\RAW\ADM
-    dir_output: C:\Users\thanakit\Downloads\EXPORT\ADM
+    input_dir: C:\Users\thanakit\Downloads\RAW\ADM
+    output_dir: C:\Users\thanakit\Downloads\EXPORT\ADM
     file: ADM.txt
+    require: ["BOS"]
 BOS:
-    dir_input: C:\Users\thanakit\Downloads\RAW\BOS
-    dir_output: C:\Users\thanakit\Downloads\EXPORT\BOS
+    input_dir: C:\Users\thanakit\Downloads\RAW\BOS
+    output_dir: C:\Users\thanakit\Downloads\EXPORT\BOS
     file: BOS.xlsx
+    require: []
 CUM:
-    dir_input: C:\Users\thanakit\Downloads\RAW\CUM
-    dir_output: C:\Users\thanakit\Downloads\EXPORT\CUM
+    input_dir: C:\Users\thanakit\Downloads\RAW\CUM
+    output_dir: C:\Users\thanakit\Downloads\EXPORT\CUM
     file: CUM.xls
+    require: []
 DOC:
-    dir_input: C:\Users\thanakit\Downloads\RAW\DOC
-    dir_output: C:\Users\thanakit\Downloads\EXPORT\DOC
+    input_dir: C:\Users\thanakit\Downloads\RAW\DOC
+    output_dir: C:\Users\thanakit\Downloads\EXPORT\DOC
     file: DocImage.txt
+    require: []
 ICAS:
-    dir_input: C:\Users\thanakit\Downloads\RAW\ICAS
-    dir_output: C:\Users\thanakit\Downloads\EXPORT\ICAS
+    input_dir: C:\Users\thanakit\Downloads\RAW\ICAS
+    output_dir: C:\Users\thanakit\Downloads\EXPORT\ICAS
     file: ICAS-NCR.xlsx
+    require: []
 
 # IIC:
 #     curr: 5

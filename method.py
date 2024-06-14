@@ -17,7 +17,6 @@ class start(run_module):
     async def mapping_source_files(self) -> None:
         
         for source in self.params["source"]:
-            
             if source == "ADM":
                 run_task = self.run_module_adm(self.params)
                 

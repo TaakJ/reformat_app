@@ -15,5 +15,5 @@ class CustomException(Exception):
 
     def generate_error_message(self):
         for i in  range(len(self.errors)):
-            error_message = f"Source::{self.errors[i]['source']} - Path::{self.errors[i]['dir_input']} - Function::{self.errors[i]['function']} - State::{self.errors[i]['state']} - Error::{self.errors[i].get('errors')}"
+            error_message = f"Source::{self.errors[i]['source']} - Path::{self.errors[i]['input_dir']} - Function::{self.errors[i]['function']} - State::{self.errors[i]['state']} - Error::{self.errors[i].get('errors')}"
             yield error_message
