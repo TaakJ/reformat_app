@@ -193,15 +193,15 @@ class convert_2_files:
 
         template_name = join(Folder.TEMPLATE, "Application Data Requirements.xlsx")
         tmp_name = join(Folder.TMP, f"TMP_{self.source}-{self.batch_date.strftime('%d%m%y')}.xlsx")
-        state = "failed"
         
+        state = "failed"
         for record in self.logging:
             try:
                 if record["source"] == "Target_file":
                     record.update({"input_dir": tmp_name, "function": "write_data_to_tmp_file", "state": state,})
                     ## get new data.
-                    new_df = pd.DataFrame(record["data"])
-                    new_df["remark"] = "Inserted"
+                    change_df = pd.DataFrame(record["data"])
+                    change_df["remark"] = "Inserted"
 
                     try:
                         workbook = openpyxl.load_workbook(tmp_name)
@@ -228,27 +228,28 @@ class convert_2_files:
                     tmp_df = pd.DataFrame(data, columns=columns)
 
                     if state != "succeed":
-                        tmp_df = tmp_df.loc[tmp_df["remark"] != "Removed"]
                         ## create new sheet.
+                        tmp_df = tmp_df.loc[tmp_df["remark"] != "Removed"]
                         sheet_name = f"RUN_TIME_{sheet_num}"
                         sheet = workbook.create_sheet(sheet_name)
                     else:
                         tmp_df["remark"] = "Inserted"
 
-                    _data = self.validation_data(tmp_df, new_df)
-                    # ## write to tmp files.
-                    # status = self.write_worksheet(sheet, new_data)
-                    # workbook.move_sheet(workbook.active, offset=-sheet_num)
-                    # workbook.save(tmp_name)
+                    _data = self.validation_data(tmp_df, change_df)
+                    ## write to tmp files.
+                    state = self.write_worksheet(sheet, _data)
+                    workbook.move_sheet(workbook.active, offset=-sheet_num)
+                    workbook.save(tmp_name)
 
-                    # key.update({'sheet_name': sheet_name, 'state': state})
-                    # logging.info(f"Write to Tmp files state: {state}.")
+                    record.update({'sheet_name': sheet_name, 'state': state})
+                    logging.info(f"Write to Tmp files state: {state}.")
 
             except Exception as err:
                 record.update({"errors": err})
 
             if "errors" in record:
                 raise CustomException(errors=self.logging)
+            
 
     def validation_data(self, df: pd.DataFrame, change_df: pd.DataFrame) -> dict:
 
@@ -317,48 +318,47 @@ class convert_2_files:
         self.logging[-1].update({"status": "verify"})
         return _data
 
-    def write_worksheet(self, sheet: any, new_data: dict) -> str:
+
+    def write_worksheet(self, sheet: any, change_data: dict) -> str:
 
         self.logging[-1].update({"function": "write_worksheet"})
-        max_rows = max(new_data, default=0)
+        max_rows = max(change_data, default=0)
         logging.info(f"Data for write: {max_rows}. rows")
+        
         start_rows = 2
-
         try:
             # write columns.
-            for idx, columns in enumerate(new_data[start_rows].keys(), 1):
+            for idx, columns in enumerate(change_data[start_rows].keys(), 1):
                 sheet.cell(row=1, column=idx).value = columns
             ## write data.
             while start_rows <= max_rows:
-                for remark in [
-                    new_data[start_rows][columns]
-                    for columns in new_data[start_rows].keys()
-                    if columns == "remark"
-                ]:
-                    for idx, values in enumerate(new_data[start_rows].values(), 1):
+                for remark in [change_data[start_rows][columns] for columns in change_data[start_rows].keys() if columns == "remark"]:
+                    for idx, values in enumerate(change_data[start_rows].values(), 1):
+                        
                         if start_rows in self.skip_rows and remark == "Removed":
+                            ## Removed
                             sheet.cell(row=start_rows, column=idx).value = values
-                            sheet.cell(row=start_rows, column=idx).font = Font(
-                                bold=True, strike=True, color="00FF0000"
-                            )
+                            sheet.cell(row=start_rows, column=idx).font = Font(bold=True, strike=True, color="00FF0000")
                             show = f"{remark} Rows: ({start_rows}) in Tmp files."
-                        elif start_rows in self.upsert_rows.keys() and remark in [
-                            "Inserted",
-                            "Updated",
-                        ]:
+                            
+                        elif start_rows in self.upsert_rows.keys() and remark in ["Inserted","Updated"]:
+                            ## Updated / Insert
                             sheet.cell(row=start_rows, column=idx).value = values
                             show = f"{remark} Rows: ({start_rows}) in Tmp files. Record Changed: {self.upsert_rows[start_rows]}"
+                            
                         else:
+                            ## no change
                             sheet.cell(row=start_rows, column=idx).value = values
                             show = f"No Change Rows: ({start_rows}) in Tmp files."
+                            
                 logging.info(show)
                 start_rows += 1
-
-            status = "succeed"
-
+                
+            state = "succeed"
         except KeyError as err:
             raise KeyError(f"Can not Write rows: {err} in Tmp files.")
-        return status
+        
+        return state
 
     def copy_worksheet(self, source_name: str, target_name: str) -> str:
         try:
