@@ -15,7 +15,6 @@ class module_adm(call_function):
     def _log_setter(self, log):
         self._log = log
     
-    
     def _parameter(self, module, params):
         for key, value in params.items():
             setattr(self, key, value)
@@ -24,15 +23,14 @@ class module_adm(call_function):
         self.input_dir = self.config[self.module]["dir"]
         self.output_dir = self.config[self.module]["output_dir"]
     
-    
     async def run(self):
         
-        logging.info(f'Run Module: "{self.module}", manual: "{self.manual}", batch_date: "{self.batch_date}", store_tmp: "{self.store_tmp}, write_mode: "{self.write_mode}"')
+        # logging.info(f'Run Module: "{self.module}", manual: "{self.manual}", batch_date: "{self.batch_date}", store_tmp: "{self.store_tmp}, write_mode: "{self.write_mode}"')
         
         self.state = True 
         try:
             await self.check_source_files()
-            # await self.retrieve_data_from_source_files()
+            await self.retrieve_data_from_source_files()
             # await self.mock_data_adm()
             # await self.write_data_to_tmp_file()
                 

@@ -20,26 +20,24 @@ class convert_2_files:
     async def check_source_files(self) -> None:
 
         logging.info("Check Source files..")
-        if self.module == "ADM":
-            raise Exception("OK")
+        
+        set_log = []
+        for _dir in self.input_dir:
 
-        # set_log = []
-        # for _dir in self.input_dir:
+            status_file = "not_found"
+            if glob.glob(_dir, recursive=True):
+                status_file = "found"
 
-        #     status_file = "not_found"
-        #     if glob.glob(_dir, recursive=True):
-        #         status_file = "found"
+            record = {
+                "module": self.module,
+                "input_dir": _dir,
+                "status_file": status_file,
+                "function": "check_source_files",
+            }
+            set_log.append(record)
+            logging.info(f'Source file: "{_dir}", Status: "{status_file}"')
 
-        #     record = {
-        #         "source": self.source,
-        #         "input_dir": _dir,
-        #         "status_file": status_file,
-        #         "function": "check_source_files",
-        #     }
-        #     set_log.append(record)
-        #     logging.info(f'Source file: "{_dir}", Status: "{status_file}"')
-
-        # self._log_setter(set_log)
+        self._log_setter(set_log)
 
 
     async def retrieve_data_from_source_files(self) -> None:
@@ -48,9 +46,7 @@ class convert_2_files:
 
         state = "failed"
         for i, record in enumerate(self.logging):
-            record.update(
-                {"function": "retrieve_data_from_source_files", "state": state}
-            )
+            record.update({"function": "retrieve_data_from_source_files", "state": state})
 
             _dir = record["input_dir"]
             types = Path(_dir).suffix
@@ -66,7 +62,6 @@ class convert_2_files:
                         _data = self.text_data_cleaning(i)
                 else:
                     continue
-
                 state = "succeed"
                 record.update({"data": _data, "state": state})
 
@@ -75,6 +70,7 @@ class convert_2_files:
 
             if "errors" in record:
                 raise CustomException(errors=self.logging)
+            
 
     def read_text_files(func):
         def wrapper(*args: tuple, **kwargs: dict) -> dict:
@@ -152,11 +148,8 @@ class convert_2_files:
             regex = re.compile(r"\w+.*")
             find_regex = regex.findall(lines)
             if find_regex != []:
-                yield {
-                    source: re.sub(r"\W\s+", "||", "".join(find_regex).strip()).split(
-                        "||"
-                    )
-                }
+                yield {source: re.sub(r"\W\s+", "||", ""\
+                    .join(find_regex).strip()).split("||")}
 
 
     def read_excle_files(func):
@@ -168,11 +161,8 @@ class convert_2_files:
             while True:
                 try:
                     for sheets, data in next(by_sheets).items():
-                        if not all(
-                            dup == data[0] for dup in data
-                        ) and not data.__contains__(
-                            "Centralized User Management : User List."
-                        ):
+                        if not all(dup == data[0] for dup in data) and not data\
+                            .__contains__("Centralized User Management : User List."):
                             if sheets not in _data:
                                 _data[sheets] = [data]
                             else:
@@ -192,16 +182,13 @@ class convert_2_files:
         self.logging[i].update({"function": "excel_data_cleaning"})
 
         workbook = xlrd.open_workbook(self.logging[i]["input_dir"])
-        sheet_list = [
-            sheet for sheet in workbook.sheet_names() if sheet != "StyleSheet"
-        ]
+        sheet_list = [sheet for sheet in workbook.sheet_names() if sheet != "StyleSheet"]
 
         for sheets in sheet_list:
             cells = workbook.sheet_by_name(sheets)
             for row in range(0, cells.nrows):
-                yield {
-                    sheets: [cells.cell(row, col).value for col in range(cells.ncols)]
-                }
+                yield {sheets: [cells.cell(row, col)\
+                    .value for col in range(cells.ncols)]}
 
 
     async def write_data_to_tmp_file(self) -> None:
@@ -209,9 +196,7 @@ class convert_2_files:
         logging.info("Write Data to Tmp files..")
 
         template_name = join(Folder.TEMPLATE, "Application Data Requirements.xlsx")
-        tmp_name = join(
-            Folder.TMP, f"TMP_{self.source}-{self.batch_date.strftime('%d%m%y')}.xlsx"
-        )
+        tmp_name = join(Folder.TMP, f"TMP_{self.source}-{self.batch_date.strftime('%d%m%y')}.xlsx")
 
         state = "failed"
         for record in self.logging:
@@ -293,9 +278,7 @@ class convert_2_files:
         ## target / tmp data.
         df = df.reindex(index=union_index, columns=df.columns).iloc[:, :-1]
         ## change data.
-        change_df = change_df.reindex(
-            index=union_index, columns=change_df.columns
-        ).iloc[:, :-1]
+        change_df = change_df.reindex(index=union_index,columns=change_df.columns).iloc[:, :-1]
 
         # compare data rows by rows.
         df["count_change"] = pd.DataFrame(
@@ -303,14 +286,8 @@ class convert_2_files:
         ).apply(lambda x: (x == True).sum(), axis=1)
 
         def format_record(record):
-            return (
-                "{"
-                + "\n".join(
-                    "{!r}: {!r},".format(columns, values)
-                    for columns, values in record.items()
-                )
-                + "}"
-            )
+            return ("{"+ "\n".join("{!r}: {!r},".format(columns, values)\
+                for columns, values in record.items())+"}")
 
         start_rows = 2
         for idx in union_index:
@@ -330,13 +307,8 @@ class convert_2_files:
                         else:
                             ## Updated rows.
                             if data[1][idx] != change_data[1][idx]:
-                                record.update(
-                                    {
-                                        data[
-                                            0
-                                        ]: f"{data[1][idx]} -> {change_data[1][idx]}"
-                                    }
-                                )
+                                record.update({data[0]: f"{data[1][idx]} \
+                                    -> {change_data[1][idx]}"})
                             df.at[idx, data[0]] = change_data[1].iloc[idx]
                             df.loc[idx, "remark"] = "Updated"
 
@@ -385,15 +357,11 @@ class convert_2_files:
                         if start_rows in self.remove_rows and remark == "Removed":
                             ## Removed
                             sheet.cell(row=start_rows, column=idx).value = values
-                            sheet.cell(row=start_rows, column=idx).font = Font(
-                                bold=True, strike=True, color="00FF0000"
-                            )
+                            sheet.cell(row=start_rows, column=idx).font = Font(bold=True,\
+                                strike=True, color="00FF0000")
                             show = f"{remark} Rows: ({start_rows}) in Tmp files."
 
-                        elif start_rows in self.change_rows.keys() and remark in [
-                            "Inserted",
-                            "Updated",
-                        ]:
+                        elif start_rows in self.change_rows.keys() and remark in ["Inserted","Updated"]:
                             ## Updated / Insert
                             sheet.cell(row=start_rows, column=idx).value = values
                             show = f"{remark} Rows: ({start_rows}) in Tmp files. Record Changed: {self.change_rows[start_rows]}"

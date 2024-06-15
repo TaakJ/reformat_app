@@ -16,19 +16,19 @@ class start:
     async def mapping_module(self):
         for module in self.params["source"]:
             if module == "ADM":
-                m  = module_adm()
-                m._parameter(module, self.params)
-                task = m.run()
+                func  = module_adm()
+                func._parameter(module, self.params)
+                task = func.run()
                 
             elif module == "BOS":
-                m  = module_bos()
-                m._parameter(module, self.params)
-                task = m.run()
+                func  = module_bos()
+                func._parameter(module, self.params)
+                task = func.run()
                 
             elif module == "CUM":
-                m  = module_cum()
-                m._parameter(module, self.params)
-                task = m.run()
+                func  = module_cum()
+                func._parameter(module, self.params)
+                task = func.run()
                 
             asyncio.create_task(task)
         
