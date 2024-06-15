@@ -82,9 +82,9 @@ class convert_2_files:
             while True:
                 try:
                     list_by_lines = []
-                    for source, data in next(by_lines).items():
+                    for sheets, data in next(by_lines).items():
 
-                        if source == "LDS":
+                        if sheets == "LDS":
                             if rows == 0:
                                 ## herder column
                                 list_by_lines = " ".join(data).split(" ")
@@ -97,7 +97,7 @@ class convert_2_files:
                                     else:
                                         list_by_lines.append(value)
 
-                        elif source == "DOC":
+                        elif sheets == "DOC":
                             if rows == 1:
                                 ## herder column
                                 list_by_lines = " ".join(data).split(" ")
@@ -110,15 +110,15 @@ class convert_2_files:
                                     else:
                                         list_by_lines.append(value)
 
-                        elif source == "ADM":
+                        elif sheets == "ADM":
                             ## row value
                             list_by_lines = data
 
                         if list_by_lines != []:
-                            if source not in _data:
-                                _data[source] = [list_by_lines]
+                            if sheets not in _data:
+                                _data[sheets] = [list_by_lines]
                             else:
-                                _data[source].append(list_by_lines)
+                                _data[sheets].append(list_by_lines)
                         else:
                             continue
                     rows += 1
@@ -137,7 +137,7 @@ class convert_2_files:
         self.logging[i].update({"function": "text_data_cleaning"})
 
         _dir = self.logging[i]["input_dir"]
-        source = self.logging[i]["source"]
+        sheets = self.logging[i]["module"]
 
         files = open(_dir, "rb")
         encoded = chardet.detect(files.read())["encoding"]
@@ -148,7 +148,7 @@ class convert_2_files:
             regex = re.compile(r"\w+.*")
             find_regex = regex.findall(lines)
             if find_regex != []:
-                yield {source: re.sub(r"\W\s+", "||", ""\
+                yield {sheets: re.sub(r"\W\s+", "||", ""\
                     .join(find_regex).strip()).split("||")}
 
 
@@ -196,19 +196,13 @@ class convert_2_files:
         logging.info("Write Data to Tmp files..")
 
         template_name = join(Folder.TEMPLATE, "Application Data Requirements.xlsx")
-        tmp_name = join(Folder.TMP, f"TMP_{self.source}-{self.batch_date.strftime('%d%m%y')}.xlsx")
+        tmp_name = join(Folder.TMP, f"TMP_{self.module}-{self.batch_date.strftime('%d%m%y')}.xlsx")
 
         state = "failed"
         for record in self.logging:
             try:
-                if record["source"] == "Target_file":
-                    record.update(
-                        {
-                            "input_dir": tmp_name,
-                            "function": "write_data_to_tmp_file",
-                            "state": state,
-                        }
-                    )
+                if record["module"] == "Target_file":
+                    record.update({"input_dir": tmp_name,"function": "write_data_to_tmp_file","state": state})
                     ## get new data.
                     change_df = pd.DataFrame(record["data"])
                     change_df["remark"] = "Inserted"
@@ -269,9 +263,7 @@ class convert_2_files:
         self.change_rows = {}
         self.remove_rows = []
         if len(df.index) > len(change_df.index):
-            self.remove_rows = [
-                idx for idx in list(df.index) if idx not in list(change_df.index)
-            ]
+            self.remove_rows = [idx for idx in list(df.index) if idx not in list(change_df.index)]
 
         ## reset index data.
         union_index = np.union1d(df.index, change_df.index)

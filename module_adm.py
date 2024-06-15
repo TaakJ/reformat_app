@@ -18,21 +18,22 @@ class module_adm(call_function):
     def _parameter(self, module, params):
         for key, value in params.items():
             setattr(self, key, value)
-            
+        
+        self.date = datetime.now()
         self.module = module
         self.input_dir = self.config[self.module]["dir"]
         self.output_dir = self.config[self.module]["output_dir"]
     
     async def run(self):
         
-        # logging.info(f'Run Module: "{self.module}", manual: "{self.manual}", batch_date: "{self.batch_date}", store_tmp: "{self.store_tmp}, write_mode: "{self.write_mode}"')
+        logging.info(f'Run Module: "{self.module}", manual: "{self.manual}", batch_date: "{self.batch_date}", store_tmp: "{self.store_tmp}, write_mode: "{self.write_mode}"')
         
         self.state = True 
         try:
             await self.check_source_files()
             await self.retrieve_data_from_source_files()
-            # await self.mock_data_adm()
-            # await self.write_data_to_tmp_file()
+            await self.mock_data()
+            await self.write_data_to_tmp_file()
                 
         except CustomException as error: 
             
@@ -76,4 +77,4 @@ class module_adm(call_function):
             df.columns = df.iloc[0].values
             df = df[1:]
             df = df.reset_index(drop=True)
-            self.logging.append({'source': 'Target_file', 'data': df.to_dict('list')})
+            self.logging.append({'module': 'Target_file', 'data': df.to_dict('list')})
