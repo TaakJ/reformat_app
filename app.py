@@ -66,7 +66,6 @@ class setup_app(QWidget):
         
         if params.manual is False:
             start(vars(params))
-            # run_batch(vars(params))
         else:
             self.ui()
             sys.exit(app.exec())

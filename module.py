@@ -16,6 +16,9 @@ import xlrd
 
 
 class convert_2_files:
+    
+    async def a(self) -> None:
+        print("run")
 
     async def check_source_files(self) -> None:
 
@@ -46,7 +49,9 @@ class convert_2_files:
 
         state = "failed"
         for i, record in enumerate(self.logging):
-            record.update({"function": "retrieve_data_from_source_files", "state": state})
+            record.update(
+                {"function": "retrieve_data_from_source_files", "state": state}
+            )
 
             _dir = record["input_dir"]
             types = Path(_dir).suffix
@@ -71,7 +76,6 @@ class convert_2_files:
 
             if "errors" in record:
                 raise CustomException(errors=self.logging)
-
 
     def read_text_files(func):
         def wrapper(*args: tuple, **kwargs: dict) -> dict:
@@ -127,6 +131,7 @@ class convert_2_files:
                 except StopIteration:
                     break
             return _data
+
         return wrapper
 
 
@@ -148,7 +153,11 @@ class convert_2_files:
             regex = re.compile(r"\w+.*")
             find_regex = regex.findall(lines)
             if find_regex != []:
-                yield {source: re.sub(r"\W\s+", "||", "".join(find_regex).strip()).split("||")}
+                yield {
+                    source: re.sub(r"\W\s+", "||", "".join(find_regex).strip()).split(
+                        "||"
+                    )
+                }
 
 
     def read_excle_files(func):
@@ -160,7 +169,11 @@ class convert_2_files:
             while True:
                 try:
                     for sheets, data in next(by_sheets).items():
-                        if not all(dup == data[0] for dup in data) and not data.__contains__("Centralized User Management : User List."):
+                        if not all(
+                            dup == data[0] for dup in data
+                        ) and not data.__contains__(
+                            "Centralized User Management : User List."
+                        ):
                             if sheets not in _data:
                                 _data[sheets] = [data]
                             else:
@@ -169,6 +182,7 @@ class convert_2_files:
                 except StopIteration:
                     break
             return _data
+
         return wrapper
 
 
@@ -179,12 +193,16 @@ class convert_2_files:
         self.logging[i].update({"function": "excel_data_cleaning"})
 
         workbook = xlrd.open_workbook(self.logging[i]["input_dir"])
-        sheet_list = [sheet for sheet in workbook.sheet_names() if sheet != "StyleSheet"]
+        sheet_list = [
+            sheet for sheet in workbook.sheet_names() if sheet != "StyleSheet"
+        ]
 
         for sheets in sheet_list:
             cells = workbook.sheet_by_name(sheets)
             for row in range(0, cells.nrows):
-                yield {sheets: [cells.cell(row, col).value for col in range(cells.ncols)]}
+                yield {
+                    sheets: [cells.cell(row, col).value for col in range(cells.ncols)]
+                }
 
 
     async def write_data_to_tmp_file(self) -> None:
@@ -192,13 +210,21 @@ class convert_2_files:
         logging.info("Write Data to Tmp files..")
 
         template_name = join(Folder.TEMPLATE, "Application Data Requirements.xlsx")
-        tmp_name = join(Folder.TMP, f"TMP_{self.source}-{self.batch_date.strftime('%d%m%y')}.xlsx")
-        
+        tmp_name = join(
+            Folder.TMP, f"TMP_{self.source}-{self.batch_date.strftime('%d%m%y')}.xlsx"
+        )
+
         state = "failed"
         for record in self.logging:
             try:
                 if record["source"] == "Target_file":
-                    record.update({"input_dir": tmp_name, "function": "write_data_to_tmp_file", "state": state,})
+                    record.update(
+                        {
+                            "input_dir": tmp_name,
+                            "function": "write_data_to_tmp_file",
+                            "state": state,
+                        }
+                    )
                     ## get new data.
                     change_df = pd.DataFrame(record["data"])
                     change_df["remark"] = "Inserted"
@@ -241,7 +267,7 @@ class convert_2_files:
                     workbook.move_sheet(workbook.active, offset=-sheet_num)
                     workbook.save(tmp_name)
 
-                    record.update({'sheet_name': sheet_name, 'state': state})
+                    record.update({"sheet_name": sheet_name, "state": state})
                     logging.info(f"Write to Tmp files state: {state}.")
 
             except Exception as err:
@@ -249,36 +275,48 @@ class convert_2_files:
 
             if "errors" in record:
                 raise CustomException(errors=self.logging)
-            
+
 
     def validation_data(self, df: pd.DataFrame, change_df: pd.DataFrame) -> dict:
 
         logging.info("Verify Changed information..")
         self.logging[-1].update({"function": "validation_data"})
 
-        self.skip_rows = []
-        self.upsert_rows = {}
+        self.change_rows = {}
+        self.remove_rows = []
         if len(df.index) > len(change_df.index):
-            self.skip_rows = [idx for idx in list(df.index) if idx not in list(change_df.index)]
+            self.remove_rows = [
+                idx for idx in list(df.index) if idx not in list(change_df.index)
+            ]
 
         ## reset index data.
         union_index = np.union1d(df.index, change_df.index)
         ## target / tmp data.
         df = df.reindex(index=union_index, columns=df.columns).iloc[:, :-1]
         ## change data.
-        change_df = change_df.reindex(index=union_index, columns=change_df.columns).iloc[:, :-1]
+        change_df = change_df.reindex(
+            index=union_index, columns=change_df.columns
+        ).iloc[:, :-1]
 
         # compare data rows by rows.
-        df["count_change"] = pd.DataFrame(np.where(df.ne(change_df), True, False), index=df.index, columns=df.columns)\
-            .apply(lambda x: (x == True).sum(), axis=1)
+        df["count_change"] = pd.DataFrame(
+            np.where(df.ne(change_df), True, False), index=df.index, columns=df.columns
+        ).apply(lambda x: (x == True).sum(), axis=1)
 
         def format_record(record):
-            return ("{"+ "\n".join("{!r}: {!r},".format(columns, values) for columns, values in record.items())+ "}")
+            return (
+                "{"
+                + "\n".join(
+                    "{!r}: {!r},".format(columns, values)
+                    for columns, values in record.items()
+                )
+                + "}"
+            )
 
         start_rows = 2
         for idx in union_index:
-            if idx not in self.skip_rows:
-                
+            if idx not in self.remove_rows:
+
                 record = {}
                 for data, change_data in zip(df.items(), change_df.items()):
                     ## data[0] = column_name
@@ -293,7 +331,13 @@ class convert_2_files:
                         else:
                             ## Updated rows.
                             if data[1][idx] != change_data[1][idx]:
-                                record.update({data[0]: f"{data[1][idx]} -> {change_data[1][idx]}"})
+                                record.update(
+                                    {
+                                        data[
+                                            0
+                                        ]: f"{data[1][idx]} -> {change_data[1][idx]}"
+                                    }
+                                )
                             df.at[idx, data[0]] = change_data[1].iloc[idx]
                             df.loc[idx, "remark"] = "Updated"
 
@@ -304,12 +348,12 @@ class convert_2_files:
                         df.loc[idx, "remark"] = "Inserted"
 
                 if record != {}:
-                    self.upsert_rows[start_rows + idx] = format_record(record)
+                    self.change_rows[start_rows + idx] = format_record(record)
 
             else:
                 ## Removed rows.
                 df.loc[idx, "remark"] = "Removed"
-        self.skip_rows = [idx + start_rows for idx in self.skip_rows]
+        self.remove_rows = [idx + start_rows for idx in self.remove_rows]
 
         df = df.drop(["count_change"], axis=1)
         df.index += start_rows
@@ -324,7 +368,7 @@ class convert_2_files:
         self.logging[-1].update({"function": "write_worksheet"})
         max_rows = max(change_data, default=0)
         logging.info(f"Data for write: {max_rows}. rows")
-        
+
         start_rows = 2
         try:
             # write columns.
@@ -332,43 +376,52 @@ class convert_2_files:
                 sheet.cell(row=1, column=idx).value = columns
             ## write data.
             while start_rows <= max_rows:
-                for remark in [change_data[start_rows][columns] for columns in change_data[start_rows].keys() if columns == "remark"]:
+                for remark in [
+                    change_data[start_rows][columns]
+                    for columns in change_data[start_rows].keys()
+                    if columns == "remark"
+                ]:
                     for idx, values in enumerate(change_data[start_rows].values(), 1):
-                        
-                        if start_rows in self.skip_rows and remark == "Removed":
+
+                        if start_rows in self.remove_rows and remark == "Removed":
                             ## Removed
                             sheet.cell(row=start_rows, column=idx).value = values
-                            sheet.cell(row=start_rows, column=idx).font = Font(bold=True, strike=True, color="00FF0000")
+                            sheet.cell(row=start_rows, column=idx).font = Font(
+                                bold=True, strike=True, color="00FF0000"
+                            )
                             show = f"{remark} Rows: ({start_rows}) in Tmp files."
-                            
-                        elif start_rows in self.upsert_rows.keys() and remark in ["Inserted","Updated"]:
+
+                        elif start_rows in self.change_rows.keys() and remark in [
+                            "Inserted",
+                            "Updated",
+                        ]:
                             ## Updated / Insert
                             sheet.cell(row=start_rows, column=idx).value = values
-                            show = f"{remark} Rows: ({start_rows}) in Tmp files. Record Changed: {self.upsert_rows[start_rows]}"
-                            
+                            show = f"{remark} Rows: ({start_rows}) in Tmp files. Record Changed: {self.change_rows[start_rows]}"
+
                         else:
                             ## no change
                             sheet.cell(row=start_rows, column=idx).value = values
                             show = f"No Change Rows: ({start_rows}) in Tmp files."
-                            
+
                 logging.info(show)
                 start_rows += 1
-                
+
             state = "succeed"
         except KeyError as err:
             raise KeyError(f"Can not Write rows: {err} in Tmp files.")
-        
         return state
+
 
     def copy_worksheet(self, source_name: str, target_name: str) -> str:
         try:
             if not glob.glob(target_name, recursive=True):
                 shutil.copy2(source_name, target_name)
-            status = "succeed"
+            state = "succeed"
         except FileNotFoundError as err:
             raise FileNotFoundError(err)
+        return state
 
-        return status
 
     def remove_row_empty(self, sheet: any) -> None:
         for row in sheet.iter_rows():
@@ -442,13 +495,13 @@ class convert_2_files:
                         for idx, columns in enumerate(new_data[start_rows].keys(), 1):
                             if columns == "remark":
                                 if (
-                                    f"{start_rows}" in self.upsert_rows.keys()
+                                    f"{start_rows}" in self.change_rows.keys()
                                     and new_data[start_rows][columns]
                                     in ["Updated", "Inserted"]
                                 ):
-                                    show = f"{new_data[start_rows][columns]} Rows: ({start_rows}) in Target files. Record Changed: {self.upsert_rows[f'{start_rows}']}"
+                                    show = f"{new_data[start_rows][columns]} Rows: ({start_rows}) in Target files. Record Changed: {self.change_rows[f'{start_rows}']}"
                                 elif (
-                                    start_rows in self.skip_rows
+                                    start_rows in self.remove_rows
                                     and new_data[start_rows][columns] == "Removed"
                                 ):
                                     show = f"{new_data[start_rows][columns]} Rows: ({start_rows}) in Target files."
@@ -456,7 +509,7 @@ class convert_2_files:
                                 else:
                                     show = f"No Change Rows: ({start_rows}) in Target files."
                             else:
-                                if start_rows in self.skip_rows:
+                                if start_rows in self.remove_rows:
                                     continue
                                 sheet.cell(row=start_rows, column=idx).value = new_data[
                                     start_rows
