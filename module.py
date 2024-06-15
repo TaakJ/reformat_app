@@ -16,31 +16,30 @@ import xlrd
 
 
 class convert_2_files:
-    
-    async def a(self) -> None:
-        print("run")
 
     async def check_source_files(self) -> None:
 
         logging.info("Check Source files..")
+        if self.module == "ADM":
+            raise Exception("OK")
 
-        set_log = []
-        for _dir in self.input_dir:
+        # set_log = []
+        # for _dir in self.input_dir:
 
-            status_file = "not_found"
-            if glob.glob(_dir, recursive=True):
-                status_file = "found"
+        #     status_file = "not_found"
+        #     if glob.glob(_dir, recursive=True):
+        #         status_file = "found"
 
-            record = {
-                "source": self.source,
-                "input_dir": _dir,
-                "status_file": status_file,
-                "function": "check_source_files",
-            }
-            set_log.append(record)
-            logging.info(f'Source file: "{_dir}", Status: "{status_file}"')
+        #     record = {
+        #         "source": self.source,
+        #         "input_dir": _dir,
+        #         "status_file": status_file,
+        #         "function": "check_source_files",
+        #     }
+        #     set_log.append(record)
+        #     logging.info(f'Source file: "{_dir}", Status: "{status_file}"')
 
-        self._log_setter(set_log)
+        # self._log_setter(set_log)
 
 
     async def retrieve_data_from_source_files(self) -> None:

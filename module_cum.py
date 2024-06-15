@@ -6,29 +6,39 @@ import pandas as pd
 import logging
 from module import convert_2_files
 
-class module_cum(record_log):
+class call_function(convert_2_files, record_log):
+    pass
+class module_cum(call_function):
     
-    async def run_module_cum(self, param):  
-        for key, value in param.items():
+    def _log_setter(self, log):
+        self._log = log
+        
+        
+    def _parameter(self, module, params):
+        for key, value in params.items():
             setattr(self, key, value)
+            
+        self.module = module
+        self.input_dir = self.config[self.module]["dir"]
+        self.output_dir = self.config[self.module]["output_dir"]
+    
+    
+    async def run(self): 
         
-        self.source = "CUM"
-        self.input_dir = self.config[self.source]["dir"]
-        self.output_dir = self.config[self.source]["output_dir"]
+        logging.info(f'Run Module: "{self.module}", manual: "{self.manual}", batch_date: "{self.batch_date}", store_tmp: "{self.store_tmp}, write_mode: "{self.write_mode}"')
         
-        logging.info(f'Run Module: "{self.source}", manual: "{self.manual}", batch_date: "{self.batch_date}", store_tmp: "{self.store_tmp}, write_mode: "{self.write_mode}"')
-        self.date = datetime.now()
         self.state = True 
         try:
             await self.check_source_files()
-            await self.retrieve_data_from_source_files()
-            await self.mock_data_cum()
-            await self.write_data_to_tmp_file()
+            # await self.retrieve_data_from_source_files()
+            # await self.mock_data_adm()
+            # await self.write_data_to_tmp_file()
                 
         except CustomException as error: 
-            logging.error("Error Exception")
-            self.state = False
             
+            logging.error("Error Exception")
+            
+            self.state = False
             while True:
                 try:
                     logging.error(next(error))
@@ -37,7 +47,9 @@ class module_cum(record_log):
                 
         logging.info("Stop Run Module\n##### End #####\n")
         
-    async def mapping_module_cum(self):
+        return self.state
+        
+    async def mapping_column(self):
         
         state = "failed"
         for record in self.logging:
@@ -51,7 +63,6 @@ class module_cum(record_log):
                         df.columns = df.iloc[0].values
                         df = df[1:]
                         df = df.reset_index(drop=True)
-                        print(df)
                 
             except Exception as err:
                 record.update({'errors': err})

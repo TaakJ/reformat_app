@@ -14,44 +14,45 @@ class module_bos(call_function):
     
     def _log_setter(self, log):
         self._log = log
-    
-    async def run(self, source):
         
-        self.source = source
         
-    # async def run_module_bos(self, param):  
-    #     for key, value in param.items():
-    #         setattr(self, key, value)
-        
-    #     self.source = "BOS"
-    #     self.input_dir = self.config[self.source]["dir"]
-    #     self.output_dir = self.config[self.source]["output_dir"]
-        
-    #     logging.info(f'Run Module: "{self.source}", manual: "{self.manual}", batch_date: "{self.batch_date}", store_tmp: "{self.store_tmp}, write_mode: "{self.write_mode}"')
-    #     self.date = datetime.now()
-    #     self.state = True 
-    #     try:
-    #         await self.check_source_files()
-    #         await self.retrieve_data_from_source_files()
-    #         await self.mock_data_bos()
-    #         await self.write_data_to_tmp_file()
-                
-    #     except CustomException as error: 
-    #         logging.error("Error Exception")
-    #         self.state = False
+    def _parameter(self, module, params):
+        for key, value in params.items():
+            setattr(self, key, value)
             
-    #         while True:
-    #             try:
-    #                 logging.error(next(error))
-    #             except StopIteration:
-    #                 break
-                
-    #     logging.info("Stop Run Module\n##### End #####\n")
-    
-    async def a(self) -> None:
-        print("mapping_module: BOS")
+        self.module = module
+        self.input_dir = self.config[self.module]["dir"]
+        self.output_dir = self.config[self.module]["output_dir"]
         
-    async def mapping_module_bos(self):
+    
+    async def run(self):
+        
+        logging.info(f'Run Module: "{self.module}", manual: "{self.manual}", batch_date: "{self.batch_date}", store_tmp: "{self.store_tmp}, write_mode: "{self.write_mode}"')
+        
+        self.state = True 
+        try:
+            await self.check_source_files()
+            # await self.retrieve_data_from_source_files()
+            # await self.mock_data_adm()
+            # await self.write_data_to_tmp_file()
+                
+        except CustomException as error: 
+            
+            logging.error("Error Exception")
+            
+            self.state = False
+            while True:
+                try:
+                    logging.error(next(error))
+                except StopIteration:
+                    break
+                
+        logging.info("Stop Run Module\n##### End #####\n")
+        
+        return self.state
+    
+        
+    async def mapping_column(self):
         
         state = "failed"
         for record in self.logging:
@@ -69,8 +70,7 @@ class module_bos(call_function):
             except Exception as err:
                 record.update({'errors': err})
 
-    async def mock_data_bos(self) -> None:
-        
+    async def mock_data(self) -> None:
             mock_data = [['ApplicationCode',	'AccountOwner', 'AccountName',	'AccountType',	'EntitlementName',	'SecondEntitlementName','ThirdEntitlementName', 'AccountStatus',	'IsPrivileged',	'AccountDescription',
                         'CreateDate','LastLogin','LastUpdatedDate',	'AdditionalAttribute'],
                         [1,2,3,4,5,6,7,8,9,10,self.batch_date.strftime('%Y-%m-%d'),12, self.date,14],

@@ -10,20 +10,26 @@ class start:
     def __init__(self, params:dict):
         self.params = params
         self.loop = asyncio.get_event_loop()
-        self.loop.run_until_complete(self.mapping_source())
-
-    async def mapping_source(self):
-        for source in self.params["source"]:
-            
-            if source == "ADM":
-                task = module_adm().run(source)
-                
-            elif source == "BOS":
-                task = module_bos().run(source)
-                
-            elif source == "CUM":
-                task = module_cum().run(source)
+        self.loop.run_until_complete(self.mapping_module())
         
+
+    async def mapping_module(self):
+        for module in self.params["source"]:
+            if module == "ADM":
+                m  = module_adm()
+                m._parameter(module, self.params)
+                task = m.run()
+                
+            elif module == "BOS":
+                m  = module_bos()
+                m._parameter(module, self.params)
+                task = m.run()
+                
+            elif module == "CUM":
+                m  = module_cum()
+                m._parameter(module, self.params)
+                task = m.run()
+                
             asyncio.create_task(task)
         
 class run_module(start):
