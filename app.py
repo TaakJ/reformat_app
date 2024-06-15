@@ -22,13 +22,12 @@ from PyQt6.QtCore import (
 )
 from qt_material import apply_stylesheet
 from setup import setup_parser, setup_folder, setup_config, Folder
-from method import start
+from method import start_app
 from pathlib import Path
 from os.path import join
 import sys
 import time
 from datetime import datetime
-import webbrowser
 
 class Jobber(QObject):
     set_total_progress = pyqtSignal(int)
@@ -42,7 +41,7 @@ class Jobber(QObject):
 
     def run(self):
         # method = run_batch(self.param)
-        method = start(self.param)
+        method = start_app(self.param)
         self.state = method.state
         read_bytes = 0
         chunk_size = 1024
@@ -65,117 +64,81 @@ class setup_app(QWidget):
         self.__thread = QThread()
         
         if params.manual is False:
-            start(vars(params))
+            start_app(vars(params))
         else:
-            self.ui()
+            self.ui(vars(params))
             sys.exit(app.exec())
 
-    def ui(self):
+    def ui(self, params):
+        self._params = params
+        
+        self.config_adm  = self._params["config"]["ADM"]
+        self.config_bos  = self._params["config"]["BOS"]
+        self.config_cum  = self._params["config"]["CUM"]
+        self.config_doc  = self._params["config"]["DOC"]
+        self.config_icas = self._params["config"]["ICAS"]
+
         grid = QGridLayout()
-        grid.addWidget(self.layout1(), 0, 0)
-        grid.addWidget(self.layout2(), 0, 1)
-        grid.addWidget(self.layout3(), 1, 0, 1, 2)
-        grid.addWidget(self.layout4(), 2, 0)
-        grid.addWidget(self.layout5(), 2, 1)
+        # grid.addWidget(self.layout1(), 0, 0)
+        # grid.addWidget(self.layout2(), 0, 1)
+        # grid.addWidget(self.layout3(), 1, 0, 1, 2)
+        # grid.addWidget(self.layout4(), 2, 0)
+        # grid.addWidget(self.layout5(), 2, 1)
+        grid.addWidget(self.layout2(), 0, 1, 1, 2)
         self.setLayout(grid)
 
         self.setWindowTitle("App")
-        self.setGeometry(650, 200, 700, 360)
+        self.setGeometry(650, 200, 580, 250)
         self.show()
 
-    def layout1(self):
-        self.groupbox1 = QGroupBox("Date.")
-        self.groupbox1.setCheckable(True)
-        self.groupbox1.setChecked(True)
+    # def layout1(self):
+    #     self.groupbox1 = QGroupBox("Date.")
+    #     self.groupbox1.setCheckable(True)
+    #     self.groupbox1.setChecked(True)
 
-        radio = QRadioButton("Manual")
-        radio.setChecked(True)
-        radio.setEnabled(False)
+    #     radio = QRadioButton("Manual")
+    #     radio.setChecked(True)
+    #     radio.setEnabled(False)
 
-        self.calendar = QDateEdit()
-        self.calendar.setCalendarPopup(True)
-        self.today = datetime.today()
-        self.calendar.setDisplayFormat("yyyy-MM-dd")
-        self.calendar.calendarWidget().setSelectedDate(self.today)
+    #     self.calendar = QDateEdit()
+    #     self.calendar.setCalendarPopup(True)
+    #     self.today = datetime.today()
+    #     self.calendar.setDisplayFormat("yyyy-MM-dd")
+    #     self.calendar.calendarWidget().setSelectedDate(self.today)
 
-        hbox1 = QHBoxLayout()
-        hbox1.addWidget(QLabel("Status Run:"))
-        hbox1.addWidget(radio)
+    #     hbox1 = QHBoxLayout()
+    #     hbox1.addWidget(QLabel("Status Run:"))
+    #     hbox1.addWidget(radio)
 
-        hbox2 = QHBoxLayout()
-        hbox2.addWidget(QLabel("Set Date:"))
-        hbox2.addWidget(self.calendar)
+    #     hbox2 = QHBoxLayout()
+    #     hbox2.addWidget(QLabel("Set Date:"))
+    #     hbox2.addWidget(self.calendar)
 
-        vbox = QVBoxLayout()
-        vbox.addLayout(hbox1)
-        vbox.addLayout(hbox2)
-        vbox.addStretch(1)
-        self.groupbox1.setLayout(vbox)
+    #     vbox = QVBoxLayout()
+    #     vbox.addLayout(hbox1)
+    #     vbox.addLayout(hbox2)
+    #     vbox.addStretch(1)
+    #     self.groupbox1.setLayout(vbox)
 
-        return self.groupbox1
+    #     return self.groupbox1
 
     def layout2(self):
-        self.groupbox2 = QGroupBox("Mode.")
+        self.groupbox2 = QGroupBox("ADM")
         self.groupbox2.setCheckable(True)
         self.groupbox2.setChecked(True)
+        
+        input_btn = QPushButton("Browse")
+        self.input_dir_adm = QLineEdit()
+        self.input_dir_adm.setText(self.config_adm["input_dir"])
+        self.input_dir_adm.setReadOnly(True)
+        
+        self.file_input = QLabel(f'File Input:  {self.config_adm["file"]}')
 
-        self.radio1 = QRadioButton("Overwrite file")
-        self.radio1.setChecked(True)
-        self.mode = "overwrite"
-        radio2 = QRadioButton("New file")
-        self.mode_lable = QLabel("e.g. manual_export.xlsx")
-        self.checkbok = QCheckBox("Tmp file")
-        self.checkbok.setCheckable(True)
-        self.checkbok.setChecked(True)
-
-        vbox = QVBoxLayout()
-        vbox.addWidget(self.radio1)
-        vbox.addWidget(radio2)
-        vbox.addWidget(self.mode_lable)
-        vbox.addWidget(self.checkbok)
-        vbox.addStretch(1)
-        self.groupbox2.setLayout(vbox)
-
-        self.radio1.clicked.connect(self.select_mode)
-        radio2.clicked.connect(self.select_mode)
-
-        return self.groupbox2
-
-    def layout3(self):
-        self.groupbox3 = QGroupBox("Path.")
-        self.groupbox3.setCheckable(True)
-        self.groupbox3.setChecked(True)
-
-        button1 = QPushButton("Browse")
-        self.path1 = QLineEdit()
-        self.path1.setText(Folder.RAW)
-        self.path1.setReadOnly(True)
-
-        button2 = QPushButton("Save")
-        self.path2 = QLineEdit()
-        self.path2.setText(Folder.EXPORT)
-        self.path2.setReadOnly(True)
-
-        layout = QGridLayout()
-        layout.addWidget(QLabel("Input :"), 0, 0)
-        layout.addWidget(self.path1, 0, 1)
-        layout.addWidget(button1, 0, 2)
-
-        layout.addWidget(QLabel("Output :"), 2, 0)
-        layout.addWidget(self.path2, 2, 1)
-        layout.addWidget(button2, 2, 2)
-        self.groupbox3.setLayout(layout)
-
-        button1.clicked.connect(lambda: self.open_dirs(Folder.RAW, 1))
-        button2.clicked.connect(lambda: self.open_dirs(Folder.EXPORT, 2))
-
-        return self.groupbox3
-
-    def layout4(self):
-        self.groupbox4 = QGroupBox("Run Job.")
-        self.groupbox4.setCheckable(True)
-        self.groupbox4.setChecked(True)
-
+        output_btn = QPushButton("Save")
+        self.output_dir_adm = QLineEdit()
+        self.output_dir_adm.setText(self.config_adm["output_dir"])
+        self.output_dir_adm.setReadOnly(True)
+        
         self.progress = QProgressBar()
         self.progress.setStyleSheet("""QProgressBar {
                                         color: #000;
@@ -186,55 +149,24 @@ class setup_app(QWidget):
                                         background-color: #a5c6ff;
                                         width: 10px;
                                         margin: 0.5px;
-                                    }"""
-        )
-
-        self.label = QLabel("Press the button to start job.")
-        self.run_btn = QPushButton("START")
-        self.run_btn.setFixedSize(90, 40)
+                                    }""")
         
-        vbox = QVBoxLayout()
-        vbox.addWidget(self.progress)
-        vbox.addWidget(self.label)
-
-        hbox = QHBoxLayout()
-        hbox.addWidget(self.run_btn)
-        hbox.addStretch(1)
-
-        vbox.addLayout(hbox)
-        vbox.addStretch(1)
-        self.groupbox4.setLayout(vbox)
+        layout = QGridLayout()
+        layout.addWidget(QLabel("Input :"), 0, 0)
+        layout.addWidget(self.input_dir_adm, 0, 1)
+        layout.addWidget(input_btn, 0, 2)
+        layout.addWidget(self.file_input, 1, 0, 1, 2)
+        layout.addWidget(QLabel("Output :"), 2, 0)
+        layout.addWidget(self.output_dir_adm, 2, 1)
+        layout.addWidget(output_btn, 2, 2)
+        layout.addWidget(QLabel("Status :"), 3, 0)
+        layout.addWidget(self.progress, 3, 1, 1, 2)
         
-        self.run_btn.clicked.connect(self.run_job_tasks)
-
-        return self.groupbox4
-
-    def layout5(self):
-        groupbox = QGroupBox("Output.")
-        groupbox.setFlat(True)
-        self.log = QPushButton("Open Log")
-        self.log.setHidden(True)
-        self.file = QPushButton("Open File")
-        self.file.setHidden(True)
-
-        self.time_label = QLabel("No Output.")
-        vbox = QVBoxLayout()
-        vbox.addWidget(self.time_label)
-
-        hbox = QHBoxLayout()
-        hbox.addWidget(self.log)
-        hbox.addWidget(self.file)
-        hbox.addStretch(1)
-
-        vbox.addLayout(hbox)
-        vbox.addStretch(1)
-        groupbox.setLayout(vbox)
+        self.groupbox2.setLayout(layout)
         
-        self.log.clicked.connect(lambda: self.open_files(1))
-        self.file.clicked.connect(lambda: self.open_files(2))
+        return self.groupbox2
 
-        return groupbox
-            
+
     def run_job_tasks(self):
         self.groupbox1.setChecked(False)
         self.groupbox2.setChecked(False)
@@ -250,10 +182,12 @@ class setup_app(QWidget):
         batch_date = self.calendar.calendarWidget().selectedDate().toPyDate()
         mode = self.mode
         tmp = self.checkbok.isChecked()
-        if self.mode == "overwrite":
-            Folder._FILE = "manual_export.xlsx" 
-        else:
-            Folder._FILE = f"manual_export_{batch_date.strftime('%d%m%Y')}.xlsx"
+        # if self.mode == "overwrite":
+        #     ''
+        #     # Folder._FILE = "manual_export.xlsx" 
+        # else:
+        #     ''
+        #     # Folder._FILE = f"manual_export_{batch_date.strftime('%d%m%Y')}.xlsx"
         self.params = {
             "manual": True,
             "batch_date": batch_date,
@@ -275,9 +209,7 @@ class setup_app(QWidget):
         
         tasks.set_total_progress.connect(self.progress.setMaximum)
         tasks.set_current_progress.connect(self.progress.setValue)
-        tasks.finished.connect(
-            lambda state=tasks.state: self.run_job_finished(tasks.state)
-            )
+        tasks.finished.connect(lambda state=tasks.state: self.run_job_finished(tasks.state))
 
         return thread
 
@@ -324,10 +256,12 @@ class setup_app(QWidget):
     def open_files(self, event):
         if event == 1:
             date = self.today.strftime("%d%m%Y")
-            open_files =  join(Folder.LOG, f'log_{date}.log')
+            ''
+            # open_files =  join(Folder.LOG, f'log_{date}.log')
         else:
-            open_files = join(Folder.EXPORT, Folder._FILE) 
-        webbrowser.open(open_files)
+            ''
+            # open_files = join(Folder.EXPORT, Folder._FILE) 
+        # webbrowser.open(open_files)
 
 if __name__ == "__main__":
     setup_folder()

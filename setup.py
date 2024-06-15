@@ -76,6 +76,7 @@ def setup_log(source) -> None:
     # else:
     #     raise Exception(f"Yaml log file path: '{log_dir}' doesn't exist.")
 
+
 class setup_parser:
     def __init__(self):
         self.parser = argparse.ArgumentParser()
@@ -92,7 +93,7 @@ class setup_parser:
                 ArgumentParams.REQUIRED : False,
                 ArgumentParams.ISFLAG : False,
                 ArgumentParams.TYPE : lambda s: [str(item).upper() for item in s.split(',')],
-                ArgumentParams.DEFAULT: 'ADM,BOS,CUM,DOC,ICAS'
+                ArgumentParams.DEFAULT: "ADM,BOS,CUM,DOC,ICAS"
             },
             {
                 ArgumentParams.SHORT_NAME : "-m",

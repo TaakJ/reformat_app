@@ -161,8 +161,8 @@ class convert_2_files:
             while True:
                 try:
                     for sheets, data in next(by_sheets).items():
-                        if not all(dup == data[0] for dup in data) and not data\
-                            .__contains__("Centralized User Management : User List."):
+                        if not all(dup == data[0] for dup in data) and \
+                            not data.__contains__("Centralized User Management : User List."):
                             if sheets not in _data:
                                 _data[sheets] = [data]
                             else:
@@ -349,8 +349,9 @@ class convert_2_files:
                         if start_rows in self.remove_rows and remark == "Removed":
                             ## Removed
                             sheet.cell(row=start_rows, column=idx).value = values
-                            sheet.cell(row=start_rows, column=idx).font = Font(bold=True,\
-                                strike=True, color="00FF0000")
+                            sheet.cell(row=start_rows, column=idx).font = Font(bold=True, 
+                                                                            strike=True,
+                                                                            color="00FF0000")
                             show = f"{remark} Rows: ({start_rows}) in Tmp files."
 
                         elif start_rows in self.change_rows.keys() and remark in ["Inserted","Updated"]:

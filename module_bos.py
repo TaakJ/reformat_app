@@ -32,6 +32,7 @@ class module_bos(call_function):
         try:
             await self.check_source_files()
             await self.retrieve_data_from_source_files()
+            # await self.mapping_column()
             await self.mock_data()
             await self.write_data_to_tmp_file()
                 
@@ -68,6 +69,7 @@ class module_bos(call_function):
                         
             except Exception as err:
                 record.update({'errors': err})
+
 
     async def mock_data(self) -> None:
             mock_data = [['ApplicationCode',	'AccountOwner', 'AccountName',	'AccountType',	'EntitlementName',	'SecondEntitlementName','ThirdEntitlementName', 'AccountStatus',	'IsPrivileged',	'AccountDescription',
