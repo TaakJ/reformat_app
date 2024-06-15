@@ -446,9 +446,8 @@ class convert_2_files:
                         raise Exception(err)
 
                     # write data to target files.
-                    logging.info(
-                        f"Write mode: {self.write_mode} in Target files: '{target_name}'"
-                    )
+                    logging.info(f"Write mode: {self.write_mode} in Target files: '{target_name}'")
+                    
                     max_rows = max(new_data, default=0)
 
                     while start_rows <= max_rows:
@@ -471,10 +470,10 @@ class convert_2_files:
                             else:
                                 if start_rows in self.remove_rows:
                                     continue
-                                sheet.cell(row=start_rows, column=idx).value = new_data[
-                                    start_rows
-                                ][columns]
+                                
+                                sheet.cell(row=start_rows, column=idx).value = new_data[start_rows][columns]
                                 continue
+                            
                             logging.info(show)
                         start_rows += 1
 

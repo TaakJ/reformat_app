@@ -23,16 +23,23 @@ ICAS:
     output_dir: C:\Users\thanakit\Downloads\EXPORT\ICAS
     file: ICAS-NCR.xlsx
     require: []
-
-# IIC:
-#     curr: 5
-#     volt: 5
-# LDS:
-#     curr: 5
-#     volt: 5
-# LEAD:
-#     curr: 5
-#     volt: 5
-# MOC:
-#     curr: 5
-#     volt: 5
+IIC:
+    input_dir: C:\Users\thanakit\Downloads\RAW\IIC
+    output_dir: C:\Users\thanakit\Downloads\EXPORT\IIC
+    file: IIC.xlsx
+    require: []
+LDS:
+    input_dir: C:\Users\thanakit\Downloads\RAW\LDS
+    output_dir: C:\Users\thanakit\Downloads\EXPORT\LDS
+    file: LDS-P_UserDetail.txt
+    require: []
+LEAD:
+    input_dir: C:\Users\thanakit\Downloads\RAW\LEAD
+    output_dir: C:\Users\thanakit\Downloads\EXPORT\LEAD
+    file: Lead-Management.xlsx
+    require: []
+MOC:
+    input_dir: C:\Users\thanakit\Downloads\RAW\MOC
+    output_dir: C:\Users\thanakit\Downloads\EXPORT\MOC
+    file: MOC.xlsx
+    require: []
