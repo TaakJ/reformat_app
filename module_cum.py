@@ -13,7 +13,7 @@ class module_cum(call_function):
     def _log_setter(self, log):
         self._log = log
         
-    def _parameter(self, module, params):
+    def _params(self, module, params):
         for key, value in params.items():
             setattr(self, key, value)
         
@@ -26,19 +26,20 @@ class module_cum(call_function):
         
         logging.info(f'Run Module: "{self.module}", manual: "{self.manual}", batch_date: "{self.batch_date}", store_tmp: "{self.store_tmp}, write_mode: "{self.write_mode}"')
         
-        self.state = True 
+        result = {"module": self.module, "task": "Completed"} 
         try:
-            await self.check_source_files()
-            await self.retrieve_data_from_source_files()
-            # await self.mapping_column()
-            await self.mock_data()
-            await self.write_data_to_tmp_file()
+            print("CUM")
+            # await self.check_source_files()
+            # await self.retrieve_data_from_source_files()
+            # # await self.mapping_column()
+            # await self.mock_data()
+            # await self.write_data_to_tmp_file()
                 
         except CustomException as error: 
             
             logging.error("Error Exception")
             
-            self.state = False
+            result.update({"task": "Uncompleted"})
             while True:
                 try:
                     logging.error(next(error))
@@ -47,7 +48,7 @@ class module_cum(call_function):
                 
         logging.info("Stop Run Module\n##### End #####\n")
         
-        return self.state
+        return result
         
     async def mapping_column(self):
         

@@ -1,5 +1,5 @@
 class CustomException(Exception):
-    def __init__(self, **kwargs: dict):
+    def __init__(self,*args: tuple, **kwargs: dict):
         self.__dict__.update(kwargs)
         
         for key, value in self.__dict__.items():

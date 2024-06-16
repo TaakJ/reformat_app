@@ -84,8 +84,8 @@ class setup_app(QWidget):
         grid.addWidget(self.layout1(), 0, 0)
         grid.addWidget(self.layout2(), 0, 1)
         grid.addWidget(self.layout3(), 1, 0, 1, 2)
-        grid.addWidget(self.layout4(), 2, 0)
-        grid.addWidget(self.layout5(), 2, 1)
+        # grid.addWidget(self.layout4(), 2, 0)
+        # grid.addWidget(self.layout5(), 2, 1)
         self.setLayout(grid)
 
         self.setWindowTitle("App")
@@ -173,17 +173,21 @@ class setup_app(QWidget):
         layout = QGridLayout()
         layout.addWidget(QLabel("Select :"), 0, 0)
         layout.addWidget(self.combobox, 0, 1)
-        layout.addWidget(self.file_input, 0, 2, 1 , 2)
+        # layout.addWidget(self.file_input, 0, 2, 1 , 2)
         
         layout.addWidget(QLabel("Input :"), 1, 0)
         layout.addWidget(self.input_dir, 1, 1)
         layout.addWidget(input_btn, 1, 2)
         
-        # layout.addWidget(self.file_input, 2, 0, 1 , 2)
+        layout.addWidget(QLabel("File Input:   "), 2, 0)
+        layout.addWidget(self.file_input, 2, 1, 1 , 2)
         
         layout.addWidget(QLabel("Output :"), 3, 0)
         layout.addWidget(self.output_dir, 3, 1)
         layout.addWidget(output_btn, 3, 2)
+        
+        layout.addWidget(QLabel("File Output:   "), 4, 0)
+        
         self.groupbox3.setLayout(layout)
 
         self.combobox.activated.connect(self.current_module)
