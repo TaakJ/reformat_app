@@ -430,63 +430,62 @@ class convert_2_files:
         logging.info("Write Data to Target files..")
 
         template_name = join(Folder.TEMPLATE, "Application Data Requirements.xlsx")
-        target_name = join(self.output_dir, f"{self.module}.csv")
+        target_name = join(self.output_dir, self.output_file)
         print(target_name)
         
-        state = "failed"
-        for record in self.logging:
-            try:
-                if record["module"] == "Target_file":
-                    record.update({"function": "write_data_to_target_file", "state": state})
+        # state = "failed"
+        # for record in self.logging:
+        #     try:
+        #         if record["module"] == "Target_file":
+        #             record.update({"function": "write_data_to_target_file", "state": state})
                     
-                    if self.store_tmp is True:
-                        tmp_name = record["input_dir"]
-                        sheet_name = record["sheet_name"]
-                        df = pd.read_excel(tmp_name, sheet_name=sheet_name)
-                        df = df.loc[df['remark'] != "Removed"]
-                    else:
-                        df = pd.DataFrame(record["data"])
-                        df["remark"] = "Inserted"
+        #             if self.store_tmp is True:
+        #                 tmp_name = record["input_dir"]
+        #                 sheet_name = record["sheet_name"]
+        #                 df = pd.read_excel(tmp_name, sheet_name=sheet_name)
+        #                 df = df.loc[df['remark'] != "Removed"]
+        #             else:
+        #                 df = pd.DataFrame(record["data"])
+        #                 df["remark"] = "Inserted"
                         
-                    print(df)
-                    try:
-                        if self.write_mode == "overwrite" or self.manual:
-                            target_name = join(self.output_dir, f"{self.module}.csv")
-                        else:
-                            suffix = f"{self.batch_date.strftime('%d%m%y')}"
-                            print("OK")
-                            # Folder._FILE = f"{Path(Folder._FILE).stem}_{suffix}.xlsx"
-                            # target_name = join(Folder.EXPORT, Folder._FILE)
+        #             print(df)
+        #             try:
+        #                 if self.write_mode == "overwrite" or self.manual:
+        #                     target_name = join(self.output_dir, f"{self.module}.csv")
+        #                 else:
+        #                     suffix = f"{self.batch_date.strftime('%d%m%y')}"
+        #                     # Folder._FILE = f"{Path(Folder._FILE).stem}_{suffix}.xlsx"
+        #                     # target_name = join(Folder.EXPORT, Folder._FILE)
 
-                        # # check files is exist.
-                        # status = (
-                        #     "succeed"
-                        #     if glob.glob(target_name, recursive=True)
-                        #     else self.copy_worksheet(source_name, target_name)
-                        # )
+        #                 # # check files is exist.
+        #                 # status = (
+        #                 #     "succeed"
+        #                 #     if glob.glob(target_name, recursive=True)
+        #                 #     else self.copy_worksheet(source_name, target_name)
+        #                 # )
 
-                        # if status == "succeed":
-                        #     workbook = openpyxl.load_workbook(target_name)
-                        #     get_sheet = workbook.get_sheet_names()
-                        #     sheet = workbook.get_sheet_by_name(get_sheet[0])
-                        #     workbook.active = sheet
+        #                 # if status == "succeed":
+        #                 #     workbook = openpyxl.load_workbook(target_name)
+        #                 #     get_sheet = workbook.get_sheet_names()
+        #                 #     sheet = workbook.get_sheet_by_name(get_sheet[0])
+        #                 #     workbook.active = sheet
 
-                        # ## read target file.
-                        # data = sheet.values
-                        # columns = next(data)[0:]
-                        # target_df = pd.DataFrame(data, columns=columns)
-                        # target_df["remark"] = "Inserted"
+        #                 # ## read target file.
+        #                 # data = sheet.values
+        #                 # columns = next(data)[0:]
+        #                 # target_df = pd.DataFrame(data, columns=columns)
+        #                 # target_df["remark"] = "Inserted"
 
-                        # ## compare data tmp data with target data.
-                        # select_date = tmp_df["CreateDate"].unique()
-                        # new_data = self.customize_data(select_date, target_df, tmp_df)
+        #                 # ## compare data tmp data with target data.
+        #                 # select_date = tmp_df["CreateDate"].unique()
+        #                 # new_data = self.customize_data(select_date, target_df, tmp_df)
 
-                        # key.update({"full_path": target_name})
-                    except Exception as err:
-                            raise Exception(err)
+        #                 # key.update({"full_path": target_name})
+        #             except Exception as err:
+        #                     raise Exception(err)
                 
-            except Exception as err:
-                record.update({"errors": err})
+        #     except Exception as err:
+        #         record.update({"errors": err})
                 
-        if "errors" in record:
-            raise CustomException(errors=self.logging)
+        # if "errors" in record:
+        #     raise CustomException(errors=self.logging)

@@ -5,11 +5,11 @@ class record_log(ABC):
         self._log = []
 
     @property
-    def logging(self):
+    def logging(self) -> list:
         return self._log
 
     @logging.setter
-    def logging(self, log: list):
+    def logging(self, log: list) -> None:
         self._log_setter(log)
 
     @abstractmethod

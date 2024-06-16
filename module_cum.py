@@ -11,26 +11,25 @@ class call_function(convert_2_files, record_log):
     pass
 class module_cum(call_function):
     
-    def _log_setter(self, log):
+    def _log_setter(self, log) -> None:
         self._log = log
         
-        
-    def _params(self, module, params):
+    def _params(self, module, params) -> None:
         for key, value in params.items():
             setattr(self, key, value)
         
-        self.date = datetime.now()
         self.module = module
-
+        ## set input
         self.input_dir = [join(self.config[self.module]["input_dir"], self.config[self.module]["input_file"])]
         for i in self.config[self.module]["require"]:
             self.input_dir += [join(self.config[i]["input_dir"], self.config[i]["input_file"])]
-    
+        ## set output
         self.output_dir = self.config[self.module]["output_dir"]
         self.output_file = self.config[self.module]["output_file"]
+
+        self.date = datetime.now()
     
-    
-    async def run(self): 
+    async def run(self) -> dict: 
         
         logging.info(f'Run Module: "{self.module}", manual: "{self.manual}", batch_date: "{self.batch_date}", store_tmp: "{self.store_tmp}, write_mode: "{self.write_mode}"')
         
@@ -57,7 +56,7 @@ class module_cum(call_function):
         return result
         
         
-    async def mapping_column(self):
+    async def mapping_column(self) -> None:
         
         state = "failed"
         for record in self.logging:
@@ -74,6 +73,7 @@ class module_cum(call_function):
                 
             except Exception as err:
                 record.update({'errors': err})
+
                 
     async def mock_data(self) -> None:
 
