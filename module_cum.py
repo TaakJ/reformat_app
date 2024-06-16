@@ -3,6 +3,7 @@ from exception import CustomException
 from setup import setup_log, Folder, clear_tmp
 from datetime import datetime
 import pandas as pd
+from os.path import join
 import logging
 from module import convert_2_files
 
@@ -19,7 +20,9 @@ class module_cum(call_function):
         
         self.date = datetime.now()
         self.module = module
-        self.input_dir = self.config[self.module]["dir"]
+        self.input_dir = [join(self.config[self.module]["input_dir"], self.config[self.module]["file"])]
+        for m in self.config[self.module]["require"]:
+            self.input_dir += [join(self.config[m]["input_dir"], self.config[m]["file"])]
         self.output_dir = self.config[self.module]["output_dir"]
     
     async def run(self): 

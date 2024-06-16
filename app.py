@@ -81,6 +81,7 @@ class setup_app(QWidget):
         
         self.bold = QFont()
         self.bold.setBold(True)
+        
         grid = QGridLayout()
         grid.addWidget(self.layout1(), 0, 0)
         grid.addWidget(self.layout2(), 0, 1)
@@ -165,6 +166,7 @@ class setup_app(QWidget):
 
         self.label1 = QLabel("Select :")
         self.label1.setFont(self.bold)
+        
         self.combobox = QComboBox()
         self.combobox.addItems(self.module)
         
@@ -173,15 +175,15 @@ class setup_app(QWidget):
         self.input_dir = QLineEdit()
         self.input_dir.setText(self.config["ADM"]["input_dir"])
         self.input_dir.setReadOnly(True)
-        input_btn = QPushButton("Browse")
+        self.input_btn = QPushButton("Browse")
         
         self.label3 = QLabel("Output :")
         self.label3.setFont(self.bold)
         self.output_dir = QLineEdit()
         self.output_dir.setText(self.config["ADM"]["output_dir"])
         self.output_dir.setReadOnly(True)
-        output_btn = QPushButton("Save")
-        
+        self.output_btn = QPushButton("Save")
+
         self.label4 = QLabel("File :   ")
         self.label4.setFont(self.bold)
         self.file_input = QLabel(f'{self.config["ADM"]["file"]}')
@@ -192,11 +194,11 @@ class setup_app(QWidget):
         
         layout.addWidget(self.label2, 1, 0)
         layout.addWidget(self.input_dir, 1, 1)
-        layout.addWidget(input_btn, 1, 2)
+        layout.addWidget(self.input_btn, 1, 2)
         
         layout.addWidget(self.label3, 2, 0)
         layout.addWidget(self.output_dir, 2, 1)
-        layout.addWidget(output_btn, 2, 2)
+        layout.addWidget(self.output_btn, 2, 2)
         
         layout.addWidget(self.label4, 3, 0)
         layout.addWidget(self.file_input, 3, 1, 1 , 2)
@@ -204,8 +206,8 @@ class setup_app(QWidget):
         self.groupbox3.setLayout(layout)
 
         self.combobox.activated.connect(self.select_task)
-        # button1.clicked.connect(lambda: self.open_dirs(Folder.RAW, 1))
-        # button2.clicked.connect(lambda: self.open_dirs(Folder.EXPORT, 2))
+        self.input_btn.clicked.connect(lambda: self.open_file_dialog(1))
+        self.output_btn.clicked.connect(lambda: self.open_file_dialog(2))
 
         return self.groupbox3
 
@@ -274,22 +276,39 @@ class setup_app(QWidget):
         return groupbox
     
     def select_task(self):
-        module = self.combobox.currentText()
         
-        self.input_dir.setText(self.config[module]["input_dir"])
-        self.output_dir.setText(self.config[module]["output_dir"])
-        self.file_input.setText(self.config[module]["file"])
+        self.input_dir.setText(self.config[self.combobox.currentText()]["input_dir"])
+        self.output_dir.setText(self.config[self.combobox.currentText()]["output_dir"])
+        self.file_input.setText(self.config[self.combobox.currentText()]["file"])
         
-        print(self.mode_label.text)
-        
-        # if self.radio1.isChecked():
-        #     self.mode = "overwrite"
-        #     self.mode_label.setText("e.g. Export_manual.xlsx")
+        if self.radio1.isChecked():
+            self.mode = "overwrite"
+            self.mode_label.setText(f"e.g. Manual_{self.combobox.currentText()}.csv")
+        else:
+            self.mode = "new"
+            self.mode_label.setText(f"e.g. Manual_{self.combobox.currentText()}-DDMMYY.csv")
             
-        # else:
-        #     self.mode = "new"
-        #     self.mode_label.setText("e.g. Export_manual-DDMMYYYY.xlsx")
-    
+            
+    def open_file_dialog(self, event):
+        
+        if event == 1:
+            _dir = "input_dir"
+            browse =  self.input_dir
+        else:
+            _dir = "output_dir"
+            browse =  self.output_dir
+        select_dir = self.config[self.combobox.currentText()][_dir]
+        
+        dialog = QFileDialog()
+        dir_name = dialog.getExistingDirectory(
+            parent=self,
+            caption="Select a directory",
+            directory=select_dir,
+            options=QFileDialog.Option.ShowDirsOnly)
+        if dir_name: 
+            self.config[self.combobox.currentText()][_dir] = join(Path(dir_name))
+            browse.setText(dir_name)
+            
     
     # def run_job_tasks(self):
     #     self.groupbox1.setChecked(False)
@@ -354,23 +373,6 @@ class setup_app(QWidget):
     #         self.file.setHidden(False)
     #     else:
     #         self.label.setText("Job has been errored. Please check log file!")
-    
-
-    # def open_dirs(self, select_path, event):
-    #     dialog = QFileDialog()
-    #     dir_name = dialog.getExistingDirectory(
-    #         parent=self,
-    #         caption="Select a directory",
-    #         directory=select_path,
-    #         options=QFileDialog.Option.ShowDirsOnly,
-    #     )
-    #     # if dir_name: 
-    #     #     if event == 1:
-    #     #         # Folder.RAW = join(Path(dir_name), '')
-    #     #         # self.path1.setText(Folder.RAW)
-    #     #     else:
-    #     #         # Folder.EXPORT = join(Path(dir_name), '')
-    #     #         # self.path2.setText(Folder.EXPORT)
             
     # def open_files(self, event):
     #     if event == 1:
