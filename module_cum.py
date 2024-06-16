@@ -14,16 +14,21 @@ class module_cum(call_function):
     def _log_setter(self, log):
         self._log = log
         
+        
     def _params(self, module, params):
         for key, value in params.items():
             setattr(self, key, value)
         
         self.date = datetime.now()
         self.module = module
-        self.input_dir = [join(self.config[self.module]["input_dir"], self.config[self.module]["file"])]
-        for m in self.config[self.module]["require"]:
-            self.input_dir += [join(self.config[m]["input_dir"], self.config[m]["file"])]
+
+        self.input_dir = [join(self.config[self.module]["input_dir"], self.config[self.module]["input_file"])]
+        for i in self.config[self.module]["require"]:
+            self.input_dir += [join(self.config[i]["input_dir"], self.config[i]["input_file"])]
+    
         self.output_dir = self.config[self.module]["output_dir"]
+        self.output_file = self.config[self.module]["output_file"]
+    
     
     async def run(self): 
         
@@ -49,8 +54,8 @@ class module_cum(call_function):
                     break
                 
         logging.info("Stop Run Module\n##### End #####\n")
-        
         return result
+        
         
     async def mapping_column(self):
         

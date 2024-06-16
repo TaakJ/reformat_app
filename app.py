@@ -279,7 +279,7 @@ class setup_app(QWidget):
         
         self.input_dir.setText(self.config[self.combobox.currentText()]["input_dir"])
         self.output_dir.setText(self.config[self.combobox.currentText()]["output_dir"])
-        self.file_input.setText(self.config[self.combobox.currentText()]["file"])
+        self.file_input.setText(self.config[self.combobox.currentText()]["input_file"])
         
         if self.radio1.isChecked():
             self.mode = "overwrite"
@@ -287,7 +287,6 @@ class setup_app(QWidget):
         else:
             self.mode = "new"
             self.mode_label.setText(f"e.g. Manual_{self.combobox.currentText()}-DDMMYY.csv")
-            
             
     def open_file_dialog(self, event):
         

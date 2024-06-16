@@ -16,17 +16,22 @@ class module_adm(call_function):
     def _log_setter(self, log):
         self._log = log
     
+    
     def _params(self, module, params):
         for key, value in params.items():
             setattr(self, key, value)
             
         self.date = datetime.now()
         self.module = module
-        self.input_dir = [join(self.config[self.module]["input_dir"], self.config[self.module]["file"])]
-        for m in self.config[self.module]["require"]:
-            self.input_dir += [join(self.config[m]["input_dir"], self.config[m]["file"])]
-        self.output_dir = self.config[self.module]["output_dir"]
 
+        self.input_dir = [join(self.config[self.module]["input_dir"], self.config[self.module]["input_file"])]
+        for i in self.config[self.module]["require"]:
+            self.input_dir += [join(self.config[i]["input_dir"], self.config[i]["input_file"])]
+    
+        self.output_dir = self.config[self.module]["output_dir"]
+        self.output_file = self.config[self.module]["output_file"]
+        
+        
     async def run(self):
         
         logging.info(f'Run Module: "{self.module}", manual: "{self.manual}", batch_date: "{self.batch_date}", store_tmp: "{self.store_tmp}, write_mode: "{self.write_mode}"')
@@ -34,24 +39,24 @@ class module_adm(call_function):
         result = {"module": self.module, "task": "Completed"}
         try:
             await self.check_source_files()
-            # await self.retrieve_data_from_source_files()
-            # # await self.mapping_column()
-            # await self.mock_data()
-            # await self.write_data_to_tmp_file()
+            await self.retrieve_data_from_source_files()
+            # await self.mapping_column()
+            await self.mock_data()
+            if self.store_tmp is True:
+                await self.write_data_to_tmp_file()
+            await self.write_data_to_target_file()
         
-        # except Exception as err:
         except CustomException as error: 
             
             logging.error("Error CustomException")
             result.update({"task": "Uncompleted"})
-            # while True:
-            #     try:
-            #         logging.error(next(error))
-            #     except StopIteration:
-            #         break
+            while True:
+                try:
+                    logging.error(next(error))
+                except StopIteration:
+                    break
                 
         logging.info("Stop Run Module\n##### End #####\n")
-        
         return result
         
     
