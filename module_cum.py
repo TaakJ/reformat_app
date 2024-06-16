@@ -31,8 +31,7 @@ class module_cum(call_function):
         
         result = {"module": self.module, "task": "Completed"} 
         try:
-            print("CUM")
-            # await self.check_source_files()
+            await self.check_source_files()
             # await self.retrieve_data_from_source_files()
             # # await self.mapping_column()
             # await self.mock_data()

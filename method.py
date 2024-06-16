@@ -31,9 +31,9 @@ class run_module:
                 coros.append(asyncio.create_task(tasks.run()))
                 
         results = await asyncio.wait(coros)
-        # print(f'Run Task: {len(results[0])}')
-        # [print(f'- Task:: {completed_task.result()["module"]} - Status:: {completed_task.result()["task"]}')\
-        #     for completed_task in results[0]]    
+        print(f'Run Task: {len(results[0])}')
+        [print(f'- Task:: {completed_task.result()["module"]} - Status:: {completed_task.result()["task"]}')\
+            for completed_task in results[0]]    
         
 class start_app(run_module):
     pass
