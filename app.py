@@ -22,6 +22,9 @@ from PyQt6.QtCore import (
     QObject, 
     pyqtSignal
 )
+from PyQt6.QtGui import (
+    QFont
+)
 from qt_material import apply_stylesheet
 from setup import setup_parser, setup_folder, setup_config, Folder
 from method import start_app
@@ -74,12 +77,10 @@ class setup_app(QWidget):
     def ui(self, params):
         self._params = params
         self.module = self._params["source"]
-        self.config_adm  = self._params["config"]["ADM"]
-        # self.config_bos  = self._params["config"]["BOS"]
-        # self.config_cum  = self._params["config"]["CUM"]
-        # self.config_doc  = self._params["config"]["DOC"]
-        # self.config_icas = self._params["config"]["ICAS"]
+        self.config  = self._params["config"]
         
+        self.bold = QFont()
+        self.bold.setBold(True)
         grid = QGridLayout()
         grid.addWidget(self.layout1(), 0, 0)
         grid.addWidget(self.layout2(), 0, 1)
@@ -108,11 +109,15 @@ class setup_app(QWidget):
         self.calendar.calendarWidget().setSelectedDate(self.today)
         
         hbox1 = QHBoxLayout()
-        hbox1.addWidget(QLabel("Status Run:"))
+        label1 = QLabel("Status Run:")
+        label1.setFont(self.bold)
+        hbox1.addWidget(label1)
         hbox1.addWidget(radio)
 
         hbox2 = QHBoxLayout()
-        hbox2.addWidget(QLabel("Set Date:"))
+        label2 = QLabel("Set Date:")
+        label2.setFont(self.bold)
+        hbox2.addWidget(label2)
         hbox2.addWidget(self.calendar)
         
         vbox = QVBoxLayout()
@@ -130,9 +135,12 @@ class setup_app(QWidget):
 
         self.radio1 = QRadioButton("Overwrite file")
         self.radio1.setChecked(True)
+        
         self.mode = "overwrite"
         radio2 = QRadioButton("New file")
-        self.mode_lable = QLabel("e.g. manual_export.xlsx")
+        self.mode_label = QLabel("e.g. Manual_ADM.csv")
+        self.mode_label.setFont(self.bold)
+        
         self.checkbok = QCheckBox("Tmp file")
         self.checkbok.setCheckable(True)
         self.checkbok.setChecked(True)
@@ -140,13 +148,13 @@ class setup_app(QWidget):
         vbox = QVBoxLayout()
         vbox.addWidget(self.radio1)
         vbox.addWidget(radio2)
-        vbox.addWidget(self.mode_lable)
+        vbox.addWidget(self.mode_label)
         vbox.addWidget(self.checkbok)
         vbox.addStretch(1)
         self.groupbox2.setLayout(vbox)
 
-        # self.radio1.clicked.connect(self.select_mode)
-        # radio2.clicked.connect(self.select_mode)
+        self.radio1.clicked.connect(self.select_task)
+        radio2.clicked.connect(self.select_task)
 
         return self.groupbox2
 
@@ -155,42 +163,47 @@ class setup_app(QWidget):
         self.groupbox3.setCheckable(True)
         self.groupbox3.setChecked(True)
 
-        input_btn = QPushButton("Browse")
-        self.input_dir = QLineEdit()
-        self.input_dir.setText(self.config_adm["input_dir"])
-        self.input_dir.setReadOnly(True)
-        
-        self.file_input = QLabel(f'{self.config_adm["file"]}')
-
-        output_btn = QPushButton("Save")
-        self.output_dir = QLineEdit()
-        self.output_dir.setText(self.config_adm["output_dir"])
-        self.output_dir.setReadOnly(True)
-        
+        self.label1 = QLabel("Select :")
+        self.label1.setFont(self.bold)
         self.combobox = QComboBox()
         self.combobox.addItems(self.module)
-
-        layout = QGridLayout()
-        layout.addWidget(QLabel("Select :"), 0, 0)
-        layout.addWidget(self.combobox, 0, 1)
-        # layout.addWidget(self.file_input, 0, 2, 1 , 2)
         
-        layout.addWidget(QLabel("Input :"), 1, 0)
+        self.label2 = QLabel("Input :")
+        self.label2.setFont(self.bold)
+        self.input_dir = QLineEdit()
+        self.input_dir.setText(self.config["ADM"]["input_dir"])
+        self.input_dir.setReadOnly(True)
+        input_btn = QPushButton("Browse")
+        
+        self.label3 = QLabel("Output :")
+        self.label3.setFont(self.bold)
+        self.output_dir = QLineEdit()
+        self.output_dir.setText(self.config["ADM"]["output_dir"])
+        self.output_dir.setReadOnly(True)
+        output_btn = QPushButton("Save")
+        
+        self.label4 = QLabel("File :   ")
+        self.label4.setFont(self.bold)
+        self.file_input = QLabel(f'{self.config["ADM"]["file"]}')
+        
+        layout = QGridLayout()
+        layout.addWidget(self.label1, 0, 0)
+        layout.addWidget(self.combobox, 0, 1)
+        
+        layout.addWidget(self.label2, 1, 0)
         layout.addWidget(self.input_dir, 1, 1)
         layout.addWidget(input_btn, 1, 2)
         
-        layout.addWidget(QLabel("File Input:   "), 2, 0)
-        layout.addWidget(self.file_input, 2, 1, 1 , 2)
+        layout.addWidget(self.label3, 2, 0)
+        layout.addWidget(self.output_dir, 2, 1)
+        layout.addWidget(output_btn, 2, 2)
         
-        layout.addWidget(QLabel("Output :"), 3, 0)
-        layout.addWidget(self.output_dir, 3, 1)
-        layout.addWidget(output_btn, 3, 2)
-        
-        layout.addWidget(QLabel("File Output:   "), 4, 0)
+        layout.addWidget(self.label4, 3, 0)
+        layout.addWidget(self.file_input, 3, 1, 1 , 2)
         
         self.groupbox3.setLayout(layout)
 
-        self.combobox.activated.connect(self.current_module)
+        self.combobox.activated.connect(self.select_task)
         # button1.clicked.connect(lambda: self.open_dirs(Folder.RAW, 1))
         # button2.clicked.connect(lambda: self.open_dirs(Folder.EXPORT, 2))
 
@@ -260,9 +273,23 @@ class setup_app(QWidget):
 
         return groupbox
     
-    def current_module(self):
-        ctext = self.combobox.currentText()
-        print("Current text", ctext)
+    def select_task(self):
+        module = self.combobox.currentText()
+        
+        self.input_dir.setText(self.config[module]["input_dir"])
+        self.output_dir.setText(self.config[module]["output_dir"])
+        self.file_input.setText(self.config[module]["file"])
+        
+        print(self.mode_label.text)
+        
+        # if self.radio1.isChecked():
+        #     self.mode = "overwrite"
+        #     self.mode_label.setText("e.g. Export_manual.xlsx")
+            
+        # else:
+        #     self.mode = "new"
+        #     self.mode_label.setText("e.g. Export_manual-DDMMYYYY.xlsx")
+    
     
     # def run_job_tasks(self):
     #     self.groupbox1.setChecked(False)
@@ -328,13 +355,6 @@ class setup_app(QWidget):
     #     else:
     #         self.label.setText("Job has been errored. Please check log file!")
     
-    # def select_mode(self):
-    #     if self.radio1.isChecked():
-    #         self.mode = "overwrite"
-    #         self.mode_lable.setText("e.g. Export_manual.xlsx")
-    #     else:
-    #         self.mode = "new"
-    #         self.mode_lable.setText("e.g. Export_manual_DDMMYYYY.xlsx")
 
     # def open_dirs(self, select_path, event):
     #     dialog = QFileDialog()

@@ -271,11 +271,9 @@ class convert_2_files:
         df = df.reindex(index=union_index, columns=df.columns).iloc[:, :-1]
         ## change data.
         change_df = change_df.reindex(index=union_index,columns=change_df.columns).iloc[:, :-1]
-
         # compare data rows by rows.
-        df["count_change"] = pd.DataFrame(
-            np.where(df.ne(change_df), True, False), index=df.index, columns=df.columns
-        ).apply(lambda x: (x == True).sum(), axis=1)
+        df["count_change"] = pd.DataFrame(np.where(df.ne(change_df), True, False), index=df.index, columns=df.columns)\
+            .apply(lambda x: (x == True).sum(), axis=1)
 
         def format_record(record):
             return ("{"+ "\n".join("{!r}: {!r},".format(columns, values)\
@@ -292,15 +290,14 @@ class convert_2_files:
                     if df.loc[idx, "count_change"] != 14:
 
                         ## No_changed rows.
-                        if df.loc[idx, "count_change"] <= 1:
+                        if df.loc[idx, "count_change"] < 1: # <=1
                             df.at[idx, data[0]] = data[1].iloc[idx]
                             df.loc[idx, "remark"] = "No_changed"
 
                         else:
                             ## Updated rows.
                             if data[1][idx] != change_data[1][idx]:
-                                record.update({data[0]: f"{data[1][idx]} \
-                                    -> {change_data[1][idx]}"})
+                                record.update({data[0]: f"{data[1][idx]} -> {change_data[1][idx]}"})
                             df.at[idx, data[0]] = change_data[1].iloc[idx]
                             df.loc[idx, "remark"] = "Updated"
 
