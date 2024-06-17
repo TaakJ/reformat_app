@@ -345,16 +345,13 @@ class convert_2_files:
                     target_df["remark"] = "Inserted"
                     target_df["CreateDate"] = target_df.CreateDate\
                         .apply(lambda d: pd.to_datetime(d, format="%Y-%m-%d"))
-                    
-                    print(target_df)
                         
-                    # data = self.customize_data(target_df, change_df)
-                    # record.update({"function": "write_csv", "state": state})
+                    data = self.customize_data(target_df, change_df)
+                    record.update({"function": "write_csv", "state": state})
+                    state = self.write_csv(target_name, data)
+                    record.update({"state": state})
                     
-                    # state = self.write_csv(target_name, data)
-                    # record.update({"state": state})
-                    
-                    # logging.info(f"Write to Target Files status: {state}.")
+                    logging.info(f"Write to Target Files status: {state}.")
             
             except Exception as err:
                 record.update({"errors": err})
