@@ -381,12 +381,13 @@ class convert_2_files:
         try:
             ## on date now
             date = self.batch_date.strftime('%Y-%m-%d')
-            
-            date_df = target_df[target_df["CreateDate"].isin(np.array([pd.Timestamp(date).date()]).astype("datetime64[ns]"))]\
+            date_df = target_df[target_df["CreateDate"]\
+                .isin(np.array([pd.Timestamp(date).date()]).astype("datetime64[ns]"))]\
                 .reset_index(drop=True)
                 
             ## base data from target files not in date.
-            df = target_df[~target_df["CreateDate"].isin(np.array([pd.Timestamp(date).date()]).astype("datetime64[ns]"))]\
+            df = target_df[~target_df["CreateDate"]\
+                .isin(np.array([pd.Timestamp(date).date()]).astype("datetime64[ns]"))]\
                 .iloc[:, :-1].to_dict("index")
         
             _data = self.validation_data(date_df, change_df)
@@ -489,22 +490,21 @@ class convert_2_files:
                     _data = {columns: values for columns, values in data[idx].items() if columns != "remark"}
                     
                     if  f"{idx}" in self.change_rows.keys() and remark in ["Updated", "Inserted"]:
-                        # update / insert data.
+                        ## update / insert rows.
                         logging.info(f'"{remark}" Rows:"({idx})" in Target files. Changed: "{self.change_rows[f"{idx}"]}"')
                         rows.update({idx: _data})
                     else:
-                        # remove data.
                         if idx in self.remove_rows:
                             continue
-                        # # no change data.
-                        # rows[idx].update(_data[idx])
-                        # continue
+                        ## no change rows.
+                        rows[idx].update(_data[idx])
 
             ## write csv file.
             with open(target_name, 'w', newline='') as writer:
                 csvout = csv.DictWriter(writer, csvin.fieldnames)
                 csvout.writeheader()
                 for idx in rows:
+                    ## remove rows.
                     if idx not in self.remove_rows:
                         csvout.writerow(rows[idx])
             writer.closed 
