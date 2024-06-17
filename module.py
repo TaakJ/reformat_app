@@ -459,12 +459,13 @@ class convert_2_files:
                         
                     ## compare / write data.
                     data = self.customize_data(target_df, change_df)
+                    # print(data)
                     
-                    record.update({"function": "write_csv", "state": state})
-                    state = self.write_csv(target_name, data)
+                    #record.update({"function": "write_csv", "state": state})
+                    #state = self.write_csv(target_name, data)
                     
-                    record.update({"state": state})
-                    logging.info(f"Write to Target Files status: {state}.")
+                    #record.update({"state": state})
+                    #logging.info(f"Write to Target Files status: {state}.")
             
             except Exception as err:
                 record.update({"errors": err})
@@ -498,8 +499,8 @@ class convert_2_files:
                         if idx in self.remove_rows:
                             continue
                         ## no change rows.
-                        rows[idx].update(_data[idx])
-
+                        rows[idx].update(_data)
+            
             ## write csv file.
             with open(target_name, 'w', newline='') as writer:
                 csvout = csv.DictWriter(writer, csvin.fieldnames)

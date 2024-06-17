@@ -35,7 +35,7 @@ class module_bos(call_function):
         
         logging.info(f'Run Module: "{self.module}", manual: "{self.manual}", batch_date: "{self.batch_date}", store_tmp: "{self.store_tmp}, write_mode: "{self.write_mode}"')
         
-        result = {"module": self.module, "task": "Completed"} 
+        result = {"module": self.module, "task": "Completed"}
         try:
             await self.check_source_files()
             await self.retrieve_data_from_source_files()
@@ -47,7 +47,7 @@ class module_bos(call_function):
                 
         except CustomException as error: 
             
-            logging.error("Error Exception")
+            logging.error("Error CustomException")
             
             result.update({"task": "Uncompleted"})
             while True:
