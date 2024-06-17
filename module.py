@@ -493,22 +493,23 @@ class convert_2_files:
                         logging.info(f'"{remark}" Rows:"({idx})" in Target files. Changed: "{self.change_rows[f"{idx}"]}"')
                         rows.update({idx: _data})
                     else:
+                        # remove data.
                         if idx in self.remove_rows:
                             continue
-                        rows[idx].update(_data[idx])
-                        continue
+                        # # no change data.
+                        # rows[idx].update(_data[idx])
+                        # continue
 
             ## write csv file.
             with open(target_name, 'w', newline='') as writer:
                 csvout = csv.DictWriter(writer, csvin.fieldnames)
                 csvout.writeheader()
                 for idx in rows:
-                    # remove.
                     if idx not in self.remove_rows:
                         csvout.writerow(rows[idx])
             writer.closed 
             state = "succeed"
-                    
+
         except Exception as err:
             raise Exception(err)
         
