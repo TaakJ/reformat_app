@@ -203,9 +203,10 @@ class convert_2_files:
                     tmp_name = join(Folder.TMP,f"TMP_{self.module}-{self.batch_date.strftime('%d%m%y')}.xlsx")
                     record.update({"input_dir": tmp_name,"function": "write_data_to_tmp_file","state": state})
 
-                    ## get new data.
                     change_df = pd.DataFrame(record["data"])
                     change_df["remark"] = "Inserted"
+                    change_df["CreateDate"] = change_df.CreateDate\
+                        .apply(lambda d: pd.to_datetime(d, format="%Y-%m-%d"))
 
                     try:
                         workbook = openpyxl.load_workbook(tmp_name)
@@ -216,7 +217,6 @@ class convert_2_files:
                         workbook.active = sheet_num
 
                     except FileNotFoundError:
-                        ## copy files from template.
                         template_name = join(Folder.TEMPLATE, "Application Data Requirements.xlsx")
                         try:
                             if not glob.glob(tmp_name, recursive=True):
@@ -244,6 +244,8 @@ class convert_2_files:
                         sheet = workbook.create_sheet(sheet_name)
                     else:
                         tmp_df["remark"] = "Inserted"
+                    tmp_df["CreateDate"] = tmp_df.CreateDate\
+                        .apply(lambda d: pd.to_datetime(d, format="%Y-%m-%d"))
 
                     _data = self.validation_data(tmp_df, change_df)
                     ## write to tmp files.
@@ -301,6 +303,107 @@ class convert_2_files:
             raise KeyError(f"Can not Write rows: {err} in Tmp files.")
         return state
 
+    async def write_data_to_target_file(self) -> None:
+
+        logging.info("Write Data to Target files..")
+
+        state = "failed"
+        for record in self.logging:
+            try:
+                
+                if record["module"] == "Target_file":
+                    record.update({"function": "write_data_to_target_file", "state": state})
+                    
+                    ## read tmp file or mapping column fuction.
+                    if self.store_tmp is True:
+                        tmp_name = record["input_dir"]
+                        sheet_name = record["sheet_name"]
+                        change_df = pd.read_excel(tmp_name, sheet_name=sheet_name,)
+                        change_df = change_df.loc[change_df['remark'] != "Removed"]
+                    else:
+                        change_df = pd.DataFrame(record["data"])
+                        change_df["remark"] = "Inserted"
+                    change_df["CreateDate"] = change_df.CreateDate\
+                        .apply(lambda d: pd.to_datetime(d, format="%Y-%m-%d"))
+                    
+                    ## read target file (csv).
+                    if self.write_mode == "overwrite" or self.manual:
+                        target_name = join(self.output_dir, self.output_file)
+                    else:
+                        suffix = f"{self.batch_date.strftime('%d%m%y')}"
+                        self.output_file = f"{Path(self.output_file).stem}_{suffix}.csv"
+                        target_name = join(self.output_dir, self.output_file)
+                    record.update({"input_dir": target_name})
+                    
+                    try:
+                        target_df = pd.read_csv(target_name)
+                        
+                    except FileNotFoundError:
+                        template_name = join(Folder.TEMPLATE, "Application Data Requirements.xlsx")
+                        target_df = pd.read_excel(template_name)
+                        target_df.to_csv(target_name, index=None, header=True)
+                    target_df["remark"] = "Inserted"
+                    target_df["CreateDate"] = target_df.CreateDate\
+                        .apply(lambda d: pd.to_datetime(d, format="%Y-%m-%d"))
+                        
+                    data = self.customize_data(target_df, change_df)
+                    record.update({"function": "write_csv", "state": state})
+                    
+                    state = self.write_csv(target_name, data)
+                    record.update({"state": state})
+                    
+                    logging.info(f"Write to Target Files status: {state}.")
+            
+            except Exception as err:
+                record.update({"errors": err})
+
+        if "errors" in record:
+            raise CustomException(errors=self.logging)
+    
+    def write_csv(self, target_name, data):
+        
+        logging.info(f'Write mode: "{self.write_mode}" in Target files: "{target_name}"')
+        
+        state = "failed"
+        try:
+            ## read csv file.
+            with open(target_name, "r") as reader:
+                csvin = csv.DictReader(reader, skipinitialspace=True)
+                start_row = 2
+                rows = {idx + start_row: value for idx, value in enumerate(csvin)}
+                
+                for idx in data:
+                    remark = data[idx]["remark"]
+                    _data = {columns: values for columns, values in data[idx].items() if columns != "remark"}
+                    
+                    if  f"{idx}" in self.change_rows.keys() and remark in ["Updated", "Inserted"]:
+                        ## update / insert rows.
+                        logging.info(f'"{remark}" Rows:"({idx})" in Target files. Changed: "{self.change_rows[f"{idx}"]}"')
+                        rows.update({idx: _data})
+                        
+                    else:
+                        if idx in self.remove_rows:
+                            continue
+                        ## no change rows.
+                        rows[idx].update(_data)
+            
+            ## write csv file.
+            with open(target_name, 'w', newline='') as writer:
+                csvout = csv.DictWriter(writer, csvin.fieldnames)
+                csvout.writeheader()
+                for idx in rows:
+                    ## remove rows.
+                    if idx not in self.remove_rows:
+                        csvout.writerow(rows[idx])
+            writer.closed 
+            state = "succeed"
+
+        except Exception as err:
+            raise Exception(err)
+        
+        return state
+    
+    
     def validation_data(self, df: pd.DataFrame, change_df: pd.DataFrame) -> dict:
 
         logging.info("Verify Changed information..")
@@ -319,7 +422,7 @@ class convert_2_files:
         df = df.reindex(index=union_index, columns=df.columns).iloc[:, :-1]
         ## change data.
         change_df = change_df.reindex(index=union_index, columns=change_df.columns).iloc[:, :-1]
-        # compare data rows by rows.
+        
         df["count_change"] = pd.DataFrame(np.where(df.ne(change_df), True, False), index=df.index, columns=df.columns)\
             .apply(lambda x: (x == True).sum(), axis=1)
 
@@ -367,11 +470,12 @@ class convert_2_files:
 
         df = df.drop(["count_change"], axis=1)
         df.index += start_rows
-        _data = df.to_dict("index")
-
+        df["CreateDate"] = df.CreateDate.apply(lambda d: d.date())
+        _data = df.to_dict(orient='index')
+    
         self.logging[-1].update({"status": "verify"})
         return _data
-
+    
     def customize_data(self, target_df: pd.DataFrame, change_df: pd.DataFrame) -> dict:
 
         logging.info("Customize Data to Target..")
@@ -379,7 +483,8 @@ class convert_2_files:
         
         data = {}
         try:
-            ## on date now
+            ''
+            # on date now
             date = self.batch_date.strftime('%Y-%m-%d')
             date_df = target_df[target_df["CreateDate"]\
                 .isin(np.array([pd.Timestamp(date).date()]).astype("datetime64[ns]"))]\
@@ -389,7 +494,7 @@ class convert_2_files:
             df = target_df[~target_df["CreateDate"]\
                 .isin(np.array([pd.Timestamp(date).date()]).astype("datetime64[ns]"))]\
                 .iloc[:, :-1].to_dict("index")
-        
+            
             _data = self.validation_data(date_df, change_df)
 
             ## add value to target files (dataframe).
@@ -416,104 +521,4 @@ class convert_2_files:
             raise Exception(err)
         
         return data
-
-    async def write_data_to_target_file(self) -> None:
-
-        logging.info("Write Data to Target files..")
-
-        state = "failed"
-        for record in self.logging:
-            try:
-                
-                if record["module"] == "Target_file":
-                    record.update({"function": "write_data_to_target_file", "state": state})
-                    
-                    # read tmp file or mapping column fuction.
-                    if self.store_tmp is True:
-                        tmp_name = record["input_dir"]
-                        sheet_name = record["sheet_name"]
-                        change_df = pd.read_excel(tmp_name, sheet_name=sheet_name)
-                        change_df = change_df.loc[change_df['remark'] != "Removed"]
-                    else:
-                        change_df = pd.DataFrame(record["data"])
-                        change_df["remark"] = "Inserted"
-                        
-                    # read target file (csv).
-                    if self.write_mode == "overwrite" or self.manual:
-                        target_name = join(self.output_dir, self.output_file)
-                    else:
-                        suffix = f"{self.batch_date.strftime('%d%m%y')}"
-                        self.output_file = f"{Path(self.output_file).stem}_{suffix}.csv"
-                        target_name = join(self.output_dir, self.output_file)
-                    record.update({"input_dir": target_name})
-                    
-                    try:
-                        target_df = pd.read_csv(target_name,
-                                                parse_dates=["CreateDate", "LastUpdatedDate"])
-                        
-                    except FileNotFoundError:
-                        template_name = join(Folder.TEMPLATE, "Application Data Requirements.xlsx")
-                        target_df = pd.read_excel(template_name)
-                        target_df.to_csv(target_name, index=None, header=True)
-                    target_df["remark"] = "Inserted"
-                        
-                    ## compare / write data.
-                    data = self.customize_data(target_df, change_df)
-                    # print(data)
-                    
-                    #record.update({"function": "write_csv", "state": state})
-                    #state = self.write_csv(target_name, data)
-                    
-                    #record.update({"state": state})
-                    #logging.info(f"Write to Target Files status: {state}.")
-            
-            except Exception as err:
-                record.update({"errors": err})
-
-        if "errors" in record:
-            raise CustomException(errors=self.logging)
-        
-        
-    def write_csv(self, target_name, data):
-        
-        logging.info(f'Write mode: "{self.write_mode}" in Target files: "{target_name}"')
-        
-        state = "failed"
-        try:
-            ## read csv file.
-            with open(target_name, "r") as reader:
-                csvin = csv.DictReader(reader, skipinitialspace=True)
-                start_row = 2
-                rows = {idx + start_row: value for idx, value in enumerate(csvin)}
-                
-                for idx in data:
-                    remark = data[idx]["remark"]
-                    _data = {columns: values for columns, values in data[idx].items() if columns != "remark"}
-                    
-                    if  f"{idx}" in self.change_rows.keys() and remark in ["Updated", "Inserted"]:
-                        ## update / insert rows.
-                        logging.info(f'"{remark}" Rows:"({idx})" in Target files. Changed: "{self.change_rows[f"{idx}"]}"')
-                        rows.update({idx: _data})
-                        
-                    else:
-                        if idx in self.remove_rows:
-                            continue
-                        ## no change rows.
-                        rows[idx].update(_data)
-            
-            ## write csv file.
-            with open(target_name, 'w', newline='') as writer:
-                csvout = csv.DictWriter(writer, csvin.fieldnames)
-                csvout.writeheader()
-                for idx in rows:
-                    ## remove rows.
-                    if idx not in self.remove_rows:
-                        csvout.writerow(rows[idx])
-            writer.closed 
-            state = "succeed"
-
-        except Exception as err:
-            raise Exception(err)
-        
-        return state
 
