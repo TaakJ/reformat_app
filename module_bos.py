@@ -38,10 +38,12 @@ class module_bos(call_function):
         result = {"module": self.module, "task": "Completed"} 
         try:
             await self.check_source_files()
-            # await self.retrieve_data_from_source_files()
-            # # await self.mapping_column()
-            # await self.mock_data()
-            # await self.write_data_to_tmp_file()
+            await self.retrieve_data_from_source_files()
+            # await self.mapping_column()
+            await self.mock_data()
+            if self.store_tmp is True:
+                await self.write_data_to_tmp_file()
+            await self.write_data_to_target_file()
                 
         except CustomException as error: 
             
@@ -78,8 +80,8 @@ class module_bos(call_function):
     async def mock_data(self) -> None:
             mock_data = [['ApplicationCode',	'AccountOwner', 'AccountName',	'AccountType',	'EntitlementName',	'SecondEntitlementName','ThirdEntitlementName', 'AccountStatus',	'IsPrivileged',	'AccountDescription',
                         'CreateDate','LastLogin','LastUpdatedDate',	'AdditionalAttribute'],
-                        [10,2,3,4,5,6,7,8,9,10,self.batch_date.strftime('%Y-%m-%d'),12, self.date,14],
-                        [150,16,17,18,19,20,21,22,23,24,self.batch_date.strftime('%Y-%m-%d'),26, self.date,28],
+                        [1,2,3,4,5,6,7,8,9,10,self.batch_date.strftime('%Y-%m-%d'),12, self.date,14],
+                        [15,16,17,18,19,20,21,22,23,24,self.batch_date.strftime('%Y-%m-%d'),26, self.date,28],
                         ]
             df = pd.DataFrame(mock_data)
             df.columns = df.iloc[0].values

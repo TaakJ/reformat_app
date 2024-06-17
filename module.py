@@ -493,6 +493,7 @@ class convert_2_files:
                         ## update / insert rows.
                         logging.info(f'"{remark}" Rows:"({idx})" in Target files. Changed: "{self.change_rows[f"{idx}"]}"')
                         rows.update({idx: _data})
+                        
                     else:
                         if idx in self.remove_rows:
                             continue
