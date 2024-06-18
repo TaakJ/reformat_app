@@ -29,7 +29,8 @@ class module_adm(call_function):
         self.output_dir = self.config[self.module]["output_dir"]
         self.output_file = self.config[self.module]["output_file"]
 
-        self.date = datetime.now()
+        self.fmt_batch_date = self.batch_date.strftime('%Y%m%d%H%M%S')
+        self.date = datetime.now().strftime('%Y%m%d%H%M%S')
         
     async def run(self) -> dict:
         
@@ -79,11 +80,12 @@ class module_adm(call_function):
     async def mock_data(self) -> None:
             mock_data = [['ApplicationCode',	'AccountOwner', 'AccountName',	'AccountType',	'EntitlementName',	'SecondEntitlementName','ThirdEntitlementName', 'AccountStatus',	'IsPrivileged',	'AccountDescription',
                         'CreateDate','LastLogin','LastUpdatedDate',	'AdditionalAttribute'],
-                        [1,2,3,4,5,6,7,8,9,10,self.batch_date.strftime('%Y-%m-%d'),12, self.date,14],
-                        [15,16,17,18,19,20,21,22,23,24,self.batch_date.strftime('%Y-%m-%d'),26, self.date,28],
+                        [1,2,3,4,5,6,7,8,9,10,self.fmt_batch_date,12, self.date,14],
+                        [15,16,17,18,19,20,21,22,23,24,self.fmt_batch_date,26, self.date,28],
                         ]
             df = pd.DataFrame(mock_data)
             df.columns = df.iloc[0].values
             df = df[1:]
             df = df.reset_index(drop=True)
             self.logging.append({'module': 'Target_file', 'data': df.to_dict('list')})
+            

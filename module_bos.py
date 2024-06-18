@@ -29,7 +29,9 @@ class module_bos(call_function):
         self.output_dir = self.config[self.module]["output_dir"]
         self.output_file = self.config[self.module]["output_file"]
 
-        self.date = datetime.now()
+        self.date = datetime.now().strftime('%Y%m%d%H%M%S')
+        print(self.date)
+        
         
     async def run(self) -> dict:
         
@@ -37,13 +39,14 @@ class module_bos(call_function):
         
         result = {"module": self.module, "task": "Completed"}
         try:
-            await self.check_source_files()
-            await self.retrieve_data_from_source_files()
-            # await self.mapping_column()
-            await self.mock_data()
-            if self.store_tmp is True:
-                await self.write_data_to_tmp_file()
-            await self.write_data_to_target_file()
+            ''
+            # await self.check_source_files()
+            # await self.retrieve_data_from_source_files()
+            # # await self.mapping_column()
+            # await self.mock_data()
+            # if self.store_tmp is True:
+            #     await self.write_data_to_tmp_file()
+            # await self.write_data_to_target_file()
                 
         except CustomException as error: 
             
@@ -80,8 +83,8 @@ class module_bos(call_function):
     async def mock_data(self) -> None:
             mock_data = [['ApplicationCode',	'AccountOwner', 'AccountName',	'AccountType',	'EntitlementName',	'SecondEntitlementName','ThirdEntitlementName', 'AccountStatus',	'IsPrivileged',	'AccountDescription',
                         'CreateDate','LastLogin','LastUpdatedDate',	'AdditionalAttribute'],
-                        [1,2,3,4,5,6,7,8,9,10,self.batch_date.strftime('%Y-%m-%d'),12, self.date,14],
-                        [15,16,17,18,19,20,21,22,23,24,self.batch_date.strftime('%Y-%m-%d'),26, self.date,28],
+                        [300,2,3,4,5,6,7,8,9,10,self.batch_date.strftime('%Y%m%d%H%M%S'),12, self.date,14],
+                        [350,16,17,18,19,20,21,22,23,24,self.batch_date.strftime('%Y%m%d%H%M%S'),26, self.date,28],
                         ]
             df = pd.DataFrame(mock_data)
             df.columns = df.iloc[0].values

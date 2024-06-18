@@ -15,7 +15,6 @@ import re
 import xlrd
 import csv
 
-
 class convert_2_files:
 
     async def check_source_files(self) -> None:
@@ -46,9 +45,7 @@ class convert_2_files:
 
         state = "failed"
         for i, record in enumerate(self.logging):
-            record.update(
-                {"function": "retrieve_data_from_source_files", "state": state}
-            )
+            record.update({"function": "retrieve_data_from_source_files", "state": state})
 
             _dir = record["input_dir"]
             types = Path(_dir).suffix
@@ -205,8 +202,6 @@ class convert_2_files:
 
                     change_df = pd.DataFrame(record["data"])
                     change_df["remark"] = "Inserted"
-                    change_df["CreateDate"] = change_df.CreateDate\
-                        .apply(lambda d: pd.to_datetime(d, format="%Y-%m-%d"))
 
                     try:
                         workbook = openpyxl.load_workbook(tmp_name)
@@ -244,8 +239,6 @@ class convert_2_files:
                         sheet = workbook.create_sheet(sheet_name)
                     else:
                         tmp_df["remark"] = "Inserted"
-                    tmp_df["CreateDate"] = tmp_df.CreateDate\
-                        .apply(lambda d: pd.to_datetime(d, format="%Y-%m-%d"))
 
                     _data = self.validation_data(tmp_df, change_df)
                     ## write to tmp files.
@@ -323,8 +316,8 @@ class convert_2_files:
                     else:
                         change_df = pd.DataFrame(record["data"])
                         change_df["remark"] = "Inserted"
-                    change_df["CreateDate"] = change_df.CreateDate\
-                        .apply(lambda d: pd.to_datetime(d, format="%Y-%m-%d"))
+                    change_df[['CreateDate','LastUpdatedDate']] = change_df[['CreateDate','LastUpdatedDate']]\
+                        .apply(pd.to_datetime, format='%Y%m%d%H%M%S')
                     
                     ## read target file (csv).
                     if self.write_mode == "overwrite" or self.manual:
@@ -337,17 +330,17 @@ class convert_2_files:
                     
                     try:
                         target_df = pd.read_csv(target_name)
-                        
                     except FileNotFoundError:
                         template_name = join(Folder.TEMPLATE, "Application Data Requirements.xlsx")
                         target_df = pd.read_excel(template_name)
                         target_df.to_csv(target_name, index=None, header=True)
                     target_df["remark"] = "Inserted"
-                    target_df["CreateDate"] = target_df.CreateDate\
-                        .apply(lambda d: pd.to_datetime(d, format="%Y-%m-%d"))
-                        
+                    target_df[['CreateDate','LastUpdatedDate']] = target_df[['CreateDate','LastUpdatedDate']]\
+                        .apply(pd.to_datetime, format='%Y%m%d%H%M%S')
+                    
                     data = self.customize_data(target_df, change_df)
                     record.update({"function": "write_csv", "state": state})
+                    ## write csv file
                     state = self.write_csv(target_name, data)
                     record.update({"state": state})
                     
@@ -469,7 +462,7 @@ class convert_2_files:
 
         df = df.drop(["count_change"], axis=1)
         df.index += start_rows
-        df["CreateDate"] = df.CreateDate.apply(lambda d: d.date())
+        # df["CreateDate"] = df.CreateDate.apply(lambda d: d.date())
         _data = df.to_dict(orient='index')
     
         self.logging[-1].update({"status": "verify"})
@@ -482,20 +475,17 @@ class convert_2_files:
         
         data = {}
         try:
-            ''
-            # on date now
-            date = self.batch_date.strftime('%Y-%m-%d')
             date_df = target_df[target_df["CreateDate"]\
-                .isin(np.array([pd.Timestamp(date).date()]).astype("datetime64[ns]"))]\
+                .isin(np.array([pd.Timestamp(self.fmt_batch_date)]).astype("datetime64[ns]"))]\
                 .reset_index(drop=True)
                 
             ## base data from target files not in date.
             df = target_df[~target_df["CreateDate"]\
-                .isin(np.array([pd.Timestamp(date).date()]).astype("datetime64[ns]"))]\
+                .isin(np.array([pd.Timestamp(self.fmt_batch_date)]).astype("datetime64[ns]"))]\
                 .iloc[:, :-1].to_dict("index")
             
             _data = self.validation_data(date_df, change_df)
-
+            
             ## add value to target files (dataframe).
             max_rows = max(df, default=0)
             df = df | {max_rows + key: ({**values, **{"mark_rows": key}}
