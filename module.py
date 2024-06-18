@@ -46,9 +46,7 @@ class convert_2_files:
 
         state = "failed"
         for i, record in enumerate(self.logging):
-            record.update(
-                {"function": "retrieve_data_from_source_files", "state": state}
-            )
+            record.update({"function": "retrieve_data_from_source_files", "state": state})
 
             _dir = record["input_dir"]
             types = Path(_dir).suffix
@@ -132,8 +130,7 @@ class convert_2_files:
 
     @read_text_files
     def text_data_cleaning(self, i: int) -> any:
-
-        # logging.info("Cleansing Data From Text file..")
+        
         self.logging[i].update({"function": "text_data_cleaning"})
 
         _dir = self.logging[i]["input_dir"]
@@ -148,11 +145,7 @@ class convert_2_files:
             regex = re.compile(r"\w+.*")
             find_regex = regex.findall(lines)
             if find_regex != []:
-                yield {
-                    sheets: re.sub(r"\W\s+", "||", "".join(find_regex).strip()).split(
-                        "||"
-                    )
-                }
+                yield {sheets: re.sub(r"\W\s+", "||", "".join(find_regex).strip()).split("||")}
 
     def read_excle_files(func):
         def wrapper(*args: tuple, **kwargs: dict) -> dict:
@@ -163,11 +156,8 @@ class convert_2_files:
             while True:
                 try:
                     for sheets, data in next(by_sheets).items():
-                        if not all(
-                            dup == data[0] for dup in data
-                        ) and not data.__contains__(
-                            "Centralized User Management : User List."
-                        ):
+                        if not all(dup == data[0] for dup in data) and\
+                        not data.__contains__("Centralized User Management : User List."):
                             if sheets not in _data:
                                 _data[sheets] = [data]
                             else:
@@ -186,16 +176,12 @@ class convert_2_files:
         self.logging[i].update({"function": "excel_data_cleaning"})
 
         workbook = xlrd.open_workbook(self.logging[i]["input_dir"])
-        sheet_list = [
-            sheet for sheet in workbook.sheet_names() if sheet != "StyleSheet"
-        ]
+        sheet_list = [sheet for sheet in workbook.sheet_names() if sheet != "StyleSheet"]
 
         for sheets in sheet_list:
             cells = workbook.sheet_by_name(sheets)
             for row in range(0, cells.nrows):
-                yield {
-                    sheets: [cells.cell(row, col).value for col in range(cells.ncols)]
-                }
+                yield {sheets: [cells.cell(row, col).value for col in range(cells.ncols)]}
 
     async def write_data_to_tmp_file(self) -> None:
 
@@ -221,9 +207,7 @@ class convert_2_files:
                         workbook.active = sheet_num
 
                     except FileNotFoundError:
-                        template_name = join(
-                            Folder.TEMPLATE, "Application Data Requirements.xlsx"
-                        )
+                        template_name = join(Folder.TEMPLATE, "Application Data Requirements.xlsx")
                         try:
                             if not glob.glob(tmp_name, recursive=True):
                                 state = shutil.copy2(template_name, tmp_name)
@@ -332,8 +316,8 @@ class convert_2_files:
                         change_df = pd.DataFrame(record["data"])
                         change_df["remark"] = "Inserted"
                     
-                    change_df[["CreateDate","LastUpdatedDate"]] = \
-                        change_df[["CreateDate","LastUpdatedDate"]].astype(str)
+                    # change_df[["CreateDate","LastUpdatedDate"]] = \
+                    #     change_df[["CreateDate","LastUpdatedDate"]].astype(str)
 
                     ## read target file (csv).
                     if self.write_mode == "overwrite" or self.manual:
@@ -352,12 +336,13 @@ class convert_2_files:
                         target_df.to_csv(target_name, index=None, header=True)
                     target_df["remark"] = "Inserted"
                     
-                    target_df[["CreateDate","LastUpdatedDate"]] = \
-                        target_df[["CreateDate","LastUpdatedDate"]].astype(str)
+                    # target_df[["CreateDate","LastUpdatedDate"]] = \
+                    #     target_df[["CreateDate","LastUpdatedDate"]].astype(str)
                     
                     data = self.customize_data(target_df, change_df)
                     record.update({"function": "write_csv", "state": state})
-                    # ## write csv file
+                    
+                    ## write csv file
                     state = self.write_csv(target_name, data)
                     record.update({"state": state})
 
@@ -383,11 +368,7 @@ class convert_2_files:
 
                 for idx in data:
                     remark = data[idx]["remark"]
-                    _data = {
-                        columns: values
-                        for columns, values in data[idx].items()
-                        if columns != "remark"
-                    }
+                    _data = {columns: values for columns, values in data[idx].items() if columns != "remark"}
 
                     if f"{idx}" in self.change_rows.keys() and remark in ["Updated","Inserted",]:
                         ## update / insert rows.
@@ -429,19 +410,15 @@ class convert_2_files:
 
         ## reset index data.
         union_index = np.union1d(df.index, change_df.index)
-
         ## target / tmp data.
         df = df.reindex(index=union_index, columns=df.columns).iloc[:, :-1]
-
         ## change data.
         change_df = change_df.reindex(index=union_index, columns=change_df.columns).iloc[:, :-1]
-
         df["count_change"] = pd.DataFrame(np.where(df.ne(change_df), True, False), index=df.index, columns=df.columns)\
             .apply(lambda x: (x == True).sum(), axis=1)
 
         def format_record(record):
-            return ("{"+ "\n".join(
-                    "{!r}: {!r},".format(columns, values)
+            return ("{"+ "\n".join("{!r}: {!r},".format(columns, values)
                     for columns, values in record.items())+ "}")
 
         start_rows = 2
@@ -494,6 +471,7 @@ class convert_2_files:
         try:
             date_df = target_df[target_df['CreateDate'].isin([self.fmt_batch_date])]\
                 .reset_index(drop=True)
+                
             ## base data from target files not in date.
             df = target_df[~target_df['CreateDate'].isin([self.fmt_batch_date])]\
                 .iloc[:, :-1].to_dict('index')
@@ -505,7 +483,7 @@ class convert_2_files:
             df = df | {max_rows + key: ({**values, **{"mark_rows": key}}
                 if key in self.change_rows or key in self.remove_rows else values)
                 for key, values in _data.items()}
-
+            
             ## sorted date order.
             start_row = 2
             i = 0
