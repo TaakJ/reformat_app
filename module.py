@@ -239,7 +239,7 @@ class convert_2_files:
                         sheet = workbook.create_sheet(sheet_name)
                     else:
                         tmp_df["remark"] = "Inserted"
-
+                        
                     _data = self.validation_data(tmp_df, change_df)
                     ## write to tmp files.
                     state = self.write_worksheet(sheet, _data)
@@ -316,8 +316,8 @@ class convert_2_files:
                     else:
                         change_df = pd.DataFrame(record["data"])
                         change_df["remark"] = "Inserted"
-                    change_df[['CreateDate','LastUpdatedDate']] = change_df[['CreateDate','LastUpdatedDate']]\
-                        .apply(pd.to_datetime, format='%Y%m%d%H%M%S')
+                    # change_df[['CreateDate','LastUpdatedDate']] = change_df[['CreateDate','LastUpdatedDate']]\
+                    #     .apply(pd.to_datetime, format='%Y%m%d%H%M%S')
                     
                     ## read target file (csv).
                     if self.write_mode == "overwrite" or self.manual:
@@ -335,8 +335,8 @@ class convert_2_files:
                         target_df = pd.read_excel(template_name)
                         target_df.to_csv(target_name, index=None, header=True)
                     target_df["remark"] = "Inserted"
-                    target_df[['CreateDate','LastUpdatedDate']] = target_df[['CreateDate','LastUpdatedDate']]\
-                        .apply(pd.to_datetime, format='%Y%m%d%H%M%S')
+                    # target_df[['CreateDate','LastUpdatedDate']] = target_df[['CreateDate','LastUpdatedDate']]\
+                    #     .apply(pd.to_datetime, format='%Y%m%d%H%M%S')
                     
                     data = self.customize_data(target_df, change_df)
                     record.update({"function": "write_csv", "state": state})
@@ -462,7 +462,6 @@ class convert_2_files:
 
         df = df.drop(["count_change"], axis=1)
         df.index += start_rows
-        # df["CreateDate"] = df.CreateDate.apply(lambda d: d.date())
         _data = df.to_dict(orient='index')
     
         self.logging[-1].update({"status": "verify"})
