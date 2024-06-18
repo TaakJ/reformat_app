@@ -44,7 +44,7 @@ class module_adm(call_function):
             await self.mock_data()
             if self.store_tmp is True:
                 await self.write_data_to_tmp_file()
-            # await self.write_data_to_target_file()
+            await self.write_data_to_target_file()
         
         except CustomException as error: 
             
@@ -60,7 +60,7 @@ class module_adm(call_function):
         logging.info("Stop Run Module\n##### End #####\n")
         return result
         
-    
+        
     async def mapping_column(self) -> None:
         
         state = "failed"
