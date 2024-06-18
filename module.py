@@ -484,7 +484,6 @@ class convert_2_files:
             ## filter data not on batch date
             df = target_df[~target_df["CreateDate"].isin(np.array([pd.Timestamp(date)])\
                 .astype("datetime64[ns]"))].iloc[:, :-1].to_dict("index")
-                
             
             ## merge new data / old data
             max_rows = max(df, default=0)
