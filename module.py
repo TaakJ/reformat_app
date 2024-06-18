@@ -331,6 +331,7 @@ class convert_2_files:
                     
                     try:
                         target_df = pd.read_csv(target_name)
+                        
                     except FileNotFoundError:
                         template_name = join(Folder.TEMPLATE, "Application Data Requirements.xlsx")
                         target_df = pd.read_excel(template_name)
@@ -375,9 +376,9 @@ class convert_2_files:
                 for idx in _dtypes:
                     _data = {columns: values for columns, values in _dtypes[idx].items() if columns != "remark"}
                     
-                    if  f"{idx}" in self.change_rows.keys() and _dtypes[idx]["remark"] in ["Updated", "Inserted"]:
+                    if  str(idx) in self.change_rows.keys() and _dtypes[idx]["remark"] in ["Updated", "Inserted"]:
                         ## update / insert rows.
-                        logging.info(f'"{_dtypes[idx]["remark"]}" Rows:"({idx})" in Target files. Changed: "{self.change_rows[f"{idx}"]}"')
+                        logging.info(f'"{_dtypes[idx]["remark"]}" Rows:"({idx})" in Target files. Changed: "{self.change_rows[str(idx)]}"')
                         rows.update({idx: _data})
                     else:
                         if idx in self.remove_rows:
@@ -472,38 +473,39 @@ class convert_2_files:
         
         data = {}
         try:
-            # set date
             date = self.fmt_batch_date
             
-            date_df = target_df[target_df["CreateDate"]\
-                .isin(np.array([date]).astype("datetime64[ns]"))].reset_index(drop=True)
-            
+            ## filter data on batch date
+            date_df = target_df[target_df["CreateDate"].isin(np.array([date])\
+                .astype("datetime64[ns]"))].reset_index(drop=True)
+                                
             _data = self.validation_data(date_df, change_df)
             
-            ## base data from target files not in date.
-            df = target_df[~target_df["CreateDate"]\
-                .isin(np.array([pd.Timestamp(date)]).astype("datetime64[ns]"))].iloc[:, :-1].to_dict("index")
+            ## filter data not on batch date
+            df = target_df[~target_df["CreateDate"].isin(np.array([pd.Timestamp(date)])\
+                .astype("datetime64[ns]"))].iloc[:, :-1].to_dict("index")
+                
             
-            ## add value to target files (dataframe).
+            ## merge new data / old data
             max_rows = max(df, default=0)
-            df = df | {max_rows + key: ({**values, **{"mark_rows": key}}
-                if key in self.change_rows or key in self.remove_rows else values)
-                for key, values in _data.items()}
+            for idx, values in _data.items():
+                if idx in self.change_rows or idx in self.remove_rows:
+                    values.update({"mark_rows": idx})
+                df = {**df, **{max_rows + idx: values}}
             
-            ## sorted date order.
-            start_row = 2
+            ## sorted batch date order.
             i = 0
             for idx, values in enumerate(sorted(df.values(), key=lambda d: d["CreateDate"])):
-                idx += start_row
+                idx += 2
                 if "mark_rows" in values.keys():
                     if values["mark_rows"] in self.change_rows:
-                        self.change_rows[f"{idx}"] = self.change_rows.pop(values["mark_rows"])
+                        self.change_rows[str(idx)] = self.change_rows.pop(values["mark_rows"])
                     elif values["mark_rows"] in self.remove_rows:
                         self.remove_rows[i] = idx
                         i += 1
                     values.pop("mark_rows")
                 data.update({idx: values})
-
+            
         except Exception as err:
             raise Exception(err)
         
