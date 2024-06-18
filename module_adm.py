@@ -28,9 +28,9 @@ class module_adm(call_function):
         ## set output
         self.output_dir = self.config[self.module]["output_dir"]
         self.output_file = self.config[self.module]["output_file"]
-
-        self.fmt_batch_date = self.batch_date.strftime('%Y%m%d%H%M%S')
-        self.date = datetime.now().strftime('%Y%m%d%H%M%S')
+        
+        self.fmt_batch_date = self.batch_date
+        self.date = datetime.now()
         
     async def run(self) -> dict:
         
@@ -44,7 +44,7 @@ class module_adm(call_function):
             await self.mock_data()
             if self.store_tmp is True:
                 await self.write_data_to_tmp_file()
-            await self.write_data_to_target_file()
+            # await self.write_data_to_target_file()
         
         except CustomException as error: 
             
