@@ -397,7 +397,6 @@ class convert_2_files:
         
         return state
     
-    
     def validation_data(self, df: pd.DataFrame, change_df: pd.DataFrame) -> dict:
 
         logging.info("Verify Changed information..")
