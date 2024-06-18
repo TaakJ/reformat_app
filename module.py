@@ -320,7 +320,7 @@ class convert_2_files:
                     change_df[["CreateDate","LastUpdatedDate"]] = change_df[["CreateDate","LastUpdatedDate"]]\
                         .apply(pd.to_datetime, format="%Y%m%d%H%M%S")
                     
-                    
+                    ## read target file (csv).
                     if self.write_mode == "overwrite" or self.manual:
                         target_name = join(self.output_dir, self.output_file)
                     else:
@@ -329,7 +329,6 @@ class convert_2_files:
                         target_name = join(self.output_dir, self.output_file)
                     record.update({"input_dir": target_name})
                     
-                    ## read target file (csv).
                     try:
                         target_df = pd.read_csv(target_name)
                     except FileNotFoundError:
@@ -341,10 +340,11 @@ class convert_2_files:
                         .apply(pd.to_datetime, format="%Y%m%d%H%M%S")
                     
                     data = self.customize_data(target_df, change_df)
-                    # record.update({"function": "write_csv", "state": state})
+                    record.update({"function": "write_csv", "state": state})
+                    
                     ## write csv file
-                    # state = self.write_csv(target_name, data)
-                    # record.update({"state": state})
+                    state = self.write_csv(target_name, data)
+                    record.update({"state": state})
                     
                     logging.info(f"Write to Target Files status: {state}.")
             
@@ -358,6 +358,12 @@ class convert_2_files:
         
         logging.info(f'Write mode: "{self.write_mode}" in Target files: "{target_name}"')
         
+        ## set datatype column.
+        df = pd.DataFrame.from_dict(data, orient='index')
+        df["CreateDate"] = df["CreateDate"].apply(lambda d: d.strftime("%Y%m%d%H%M%S"))
+        df["LastUpdatedDate"] = df["LastUpdatedDate"].apply(lambda d: d.strftime("%Y%m%d%H%M%S"))
+        _dtypes = df.to_dict(orient='index')
+        
         state = "failed"
         try:
             ## read csv file.
@@ -365,22 +371,20 @@ class convert_2_files:
                 csvin = csv.DictReader(reader, skipinitialspace=True)
                 start_row = 2
                 rows = {idx + start_row: value for idx, value in enumerate(csvin)}
-                
-                for idx in data:
-                    remark = data[idx]["remark"]
-                    _data = {columns: values for columns, values in data[idx].items() if columns != "remark"}
+            
+                for idx in _dtypes:
+                    _data = {columns: values for columns, values in _dtypes[idx].items() if columns != "remark"}
                     
-                    if  f"{idx}" in self.change_rows.keys() and remark in ["Updated", "Inserted"]:
+                    if  f"{idx}" in self.change_rows.keys() and _dtypes[idx]["remark"] in ["Updated", "Inserted"]:
                         ## update / insert rows.
-                        logging.info(f'"{remark}" Rows:"({idx})" in Target files. Changed: "{self.change_rows[f"{idx}"]}"')
+                        logging.info(f'"{_dtypes[idx]["remark"]}" Rows:"({idx})" in Target files. Changed: "{self.change_rows[f"{idx}"]}"')
                         rows.update({idx: _data})
-                        
                     else:
                         if idx in self.remove_rows:
                             continue
                         ## no change rows.
                         rows[idx].update(_data)
-            
+                        
             ## write csv file.
             with open(target_name, 'w', newline='') as writer:
                 csvout = csv.DictWriter(writer, csvin.fieldnames)
@@ -418,10 +422,8 @@ class convert_2_files:
             .apply(lambda x: (x == True).sum(), axis=1)
 
         def format_record(record):
-            return ("{"
-                + "\n".join("{!r}: {!r},".format(columns, values)\
-                    for columns, values in record.items())
-                + "}")
+            return ("{"+"\n".join("{!r}: {!r},".format(columns, values) \
+                for columns, values in record.items())+"}")
 
         start_rows = 2
         for idx in union_index:
@@ -470,16 +472,17 @@ class convert_2_files:
         
         data = {}
         try:
+            # set date
+            date = self.fmt_batch_date
+            
             date_df = target_df[target_df["CreateDate"]\
-                .isin(np.array([pd.Timestamp(self.fmt_batch_date)]).astype("datetime64[ns]"))]\
-                .reset_index(drop=True)
-                
-            ## base data from target files not in date.
-            df = target_df[~target_df["CreateDate"]\
-                .isin(np.array([pd.Timestamp(self.fmt_batch_date)]).astype("datetime64[ns]"))]\
-                .iloc[:, :-1].to_dict("index")
+                .isin(np.array([date]).astype("datetime64[ns]"))].reset_index(drop=True)
             
             _data = self.validation_data(date_df, change_df)
+            
+            ## base data from target files not in date.
+            df = target_df[~target_df["CreateDate"]\
+                .isin(np.array([pd.Timestamp(date)]).astype("datetime64[ns]"))].iloc[:, :-1].to_dict("index")
             
             ## add value to target files (dataframe).
             max_rows = max(df, default=0)
