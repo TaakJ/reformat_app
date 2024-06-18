@@ -480,29 +480,27 @@ class convert_2_files:
                 .isin(np.array([pd.Timestamp(self.fmt_batch_date)]).astype("datetime64[ns]"))]\
                 .iloc[:, :-1].to_dict("index")
             
-            print(date_df)
-            print(df)
-            # _data = self.validation_data(date_df, change_df)
+            _data = self.validation_data(date_df, change_df)
             
-            # ## add value to target files (dataframe).
-            # max_rows = max(df, default=0)
-            # df = df | {max_rows + key: ({**values, **{"mark_rows": key}}
-            #     if key in self.change_rows or key in self.remove_rows else values)
-            #     for key, values in _data.items()}
+            ## add value to target files (dataframe).
+            max_rows = max(df, default=0)
+            df = df | {max_rows + key: ({**values, **{"mark_rows": key}}
+                if key in self.change_rows or key in self.remove_rows else values)
+                for key, values in _data.items()}
             
-            # ## sorted date order.
-            # start_row = 2
-            # i = 0
-            # for idx, values in enumerate(sorted(df.values(), key=lambda d: d["CreateDate"])):
-            #     idx += start_row
-            #     if "mark_rows" in values.keys():
-            #         if values["mark_rows"] in self.change_rows:
-            #             self.change_rows[f"{idx}"] = self.change_rows.pop(values["mark_rows"])
-            #         elif values["mark_rows"] in self.remove_rows:
-            #             self.remove_rows[i] = idx
-            #             i += 1
-            #         values.pop("mark_rows")
-            #     data.update({idx: values})
+            ## sorted date order.
+            start_row = 2
+            i = 0
+            for idx, values in enumerate(sorted(df.values(), key=lambda d: d["CreateDate"])):
+                idx += start_row
+                if "mark_rows" in values.keys():
+                    if values["mark_rows"] in self.change_rows:
+                        self.change_rows[f"{idx}"] = self.change_rows.pop(values["mark_rows"])
+                    elif values["mark_rows"] in self.remove_rows:
+                        self.remove_rows[i] = idx
+                        i += 1
+                    values.pop("mark_rows")
+                data.update({idx: values})
 
         except Exception as err:
             raise Exception(err)
