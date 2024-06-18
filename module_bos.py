@@ -39,14 +39,13 @@ class module_bos(call_function):
         
         result = {"module": self.module, "task": "Completed"}
         try:
-            ''
-            # await self.check_source_files()
-            # await self.retrieve_data_from_source_files()
-            # # await self.mapping_column()
-            # await self.mock_data()
-            # if self.store_tmp is True:
-            #     await self.write_data_to_tmp_file()
-            # await self.write_data_to_target_file()
+            await self.check_source_files()
+            await self.retrieve_data_from_source_files()
+            # await self.mapping_column()
+            await self.mock_data()
+            if self.store_tmp is True:
+                await self.write_data_to_tmp_file()
+            await self.write_data_to_target_file()
                 
         except CustomException as error: 
             
