@@ -7,7 +7,6 @@ import glob
 import shutil
 import pandas as pd
 import numpy as np
-from datetime import datetime
 import openpyxl
 import chardet
 from io import StringIO
