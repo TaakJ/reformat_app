@@ -32,19 +32,22 @@ class module_adm(call_function):
         self.fmt_batch_date = self.batch_date
         self.date = datetime.now()
         
+        setup_log(self)
+        
     async def run(self) -> dict:
         
         logging.info(f'Run Module: "{self.module}", manual: "{self.manual}", batch_date: "{self.batch_date}", store_tmp: "{self.store_tmp}, write_mode: "{self.write_mode}"')
         
         result = {"module": self.module, "task": "Completed"}
         try:
-            await self.check_source_files()
-            await self.retrieve_data_from_source_files()
-            # await self.mapping_column()
-            await self.mock_data()
-            if self.store_tmp is True:
-                await self.write_data_to_tmp_file()
-            await self.write_data_to_target_file()
+            ''
+            # await self.check_source_files()
+            # await self.retrieve_data_from_source_files()
+            # # await self.mapping_column()
+            # await self.mock_data()
+            # if self.store_tmp is True:
+            #     await self.write_data_to_tmp_file()
+            # await self.write_data_to_target_file()
         
         except CustomException as error: 
             

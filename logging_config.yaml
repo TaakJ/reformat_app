@@ -17,7 +17,7 @@ handlers:
     formatter: verbose
     backupCount: 0
     mode: w
-    filename: ./log/
+    filename: 
 root: 
   level: INFO
   handlers:

@@ -46,14 +46,17 @@ def setup_config() -> dict:
     return config_yaml
 
 
-def setup_log(source) -> None:
+def setup_log(self) -> None:
     log_yaml  = None
     log_dir   = Folder._LOGGER_CONFIG_DIR
-    date_dir = datetime.today().strftime('%Y%m%d')
+    
+    _folders = join(self.output_dir ,f".{self.date.strftime('%d%m%y')}")
+    os.makedirs(_folders, exist_ok=True)
     
     # log_name  = f"log-{datetime.today().strftime('%d%m%Y')}.log"
 
-    # if os.path.exists(log_dir):
+    if os.path.exists(log_dir):
+        ''
     #     with open(log_dir, "rb") as logger:
     #         log_yaml  = yaml.safe_load(logger.read())
             
@@ -63,8 +66,8 @@ def setup_log(source) -> None:
                     
     #         log_yaml["handlers"][i]["filename"] = log_path
     #         logging.config.dictConfig(log_yaml)
-    # else:
-    #     raise Exception(f"Yaml log file path: '{log_dir}' doesn't exist.")
+    else:
+        raise Exception(f"Yaml log file path: '{log_dir}' doesn't exist.")
 
 
 class setup_parser:
