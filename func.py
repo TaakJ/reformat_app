@@ -29,20 +29,16 @@ class parameter(setter):
     def _params_setter(self, module:str, _params:dict) -> None:
         for key, value in _params.items():
             setattr(self, key, value)
-        
-        ## set module parameter
+
         self.module = module      
-        
-        ## set input parameter
         self.input_dir = [join(self.config[self.module]["input_dir"], self.config[self.module]["input_file"])]
+        
         for i in self.config[self.module]["require"]:
             self.input_dir += [join(self.config[i]["input_dir"], self.config[i]["input_file"])]
             
-        ## set output parameter
         self.output_dir = self.config[self.module]["output_dir"]
         self.output_file = self.config[self.module]["output_file"]
         
-        ## set date parameter
         self.fmt_batch_date = self.batch_date
         self.date = datetime.now()
     
