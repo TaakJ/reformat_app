@@ -50,22 +50,24 @@ def setup_log(self) -> None:
     log_yaml  = None
     log_dir   = Folder._LOGGER_CONFIG_DIR
     
-    _folders = join(self.output_dir ,f".{self.date.strftime('%d%m%y')}")
+    _folders = join(self.output_dir ,f'.{self.date.strftime("%d%m%y")}')
+    log_name = ".log_success.log"
+    
     os.makedirs(_folders, exist_ok=True)
     
-    # log_name  = f"log-{datetime.today().strftime('%d%m%Y')}.log"
-
     if os.path.exists(log_dir):
-        ''
-    #     with open(log_dir, "rb") as logger:
-    #         log_yaml  = yaml.safe_load(logger.read())
+        with open(log_dir, "rb") as logger:
+            log_yaml  = yaml.safe_load(logger.read())
             
-    #         for i in (log_yaml["handlers"].keys()):
-    #             if "filename" in log_yaml["handlers"][i]:
-    #                 log_path = log_yaml["handlers"][i]["filename"] + log_name
-                    
-    #         log_yaml["handlers"][i]["filename"] = log_path
-    #         logging.config.dictConfig(log_yaml)
+            for i in (log_yaml["handlers"].keys()):
+                print(i)
+                if "filename" in log_yaml["handlers"][i]:
+                    ''
+                    # log_path = log_yaml["handlers"][i]["filename"] + log_name
+
+                    print(log_yaml["handlers"][i]["filename"])     
+            # log_yaml["handlers"][i]["filename"] = log_path
+            # logging.config.dictConfig(log_yaml)
     else:
         raise Exception(f"Yaml log file path: '{log_dir}' doesn't exist.")
 

@@ -3,7 +3,7 @@ disable_existing_loggers: false,
 formatters: 
   verbose: 
     class: logging.Formatter
-    format: "%(process)d | %(asctime)s.%(msecs)03d | %(processName)s | %(levelname)s | convert_2_files | %(module)s | %(funcName)s::%(lineno)d | message >> %(message)s"
+    format: "%(asctime)s.%(msecs)03d | %(processName)s | %(levelname)s | convert_2_files | %(module)s | %(funcName)s::%(lineno)d | message >> %(message)s"
     datefmt: "%Y/%m/%d %H:%M:%S"
 handlers:
   console:
@@ -13,7 +13,7 @@ handlers:
     stream  : ext://sys.stdout
   file:
     class: logging.handlers.RotatingFileHandler
-    level: DEBUG
+    level: INFO
     formatter: verbose
     backupCount: 0
     mode: w

@@ -1,47 +1,27 @@
-from log import record_log
+from func import call_function
 from exception import CustomException
 from setup import setup_log, Folder, clear_tmp
 from datetime import datetime
 import pandas as pd
 from os.path import join
 import logging
-from module import convert_2_files
-
-
-class call_function(convert_2_files, record_log):
-    pass
 
 class module_adm(call_function):
     
     def _log_setter(self, log) -> None:
         self._log = log
+        
+    async def run(self, module, _params) -> dict:
     
-    def _params(self, module, params) -> None:
-        for key, value in params.items():
-            setattr(self, key, value)
-        
-        ## set batch_date / module
-        self.module = module 
-        self.fmt_batch_date = self.batch_date
-        self.date = datetime.now()
-        
-        ## set input
-        self.input_dir = [join(self.config[self.module]["input_dir"], self.config[self.module]["input_file"])]
-        for i in self.config[self.module]["require"]:
-            self.input_dir += [join(self.config[i]["input_dir"], self.config[i]["input_file"])]
-            
-        ## set output
-        self.output_dir = self.config[self.module]["output_dir"]
-        self.output_file = self.config[self.module]["output_file"]
-        
-    async def run(self) -> dict:
-        
+        self._params_setter(module, _params)
         logging.info(f'Run Module: "{self.module}", manual: "{self.manual}", batch_date: "{self.batch_date}", store_tmp: "{self.store_tmp}, write_mode: "{self.write_mode}"')
         
         result = {"module": self.module, "task": "Completed"}
         try:
-            setup_log(self)
-            # await self.check_source_files()
+            
+            await self.check_source_files()
+            print()
+            print(self.logging)
             # await self.retrieve_data_from_source_files()
             # # await self.mapping_column()
             # await self.mock_data()
@@ -61,6 +41,7 @@ class module_adm(call_function):
                     break
                 
         logging.info("Stop Run Module\n##### End #####\n")
+        
         return result
         
         

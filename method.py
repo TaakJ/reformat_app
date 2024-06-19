@@ -12,20 +12,18 @@ class run_module:
     async def mapping_module(self):
         coros = []
         for module in self._params["source"]:
+            
             if module == "ADM":
-                tasks  = module_adm()
-                tasks._params(module, self._params)
-                coros.append(asyncio.create_task(tasks.run()))
+                tasks  = module_adm().run(module, self._params)
+                coros.append(asyncio.create_task(tasks))
                 
             elif module == "BOS":
-                tasks = module_bos()
-                tasks._params(module, self._params)
-                coros.append(asyncio.create_task(tasks.run()))
+                tasks  = module_bos().run(module, self._params)
+                coros.append(asyncio.create_task(tasks))
                 
             elif module == "CUM":
-                tasks  = module_cum()
-                tasks._params(module, self._params)
-                coros.append(asyncio.create_task(tasks.run()))
+                tasks  = module_cum().run(module, self._params)
+                coros.append(asyncio.create_task(tasks))
                 
         results = await asyncio.wait(coros)
         print(f'Run Task: {len(results[0])}')
