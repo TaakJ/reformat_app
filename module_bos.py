@@ -19,7 +19,7 @@ class module_bos(call_function):
     def _params(self, module, params) -> None:
         for key, value in params.items():
             setattr(self, key, value)
-        
+            
         self.module = module
         ## set input
         self.input_dir = [join(self.config[self.module]["input_dir"], self.config[self.module]["input_file"])]
@@ -31,7 +31,6 @@ class module_bos(call_function):
         
         self.fmt_batch_date = self.batch_date
         self.date = datetime.now()
-        
         
     async def run(self) -> dict:
         

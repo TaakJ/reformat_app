@@ -7,14 +7,13 @@ import glob
 import shutil
 import pandas as pd
 import numpy as np
+from datetime import datetime
 import openpyxl
-from openpyxl.styles import Font
 import chardet
 from io import StringIO
 import re
 import xlrd
 import csv
-from openpyxl.styles import NamedStyle
 
 class convert_2_files:
 
@@ -230,15 +229,14 @@ class convert_2_files:
                     data = sheet.values
                     columns = next(data)[0:]
                     tmp_df = pd.DataFrame(data, columns=columns)
-
+                    tmp_df["remark"] = "Inserted"
+                    tmp_df[["CreateDate","LastUpdatedDate"]] = tmp_df[["CreateDate","LastUpdatedDate"]]\
+                        .apply(pd.to_datetime, format="%Y%m%d%H%M%S")
+                        
                     if state != "succeed":
                         tmp_df = tmp_df.loc[tmp_df["remark"] != "Removed"]
                         sheet_name = f"RUN_TIME_{sheet_num}"
                         sheet = workbook.create_sheet(sheet_name)
-                    else:
-                        tmp_df["remark"] = "Inserted"
-                    tmp_df[["CreateDate","LastUpdatedDate"]] = tmp_df[["CreateDate","LastUpdatedDate"]]\
-                        .apply(pd.to_datetime, format="%Y%m%d%H%M%S")
                     
                     _data = self.validation_data(tmp_df, change_df)
                     
@@ -275,18 +273,23 @@ class convert_2_files:
                         if start_rows in self.remove_rows and change_data[start_rows][columns] == "Removed":
                             ## Removed data.
                             _show = f"{change_data[start_rows][columns]} Rows: ({start_rows}) in Tmp files."
+                            sheet.cell(row=start_rows, column=idx).value = change_data[start_rows][columns]
                             
                         elif start_rows in self.change_rows.keys() and change_data[start_rows][columns] in ["Inserted","Updated"]:
                             ## Updated / Insert data. 
                             _show = f"{change_data[start_rows][columns]} Rows: ({start_rows}) in Tmp files.\
                                 Record Changed: {self.change_rows[start_rows]}"
+                            sheet.cell(row=start_rows, column=idx).value = change_data[start_rows][columns]
                         else:
                             ## No change data.
                             _show = f"No Change Rows: ({start_rows}) in Tmp files."
+                            sheet.cell(row=start_rows, column=idx).value = change_data[start_rows][columns]
+                            
                         logging.info(_show)
                         
                     elif columns in ["CreateDate","LastUpdatedDate"]:
                         sheet.cell(row=start_rows, column=idx).value = change_data[start_rows][columns].strftime("%Y%m%d%H%M%S")
+                        
                     else:
                         sheet.cell(row=start_rows, column=idx).value = change_data[start_rows][columns]
                         
@@ -327,18 +330,19 @@ class convert_2_files:
                         suffix = f"{self.batch_date.strftime('%d%m%y')}"
                         self.output_file = f"{Path(self.output_file).stem}_{suffix}.csv"
                         target_name = join(self.output_dir, self.output_file)
+                        
                     record.update({"input_dir": target_name})
                     
                     try:
                         target_df = pd.read_csv(target_name)
+                        target_df["remark"] = "Inserted"
+                        target_df[["CreateDate","LastUpdatedDate"]] = target_df[["CreateDate","LastUpdatedDate"]]\
+                            .apply(pd.to_datetime, format="%Y%m%d%H%M%S")
                         
                     except FileNotFoundError:
                         template_name = join(Folder.TEMPLATE, "Application Data Requirements.xlsx")
                         target_df = pd.read_excel(template_name)
                         target_df.to_csv(target_name, index=None, header=True)
-                    target_df["remark"] = "Inserted"
-                    target_df[["CreateDate","LastUpdatedDate"]] = target_df[["CreateDate","LastUpdatedDate"]]\
-                        .apply(pd.to_datetime, format="%Y%m%d%H%M%S")
                     
                     data = self.customize_data(target_df, change_df)
                     record.update({"function": "write_csv", "state": state})
@@ -359,26 +363,20 @@ class convert_2_files:
         
         logging.info(f'Write mode: "{self.write_mode}" in Target files: "{target_name}"')
         
-        ## set datatype column.
-        df = pd.DataFrame.from_dict(data, orient='index')
-        df["CreateDate"] = df["CreateDate"].apply(lambda d: d.strftime("%Y%m%d%H%M%S"))
-        df["LastUpdatedDate"] = df["LastUpdatedDate"].apply(lambda d: d.strftime("%Y%m%d%H%M%S"))
-        _dtypes = df.to_dict(orient='index')
-        
         state = "failed"
         try:
             ## read csv file.
+            start_row = 2
             with open(target_name, "r") as reader:
                 csvin = csv.DictReader(reader, skipinitialspace=True)
-                start_row = 2
                 rows = {idx + start_row: value for idx, value in enumerate(csvin)}
             
-                for idx in _dtypes:
-                    _data = {columns: values for columns, values in _dtypes[idx].items() if columns != "remark"}
+                for idx in data:
+                    _data = {columns: values for columns, values in data[idx].items() if columns != "remark"}
                     
-                    if  str(idx) in self.change_rows.keys() and _dtypes[idx]["remark"] in ["Updated", "Inserted"]:
+                    if  str(idx) in self.change_rows.keys() and data[idx]["remark"] in ["Updated", "Inserted"]:
                         ## update / insert rows.
-                        logging.info(f'"{_dtypes[idx]["remark"]}" Rows:"({idx})" in Target files. Changed: "{self.change_rows[str(idx)]}"')
+                        logging.info(f'"{data[idx]["remark"]}" Rows:"({idx})" in Target files. Changed: "{self.change_rows[str(idx)]}"')
                         rows.update({idx: _data})
                     else:
                         if idx in self.remove_rows:
@@ -388,15 +386,19 @@ class convert_2_files:
                         
             ## write csv file.
             with open(target_name, 'w', newline='') as writer:
-                csvout = csv.DictWriter(writer, csvin.fieldnames)
+                csvout = csv.DictWriter(writer, csvin.fieldnames, delimiter=',', quotechar='"')
                 csvout.writeheader()
                 for idx in rows:
-                    ## remove rows.
+                    ## set data types column.
+                    rows[idx]["CreateDate"] = rows[idx]["CreateDate"].strftime("%Y%m%d%H%M%S")
+                    rows[idx]["LastUpdatedDate"] = rows[idx]["LastUpdatedDate"].strftime("%Y%m%d%H%M%S")
+                    
                     if idx not in self.remove_rows:
                         csvout.writerow(rows[idx])
+                        
             writer.closed 
             state = "succeed"
-
+            
         except Exception as err:
             raise Exception(err)
         
@@ -471,14 +473,13 @@ class convert_2_files:
         logging.info("Customize Data to Target..")
         self.logging[-1].update({"function": "customize_data"})
         
+        date = self.fmt_batch_date
         data = {}
         try:
-            date = self.fmt_batch_date
-            
             ## filter data on batch date
             date_df = target_df[target_df["CreateDate"].isin(np.array([date])\
                 .astype("datetime64[ns]"))].reset_index(drop=True)
-                                
+            
             _data = self.validation_data(date_df, change_df)
             
             ## filter data not on batch date
@@ -491,11 +492,12 @@ class convert_2_files:
                 if idx in self.change_rows or idx in self.remove_rows:
                     values.update({"mark_rows": idx})
                 df = {**df, **{max_rows + idx: values}}
-            
+                
             ## sorted batch date order.
-            i = 0
+            start_rows = 2
             for idx, values in enumerate(sorted(df.values(), key=lambda d: d["CreateDate"])):
-                idx += 2
+                idx += start_rows
+                i = 0
                 if "mark_rows" in values.keys():
                     if values["mark_rows"] in self.change_rows:
                         self.change_rows[str(idx)] = self.change_rows.pop(values["mark_rows"])
