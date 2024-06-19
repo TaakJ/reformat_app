@@ -376,7 +376,8 @@ class convert_2_files:
                     
                     if  str(idx) in self.change_rows.keys() and data[idx]["remark"] in ["Updated", "Inserted"]:
                         ## update / insert rows.
-                        logging.info(f'"{data[idx]["remark"]}" Rows:"({idx})" in Target files. Changed: "{self.change_rows[str(idx)]}"')
+                        logging.info(f'"{data[idx]["remark"]}" Rows:"({idx})" in Target files.\
+                            Record Changed: "{self.change_rows[str(idx)]}"')
                         rows.update({idx: _data})
                     else:
                         if idx in self.remove_rows:
@@ -439,26 +440,23 @@ class convert_2_files:
                         if df.loc[idx, "count_change"] < 1:  # <=1
                             df.at[idx, data[0]] = data[1].iloc[idx]
                             df.loc[idx, "remark"] = "No_changed"
-
                         else:
                             ## Updated rows.
                             if data[1][idx] != change_data[1][idx]:
                                 record.update({data[0]: f"{data[1][idx]} -> {change_data[1][idx]}"})
                             df.at[idx, data[0]] = change_data[1].iloc[idx]
                             df.loc[idx, "remark"] = "Updated"
-
                     else:
                         ## Inserted rows.
                         record.update({data[0]: change_data[1][idx]})
                         df.at[idx, data[0]] = change_data[1].iloc[idx]
                         df.loc[idx, "remark"] = "Inserted"
-
                 if record != {}:
                     self.change_rows[start_rows + idx] = format_record(record)
-
             else:
                 ## Removed rows.
                 df.loc[idx, "remark"] = "Removed"
+                
         self.remove_rows = [idx + start_rows for idx in self.remove_rows]
 
         df = df.drop(["count_change"], axis=1)
