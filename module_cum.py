@@ -1,9 +1,7 @@
 from func import call_function
 from exception import CustomException
 from setup import setup_log, Folder, clear_tmp
-from datetime import datetime
 import pandas as pd
-from os.path import join
 import logging
 
 class module_cum(call_function):
@@ -22,7 +20,7 @@ class module_cum(call_function):
         
         result = {"module": self.module, "task": "Completed"}
         try:
-            raise CustomException("Error Exception")
+            raise CustomException("Test Error Exception")
             await self.check_source_files()
             await self.retrieve_data_from_source_files()
             # await self.mapping_column()

@@ -1,9 +1,7 @@
 from func import call_function
 from exception import CustomException
 from setup import setup_log, Folder, clear_tmp
-from datetime import datetime
 import pandas as pd
-from os.path import join
 import logging
 
 class module_adm(call_function):

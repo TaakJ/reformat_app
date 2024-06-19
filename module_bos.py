@@ -1,11 +1,8 @@
 from func import call_function
 from exception import CustomException
 from setup import setup_log, Folder, clear_tmp
-from datetime import datetime
 import pandas as pd
-from os.path import join
 import logging
-from module import convert_2_files
 
 
 class module_bos(call_function):
