@@ -335,15 +335,15 @@ class convert_2_files:
                     
                     try:
                         target_df = pd.read_csv(target_name)
-                        target_df["remark"] = "Inserted"
-                        target_df[["CreateDate","LastUpdatedDate"]] = target_df[["CreateDate","LastUpdatedDate"]]\
-                            .apply(pd.to_datetime, format="%Y%m%d%H%M%S")
                         
                     except FileNotFoundError:
                         template_name = join(Folder.TEMPLATE, "Application Data Requirements.xlsx")
                         target_df = pd.read_excel(template_name)
                         target_df.to_csv(target_name, index=None, header=True)
-                    
+                    target_df["remark"] = "Inserted"
+                    target_df[["CreateDate","LastUpdatedDate"]] = target_df[["CreateDate","LastUpdatedDate"]]\
+                        .apply(pd.to_datetime, format="%Y%m%d%H%M%S")
+                        
                     data = self.customize_data(target_df, change_df)
                     record.update({"function": "write_csv", "state": state})
                     
@@ -475,7 +475,7 @@ class convert_2_files:
         data = {}
         try:
             ## filter data on batch date
-            date_df = target_df[target_df["CreateDate"].isin(np.array([date])\
+            date_df = target_df[target_df["CreateDate"].isin(np.array([pd.Timestamp(date)])\
                 .astype("datetime64[ns]"))].reset_index(drop=True)
             
             _data = self.validation_data(date_df, change_df)
@@ -491,7 +491,7 @@ class convert_2_files:
                     values.update({"mark_rows": idx})
                 df = {**df, **{max_rows + idx: values}}
                 
-            ## sorted batch date order.
+            ## sorted batch date order
             start_rows = 2
             for idx, values in enumerate(sorted(df.values(), key=lambda d: d["CreateDate"])):
                 idx += start_rows
