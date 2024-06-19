@@ -19,15 +19,13 @@ class record_log(ABC):
     @abstractmethod
     def _log_setter(self, log: list):
         pass
-    
-    
-class _parameter(ABC):
-    @abstractmethod
-    def _params_setter(self, module:str, _params:dict) -> None:
+
+class setter(ABC):
+    @abstractmethod 
+    def _params_setter(self, module:str, _params:dict): 
         pass
 
-
-class parameter(_parameter):
+class parameter(setter): 
     def _params_setter(self, module:str, _params:dict) -> None:
         for key, value in _params.items():
             setattr(self, key, value)
@@ -47,7 +45,7 @@ class parameter(_parameter):
         ## set date parameter
         self.fmt_batch_date = self.batch_date
         self.date = datetime.now()
-
     
+
 class call_function(convert_2_files, record_log, parameter):
     pass
