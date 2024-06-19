@@ -18,18 +18,19 @@ class module_cum(call_function):
         for key, value in params.items():
             setattr(self, key, value)
             
-        self.module = module
+        ## set batch_date / module
+        self.module = module 
+        self.fmt_batch_date = self.batch_date
+        self.date = datetime.now()
+        
         ## set input
         self.input_dir = [join(self.config[self.module]["input_dir"], self.config[self.module]["input_file"])]
         for i in self.config[self.module]["require"]:
             self.input_dir += [join(self.config[i]["input_dir"], self.config[i]["input_file"])]
+            
         ## set output
         self.output_dir = self.config[self.module]["output_dir"]
         self.output_file = self.config[self.module]["output_file"]
-        
-        self.fmt_batch_date = self.batch_date
-        self.date = datetime.now()
-        
     
     async def run(self) -> dict: 
         
