@@ -481,19 +481,19 @@ class convert_2_files:
             _data = self.validation_data(date_df, change_df)
             
             ## filter data not on batch date
-            _dict = target_df[~target_df["CreateDate"].isin(np.array([pd.Timestamp(date)])\
+            df = target_df[~target_df["CreateDate"].isin(np.array([pd.Timestamp(date)])\
                 .astype("datetime64[ns]"))].iloc[:, :-1].to_dict("index")
             
             ## merge new data / old data
-            max_rows = max(_dict, default=0)
+            max_rows = max(df, default=0)
             for idx, values in _data.items():
                 if idx in self.change_rows or idx in self.remove_rows:
                     values.update({"mark_rows": idx})
-                _dict = {**_dict, **{max_rows + idx: values}}
+                df = {**df, **{max_rows + idx: values}}
                 
             ## sorted batch date order
             start_rows = 2
-            for idx, values in enumerate(sorted(_dict.values(), key=lambda d: d["CreateDate"])):
+            for idx, values in enumerate(sorted(df.values(), key=lambda d: d["CreateDate"])):
                 idx += start_rows
                 i = 0
                 if "mark_rows" in values.keys():
