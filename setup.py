@@ -27,12 +27,10 @@ def setup_folder() -> None:
     for folder in _folders:
         os.makedirs(folder, exist_ok=True)
     
-    
 def clear_tmp() -> None:
     _folders = [value for name, value in vars(Folder).items() if isinstance(value, str) and not name.startswith("_") and value.endswith("TMP/")]
     for file_path in [join(folder, files) for folder in _folders for files in os.listdir(folder) if os.path.isfile(join(folder, files))]:
         os.remove(file_path)
-        
         
 def setup_config() -> dict:
     config_yaml  = None
@@ -45,12 +43,11 @@ def setup_config() -> dict:
         raise Exception(f"Yaml config file path: '{config_dir}' doesn't exist.")
     return config_yaml
 
-
 def setup_log(self) -> None:
     log_yaml  = None
     log_dir   = Folder._LOGGER_CONFIG_DIR
     
-    _folders = join(self.output_dir ,f'.{self.date.strftime("%d%m%y")}')
+    _folders = join(self.output_dir ,f'{self.date.strftime("%d%m%y")}')
     log_name = ".log_success.log"
     print(self.module)
     os.makedirs(_folders, exist_ok=True)
@@ -69,7 +66,6 @@ def setup_log(self) -> None:
             # logging.config.dictConfig(log_yaml)
     else:
         raise Exception(f"Yaml log file path: '{log_dir}' doesn't exist.")
-
 
 class setup_parser:
     def __init__(self):
