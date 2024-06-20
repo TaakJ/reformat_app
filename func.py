@@ -21,6 +21,7 @@ class record_log(ABC):
         pass
 
 class parameter(ABC):
+    
     @abstractmethod
     def _params_setter(self, module:str, _params:dict) -> None:
         for key, value in _params.items():
