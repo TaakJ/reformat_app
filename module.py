@@ -492,10 +492,10 @@ class convert_2_files:
                 df = {**df, **{max_rows + idx: values}}
                 
             ## sorted batch date order
+            i = 0
             start_rows = 2
             for idx, values in enumerate(sorted(df.values(), key=lambda d: d["CreateDate"])):
                 idx += start_rows
-                i = 0
                 if "mark_rows" in values.keys():
                     if values["mark_rows"] in self.change_rows:
                         self.change_rows[str(idx)] = self.change_rows.pop(values["mark_rows"])

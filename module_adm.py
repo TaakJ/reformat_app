@@ -64,7 +64,7 @@ class module_adm(call_function):
             mock_data = [['ApplicationCode',	'AccountOwner', 'AccountName',	'AccountType',	'EntitlementName',	'SecondEntitlementName','ThirdEntitlementName', 'AccountStatus',	'IsPrivileged',	'AccountDescription',
                         'CreateDate','LastLogin','LastUpdatedDate',	'AdditionalAttribute'],
                         [1,2,3,4,5,6,7,8,9,10,self.fmt_batch_date,12, self.date,14],
-                        # [15,16,17,18,19,20,21,22,23,24,self.fmt_batch_date,26, self.date,28],
+                        [15,16,17,18,19,20,21,22,23,24,self.fmt_batch_date,26, self.date,28],
                         ]
             df = pd.DataFrame(mock_data)
             df.columns = df.iloc[0].values
