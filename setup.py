@@ -21,6 +21,7 @@ class Folder:
     _LOGGER_CONFIG_DIR  =  join(_CURRENT_DIR, "logging_config.yaml")
     TEMPLATE            =  join(_CURRENT_DIR, "TEMPLATE/")
     TMP                 =  join(_CURRENT_DIR, "TMP/")
+    LOG                 =  join(_CURRENT_DIR, "LOG/")
 
 def setup_folder() -> None:
     _folders = [value for name, value in vars(Folder).items() if isinstance(value, str) and not name.startswith("_")]
@@ -43,25 +44,23 @@ def setup_config() -> dict:
         raise Exception(f"Yaml config file path: '{config_dir}' doesn't exist.")
     return config_yaml
 
-def setup_log(self) -> None:
-    log_yaml  = None
-    log_dir   = Folder._LOGGER_CONFIG_DIR
-    
-    _folders = join(self.output_dir ,f'{self.date.strftime("%d%m%y")}')
-    log_name = ".log_success.log"
-    os.makedirs(_folders, exist_ok=True)
-    
-    if os.path.exists(log_dir):
-        with open(log_dir, "rb") as logger:
-            log_yaml  = yaml.safe_load(logger.read())
-            
-            for i in (log_yaml["handlers"].keys()):
-                if "filename" in log_yaml["handlers"][i]:
-                    log_path = join(_folders, log_name)
-                    log_yaml["handlers"][i]["filename"] = log_path     
-            logging.config.dictConfig(log_yaml)
+def setup_log() -> None:
+    config_yaml  = None
+    date = datetime.today().strftime("%d%m%y")
+    log_name = f'log_status-{date}.log'
+
+    if os.path.exists(Folder._LOGGER_CONFIG_DIR):
+        with open(Folder._LOGGER_CONFIG_DIR, 'rb') as logger:
+            config_yaml  = yaml.safe_load(logger.read())
+            for i in (config_yaml["handlers"].keys()):
+                if "filename" in config_yaml['handlers'][i]:
+                    log_path = config_yaml["handlers"][i]["filename"]
+                    log_file = log_path + log_name
+                    config_yaml["handlers"][i]["filename"] = log_file
+
+            logging.config.dictConfig(config_yaml)
     else:
-        raise Exception(f"Yaml log file path: '{log_dir}' doesn't exist.")
+        raise Exception(f"Yaml file file_path: '{Folder._LOGGER_CONFIG_DIR}' doesn't exist.")
 
 class setup_parser:
     def __init__(self):
