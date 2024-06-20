@@ -60,7 +60,6 @@ def setup_log(self) -> None:
             log_yaml  = yaml.safe_load(logger.read())
             
             for i in (log_yaml["handlers"].keys()):
-                print(i)
                 if "filename" in log_yaml["handlers"][i]:
                     ''
                     # log_path = log_yaml["handlers"][i]["filename"] + log_name
