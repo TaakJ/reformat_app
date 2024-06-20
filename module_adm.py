@@ -6,6 +6,9 @@ import logging
 
 class module_adm(call_function):
     
+    def _params_setter(self, module: str, _params: dict) -> None:
+        return super()._params_setter(module, _params)
+    
     def _log_setter(self, log) -> None:
         self._log = log
         
@@ -20,14 +23,13 @@ class module_adm(call_function):
         
         result = {"module": self.module, "task": "Completed"}
         try:
-            setup_log(self)
-            # await self.check_source_files()
-            # await self.retrieve_data_from_source_files()
-            # # await self.mapping_column()
-            # await self.mock_data()
-            # if self.store_tmp is True:
-            #     await self.write_data_to_tmp_file()
-            # await self.write_data_to_target_file()
+            await self.check_source_files()
+            await self.retrieve_data_from_source_files()
+            # await self.mapping_column()
+            await self.mock_data()
+            if self.store_tmp is True:
+                await self.write_data_to_tmp_file()
+            await self.write_data_to_target_file()
         
         except CustomException as error: 
             
@@ -65,7 +67,7 @@ class module_adm(call_function):
             mock_data = [['ApplicationCode',	'AccountOwner', 'AccountName',	'AccountType',	'EntitlementName',	'SecondEntitlementName','ThirdEntitlementName', 'AccountStatus',	'IsPrivileged',	'AccountDescription',
                         'CreateDate','LastLogin','LastUpdatedDate',	'AdditionalAttribute'],
                         [1,2,3,4,5,6,7,8,9,10,self.fmt_batch_date,12, self.date,14],
-                        [15,16,17,18,19,20,21,22,23,24,self.fmt_batch_date,26, self.date,28],
+                        # [15,16,17,18,19,20,21,22,23,24,self.fmt_batch_date,26, self.date,28],
                         ]
             df = pd.DataFrame(mock_data)
             df.columns = df.iloc[0].values

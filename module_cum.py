@@ -6,6 +6,9 @@ import logging
 
 class module_cum(call_function):
     
+    def _params_setter(self, module: str, _params: dict) -> None:
+        return super()._params_setter(module, _params)
+    
     def _log_setter(self, log) -> None:
         self._log = log
     
