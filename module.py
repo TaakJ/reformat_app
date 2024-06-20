@@ -318,6 +318,7 @@ class convert_2_files:
                     else:
                         change_df = pd.DataFrame(record["data"])
                         change_df["remark"] = "Inserted"
+                        
                     change_df[["CreateDate","LastUpdatedDate"]] = change_df[["CreateDate","LastUpdatedDate"]]\
                         .apply(pd.to_datetime, format="%Y%m%d%H%M%S")
                     
@@ -420,6 +421,9 @@ class convert_2_files:
         ## compare data.
         df["count_change"] = pd.DataFrame(np.where(df.ne(change_df), True, False), index=df.index, columns=df.columns)\
             .apply(lambda x: (x == True).sum(), axis=1)
+            
+        # print(df)
+        # print(change_df)
 
         def format_record(record):
             return ("{"+"\n".join("{!r}: {!r},".format(columns, values) \
@@ -438,7 +442,7 @@ class convert_2_files:
                         else:
                             ## Updated rows.
                             if data[1][idx] != change_data[1][idx]:
-                                record.update({data[0]: f"{data[1][idx]} -> {change_data[1][idx]}"})
+                                record.update({data[0]: f"{data[1].iloc[idx]} -> {change_data[1].iloc[idx]}"})
                             df.at[idx, data[0]] = change_data[1].iloc[idx]
                             df.loc[idx, "remark"] = "Updated"
                     else:
