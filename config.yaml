@@ -1,54 +1,54 @@
 ADM:
     input_dir: C:\Users\thanakit\Downloads\RAW\ADM
-    output_dir: C:\Users\thanakit\Downloads\EXPORT\ADM
+    output_dir: C:\Users\thanakit\Downloads\EXPORT\IGA
     input_file: ADM.txt
     output_file: ADM.csv
     require: []
 BOS:
     input_dir: C:\Users\thanakit\Downloads\RAW\BOS
-    output_dir: C:\Users\thanakit\Downloads\EXPORT\BOS
+    output_dir: C:\Users\thanakit\Downloads\EXPORT\IGA
     input_file: BOS.xlsx
     output_file: BOS.csv
     require: []
 CUM:
     input_dir: C:\Users\thanakit\Downloads\RAW\CUM
-    output_dir: C:\Users\thanakit\Downloads\EXPORT\CUM
+    output_dir: C:\Users\thanakit\Downloads\EXPORT\IGA
     input_file: CUM.xls
     output_file: CUM.csv
     require: []
 DOC:
     input_dir: C:\Users\thanakit\Downloads\RAW\DOC
-    output_dir: C:\Users\thanakit\Downloads\EXPORT\DOC
+    output_dir: C:\Users\thanakit\Downloads\EXPORT\IGA
     input_file: DocImage.txt
     output_file: DOC.csv
     require: []
 ICAS:
     input_dir: C:\Users\thanakit\Downloads\RAW\ICAS
-    output_dir: C:\Users\thanakit\Downloads\EXPORT\ICAS
+    output_dir: C:\Users\thanakit\Downloads\EXPORT\IGA
     input_file: ICAS-NCR.xlsx
     output_file: ICAS-NCR.csv
     require: []
 IIC:
     input_dir: C:\Users\thanakit\Downloads\RAW\IIC
-    output_dir: C:\Users\thanakit\Downloads\EXPORT\IIC
+    output_dir: C:\Users\thanakit\Downloads\EXPORT\IGA
     input_file: IIC.xlsx
     output_file: IIC.csv
     require: []
 LDS:
     input_dir: C:\Users\thanakit\Downloads\RAW\LDS
-    output_dir: C:\Users\thanakit\Downloads\EXPORT\LDS
+    output_dir: C:\Users\thanakit\Downloads\EXPORT\IGA
     input_file: LDS-P_UserDetail.txt
     output_file: LDS.csv
     require: []
 LEAD:
     input_dir: C:\Users\thanakit\Downloads\RAW\LEAD
-    output_dir: C:\Users\thanakit\Downloads\EXPORT\LEAD
+    output_dir: C:\Users\thanakit\Downloads\EXPORT\IGA
     input_file: Lead-Management.xlsx
     output_file: LEAD.csv
     require: []
 MOC:
     input_dir: C:\Users\thanakit\Downloads\RAW\MOC
-    output_dir: C:\Users\thanakit\Downloads\EXPORT\MOC
+    output_dir: C:\Users\thanakit\Downloads\EXPORT\IGA
     input_file: MOC.xlsx
     output_file: MOC.csv
     require: []

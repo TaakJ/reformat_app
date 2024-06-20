@@ -54,8 +54,8 @@ def setup_log() -> None:
             config_yaml  = yaml.safe_load(logger.read())
             for i in (config_yaml["handlers"].keys()):
                 if "filename" in config_yaml['handlers'][i]:
-                    log_path = config_yaml["handlers"][i]["filename"]
-                    log_file = log_path + log_name
+                    log_file = join(config_yaml["handlers"][i]["filename"], log_name)
+                    
                     config_yaml["handlers"][i]["filename"] = log_file
 
             logging.config.dictConfig(config_yaml)
