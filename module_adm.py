@@ -15,13 +15,9 @@ class module_adm(call_function):
     async def run(self, module, _params) -> dict:
         
         self._params_setter(module, _params)
-        setup_log()
+        setup_log(self)
         
-        logging.info(f'Run Module: "{self.module}"\
-                    , Manual: "{self.manual}"\
-                    , Batch Date: "{self.batch_date}"\
-                    , Store Tmp: "{self.store_tmp}"\
-                    , Write Mode: "{self.write_mode}"')
+        logging.info(f'Run Module: "{self.module}", Manual: "{self.manual}", Batch Date: "{self.batch_date}", Store Tmp: "{self.store_tmp}", Write Mode: "{self.write_mode}"')
         
         result = {"module": self.module, "task": "Completed"}
         try:
