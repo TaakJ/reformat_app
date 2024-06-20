@@ -71,4 +71,3 @@ class module_adm(call_function):
             df = df[1:]
             df = df.reset_index(drop=True)
             self.logging.append({'module': 'Target_file', 'data': df.to_dict('list')})
-            
