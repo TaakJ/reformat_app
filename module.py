@@ -13,7 +13,6 @@ from io import StringIO
 import re
 import xlrd
 import csv
-from datetime import datetime
 
 class convert_2_files:
 
@@ -277,8 +276,7 @@ class convert_2_files:
                             
                         elif start_rows in self.change_rows.keys() and change_data[start_rows][columns] in ["Inserted","Updated"]:
                             ## Updated / Insert data. 
-                            _show = f"{change_data[start_rows][columns]} Rows: ({start_rows}) in Tmp files.\
-                                Record Changed: {self.change_rows[start_rows]}"
+                            _show = f"{change_data[start_rows][columns]} Rows: ({start_rows}) in Tmp files. Record Changed: {self.change_rows[start_rows]}"
                             sheet.cell(row=start_rows, column=idx).value = change_data[start_rows][columns]
                         else:
                             ## No change data.
@@ -383,8 +381,7 @@ class convert_2_files:
                     
                     if  str(idx) in self.change_rows.keys() and rows_data[idx]["remark"] in ["Updated", "Inserted"]:
                         ## update / insert rows.
-                        logging.info(f'"{rows_data[idx]["remark"]}" Rows:"({idx})" in Target files.\
-                            Record Changed: "{self.change_rows[str(idx)]}"')
+                        logging.info(f'"{rows_data[idx]["remark"]}" Rows:"({idx})" in Target files. Record Changed: "{self.change_rows[str(idx)]}"')
                         rows.update({idx: data})
                     else:
                         if idx in self.remove_rows:
