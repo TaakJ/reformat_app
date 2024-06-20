@@ -52,7 +52,7 @@ def setup_log(self) -> None:
     
     _folders = join(self.output_dir ,f'.{self.date.strftime("%d%m%y")}')
     log_name = ".log_success.log"
-    
+    print(self.module)
     os.makedirs(_folders, exist_ok=True)
     
     if os.path.exists(log_dir):

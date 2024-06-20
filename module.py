@@ -254,7 +254,7 @@ class convert_2_files:
             if "errors" in record:
                 raise CustomException(errors=self.logging)
 
-    def write_worksheet(self, sheet: any, change_data: dict) -> str:
+    def write_worksheet(self, sheet:any, change_data:dict) -> str:
 
         self.logging[-1].update({"function": "write_worksheet"})
         max_rows = max(change_data, default=0)
