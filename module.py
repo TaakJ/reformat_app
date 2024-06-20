@@ -13,6 +13,7 @@ from io import StringIO
 import re
 import xlrd
 import csv
+from datetime import datetime
 
 class convert_2_files:
 
@@ -237,10 +238,10 @@ class convert_2_files:
                         sheet_name = f"RUN_TIME_{sheet_num}"
                         sheet = workbook.create_sheet(sheet_name)
                     
-                    _data = self.validation_data(tmp_df, change_df)
+                    rows_data = self.validation_data(tmp_df, change_df)
                     
                     ## write to tmp files.
-                    state = self.write_worksheet(sheet, _data)
+                    state = self.write_worksheet(sheet, rows_data)
                     workbook.move_sheet(workbook.active, offset=-sheet_num)
                     workbook.save(tmp_name)
 
@@ -344,11 +345,11 @@ class convert_2_files:
                     target_df[["CreateDate","LastUpdatedDate"]] = target_df[["CreateDate","LastUpdatedDate"]]\
                         .apply(pd.to_datetime, format="%Y%m%d%H%M%S")
                         
-                    data = self.customize_data(target_df, change_df)
+                    rows_data = self.customize_data(target_df, change_df)
                     record.update({"function": "write_csv", "state": state})
                     
                     ## write csv file
-                    state = self.write_csv(target_name, data)
+                    state = self.write_csv(target_name, rows_data)
                     record.update({"state": state})
                     
                     logging.info(f"Write to Target Files status: {state}.")
@@ -359,9 +360,14 @@ class convert_2_files:
         if "errors" in record:
             raise CustomException(errors=self.logging)
     
-    def write_csv(self, target_name, data):
+    def write_csv(self, target_name, rows_data):
         
         logging.info(f'Write mode: "{self.write_mode}" in Target files: "{target_name}"')
+        
+        ## set data types column.
+        df = pd.DataFrame.from_dict(rows_data, orient="index")
+        df[["CreateDate","LastUpdatedDate"]] = df[["CreateDate","LastUpdatedDate"]].apply(lambda d: d.dt.strftime("%Y%m%d%H%M%S"))
+        rows_data = df.to_dict(orient='index')
         
         state = "failed"
         try:
@@ -371,32 +377,27 @@ class convert_2_files:
                 csvin = csv.DictReader(reader, skipinitialspace=True)
                 rows = {idx + start_row: value for idx, value in enumerate(csvin)}
             
-                for idx in data:
-                    _data = {columns: values for columns, values in data[idx].items() if columns != "remark"}
+                for idx in rows_data:
+                    data = {columns: values for columns, values in rows_data[idx].items() if columns != "remark"}
                     
-                    if  str(idx) in self.change_rows.keys() and data[idx]["remark"] in ["Updated", "Inserted"]:
+                    if  str(idx) in self.change_rows.keys() and rows_data[idx]["remark"] in ["Updated", "Inserted"]:
                         ## update / insert rows.
-                        logging.info(f'"{data[idx]["remark"]}" Rows:"({idx})" in Target files.\
+                        logging.info(f'"{rows_data[idx]["remark"]}" Rows:"({idx})" in Target files.\
                             Record Changed: "{self.change_rows[str(idx)]}"')
-                        rows.update({idx: _data})
+                        rows.update({idx: data})
                     else:
                         if idx in self.remove_rows:
                             continue
                         ## no change rows.
-                        rows[idx].update(_data)
+                        rows[idx].update(data)
                         
             ## write csv file.
             with open(target_name, 'w', newline='') as writer:
                 csvout = csv.DictWriter(writer, csvin.fieldnames, delimiter=',', quotechar='"')
                 csvout.writeheader()
-                for idx in rows:
-                    ## set data types column.
-                    rows[idx]["CreateDate"] = rows[idx]["CreateDate"].strftime("%Y%m%d%H%M%S")
-                    rows[idx]["LastUpdatedDate"] = rows[idx]["LastUpdatedDate"].strftime("%Y%m%d%H%M%S")
-                    
+                for idx in rows:            
                     if idx not in self.remove_rows:
                         csvout.writerow(rows[idx])
-                        
             writer.closed 
             state = "succeed"
             
@@ -461,10 +462,10 @@ class convert_2_files:
 
         df = df.drop(["count_change"], axis=1)
         df.index += start_rows
-        _data = df.to_dict(orient='index')
+        rows_data = df.to_dict(orient='index')
     
         self.logging[-1].update({"status": "verify"})
-        return _data
+        return rows_data
     
     def customize_data(self, target_df: pd.DataFrame, change_df: pd.DataFrame) -> dict:
 
@@ -472,7 +473,7 @@ class convert_2_files:
         self.logging[-1].update({"function": "customize_data"})
         
         date = self.fmt_batch_date
-        data = {}
+        rows_data = {}
         try:
             ## filter data on batch date
             date_df = target_df[target_df["CreateDate"].isin(np.array([pd.Timestamp(date)])\
@@ -481,20 +482,20 @@ class convert_2_files:
             _data = self.validation_data(date_df, change_df)
             
             ## filter data not on batch date
-            df = target_df[~target_df["CreateDate"].isin(np.array([pd.Timestamp(date)])\
+            _dict = target_df[~target_df["CreateDate"].isin(np.array([pd.Timestamp(date)])\
                 .astype("datetime64[ns]"))].iloc[:, :-1].to_dict("index")
             
             ## merge new data / old data
-            max_rows = max(df, default=0)
+            max_rows = max(_dict, default=0)
             for idx, values in _data.items():
                 if idx in self.change_rows or idx in self.remove_rows:
                     values.update({"mark_rows": idx})
-                df = {**df, **{max_rows + idx: values}}
+                _dict = {**_dict, **{max_rows + idx: values}}
                 
             ## sorted batch date order
             i = 0
             start_rows = 2
-            for idx, values in enumerate(sorted(df.values(), key=lambda d: d["CreateDate"])):
+            for idx, values in enumerate(sorted(_dict.values(), key=lambda d: d["CreateDate"])):
                 idx += start_rows
                 if "mark_rows" in values.keys():
                     if values["mark_rows"] in self.change_rows:
@@ -503,10 +504,10 @@ class convert_2_files:
                         self.remove_rows[i] = idx
                         i += 1
                     values.pop("mark_rows")
-                data.update({idx: values})
+                rows_data.update({idx: values})
             
         except Exception as err:
             raise Exception(err)
         
-        return data
+        return rows_data
 
