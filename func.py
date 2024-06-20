@@ -20,12 +20,7 @@ class record_log(ABC):
     def _log_setter(self, log: list):
         pass
 
-class setter(ABC):
-    @abstractmethod 
-    def _params_setter(self, module:str, _params:dict): 
-        pass
-
-class parameter(setter): 
+class parameter: 
     def _params_setter(self, module:str, _params:dict) -> None:
         for key, value in _params.items():
             setattr(self, key, value)
