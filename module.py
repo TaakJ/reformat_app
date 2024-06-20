@@ -366,7 +366,8 @@ class convert_2_files:
         
         ## set data types column.
         df = pd.DataFrame.from_dict(rows_data, orient="index")
-        df[["CreateDate","LastUpdatedDate"]] = df[["CreateDate","LastUpdatedDate"]].apply(lambda d: d.dt.strftime("%Y%m%d%H%M%S"))
+        df[["CreateDate","LastUpdatedDate"]] = df[["CreateDate","LastUpdatedDate"]]\
+            .apply(lambda d: d.dt.strftime("%Y%m%d%H%M%S"))
         rows_data = df.to_dict(orient='index')
         
         state = "failed"
@@ -416,13 +417,10 @@ class convert_2_files:
         if len(df.index) > len(change_df.index):
             self.remove_rows = [idx for idx in list(df.index) if idx not in list(change_df.index)]
 
-        ## reset index data.
         union_index = np.union1d(df.index, change_df.index)
-        ## target / tmp data.
-        df = df.reindex(index=union_index, columns=df.columns).iloc[:, :-1]
-        ## change data.
-        change_df = change_df.reindex(index=union_index, columns=change_df.columns).iloc[:, :-1]
-        
+        df = df.reindex(index=union_index, columns=df.columns).iloc[:,:-1]
+        change_df = change_df.reindex(index=union_index, columns=change_df.columns).iloc[:,:-1]
+        ## compare data.
         df["count_change"] = pd.DataFrame(np.where(df.ne(change_df), True, False), index=df.index, columns=df.columns)\
             .apply(lambda x: (x == True).sum(), axis=1)
 
@@ -433,7 +431,6 @@ class convert_2_files:
         start_rows = 2
         for idx in union_index:
             if idx not in self.remove_rows:
-
                 record = {}
                 for data, change_data in zip(df.items(), change_df.items()):
                     if df.loc[idx, "count_change"] != 14:
@@ -457,7 +454,6 @@ class convert_2_files:
             else:
                 ## Removed rows.
                 df.loc[idx, "remark"] = "Removed"
-                
         self.remove_rows = [idx + start_rows for idx in self.remove_rows]
 
         df = df.drop(["count_change"], axis=1)
@@ -478,12 +474,11 @@ class convert_2_files:
             ## filter data on batch date
             date_df = target_df[target_df["CreateDate"].isin(np.array([pd.Timestamp(date)])\
                 .astype("datetime64[ns]"))].reset_index(drop=True)
-            
             _data = self.validation_data(date_df, change_df)
             
             ## filter data not on batch date
             _dict = target_df[~target_df["CreateDate"].isin(np.array([pd.Timestamp(date)])\
-                .astype("datetime64[ns]"))].iloc[:, :-1].to_dict("index")
+                .astype("datetime64[ns]"))].iloc[:,:-1].to_dict("index")
             
             ## merge new data / old data
             max_rows = max(_dict, default=0)
@@ -492,7 +487,7 @@ class convert_2_files:
                     values.update({"mark_rows": idx})
                 _dict = {**_dict, **{max_rows + idx: values}}
                 
-            ## sorted batch date order
+            ## sorted order batch date 
             i = 0
             start_rows = 2
             for idx, values in enumerate(sorted(_dict.values(), key=lambda d: d["CreateDate"])):
