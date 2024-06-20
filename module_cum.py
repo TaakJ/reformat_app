@@ -20,7 +20,6 @@ class module_cum(call_function):
         
         result = {"module": self.module, "task": "Completed"}
         try:
-            raise CustomException("Test Error Exception")
             await self.check_source_files()
             await self.retrieve_data_from_source_files()
             # await self.mapping_column()
