@@ -130,7 +130,6 @@ class convert_2_files:
     @read_text_files
     def text_data_cleaning(self, i: int) -> any:
 
-        # logging.info("Cleansing Data From Text file..")
         self.logging[i].update({"function": "text_data_cleaning"})
 
         _dir = self.logging[i]["input_dir"]
@@ -172,7 +171,6 @@ class convert_2_files:
     @read_excle_files
     def excel_data_cleaning(self, i: int) -> any:
 
-        # logging.info("Cleansing Data From Excle files..")
         self.logging[i].update({"function": "excel_data_cleaning"})
 
         workbook = xlrd.open_workbook(self.logging[i]["input_dir"])
@@ -185,6 +183,10 @@ class convert_2_files:
 
 
     def validate_data_change(self, df: pd.DataFrame, change_df: pd.DataFrame) -> dict:
+        
+        def format_record(record):
+            return ({"\n".join('{!r}: {!r},'.format(columns, values) \
+                for columns, values in record.items())})
 
         logging.info("Validate Data Change Information..")
         self.logging[-1].update({"function": "validate_data_change"})
@@ -194,38 +196,46 @@ class convert_2_files:
         if len(df.index) > len(change_df.index):
             self.remove_rows = [idx for idx in list(df.index) if idx not in list(change_df.index)]
 
+        ## reset index.
         union_index = np.union1d(df.index, change_df.index)
+        
+        # as starter dataframe for compare
         df = df.reindex(index=union_index, columns=df.columns).iloc[:,:-1]
+        
+        # change data / new data.
         change_df = change_df.reindex(index=union_index, columns=change_df.columns).iloc[:,:-1]
-        ## compare data.
-        df["count_change"] = pd.DataFrame(np.where(df.ne(change_df), True, False), index=df.index, columns=df.columns)\
+        
+        ## compare data 
+        df["count"] = pd.DataFrame(np.where(df.ne(change_df), True, False), index=df.index, columns=df.columns)\
             .apply(lambda x: (x == True).sum(), axis=1)
-
-        def format_record(record):
-            return ("{"+"\n".join("{!r}: {!r},".format(columns, values) \
-                for columns, values in record.items())+"}")
-
+        
         start_rows = 2
         for idx in union_index:
             if idx not in self.remove_rows:
                 record = {}
                 for data, change_data in zip(df.items(), change_df.items()):
-                    if df.loc[idx, "count_change"] != 14:
+                    if df.loc[idx, "count"] != 14:
+                        
                         ## No_changed rows.
-                        if df.loc[idx, "count_change"] < 1:  # <=1
+                        if df.loc[idx, "count"] < 1:  # <=1
                             df.at[idx, data[0]] = data[1].iloc[idx]
                             df.loc[idx, "remark"] = "No_changed"
+                            
                         else:
                             ## Updated rows.
                             if data[1][idx] != change_data[1][idx]:
                                 record.update({data[0]: f"{data[1].iloc[idx]} -> {change_data[1].iloc[idx]}"})
                             df.at[idx, data[0]] = change_data[1].iloc[idx]
                             df.loc[idx, "remark"] = "Updated"
+                            
                     else:
                         ## Inserted rows.
                         record.update({data[0]: change_data[1][idx]})
-                        df.at[idx, data[0]] = change_data[1].iloc[idx]
-                        df.loc[idx, "remark"] = "Inserted"
+                        print(df.at[idx, data[0]])
+                        print(change_data[1][idx])
+                        print()
+                        # df.at[idx, data[0]] = change_data[1].iloc[idx]
+                        # df.loc[idx, "remark"] = "Inserted"
                 if record != {}:
                     self.change_rows[start_rows + idx] = format_record(record)
             else:
@@ -243,21 +253,29 @@ class convert_2_files:
         return rows_data
     
     
-    def initial_data_types(self, df: pd.DataFrame) -> pd.DataFrame:
+    def initial_data_types(self, df: pd.DataFrame):
         
         self.logging[-1].update({"function": "initial_data_types"})
         
-        df = df.astype({"ApplicationCode": int,
+        df = df.astype({"ApplicationCode": str,
                         "AccountOwner": int,
-                        "AccountName": int,
+                        "AccountName": str,
+                        "AccountType": str,
+                        "EntitlementName": str,
+                        "SecondEntitlementName": str,
+                        "ThirdEntitlementName": str,
+                        "AccountStatus": str,
+                        "IsPrivileged": str,
+                        "AccountDescription": str,
                         "CreateDate": "datetime64[ms]",
                         "LastLogin": "datetime64[ms]",
-                        "LastUpdatedDate": "datetime64[ms]"
+                        "LastUpdatedDate": "datetime64[ms]",
+                        "AdditionalAttribute": str,
                         })
+        df["remark"] = "Inserted"
         df[["CreateDate","LastLogin","LastUpdatedDate"]] = df[["CreateDate","LastLogin","LastUpdatedDate"]]\
             .apply(pd.to_datetime, format="%Y%m%d%H%M%S")
-        df["remark"] = "Inserted"
-
+        
         state = "succeed"
         self.logging[-1].update({"state": state})
                 
@@ -432,7 +450,7 @@ class convert_2_files:
         try:
             data = []
             with open(target_name, 'r', newline='') as reader:
-                csv_reader = csv.reader(reader)
+                csv_reader = csv.reader(reader, skipinitialspace=True)
                 header = next(csv_reader)
                 
                 for row in csv_reader:
@@ -459,18 +477,19 @@ class convert_2_files:
         self.logging[-1].update({"function": "optimize_data", "state": state})
         
         try:
-            df = self.initial_data_types(target_df)
+            _target_df = self.initial_data_types(target_df)
             
-            # ## filter data on batch date (DataFrame)
-            # batch_df = target_df[target_df["CreateDate"].isin(np.array([pd.Timestamp(date)])\
-            #     .astype("datetime64[ns]"))].reset_index(drop=True)
+            ## filter data on batch date (DataFrame)
+            batch_df = _target_df[_target_df["CreateDate"].isin(np.array([pd.Timestamp(self.fmt_batch_date)]))]\
+                .reset_index(drop=True)
             
-            # ## filter data not on batch date (dict).
-            # _dict = target_df[~target_df["CreateDate"].isin(np.array([pd.Timestamp(date)])\
-            #     .astype("datetime64[ns]"))].iloc[:,:-1].to_dict("index")
+            ## filter data not on batch date (dict).
+            _dict = target_df[~target_df["CreateDate"].isin(np.array([pd.Timestamp(self.fmt_batch_date)]))]\
+                .iloc[:,:-1].to_dict("index")
             
-            # # return value to dict('index').
-            # rows_data = self.validate_data_change(batch_df, change_df)
+            ## return value to dict('index').
+            rows_data = self.validate_data_change(batch_df, change_df)
+
             
             # ## merge data from new and old data.
             # max_rows = max(_dict, default=0)
@@ -510,6 +529,7 @@ class convert_2_files:
             if str(idx) in self.change_rows.keys() and wt_data[idx]["remark"] in ["Updated", "Inserted"]:
                 ## update / insert rows.
                 logging.info(f'"{wt_data[idx]["remark"]}" Rows:"{idx}" in Target file.\nRecord Changed:"{self.change_rows[str(idx)]}"')
+                
         # ## set data types column.
         # df = pd.DataFrame.from_dict(rows_data, orient="index")
         # df[["CreateDate","LastUpdatedDate"]] = df[["CreateDate","LastUpdatedDate"]]\

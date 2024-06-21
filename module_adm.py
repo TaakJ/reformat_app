@@ -56,7 +56,6 @@ class module_adm(call_function):
                         df.columns = df.iloc[0].values
                         df = df[1:]
                         df = df.reset_index(drop=True)
-                        print(df)
                         
             except Exception as err:
                 record.update({'errors': err})
@@ -65,8 +64,8 @@ class module_adm(call_function):
     async def mock_data(self) -> None:
             mock_data = [['ApplicationCode',	'AccountOwner', 'AccountName',	'AccountType',	'EntitlementName',	'SecondEntitlementName','ThirdEntitlementName', 'AccountStatus',	'IsPrivileged',	'AccountDescription',
                         'CreateDate','LastLogin','LastUpdatedDate',	'AdditionalAttribute'],
-                        [1,2,3,4,5,6,7,8,9,10,self.fmt_batch_date,self.fmt_batch_date, self.date,14],
-                        [15,16,17,18,19,20,21,22,23,24,self.fmt_batch_date,self.fmt_batch_date, self.date,28],
+                        [1,"TAAK",3,4,5,6,7,8,9,10,self.fmt_batch_date,self.fmt_batch_date, self.date,14],
+                        [15,"TOKE",17,18,19,20,21,22,23,24,self.fmt_batch_date,self.fmt_batch_date, self.date,28],
                         ]
             df = pd.DataFrame(mock_data)
             df.columns = df.iloc[0].values
