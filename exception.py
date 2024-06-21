@@ -14,9 +14,7 @@ class CustomException(Exception):
         return next(self.msg_err)
 
     def generate_error_message(self):
-        try:
-            for i in  range(len(self.errors)):
-                error_message = f"Module::{self.errors[i]['module']} - Path::{self.errors[i]['input_dir']} - Function::{self.errors[i]['function']} - State::{self.errors[i]['state']} - Error::{self.errors[i].get('errors')}"
-                yield error_message
-        except:
-            pass
+        
+        for i in  range(len(self.errors)):
+            error_message = f"Module::{self.errors[i]['module']} - Path::{self.errors[i]['input_dir']} - Function::{self.errors[i]['function']} - State::{self.errors[i]['state']} - Error::{self.errors[i].get('errors')}"
+            yield error_message
