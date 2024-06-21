@@ -182,6 +182,39 @@ class convert_2_files:
                 yield {sheets: [cells.cell(row, col).value for col in range(cells.ncols)]}
 
 
+    def initial_data_types(self, df: pd.DataFrame):
+        
+        self.logging[-1].update({"function": "initial_data_types"})
+        
+        df = df.astype({"ApplicationCode": object,
+                        "AccountOwner": int,
+                        "AccountName": object,
+                        "AccountType": object,
+                        "EntitlementName": object,
+                        "SecondEntitlementName": object,
+                        "ThirdEntitlementName": object,
+                        "AccountStatus": object,
+                        "IsPrivileged": object,
+                        "AccountDescription": object,
+                        "CreateDate": "datetime64[ms]",
+                        "LastLogin": "datetime64[ms]",
+                        "LastUpdatedDate": "datetime64[ms]",
+                        "AdditionalAttribute": object,
+                        })
+        
+        df[["CreateDate","LastLogin","LastUpdatedDate"]] = df[["CreateDate","LastLogin","LastUpdatedDate"]]\
+            .apply(pd.to_datetime, format="%Y%m%d%H%M%S")
+        
+        if "remark" in df.columns:
+            df = df.loc[df["remark"] != "Removed"]
+        else:
+            df["remark"] = "Inserted"
+        
+        state = "succeed"
+        self.logging[-1].update({"state": state})
+                
+        return df    
+
     def validate_data_change(self, df: pd.DataFrame, change_df: pd.DataFrame) -> dict:
         
         def format_record(record):
@@ -234,7 +267,7 @@ class convert_2_files:
                         print(data[0])
                         print(df.at[idx, data[0]])
                         print(change_data[1][idx])
-                        df.at[idx, data[0]] = change_data[1][idx]
+                        # df.at[idx, data[0]] = change_data[1][idx]
                         print()
                         # df.loc[idx, "remark"] = "Inserted"
                 if record != {}:
@@ -242,45 +275,16 @@ class convert_2_files:
             else:
                 ## Removed rows.
                 df.loc[idx, "remark"] = "Removed"
-        self.remove_rows = [idx + start_rows for idx in self.remove_rows]
+        # self.remove_rows = [idx + start_rows for idx in self.remove_rows]
 
-        df = df.drop(["count"], axis=1)
-        df.index += start_rows
-        rows_data = df.to_dict(orient='index')
+        # df = df.drop(["count"], axis=1)
+        # df.index += start_rows
+        # rows_data = df.to_dict(orient='index')
 
-        state = "succeed"
-        self.logging[-1].update({"state": state})
+        # state = "succeed"
+        # self.logging[-1].update({"state": state})
         
-        return rows_data
-    
-    
-    def initial_data_types(self, df: pd.DataFrame):
-        
-        self.logging[-1].update({"function": "initial_data_types"})
-        
-        df = df.astype({"ApplicationCode": object,
-                        "AccountOwner": int,
-                        "AccountName": object,
-                        "AccountType": object,
-                        "EntitlementName": object,
-                        "SecondEntitlementName": object,
-                        "ThirdEntitlementName": object,
-                        "AccountStatus": object,
-                        "IsPrivileged": object,
-                        "AccountDescription": object,
-                        "CreateDate": "datetime64[ms]",
-                        "LastLogin": "datetime64[ms]",
-                        "LastUpdatedDate": "datetime64[ms]",
-                        "AdditionalAttribute": object,
-                        })
-        df["remark"] = "Inserted"
-        # df[["CreateDate","LastLogin","LastUpdatedDate"]] = df[["CreateDate","LastLogin","LastUpdatedDate"]]\
-        #     .apply(pd.to_datetime, format="%Y%m%d%H%M%S")
-        
-        state = "succeed"
-        self.logging[-1].update({"state": state})
-                
-        return df    
+        return "rows_data"
     
     
     async def write_data_to_tmp_file(self) -> None:
@@ -295,9 +299,11 @@ class convert_2_files:
                     tmp_name = join(Folder.TMP,f"TMP_{self.module}-{self.batch_date.strftime('%d%m%y')}.xlsx")
                     record.update({"input_dir": tmp_name,"function": "write_data_to_tmp_file","state": state})
 
-                    # return value from mapping column
-                    change_df = pd.DataFrame(record["data"])
+                    data = record["data"]
+                    change_df = pd.DataFrame(data)
+                    ## check intial data types for new data.
                     change_df = self.initial_data_types(change_df)
+                    
                     try:
                         workbook = openpyxl.load_workbook(tmp_name)
                         get_sheet = workbook.get_sheet_names()
@@ -310,8 +316,8 @@ class convert_2_files:
                         template_name = join(Folder.TEMPLATE, "Application Data Requirements.xlsx")
                         try:
                             if not glob.glob(tmp_name, recursive=True):
-                                state = shutil.copy2(template_name, tmp_name)
-                            state = "succeed"
+                                shutil.copy2(template_name, tmp_name)
+                                state = "succeed"
                         except:
                             raise
                         workbook = openpyxl.load_workbook(tmp_name)
@@ -320,18 +326,20 @@ class convert_2_files:
                         sheet_num = 1
                         sheet.title = sheet_name
 
+                    if state != "succeed":
+                        sheet_name = f"RUN_TIME_{sheet_num}"
+                        sheet = workbook.create_sheet(sheet_name)
+                        
                     # read tmp files.
                     data = sheet.values
                     columns = next(data)[0:]
                     tmp_df = pd.DataFrame(data, columns=columns)
+                    ## check intial data types for existing data.
                     tmp_df = self.initial_data_types(tmp_df)
-                        
-                    if state != "succeed":
-                        tmp_df = tmp_df.loc[tmp_df["remark"] != "Removed"]
-                        sheet_name = f"RUN_TIME_{sheet_num}"
-                        sheet = workbook.create_sheet(sheet_name)
                     
                     logging.info(f'Generate Sheet_name: "{sheet_name}" in Tmp files.')
+                    
+                    ## validate data change row by row
                     rows_data = self.validate_data_change(tmp_df, change_df)
                     
                     ## write to tmp files.
@@ -408,28 +416,28 @@ class convert_2_files:
                 if record["module"] == "Target_file":
                     record.update({"function": "write_data_to_target_file", "state": state})
                     
-                    ## read tmp file / return value from mapping column
                     if self.store_tmp is True:
                         tmp_name = record["input_dir"]
                         sheet_name = record["sheet_name"]
                         change_df = pd.read_excel(tmp_name, sheet_name=sheet_name,)
-                        change_df = change_df.loc[change_df['remark'] != "Removed"]
                     else:
-                        change_df = pd.DataFrame(record["data"])
-                        
-                    # change_df = self.initial_data_types(change_df)
-                    print(change_df)
+                        data = record["data"]
+                        change_df = pd.DataFrame(data)
                     
-                    ### read target file (csv).
-                    # if self.write_mode == "overwrite" or self.manual:
-                    #     target_name = join(self.output_dir, self.output_file)
-                    # else:
-                    #     suffix = f"{self.batch_date.strftime('%d%m%y')}"
-                    #     self.output_file = f"{Path(self.output_file).stem}_{suffix}.csv"
-                    #     target_name = join(self.output_dir, self.output_file)
-                        
-                    # target_df = self.read_csv(target_name)
-                    # wt_data = self.optimize_data(target_df, change_df)
+                    ## check intial data types for new data.
+                    change_df = self.initial_data_types(change_df)
+                    
+                    ## set target name for read csv.
+                    if self.write_mode == "overwrite" or self.manual:
+                        target_name = join(self.output_dir, self.output_file)
+                    else:
+                        suffix = f"{self.batch_date.strftime('%d%m%y')}"
+                        self.output_file = f"{Path(self.output_file).stem}_{suffix}.csv"
+                        target_name = join(self.output_dir, self.output_file)
+                    
+                    ## read csv.    
+                    target_df = self.read_csv(target_name)
+                    wt_data = self.optimize_data(target_df, change_df)
                     
                     # state = self.write_csv(target_name, wt_data)
                     # logging.info(f"Write to Target Files status: {state}.")
@@ -476,17 +484,18 @@ class convert_2_files:
         self.logging[-1].update({"function": "optimize_data", "state": state})
         
         try:
-            _target_df = self.initial_data_types(target_df)
+            ## check intial data types for existing data.
+            target_df = self.initial_data_types(target_df)
             
-            ## filter data on batch date (DataFrame)
-            batch_df = _target_df[_target_df["CreateDate"].isin(np.array([pd.Timestamp(self.fmt_batch_date)]))]\
+            ## filter data on batch date => (DataFrame)
+            batch_df = target_df[target_df["CreateDate"].isin(np.array([pd.Timestamp(self.fmt_batch_date)]))]\
                 .reset_index(drop=True)
             
-            ## filter data not on batch date (dict).
+            ## filter data not on batch date => (dict).
             _dict = target_df[~target_df["CreateDate"].isin(np.array([pd.Timestamp(self.fmt_batch_date)]))]\
                 .iloc[:,:-1].to_dict("index")
             
-            ## return value to dict('index').
+            ## validate data change row by row
             rows_data = self.validate_data_change(batch_df, change_df)
             
             # ## merge data from new and old data.
