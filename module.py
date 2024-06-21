@@ -231,10 +231,11 @@ class convert_2_files:
                     else:
                         ## Inserted rows.
                         record.update({data[0]: change_data[1][idx]})
+                        print(data[0])
                         print(df.at[idx, data[0]])
                         print(change_data[1][idx])
+                        df.at[idx, data[0]] = change_data[1][idx]
                         print()
-                        # df.at[idx, data[0]] = change_data[1].iloc[idx]
                         # df.loc[idx, "remark"] = "Inserted"
                 if record != {}:
                     self.change_rows[start_rows + idx] = format_record(record)
@@ -243,7 +244,7 @@ class convert_2_files:
                 df.loc[idx, "remark"] = "Removed"
         self.remove_rows = [idx + start_rows for idx in self.remove_rows]
 
-        df = df.drop(["count_change"], axis=1)
+        df = df.drop(["count"], axis=1)
         df.index += start_rows
         rows_data = df.to_dict(orient='index')
 
@@ -257,24 +258,24 @@ class convert_2_files:
         
         self.logging[-1].update({"function": "initial_data_types"})
         
-        df = df.astype({"ApplicationCode": str,
+        df = df.astype({"ApplicationCode": object,
                         "AccountOwner": int,
-                        "AccountName": str,
-                        "AccountType": str,
-                        "EntitlementName": str,
-                        "SecondEntitlementName": str,
-                        "ThirdEntitlementName": str,
-                        "AccountStatus": str,
-                        "IsPrivileged": str,
-                        "AccountDescription": str,
+                        "AccountName": object,
+                        "AccountType": object,
+                        "EntitlementName": object,
+                        "SecondEntitlementName": object,
+                        "ThirdEntitlementName": object,
+                        "AccountStatus": object,
+                        "IsPrivileged": object,
+                        "AccountDescription": object,
                         "CreateDate": "datetime64[ms]",
                         "LastLogin": "datetime64[ms]",
                         "LastUpdatedDate": "datetime64[ms]",
-                        "AdditionalAttribute": str,
+                        "AdditionalAttribute": object,
                         })
         df["remark"] = "Inserted"
-        df[["CreateDate","LastLogin","LastUpdatedDate"]] = df[["CreateDate","LastLogin","LastUpdatedDate"]]\
-            .apply(pd.to_datetime, format="%Y%m%d%H%M%S")
+        # df[["CreateDate","LastLogin","LastUpdatedDate"]] = df[["CreateDate","LastLogin","LastUpdatedDate"]]\
+        #     .apply(pd.to_datetime, format="%Y%m%d%H%M%S")
         
         state = "succeed"
         self.logging[-1].update({"state": state})
@@ -297,7 +298,6 @@ class convert_2_files:
                     # return value from mapping column
                     change_df = pd.DataFrame(record["data"])
                     change_df = self.initial_data_types(change_df)
-                    
                     try:
                         workbook = openpyxl.load_workbook(tmp_name)
                         get_sheet = workbook.get_sheet_names()
@@ -416,24 +416,23 @@ class convert_2_files:
                         change_df = change_df.loc[change_df['remark'] != "Removed"]
                     else:
                         change_df = pd.DataFrame(record["data"])
-                        change_df["remark"] = "Inserted"
                         
-                    change_df[["CreateDate","LastUpdatedDate"]] = change_df[["CreateDate","LastUpdatedDate"]]\
-                        .apply(pd.to_datetime, format="%Y%m%d%H%M%S")
+                    # change_df = self.initial_data_types(change_df)
+                    print(change_df)
                     
-                    ## read target file (csv).
-                    if self.write_mode == "overwrite" or self.manual:
-                        target_name = join(self.output_dir, self.output_file)
-                    else:
-                        suffix = f"{self.batch_date.strftime('%d%m%y')}"
-                        self.output_file = f"{Path(self.output_file).stem}_{suffix}.csv"
-                        target_name = join(self.output_dir, self.output_file)
+                    ### read target file (csv).
+                    # if self.write_mode == "overwrite" or self.manual:
+                    #     target_name = join(self.output_dir, self.output_file)
+                    # else:
+                    #     suffix = f"{self.batch_date.strftime('%d%m%y')}"
+                    #     self.output_file = f"{Path(self.output_file).stem}_{suffix}.csv"
+                    #     target_name = join(self.output_dir, self.output_file)
                         
-                    target_df = self.read_csv(target_name)
-                    wt_data = self.optimize_data(target_df, change_df)
+                    # target_df = self.read_csv(target_name)
+                    # wt_data = self.optimize_data(target_df, change_df)
                     
-                    state = self.write_csv(target_name, wt_data)
-                    logging.info(f"Write to Target Files status: {state}.")
+                    # state = self.write_csv(target_name, wt_data)
+                    # logging.info(f"Write to Target Files status: {state}.")
             
             except Exception as err:
                 record.update({"errors": err})
@@ -489,7 +488,6 @@ class convert_2_files:
             
             ## return value to dict('index').
             rows_data = self.validate_data_change(batch_df, change_df)
-
             
             # ## merge data from new and old data.
             # max_rows = max(_dict, default=0)
