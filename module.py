@@ -13,7 +13,6 @@ from io import StringIO
 import re
 import xlrd
 import csv
-from datetime import datetime
 
 class convert_2_files:
 
