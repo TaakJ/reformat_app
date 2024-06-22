@@ -1,3 +1,5 @@
+from setup import Folder
+
 class CustomException(Exception):
     def __init__(self,*args: tuple, **kwargs: dict):
         self.__dict__.update(kwargs)
@@ -5,6 +7,7 @@ class CustomException(Exception):
         for key, value in self.__dict__.items():
             setattr(self, key, value)
         
+        self.setup_log()
         self.x = args[0]
         self.err_msg = self.generate_error()
         
@@ -14,8 +17,10 @@ class CustomException(Exception):
     def __next__(self):
         return next(self.err_msg)
 
+    def setup_log(self):
+        print(self.x)
+    
     def generate_error(self):
-        
         yield self.x
         
         
