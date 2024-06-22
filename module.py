@@ -378,19 +378,20 @@ class convert_2_files:
                     if columns == "remark":
                         if start_rows in self.remove_rows and change_data[start_rows][columns] == "Remove":
                             ## Remove rows.
-                            show = f"{change_data[start_rows][columns]} Rows: ({start_rows}) in Tmp files."
+                            show = f'{change_data[start_rows][columns]} Rows: "{start_rows}" in Tmp files.'
                             sheet.cell(row=start_rows, column=idx).value = change_data[start_rows][columns]
                             
                         elif start_rows in self.change_rows.keys() and change_data[start_rows][columns] in ["Insert","Update"]:
                             ## Update / Insert rows. 
-                            show = f"{change_data[start_rows][columns]} Rows: ({start_rows}) in Tmp files.\nRecord Change: {self.change_rows[start_rows]}"
+                            show = f'{change_data[start_rows][columns]} Rows: "{start_rows}" in Tmp files.\nRecord Change: {self.change_rows[start_rows]}'
                             sheet.cell(row=start_rows, column=idx).value = change_data[start_rows][columns]
                         else:
                             ## No change rows.
-                            show = f"No Change Rows: ({start_rows}) in Tmp files."
+                            show = f'No Change Rows: "{start_rows}" in Tmp files.'
                             sheet.cell(row=start_rows, column=idx).value = change_data[start_rows][columns]
-                            
+                        
                         logging.info(show)
+                        
                     else:
                         sheet.cell(row=start_rows, column=idx).value = change_data[start_rows][columns]
                         
@@ -439,7 +440,7 @@ class convert_2_files:
                     _data = self.optimize_data(target_df, change_df)
                     
                     ## write csv. 
-                    # state = self.write_csv(target_name, _data)
+                    state = self.write_csv(target_name, _data)
             
             except Exception as err:
                 record.update({"errors": err})
@@ -501,28 +502,28 @@ class convert_2_files:
             ## validate data change row by row
             rows_data = self.validate_data_change(batch_df, change_df)
             
-            # ## merge data from new and old data.
-            # max_rows = max(_dict, default=0)
-            # for idx, values in rows_data.items():
-            #     if idx in self.change_rows or idx in self.remove_rows:
-            #         values.update({"mark_row": idx})
-            #     _dict = {**_dict, **{max_rows + idx: values}}
+            ## merge data from new and old data.
+            max_rows = max(_dict, default=0)
+            for idx, values in rows_data.items():
+                if idx in self.change_rows or idx in self.remove_rows:
+                    values.update({"mark_row": idx})
+                _dict = {**_dict, **{max_rows + idx: values}}
             
-            # ## sorted order data on batch date.
-            # i = 0
-            # start_rows = 2
-            # for idx, values in enumerate(sorted(_dict.values(), key=lambda d: d["CreateDate"])):
-            #     idx += start_rows
-            #     if "mark_row" in values.keys():
-            #         if values["mark_row"] in self.change_rows:
-            #             self.change_rows[str(idx)] = self.change_rows.pop(values["mark_row"])
-            #         elif values["mark_row"] in self.remove_rows:
-            #             self.remove_rows[i] = idx
-            #             i += 1
-            #         values.pop("mark_row")
-            #     _data.update({idx: values})
+            ## sorted order data on batch date.
+            i = 0
+            start_rows = 2
+            for idx, values in enumerate(sorted(_dict.values(), key=lambda d: d["CreateDate"])):
+                idx += start_rows
+                if "mark_row" in values.keys():
+                    if values["mark_row"] in self.change_rows:
+                        self.change_rows[str(idx)] = self.change_rows.pop(values["mark_row"])
+                    elif values["mark_row"] in self.remove_rows:
+                        self.remove_rows[i] = idx
+                        i += 1
+                    values.pop("mark_row")
+                _data.update({idx: values})
         
-            # state = "succeed"
+            state = "succeed"
             
         except Exception as err:
             raise Exception(err)
