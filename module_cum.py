@@ -68,4 +68,4 @@ class module_cum(call_function):
             df.columns = df.iloc[0].values
             df = df[1:]
             df = df.reset_index(drop=True)
-            self.logging.append({'module': 'Target_file', 'data': df.to_dict('list')})
+            self.logging.append({"module": "Target_file", "data": df.to_dict('list')})
