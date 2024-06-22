@@ -188,30 +188,35 @@ class convert_2_files:
 
     def initial_data_types(self, df: pd.DataFrame) -> pd.DataFrame:
         
-        self.logging[-1].update({"function": "initial_data_types"})
+        state = "failed"
+        self.logging[-1].update({"function": "initial_data_types", "state":state})
+        try:
+            df = df.astype({"ApplicationCode": object,
+                            "AccountOwner": object,
+                            "AccountName": object,
+                            "AccountType": object,
+                            "EntitlementName": object,
+                            "SecondEntitlementName": object,
+                            "ThirdEntitlementName": object,
+                            "AccountStatus": object,
+                            "IsPrivileged": object,
+                            "AccountDescription": object,
+                            "CreateDate": "datetime64[ms]",
+                            "LastLogin": "datetime64[ms]",
+                            "LastUpdatedDate": "datetime64[ms]",
+                            "AdditionalAttribute": object,
+                            })
+            df[["CreateDate","LastLogin","LastUpdatedDate"]] = df[["CreateDate","LastLogin","LastUpdatedDate"]]\
+                .apply(pd.to_datetime, format="%Y%m%d%H%M%S")
+            
+            if "remark" in df.columns:
+                df = df.loc[df["remark"] != "Remove"]
+            else:
+                df["remark"] = "Insert"
         
-        df = df.astype({"ApplicationCode": object,
-                        "AccountOwner": object,
-                        "AccountName": object,
-                        "AccountType": object,
-                        "EntitlementName": object,
-                        "SecondEntitlementName": object,
-                        "ThirdEntitlementName": object,
-                        "AccountStatus": object,
-                        "IsPrivileged": object,
-                        "AccountDescription": object,
-                        "CreateDate": "datetime64[ms]",
-                        "LastLogin": "datetime64[ms]",
-                        "LastUpdatedDate": "datetime64[ms]",
-                        "AdditionalAttribute": object,
-                        })
-        df[["CreateDate","LastLogin","LastUpdatedDate"]] = df[["CreateDate","LastLogin","LastUpdatedDate"]]\
-            .apply(pd.to_datetime, format="%Y%m%d%H%M%S")
-        
-        if "remark" in df.columns:
-            df = df.loc[df["remark"] != "Remove"]
-        else:
-            df["remark"] = "Insert"
+        except Exception as err:
+            print(err)
+            raise Exception(err)
         
         state = "succeed"
         self.logging[-1].update({"state": state})
@@ -298,7 +303,6 @@ class convert_2_files:
 
                     data = record["data"]
                     change_df = pd.DataFrame(data)
-                    ## check intial data types for new data.
                     change_df = self.initial_data_types(change_df)
                     
                     try:
@@ -322,33 +326,33 @@ class convert_2_files:
                         sheet_name = "RUN_TIME_1"
                         sheet_num = 1
                         sheet.title = sheet_name
-
-                    if state != "succeed":
-                        sheet_name = f"RUN_TIME_{sheet_num}"
-                        sheet = workbook.create_sheet(sheet_name)
-                        
-                    # read tmp files.
+                    
+                    ## read tmp files.
                     data = sheet.values
                     columns = next(data)[0:]
                     tmp_df = pd.DataFrame(data, columns=columns)
-                    ## check intial data types for existing data.
                     tmp_df = self.initial_data_types(tmp_df)
-                    logging.info(f'Generate Sheet_name: "{sheet_name}" in Tmp files.')
                     
-                    ## validate data change row by row
+                    # ## validate data change row by row
                     rows_data = self.validate_data_change(tmp_df, change_df)
                     
                     ## write to tmp files.
+                    if state != "succeed":
+                        sheet_name = f"RUN_TIME_{sheet_num}"
+                        sheet = workbook.create_sheet(sheet_name)
+                    logging.info(f'Generate Sheet_name: "{sheet_name}" in Tmp files.')   
+                    
                     state = self.write_worksheet(sheet, rows_data)
                     workbook.move_sheet(workbook.active, offset=-sheet_num)
                     workbook.save(tmp_name)
+                    
                     record.update({"sheet_name": sheet_name, "state": state})
-
+                    
             except Exception as err:
                 record.update({"errors": err})
-                
-            logging.info(f'Write to Tmp files Status: "{state}".')
 
+            logging.info(f'Write Data to Tmp files: "{state}" rows')
+            
             if "errors" in record:
                 raise CustomException(errors=self.logging)
 
@@ -373,22 +377,22 @@ class convert_2_files:
                     
                     if columns == "remark":
                         if start_rows in self.remove_rows and change_data[start_rows][columns] == "Remove":
-                            ## Remove data.
+                            ## Remove rows.
                             show = f"{change_data[start_rows][columns]} Rows: ({start_rows}) in Tmp files."
                             sheet.cell(row=start_rows, column=idx).value = change_data[start_rows][columns]
                             
                         elif start_rows in self.change_rows.keys() and change_data[start_rows][columns] in ["Insert","Update"]:
-                            ## Update / Insert data. 
+                            ## Update / Insert rows. 
                             show = f"{change_data[start_rows][columns]} Rows: ({start_rows}) in Tmp files.\nRecord Change: {self.change_rows[start_rows]}"
                             sheet.cell(row=start_rows, column=idx).value = change_data[start_rows][columns]
                         else:
-                            ## No change data.
+                            ## No change rows.
                             show = f"No Change Rows: ({start_rows}) in Tmp files."
                             sheet.cell(row=start_rows, column=idx).value = change_data[start_rows][columns]
                             
                         logging.info(show)
                         
-                    elif columns in ["CreateDate","LastUpdatedDate"]:
+                    elif columns in ["CreateDate", "LastLogin", "LastUpdatedDate"]:
                         sheet.cell(row=start_rows, column=idx).value = change_data[start_rows][columns].strftime("%Y%m%d%H%M%S")
                         
                     else:
@@ -446,7 +450,7 @@ class convert_2_files:
                 record.update({"errors": err})
                 
         logging.info(f'Write to Target Files status: "{state}".')
-
+        
         if "errors" in record:
             raise CustomException(errors=self.logging)
         
