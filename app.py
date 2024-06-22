@@ -13,16 +13,21 @@ from PyQt6.QtWidgets import (
     QLabel,
     QDateEdit,
     QProgressBar,
-    QCheckBox
+    QCheckBox,
+    QComboBox,
 )
 from PyQt6.QtCore import (
+    Qt,
     QThread, 
     QObject, 
     pyqtSignal
 )
 from PyQt6.QtGui import (
-    QFont
+    QFont,
+    QPalette,
+    QColor
 )
+from PyQt6.QtCore import Qt
 from qt_material import apply_stylesheet
 from setup import setup_parser, setup_folder, setup_config, setup_log
 from method import start_app
@@ -74,6 +79,10 @@ class setup_app(QWidget):
 
     def ui(self , params):
         
+        self._params = params
+        self.module = self._params["source"]
+        self.config  = self._params["config"]
+        
         self.bold = QFont()
         self.bold.setBold(True)
         
@@ -86,7 +95,7 @@ class setup_app(QWidget):
         self.setLayout(grid)
 
         self.setWindowTitle("App")
-        self.setGeometry(650, 200, 700, 360)
+        self.setGeometry(650, 200, 660, 360)
         self.show()
 
     def layout1(self):
@@ -111,11 +120,18 @@ class setup_app(QWidget):
         hbox2 = QHBoxLayout()
         hbox2.addWidget(QLabel("Set Date:"))
         hbox2.addWidget(self.calendar)
+        
+        hbox3 = QHBoxLayout()
+        hbox3.addWidget(QLabel("Select Module:"))
+        self.combobox = QComboBox()
+        self.combobox.addItems(self.module)
+        hbox3.addWidget(self.combobox)
 
         vbox = QVBoxLayout()
         vbox.addLayout(hbox1)
         vbox.addLayout(hbox2)
-        vbox.addStretch(1)
+        vbox.addLayout(hbox3)
+        # vbox.addStretch(1)
         self.groupbox1.setLayout(vbox)
 
         return self.groupbox1
@@ -142,78 +158,78 @@ class setup_app(QWidget):
         vbox.addStretch(1)
         self.groupbox2.setLayout(vbox)
 
-        self.radio1.clicked.connect(self.select_mode)
-        radio2.clicked.connect(self.select_mode)
+        # self.radio1.clicked.connect(self.select_mode)
+        # radio2.clicked.connect(self.select_mode)
 
         return self.groupbox2
 
-    # def layout3(self):
-    #     self.groupbox3 = QGroupBox("Path.")
-    #     self.groupbox3.setCheckable(True)
-    #     self.groupbox3.setChecked(True)
+    def layout3(self):
+        self.groupbox3 = QGroupBox("Path.")
+        self.groupbox3.setCheckable(True)
+        self.groupbox3.setChecked(True)
 
-    #     button1 = QPushButton("Browse")
-    #     self.path1 = QLineEdit()
-    #     self.path1.setText(Folder.RAW)
-    #     self.path1.setReadOnly(True)
+        button1 = QPushButton("Browse")
+        self.path1 = QLineEdit()
+        # self.path1.setText(Folder.RAW)
+        self.path1.setReadOnly(True)
 
-    #     button2 = QPushButton("Save")
-    #     self.path2 = QLineEdit()
-    #     self.path2.setText(Folder.EXPORT)
-    #     self.path2.setReadOnly(True)
+        button2 = QPushButton("Save")
+        self.path2 = QLineEdit()
+        # self.path2.setText(Folder.EXPORT)
+        self.path2.setReadOnly(True)
 
-    #     layout = QGridLayout()
-    #     layout.addWidget(QLabel("Input :"), 0, 0)
-    #     layout.addWidget(self.path1, 0, 1)
-    #     layout.addWidget(button1, 0, 2)
+        layout = QGridLayout()
+        layout.addWidget(QLabel("Incoming Path :"), 0, 0)
+        layout.addWidget(self.path1, 0, 1)
+        layout.addWidget(button1, 0, 2)
 
-    #     layout.addWidget(QLabel("Output :"), 2, 0)
-    #     layout.addWidget(self.path2, 2, 1)
-    #     layout.addWidget(button2, 2, 2)
-    #     self.groupbox3.setLayout(layout)
+        layout.addWidget(QLabel("Outgoing Path :"), 2, 0)
+        layout.addWidget(self.path2, 2, 1)
+        layout.addWidget(button2, 2, 2)
+        self.groupbox3.setLayout(layout)
 
-    #     button1.clicked.connect(lambda: self.open_dirs(Folder.RAW, 1))
-    #     button2.clicked.connect(lambda: self.open_dirs(Folder.EXPORT, 2))
+        # button1.clicked.connect(lambda: self.open_dirs(Folder.RAW, 1))
+        # button2.clicked.connect(lambda: self.open_dirs(Folder.EXPORT, 2))
 
-    #     return self.groupbox3
+        return self.groupbox3
 
-    # def layout4(self):
-    #     self.groupbox4 = QGroupBox("Run Job.")
-    #     self.groupbox4.setCheckable(True)
-    #     self.groupbox4.setChecked(True)
+    def layout4(self):
+        self.groupbox4 = QGroupBox("Run Job.")
+        self.groupbox4.setCheckable(True)
+        self.groupbox4.setChecked(True)
 
-    #     self.progress = QProgressBar()
-    #     self.progress.setStyleSheet("""QProgressBar {
-    #                                     color: #000;
-    #                                     border: 2px solid grey;
-    #                                     border-radius: 5px;
-    #                                     text-align: center;}
-    #                                 QProgressBar::chunk {
-    #                                     background-color: #a5c6ff;
-    #                                     width: 10px;
-    #                                     margin: 0.5px;
-    #                                 }"""
-    #     )
+        self.progress = QProgressBar()
+        self.progress.setStyleSheet("""QProgressBar {
+                                        color: #000;
+                                        border: 2px solid grey;
+                                        border-radius: 5px;
+                                        text-align: center;}
+                                    QProgressBar::chunk {
+                                        background-color: #a5c6ff;
+                                        width: 10px;
+                                        margin: 0.5px;
+                                    }"""
+        )
 
-    #     self.label = QLabel("Press the button to start job.")
-    #     self.run_btn = QPushButton("START")
-    #     self.run_btn.setFixedSize(90, 40)
+        self.label = QLabel("Press the button to start job.")
+        self.run_btn = QPushButton("START")
+        self.run_btn.setFixedSize(90, 40)
         
-    #     vbox = QVBoxLayout()
-    #     vbox.addWidget(self.progress)
-    #     vbox.addWidget(self.label)
+        vbox = QVBoxLayout()
+        vbox.addWidget(self.progress)
+        vbox.addWidget(self.label)
 
-    #     hbox = QHBoxLayout()
-    #     hbox.addWidget(self.run_btn)
-    #     hbox.addStretch(1)
+        hbox = QHBoxLayout()
+        hbox.addWidget(self.run_btn)
+        hbox.addStretch(1)
 
-    #     vbox.addLayout(hbox)
-    #     vbox.addStretch(1)
-    #     self.groupbox4.setLayout(vbox)
+        vbox.addLayout(hbox)
+        vbox.addStretch(1)
+        self.groupbox4.setLayout(vbox)
         
-    #     self.run_btn.clicked.connect(self.run_job_tasks)
+        # self.run_btn.clicked.connect(self.run_job_tasks)
 
-    #     return self.groupbox4
+        return self.groupbox4
 
     def layout5(self):
         groupbox = QGroupBox("Output.")
@@ -341,10 +357,14 @@ if __name__ == "__main__":
     app = QApplication(sys.argv)
     apply_stylesheet(
         app,
-        theme="light_blue.xml",
-        invert_secondary=True,
+        theme="dark_yellow.xml",
+        # invert_secondary=True,
         extra={
-            "font_family": "Roboto",
-        },
+            "font_family": "monoespace",
+            "font_size": "14px",
+            "line_height": "14px",
+            "density_scale": "0",
+            "pyside6": True,
+            "linux": True },
     )
     setup_app()
