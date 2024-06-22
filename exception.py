@@ -1,4 +1,9 @@
 from setup import Folder
+import logging.config
+import yaml
+import os
+from os.path import join
+from datetime import datetime
 
 class CustomException(Exception):
     def __init__(self,*args: tuple, **kwargs: dict):
@@ -17,10 +22,10 @@ class CustomException(Exception):
     def __next__(self):
         return next(self.err_msg)
 
-    def setup_log(self):
+    def setup_log(self) -> None:
         print(self.x)
-    
-    def generate_error(self):
+
+    def generate_error(self) -> any:
         yield self.x
         
         
