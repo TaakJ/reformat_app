@@ -23,15 +23,18 @@ class Folder:
     TMP                 =  join(_CURRENT_DIR, "TMP/")
     LOG                 =  join(_CURRENT_DIR, "LOG/")
 
+
 def setup_folder() -> None:
     _folders = [value for name, value in vars(Folder).items() if isinstance(value, str) and not name.startswith("_")]
     for folder in _folders:
         os.makedirs(folder, exist_ok=True)
     
+    
 def clear_tmp() -> None:
     _folders = [value for name, value in vars(Folder).items() if isinstance(value, str) and not name.startswith("_") and value.endswith("TMP/")]
     for file_path in [join(folder, files) for folder in _folders for files in os.listdir(folder) if os.path.isfile(join(folder, files))]:
         os.remove(file_path)
+        
         
 def setup_config() -> dict:
     config_yaml  = None
@@ -61,6 +64,7 @@ def setup_log() -> None:
             logging.config.dictConfig(config_yaml)
     else:
         raise Exception(f"Yaml file file_path: '{Folder._LOGGER_CONFIG_DIR}' doesn't exist.")
+
 
 class setup_parser:
     def __init__(self):

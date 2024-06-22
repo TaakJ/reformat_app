@@ -1,6 +1,5 @@
 from func import call_function
 from exception import CustomException
-from setup import setup_log, Folder, clear_tmp
 import pandas as pd
 import logging
 
@@ -23,12 +22,14 @@ class module_adm(call_function):
         
         result = {"module": self.module, "task": "Completed"}
         try:
-            await self.check_source_files()
-            await self.retrieve_data_from_source_files()
-            await self.mock_data()
-            if self.store_tmp is True:
-                await self.write_data_to_tmp_file()
-            await self.write_data_to_target_file()
+            raise Exception("Test Exception")
+            # await self.check_source_files()
+            # await self.retrieve_data_from_source_files()
+            # # await self.mapping_column()
+            # await self.mock_data()
+            # if self.store_tmp is True:
+            #     await self.write_data_to_tmp_file()
+            # await self.write_data_to_target_file()
         
         except CustomException as error:
             logging.error("Error Exception")

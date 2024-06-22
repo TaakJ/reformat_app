@@ -1,6 +1,5 @@
 from func import call_function
 from exception import CustomException
-from setup import setup_log, Folder, clear_tmp
 import pandas as pd
 import logging
 
