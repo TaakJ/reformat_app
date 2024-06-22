@@ -561,7 +561,6 @@ class convert_2_files:
                 
                 for idx in output:
                     if str(idx) in self.change_rows.keys() and output[idx]["remark"] in ["Update", "Insert"]:
-                        
                         logging.info(f'"{output[idx]["remark"]}" Rows: "{idx}" in Target file.\nRecord Change:"{self.change_rows[str(idx)]}"')
                         output[idx].pop('remark')
                         
