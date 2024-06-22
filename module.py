@@ -13,6 +13,7 @@ from io import StringIO
 import re
 import xlrd
 import csv
+from datetime import datetime
 
 class convert_2_files:
 
@@ -347,12 +348,12 @@ class convert_2_files:
                     state = self.write_worksheet(sheet, rows_data)
                     workbook.move_sheet(workbook.active, offset=-sheet_num)
                     workbook.save(tmp_name)
-
                     record.update({"sheet_name": sheet_name, "state": state})
-                    logging.info(f"Write to Tmp files state: {state}.")
 
             except Exception as err:
                 record.update({"errors": err})
+                
+            logging.info(f"Write to Tmp files state: {state}.")
 
             if "errors" in record:
                 raise CustomException(errors=self.logging)
@@ -397,11 +398,12 @@ class convert_2_files:
                         sheet.cell(row=start_rows, column=idx).value = change_data[start_rows][columns]
                         
                 start_rows += 1
+                
             state = "succeed"
-            self.logging[-1].update({"state": state})
-            
         except KeyError as err:
             raise KeyError(f"Can not Write rows: {err} in Tmp files.")
+        
+        self.logging[-1].update({"state": state})
         
         return state
 
@@ -438,14 +440,16 @@ class convert_2_files:
                     
                     ## read csv.    
                     target_df = self.read_csv(target_name)
-                    _data = self.optimize_data(target_df, change_df)
+                    print(target_df)
+                    # _data = self.optimize_data(target_df, change_df)
                     
                     ## write csv. 
-                    state = self.write_csv(target_name, _data)
-                    logging.info(f"Write to Target Files status: {state}.")
+                    # state = self.write_csv(target_name, _data)
             
             except Exception as err:
                 record.update({"errors": err})
+                
+        logging.info(f"Write to Target Files status: {state}.")
 
         if "errors" in record:
             raise CustomException(errors=self.logging)
@@ -522,11 +526,11 @@ class convert_2_files:
                         i += 1
                     values.pop("mark_row")
                 _data.update({idx: values})
-            
+        
+            state = "succeed"
         except Exception as err:
             raise Exception(err)
         
-        state = "succeed"
         self.logging[-1].update({"state": state})
         
         return _data
@@ -539,50 +543,38 @@ class convert_2_files:
         state = "failed"
         self.logging[-1].update({"function": "write_csv", "state": state})
         
-        # ## set data types column.
-        # df = pd.DataFrame.from_dict(rows_data, orient="index")
-        # df[["CreateDate","LastUpdatedDate"]] = df[["CreateDate","LastUpdatedDate"]]\
-        #     .apply(lambda d: d.dt.strftime("%Y%m%d%H%M%S"))
-        # rows_data = df.to_dict(orient='index')
         try:
             reader = self.read_csv(target_name)
-            fieldnames = reader.columns.tolist()
+            header = {i: column for i, column in enumerate(reader.columns.tolist())}
 
-            print(fieldnames)
-            # fieldnames = _data[2].keys()
-            # print(fieldnames)
-            # with open(target_name, 'w', newline='') as writer:
-            #     csv_writer = csv.DictWriter(writer, fieldnames=fieldnames)
-            #     csv_writer.writeheader()
+            with open(target_name, 'w', newline='') as writer:
+                csv_writer = csv.DictWriter(writer, fieldnames=header.values(), quoting=csv.QUOTE_ALL)
+                csv_writer.writeheader()
                 
-            #     for idx in wt_data:
-            #         ## update / insert rows.
-            #         if str(idx) in self.change_rows.keys() and wt_data[idx]["remark"] in ["Updated", "Inserted"]:
-            #             logging.info(f'"{wt_data[idx]["remark"]}" Rows: "{idx}" in Target file.\nRecord Changed:"{self.change_rows[str(idx)]}"')
-            #         else:
-            #             continue
+                for idx in _data:
+                    if str(idx) in self.change_rows.keys() and _data[idx]["remark"] in ["Updated", "Inserted"]:
+                        logging.info(f'"{_data[idx]["remark"]}" Rows: "{idx}" in Target file.\nRecord Changed:"{self.change_rows[str(idx)]}"')
+                        _data[idx].pop('remark')
+                    else:
+                        continue
+                    cratedate = _data[idx]["CreateDate"].strftime("%Y%m%d%H%M%S")
+                    lastlogin = _data[idx]["LastLogin"].strftime("%Y%m%d%H%M%S")
+                    updatedate = _data[idx]["LastUpdatedDate"].strftime("%Y%m%d%H%M%S")
+                
+                    _data[idx].update({"CreateDate": cratedate, 
+                                    "LastLogin":lastlogin, 
+                                    "LastUpdatedDate":updatedate})
                     
-            #         if idx not in self.remove_rows:
-            #             csv_writer.writerow(wt_data[idx])
+                    if idx not in self.remove_rows:
+                        csv_writer.writerow(_data[idx])
                         
-            # writer.closed
-            # state = "succeed"
-                
+            writer.closed
+            state = "succeed"
                 
         except Exception as err:
             raise Exception(err)
         
-        
-        #     ## write csv file.
-        #     with open(target_name, 'w', newline='') as writer:
-        #         csvout = csv.DictWriter(writer, csvin.fieldnames, delimiter=',', quotechar='"', quoting=csv.QUOTE_NONNUMERIC)
-        #         csvout.writeheader()
-        #         for idx in rows:            
-        #             if idx not in self.remove_rows:
-        #                 csvout.writerow(rows[idx])
-        #     writer.closed 
-        #     state = "succeed"
-            
+        self.logging[-1].update({"state": state})
         
         return state
 
