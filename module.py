@@ -210,9 +210,9 @@ class convert_2_files:
             .apply(pd.to_datetime, format="%Y%m%d%H%M%S")
         
         if "remark" in df.columns:
-            df = df.loc[df["remark"] != "Removed"]
+            df = df.loc[df["remark"] != "Remove"]
         else:
-            df["remark"] = "Inserted"
+            df["remark"] = "Insert"
         
         state = "succeed"
         self.logging[-1].update({"state": state})
@@ -222,7 +222,7 @@ class convert_2_files:
     def validate_data_change(self, df: pd.DataFrame, change_df: pd.DataFrame) -> dict:
         
         def format_record(record):
-            return ("{"+"\n".join('{!r}: {!r},'.format(columns, values) \
+            return ("{"+"\n".join("{!r} => {!r},".format(columns, values) \
                 for columns, values in record.items())+"}")
 
         logging.info("Validate Data Change..")
@@ -232,60 +232,56 @@ class convert_2_files:
         self.remove_rows = []
         if len(df.index) > len(change_df.index):
             self.remove_rows = [idx for idx in list(df.index) if idx not in list(change_df.index)]
-
-        ## reset index.
-        union_index = np.union1d(df.index, change_df.index)
+            
+        ## merge index.
+        merge_index = np.union1d(df.index, change_df.index)
         
         # as starter dataframe for compare
-        df = df.reindex(index=union_index, columns=df.columns).iloc[:,:-1]
+        df = df.reindex(index=merge_index, columns=df.columns).iloc[:,:-1]
         
         # change data / new data.
-        change_df = change_df.reindex(index=union_index, columns=change_df.columns).iloc[:,:-1]
+        change_df = change_df.reindex(index=merge_index, columns=change_df.columns).iloc[:,:-1]
         
         ## compare data 
-        df["count"] = pd.DataFrame(np.where(df.ne(change_df), True, False), index=df.index, columns=df.columns)\
-            .apply(lambda x: (x == True).sum(), axis=1)
+        df = pd.DataFrame(np.where(df.ne(change_df), True, df), index=df.index, columns=df.columns)
+        df["count"] = df.apply(lambda c: (c == True).sum(), axis=1)
         
+        i = 0
         start_rows = 2
-        for idx in union_index:
+        for idx in merge_index:
             if idx not in self.remove_rows:
                 record = {}
-                #[0] => column
-                #[1] => value
+                #data[0] => column
+                #data[1] => value
                 for data, change_data in zip(df.items(), change_df.items()):
                     if df.loc[idx, "count"] != 14:
-                        ## No_changed rows.
-                        if df.loc[idx, "count"] < 1:  # <=1
-                            df.at[idx, data[0]] = data[1][idx]
-                            df.loc[idx, "remark"] = "No_changed"
-                            
+                        if df.loc[idx, "count"] < 1:
+                            df.loc[idx, data[0]] = data[1][idx]
+                            df.loc[idx, "remark"] = "No_change"
                         else:
-                            ## Updated rows.
                             if data[1][idx] != change_data[1][idx]:
-                                record.update({data[0]: f"{data[1][idx]} => {change_data[1][idx]}"})
-                            df.at[idx, data[0]] = change_data[1][idx]
-                            df.loc[idx, "remark"] = "Updated"
-                            
+                                record.update({data[0]: change_data[1][idx]})
+                            df.loc[idx, data[0]] = change_data[1][idx]
+                            df.loc[idx, "remark"] = "Update"
                     else:
-                        ## Inserted rows.
                         record.update({data[0]: change_data[1][idx]})
-                        df.at[idx, data[0]] = change_data[1][idx]
-                        df.loc[idx, "remark"] = "Inserted"
+                        df.loc[idx, data[0]] = change_data[1][idx]
+                        df.loc[idx, "remark"] = "Insert"
                         
                 if record != {}:
                     self.change_rows[start_rows + idx] = format_record(record)
             else:
-                ## Removed rows.
-                df.loc[idx, "remark"] = "Removed"
-        # self.remove_rows = [idx + start_rows for idx in self.remove_rows]
-
+                df.loc[idx, "remark"] = "Remove"
+                self.remove_rows[i] = start_rows + idx
+                i += 0
+        
+        ## set dataframe.
         df = df.drop(["count"], axis=1)
         df.index += start_rows
         rows_data = df.to_dict(orient='index')
 
         state = "succeed"
         self.logging[-1].update({"state": state})
-        
         return rows_data
     
     
@@ -353,7 +349,7 @@ class convert_2_files:
             except Exception as err:
                 record.update({"errors": err})
                 
-            logging.info(f"Write to Tmp files state: {state}.")
+            logging.info(f'Write to Tmp files Status: "{state}".')
 
             if "errors" in record:
                 raise CustomException(errors=self.logging)
@@ -361,35 +357,38 @@ class convert_2_files:
 
     def write_worksheet(self, sheet:any, change_data:dict) -> str:
 
-        self.logging[-1].update({"function": "write_worksheet"})
         max_rows = max(change_data, default=0)
-        logging.info(f"Data for write: {max_rows}. rows")
+        logging.info(f'Data for write: "{max_rows}" rows')
 
-        start_rows = 2
+        state = "failed"
+        self.logging[-1].update({"function": "write_worksheet", "state": state})
+        
         try:
             # write columns.
             for idx, columns in enumerate(change_data[start_rows].keys(), 1):
                 sheet.cell(row=1, column=idx).value = columns
                 
             ## write data.
+            start_rows = 2
             while start_rows <= max_rows:
                 for idx, columns in enumerate(change_data[start_rows].keys(),1):
+                    
                     if columns == "remark":
-                        if start_rows in self.remove_rows and change_data[start_rows][columns] == "Removed":
-                            ## Removed data.
-                            _show = f"{change_data[start_rows][columns]} Rows: ({start_rows}) in Tmp files."
+                        if start_rows in self.remove_rows and change_data[start_rows][columns] == "Remove":
+                            ## Remove data.
+                            show = f"{change_data[start_rows][columns]} Rows: ({start_rows}) in Tmp files."
                             sheet.cell(row=start_rows, column=idx).value = change_data[start_rows][columns]
                             
-                        elif start_rows in self.change_rows.keys() and change_data[start_rows][columns] in ["Inserted","Updated"]:
-                            ## Updated / Insert data. 
-                            _show = f"{change_data[start_rows][columns]} Rows: ({start_rows}) in Tmp files.\nRecord Changed: {self.change_rows[start_rows]}"
+                        elif start_rows in self.change_rows.keys() and change_data[start_rows][columns] in ["Insert","Update"]:
+                            ## Update / Insert data. 
+                            show = f"{change_data[start_rows][columns]} Rows: ({start_rows}) in Tmp files.\nRecord Change: {self.change_rows[start_rows]}"
                             sheet.cell(row=start_rows, column=idx).value = change_data[start_rows][columns]
                         else:
                             ## No change data.
-                            _show = f"No Change Rows: ({start_rows}) in Tmp files."
+                            show = f"No Change Rows: ({start_rows}) in Tmp files."
                             sheet.cell(row=start_rows, column=idx).value = change_data[start_rows][columns]
                             
-                        logging.info(_show)
+                        logging.info(show)
                         
                     elif columns in ["CreateDate","LastUpdatedDate"]:
                         sheet.cell(row=start_rows, column=idx).value = change_data[start_rows][columns].strftime("%Y%m%d%H%M%S")
@@ -398,8 +397,8 @@ class convert_2_files:
                         sheet.cell(row=start_rows, column=idx).value = change_data[start_rows][columns]
                         
                 start_rows += 1
-                
             state = "succeed"
+            
         except KeyError as err:
             raise KeyError(f"Can not Write rows: {err} in Tmp files.")
         
@@ -448,7 +447,7 @@ class convert_2_files:
             except Exception as err:
                 record.update({"errors": err})
                 
-        logging.info(f"Write to Target Files status: {state}.")
+        logging.info(f'Write to Target Files status: "{state}".')
 
         if "errors" in record:
             raise CustomException(errors=self.logging)
@@ -484,7 +483,7 @@ class convert_2_files:
     
     def optimize_data(self,target_df: pd.DataFrame, change_df: pd.DataFrame) -> dict:
 
-        logging.info("Optimize Data Before Write To Target..")
+        logging.info("Optimize Data Before Write to Target..")
         
         state = "failed"
         self.logging[-1].update({"function": "optimize_data", "state":state})
@@ -527,6 +526,7 @@ class convert_2_files:
                 _data.update({idx: values})
         
             state = "succeed"
+            
         except Exception as err:
             raise Exception(err)
         
@@ -545,7 +545,7 @@ class convert_2_files:
         try:
             reader = self.read_csv(target_name)
             header = {i: column for i, column in enumerate(reader.columns.tolist())}
-
+            
             with open(target_name, 'w', newline='') as writer:
                 csv_writer = csv.DictWriter(writer, fieldnames=header.values(), quoting=csv.QUOTE_ALL)
                 csv_writer.writeheader()
@@ -556,13 +556,10 @@ class convert_2_files:
                         _data[idx].pop('remark')
                     else:
                         continue
-                    cratedate = _data[idx]["CreateDate"].strftime("%Y%m%d%H%M%S")
-                    lastlogin = _data[idx]["LastLogin"].strftime("%Y%m%d%H%M%S")
-                    updatedate = _data[idx]["LastUpdatedDate"].strftime("%Y%m%d%H%M%S")
-                
-                    _data[idx].update({"CreateDate": cratedate, 
-                                    "LastLogin":lastlogin, 
-                                    "LastUpdatedDate":updatedate})
+                    
+                    _data[idx].update({"CreateDate": _data[idx]["CreateDate"].strftime("%Y%m%d%H%M%S"), 
+                                    "LastLogin":_data[idx]["LastLogin"].strftime("%Y%m%d%H%M%S"), 
+                                    "LastUpdatedDate":_data[idx]["LastUpdatedDate"].strftime("%Y%m%d%H%M%S")})
                     
                     if idx not in self.remove_rows:
                         csv_writer.writerow(_data[idx])
