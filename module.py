@@ -13,7 +13,6 @@ from io import StringIO
 import re
 import xlrd
 import csv
-from datetime import datetime
 
 class convert_2_files:
 
@@ -38,6 +37,7 @@ class convert_2_files:
             logging.info(f'Source file: "{_dir}", Status: "{status_file}"')
 
         self._log_setter(set_log)
+
 
     async def retrieve_data_from_source_files(self) -> None:
 
@@ -69,6 +69,7 @@ class convert_2_files:
 
             if "errors" in record:
                 raise CustomException(errors=self.logging)
+
 
     def read_text_files(func):
         def wrapper(*args: tuple, **kwargs: dict) -> dict:
@@ -127,6 +128,7 @@ class convert_2_files:
 
         return wrapper
 
+
     @read_text_files
     def text_data_cleaning(self, i: int) -> any:
 
@@ -145,6 +147,7 @@ class convert_2_files:
             find_regex = regex.findall(lines)
             if find_regex != []:
                 yield {sheets: re.sub(r"\W\s+","||","".join(find_regex).strip()).split("||")}
+
 
     def read_excle_files(func):
         def wrapper(*args: tuple, **kwargs: dict) -> dict:
@@ -168,6 +171,7 @@ class convert_2_files:
 
         return wrapper
 
+
     @read_excle_files
     def excel_data_cleaning(self, i: int) -> any:
 
@@ -182,7 +186,7 @@ class convert_2_files:
                 yield {sheets: [cells.cell(row, col).value for col in range(cells.ncols)]}
 
 
-    def initial_data_types(self, df: pd.DataFrame):
+    def initial_data_types(self, df: pd.DataFrame) -> pd.DataFrame:
         
         self.logging[-1].update({"function": "initial_data_types"})
         
@@ -201,7 +205,6 @@ class convert_2_files:
                         "LastUpdatedDate": "datetime64[ms]",
                         "AdditionalAttribute": object,
                         })
-        
         df[["CreateDate","LastLogin","LastUpdatedDate"]] = df[["CreateDate","LastLogin","LastUpdatedDate"]]\
             .apply(pd.to_datetime, format="%Y%m%d%H%M%S")
         
@@ -218,10 +221,10 @@ class convert_2_files:
     def validate_data_change(self, df: pd.DataFrame, change_df: pd.DataFrame) -> dict:
         
         def format_record(record):
-            return ({"\n".join('{!r}: {!r},'.format(columns, values) \
-                for columns, values in record.items())})
+            return ("{"+"\n".join('{!r}: {!r},'.format(columns, values) \
+                for columns, values in record.items())+"}")
 
-        logging.info("Validate Data Change Information..")
+        logging.info("Validate Data Change..")
         self.logging[-1].update({"function": "validate_data_change"})
 
         self.change_rows = {}
@@ -246,30 +249,28 @@ class convert_2_files:
         for idx in union_index:
             if idx not in self.remove_rows:
                 record = {}
+                #[0] => column
+                #[1] => value
                 for data, change_data in zip(df.items(), change_df.items()):
                     if df.loc[idx, "count"] != 14:
-                        
                         ## No_changed rows.
                         if df.loc[idx, "count"] < 1:  # <=1
-                            df.at[idx, data[0]] = data[1].iloc[idx]
+                            df.at[idx, data[0]] = data[1][idx]
                             df.loc[idx, "remark"] = "No_changed"
                             
                         else:
                             ## Updated rows.
                             if data[1][idx] != change_data[1][idx]:
-                                record.update({data[0]: f"{data[1].iloc[idx]} -> {change_data[1].iloc[idx]}"})
-                            df.at[idx, data[0]] = change_data[1].iloc[idx]
+                                record.update({data[0]: f"{data[1][idx]} => {change_data[1][idx]}"})
+                            df.at[idx, data[0]] = change_data[1][idx]
                             df.loc[idx, "remark"] = "Updated"
                             
                     else:
                         ## Inserted rows.
                         record.update({data[0]: change_data[1][idx]})
-                        print(data[0])
-                        print(df.at[idx, data[0]])
-                        print(change_data[1][idx])
-                        # df.at[idx, data[0]] = change_data[1][idx]
-                        print()
-                        # df.loc[idx, "remark"] = "Inserted"
+                        df.at[idx, data[0]] = change_data[1][idx]
+                        df.loc[idx, "remark"] = "Inserted"
+                        
                 if record != {}:
                     self.change_rows[start_rows + idx] = format_record(record)
             else:
@@ -277,14 +278,14 @@ class convert_2_files:
                 df.loc[idx, "remark"] = "Removed"
         # self.remove_rows = [idx + start_rows for idx in self.remove_rows]
 
-        # df = df.drop(["count"], axis=1)
-        # df.index += start_rows
-        # rows_data = df.to_dict(orient='index')
+        df = df.drop(["count"], axis=1)
+        df.index += start_rows
+        rows_data = df.to_dict(orient='index')
 
-        # state = "succeed"
-        # self.logging[-1].update({"state": state})
+        state = "succeed"
+        self.logging[-1].update({"state": state})
         
-        return "rows_data"
+        return rows_data
     
     
     async def write_data_to_tmp_file(self) -> None:
@@ -437,10 +438,11 @@ class convert_2_files:
                     
                     ## read csv.    
                     target_df = self.read_csv(target_name)
-                    wt_data = self.optimize_data(target_df, change_df)
+                    _data = self.optimize_data(target_df, change_df)
                     
-                    # state = self.write_csv(target_name, wt_data)
-                    # logging.info(f"Write to Target Files status: {state}.")
+                    ## write csv. 
+                    state = self.write_csv(target_name, _data)
+                    logging.info(f"Write to Target Files status: {state}.")
             
             except Exception as err:
                 record.update({"errors": err})
@@ -449,10 +451,12 @@ class convert_2_files:
             raise CustomException(errors=self.logging)
         
         
-    def read_csv(self, target_name):
+    def read_csv(self, target_name:str) -> pd.DataFrame:
         
         logging.info(f'Read Target files: "{target_name}"')
-        self.logging[-1].update({"input_dir": target_name, "function": "read_csv"})
+        
+        state = "failed"
+        self.logging[-1].update({"input_dir": target_name, "function": "read_csv", "state": state})
         
         try:
             data = []
@@ -479,10 +483,10 @@ class convert_2_files:
 
         logging.info("Optimize Data Before Write To Target..")
         
-        wt_data = {}
         state = "failed"
-        self.logging[-1].update({"function": "optimize_data", "state": state})
+        self.logging[-1].update({"function": "optimize_data", "state":state})
         
+        _data = {}
         try:
             ## check intial data types for existing data.
             target_df = self.initial_data_types(target_df)
@@ -498,26 +502,26 @@ class convert_2_files:
             ## validate data change row by row
             rows_data = self.validate_data_change(batch_df, change_df)
             
-            # ## merge data from new and old data.
-            # max_rows = max(_dict, default=0)
-            # for idx, values in rows_data.items():
-            #     if idx in self.change_rows or idx in self.remove_rows:
-            #         values.update({"mark_row": idx})
-            #     _dict = {**_dict, **{max_rows + idx: values}}
+            ## merge data from new and old data.
+            max_rows = max(_dict, default=0)
+            for idx, values in rows_data.items():
+                if idx in self.change_rows or idx in self.remove_rows:
+                    values.update({"mark_row": idx})
+                _dict = {**_dict, **{max_rows + idx: values}}
             
-            # ## sorted order data on batch date.
-            # i = 0
-            # start_rows = 2
-            # for idx, values in enumerate(sorted(_dict.values(), key=lambda d: d["CreateDate"])):
-            #     idx += start_rows
-            #     if "mark_row" in values.keys():
-            #         if values["mark_row"] in self.change_rows:
-            #             self.change_rows[str(idx)] = self.change_rows.pop(values["mark_row"])
-            #         elif values["mark_row"] in self.remove_rows:
-            #             self.remove_rows[i] = idx
-            #             i += 1
-            #         values.pop("mark_row")
-            #     wt_data.update({idx: values})
+            ## sorted order data on batch date.
+            i = 0
+            start_rows = 2
+            for idx, values in enumerate(sorted(_dict.values(), key=lambda d: d["CreateDate"])):
+                idx += start_rows
+                if "mark_row" in values.keys():
+                    if values["mark_row"] in self.change_rows:
+                        self.change_rows[str(idx)] = self.change_rows.pop(values["mark_row"])
+                    elif values["mark_row"] in self.remove_rows:
+                        self.remove_rows[i] = idx
+                        i += 1
+                    values.pop("mark_row")
+                _data.update({idx: values})
             
         except Exception as err:
             raise Exception(err)
@@ -525,44 +529,48 @@ class convert_2_files:
         state = "succeed"
         self.logging[-1].update({"state": state})
         
-        return wt_data
+        return _data
     
-    def write_csv(self, target_name, wt_data):
+    
+    def write_csv(self, target_name:str, _data:dict) -> str:
         
         logging.info(f'Write mode: "{self.write_mode}" in Target files: "{target_name}"')
         
-        for idx in wt_data:
-
-            if str(idx) in self.change_rows.keys() and wt_data[idx]["remark"] in ["Updated", "Inserted"]:
-                ## update / insert rows.
-                logging.info(f'"{wt_data[idx]["remark"]}" Rows:"{idx}" in Target file.\nRecord Changed:"{self.change_rows[str(idx)]}"')
-                
+        state = "failed"
+        self.logging[-1].update({"function": "write_csv", "state": state})
+        
         # ## set data types column.
         # df = pd.DataFrame.from_dict(rows_data, orient="index")
         # df[["CreateDate","LastUpdatedDate"]] = df[["CreateDate","LastUpdatedDate"]]\
         #     .apply(lambda d: d.dt.strftime("%Y%m%d%H%M%S"))
         # rows_data = df.to_dict(orient='index')
-        
-        # state = "failed"
-        # try:
-        #     ## read csv file.
-        #     start_row = 2
-        #     with open(target_name, "r") as reader:
-        #         csvin = csv.DictReader(reader, skipinitialspace=True)
-        #         rows = {idx + start_row: value for idx, value in enumerate(csvin)}
-            
-        #         for idx in rows_data:
-        #             data = {columns: values for columns, values in rows_data[idx].items() if columns != "remark"}
+        try:
+            reader = self.read_csv(target_name)
+            fieldnames = reader.columns.tolist()
+
+            print(fieldnames)
+            # fieldnames = _data[2].keys()
+            # print(fieldnames)
+            # with open(target_name, 'w', newline='') as writer:
+            #     csv_writer = csv.DictWriter(writer, fieldnames=fieldnames)
+            #     csv_writer.writeheader()
+                
+            #     for idx in wt_data:
+            #         ## update / insert rows.
+            #         if str(idx) in self.change_rows.keys() and wt_data[idx]["remark"] in ["Updated", "Inserted"]:
+            #             logging.info(f'"{wt_data[idx]["remark"]}" Rows: "{idx}" in Target file.\nRecord Changed:"{self.change_rows[str(idx)]}"')
+            #         else:
+            #             continue
                     
-        #             if  str(idx) in self.change_rows.keys() and rows_data[idx]["remark"] in ["Updated", "Inserted"]:
-        #                 ## update / insert rows.
-        #                 logging.info(f'"{rows_data[idx]["remark"]}" Rows:"({idx})" in Target files. Record Changed: "{self.change_rows[str(idx)]}"')
-        #                 rows.update({idx: data})
-        #             else:
-        #                 if idx in self.remove_rows:
-        #                     continue
-        #                 ## no change rows.
-        #                 rows[idx].update(data)
+            #         if idx not in self.remove_rows:
+            #             csv_writer.writerow(wt_data[idx])
+                        
+            # writer.closed
+            # state = "succeed"
+                
+                
+        except Exception as err:
+            raise Exception(err)
         
         
         #     ## write csv file.
@@ -575,8 +583,6 @@ class convert_2_files:
         #     writer.closed 
         #     state = "succeed"
             
-        # except Exception as err:
-        #     raise Exception(err)
         
-        # return state
+        return state
 
