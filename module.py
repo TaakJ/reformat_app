@@ -249,46 +249,44 @@ class convert_2_files:
         ## compare data 
         df = pd.DataFrame(np.where(df.ne(change_df), True, df), index=df.index, columns=df.columns)
         df["count"] = df.apply(lambda c: (c == True).sum(), axis=1)
-        print(df)
         
-        # i = 0
-        # start_rows = 2
-        # for idx in merge_index:
-        #     if idx not in self.remove_rows:
-        #         record = {}
-        #         #data[0] => column
-        #         #data[1] => value
-        #         for data, change_data in zip(df.items(), change_df.items()):
-        #             if df.loc[idx, "count"] != 14:
-        #                 if df.loc[idx, "count"] < 1:
-        #                     df.loc[idx, data[0]] = data[1][idx]
-        #                     df.loc[idx, "remark"] = "No_change"
-        #                 else:
-        #                     print(data[1][idx])
-        #                     # if data[1][idx] != change_data[1][idx]:
-        #                     #     record.update({data[0]: change_data[1][idx]})
-        #                     # df.loc[idx, data[0]] = change_data[1][idx]
-        #                     # df.loc[idx, "remark"] = "Update"
-        #             else:
-        #                 record.update({data[0]: change_data[1][idx]})
-        #                 df.loc[idx, data[0]] = change_data[1][idx]
-        #                 df.loc[idx, "remark"] = "Insert"
+        i = 0
+        start_rows = 2
+        for idx in merge_index:
+            if idx not in self.remove_rows:
+                record = {}
+                #data[0] => column
+                #data[1] => value
+                for data, change_data in zip(df.items(), change_df.items()):
+                    if df.loc[idx, "count"] != 14:
+                        if df.loc[idx, "count"] < 1:
+                            df.loc[idx, data[0]] = data[1][idx]
+                            df.loc[idx, "remark"] = "No_change"
+                        else:
+                            if data[1][idx] != change_data[1][idx]:
+                                record.update({data[0]: change_data[1][idx]})
+                            df.loc[idx, data[0]] = change_data[1][idx]
+                            df.loc[idx, "remark"] = "Update"
+                    else:
+                        record.update({data[0]: change_data[1][idx]})
+                        df.loc[idx, data[0]] = change_data[1][idx]
+                        df.loc[idx, "remark"] = "Insert"
                         
-        #         if record != {}:
-        #             self.change_rows[start_rows + idx] = format_record(record)
-        #     else:
-        #         df.loc[idx, "remark"] = "Remove"
-        #         self.remove_rows[i] = start_rows + idx
-        #         i += 0
+                if record != {}:
+                    self.change_rows[start_rows + idx] = format_record(record)
+            else:
+                df.loc[idx, "remark"] = "Remove"
+                self.remove_rows[i] = start_rows + idx
+                i += 0
         
-        # ## set dataframe.
-        # df = df.drop(["count"], axis=1)
-        # df.index += start_rows
-        # rows_data = df.to_dict(orient='index')
+        ## set dataframe.
+        df = df.drop(["count"], axis=1)
+        df.index += start_rows
+        rows_data = df.to_dict(orient='index')
 
-        # state = "succeed"
-        # self.logging[-1].update({"state": state})
-        return "rows_data"
+        state = "succeed"
+        self.logging[-1].update({"state": state})
+        return rows_data
     
     
     async def write_data_to_tmp_file(self) -> None:
