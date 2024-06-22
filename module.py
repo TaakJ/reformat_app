@@ -125,7 +125,6 @@ class convert_2_files:
                 except StopIteration:
                     break
             return _data
-
         return wrapper
 
 
@@ -168,7 +167,6 @@ class convert_2_files:
                 except StopIteration:
                     break
             return _data
-
         return wrapper
 
 
@@ -225,27 +223,26 @@ class convert_2_files:
 
     def validate_data_change(self, df: pd.DataFrame, change_df: pd.DataFrame) -> dict:
         
+        logging.info("Validate Data Change..")
+        
+        self.change_rows = {}
+        self.remove_rows = []
+        state = "failed"
+        self.logging[-1].update({"function": "validate_data_change", "state": state})
+                
         def format_record(record):
             return ("{"+"\n".join("{!r} => {!r},".format(columns, values) \
                 for columns, values in record.items())+"}")
 
-        logging.info("Validate Data Change..")
-        self.logging[-1].update({"function": "validate_data_change"})
-
-        self.change_rows = {}
-        self.remove_rows = []
         if len(df.index) > len(change_df.index):
             self.remove_rows = [idx for idx in list(df.index) if idx not in list(change_df.index)]
             
         ## merge index.
         merge_index = np.union1d(df.index, change_df.index)
-        
         # as starter dataframe for compare
         df = df.reindex(index=merge_index, columns=df.columns).iloc[:,:-1]
-        
         # change data / new data.
         change_df = change_df.reindex(index=merge_index, columns=change_df.columns).iloc[:,:-1]
-        
         ## compare data 
         df = pd.DataFrame(np.where(df.ne(change_df), True, df), index=df.index, columns=df.columns)
         df["count"] = df.apply(lambda c: (c == True).sum(), axis=1)
@@ -299,7 +296,7 @@ class convert_2_files:
                 if record["module"] == "Target_file":
 
                     tmp_name = join(Folder.TMP,f"TMP_{self.module}-{self.batch_date.strftime('%d%m%y')}.xlsx")
-                    record.update({"input_dir": tmp_name,"function": "write_data_to_tmp_file","state": state})
+                    record.update({"input_dir": tmp_name,"function": "write_data_to_tmp_file", "state": state})
 
                     data = record["data"]
                     change_df = pd.DataFrame(data)
@@ -420,7 +417,7 @@ class convert_2_files:
                     if self.store_tmp is True:
                         tmp_name = record["input_dir"]
                         sheet_name = record["sheet_name"]
-                        change_df = pd.read_excel(tmp_name, sheet_name=sheet_name,)
+                        change_df = pd.read_excel(tmp_name, sheet_name=sheet_name, dtype=object)
                     else:
                         data = record["data"]
                         change_df = pd.DataFrame(data)
@@ -440,7 +437,7 @@ class convert_2_files:
                     _data = self.optimize_data(target_df, change_df)
                     
                     ## write csv. 
-                    state = self.write_csv(target_name, _data)
+                    # state = self.write_csv(target_name, _data)
             
             except Exception as err:
                 record.update({"errors": err})
@@ -477,7 +474,7 @@ class convert_2_files:
         self.logging[-1].update({"state": state})
         
         return target_df
-        
+    
     
     def optimize_data(self,target_df: pd.DataFrame, change_df: pd.DataFrame) -> dict:
 
@@ -499,31 +496,31 @@ class convert_2_files:
             _dict = target_df[~target_df["CreateDate"].isin(np.array([pd.Timestamp(self.fmt_batch_date)]))]\
                 .iloc[:,:-1].to_dict("index")
             
-            ## validate data change row by row
-            rows_data = self.validate_data_change(batch_df, change_df)
+            # ## validate data change row by row
+            rows_data = self.validate_data(batch_df, change_df)
             
-            ## merge data from new and old data.
-            max_rows = max(_dict, default=0)
-            for idx, values in rows_data.items():
-                if idx in self.change_rows or idx in self.remove_rows:
-                    values.update({"mark_row": idx})
-                _dict = {**_dict, **{max_rows + idx: values}}
+            # ## merge data from new and old data.
+            # max_rows = max(_dict, default=0)
+            # for idx, values in rows_data.items():
+            #     if idx in self.change_rows or idx in self.remove_rows:
+            #         values.update({"mark_row": idx})
+            #     _dict = {**_dict, **{max_rows + idx: values}}
             
-            ## sorted order data on batch date.
-            i = 0
-            start_rows = 2
-            for idx, values in enumerate(sorted(_dict.values(), key=lambda d: d["CreateDate"])):
-                idx += start_rows
-                if "mark_row" in values.keys():
-                    if values["mark_row"] in self.change_rows:
-                        self.change_rows[str(idx)] = self.change_rows.pop(values["mark_row"])
-                    elif values["mark_row"] in self.remove_rows:
-                        self.remove_rows[i] = idx
-                        i += 1
-                    values.pop("mark_row")
-                _data.update({idx: values})
+            # ## sorted order data on batch date.
+            # i = 0
+            # start_rows = 2
+            # for idx, values in enumerate(sorted(_dict.values(), key=lambda d: d["CreateDate"])):
+            #     idx += start_rows
+            #     if "mark_row" in values.keys():
+            #         if values["mark_row"] in self.change_rows:
+            #             self.change_rows[str(idx)] = self.change_rows.pop(values["mark_row"])
+            #         elif values["mark_row"] in self.remove_rows:
+            #             self.remove_rows[i] = idx
+            #             i += 1
+            #         values.pop("mark_row")
+            #     _data.update({idx: values})
         
-            state = "succeed"
+            # state = "succeed"
             
         except Exception as err:
             raise Exception(err)
