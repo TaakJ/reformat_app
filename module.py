@@ -355,19 +355,19 @@ class convert_2_files:
 
     def write_worksheet(self, sheet:any, change_data:dict) -> str:
 
-        max_rows = max(change_data, default=0)
-        logging.info(f'Data for write: "{max_rows}" rows')
-
         state = "failed"
+        max_rows = max(change_data, default=0)
+        
+        logging.info(f'Data for write: "{max_rows}" rows')
         self.logging[-1].update({"function": "write_worksheet", "state": state})
         
+        start_rows = 2
         try:
             # write columns.
             for idx, columns in enumerate(change_data[start_rows].keys(), 1):
                 sheet.cell(row=1, column=idx).value = columns
                 
             ## write data.
-            start_rows = 2
             while start_rows <= max_rows:
                 for idx, columns in enumerate(change_data[start_rows].keys(),1):
                     

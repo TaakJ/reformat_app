@@ -37,7 +37,7 @@ class module_adm(call_function):
                 except StopIteration:
                     break
                 
-        logging.info("Stop Run Module\n##### End #####\n")
+        logging.info("Stop Run Module\n")
         
         return result
         
