@@ -239,9 +239,9 @@ class convert_2_files:
             
         ## merge index.
         merge_index = np.union1d(df.index, change_df.index)
-        # as starter dataframe for compare
+        ## as starter dataframe for compare
         df = df.reindex(index=merge_index, columns=df.columns).iloc[:,:-1]
-        # change data / new data.
+        ## change data / new data.
         change_df = change_df.reindex(index=merge_index, columns=change_df.columns).iloc[:,:-1]
         ## compare data 
         df = pd.DataFrame(np.where(df.ne(change_df), True, df), index=df.index, columns=df.columns)
@@ -252,8 +252,8 @@ class convert_2_files:
         for idx in merge_index:
             if idx not in self.remove_rows:
                 record = {}
-                #data[0] => column
-                #data[1] => value
+                ## data[0] => column
+                ## data[1] => value
                 for data, change_data in zip(df.items(), change_df.items()):
                     if df.loc[idx, "count"] != 14:
                         if df.loc[idx, "count"] < 1:
@@ -283,6 +283,7 @@ class convert_2_files:
 
         state = "succeed"
         self.logging[-1].update({"state": state})
+        
         return rows_data
     
     
@@ -377,7 +378,6 @@ class convert_2_files:
                             ## Remove rows.
                             show = f'{change_data[start_rows][columns]} Rows: "{start_rows}" in Tmp files.'
                             sheet.cell(row=start_rows, column=idx).value = change_data[start_rows][columns]
-                            
                         elif start_rows in self.change_rows.keys() and change_data[start_rows][columns] in ["Insert","Update"]:
                             ## Update / Insert rows. 
                             show = f'{change_data[start_rows][columns]} Rows: "{start_rows}" in Tmp files.\nRecord Change: {self.change_rows[start_rows]}'
@@ -386,9 +386,7 @@ class convert_2_files:
                             ## No change rows.
                             show = f'No Change Rows: "{start_rows}" in Tmp files.'
                             sheet.cell(row=start_rows, column=idx).value = change_data[start_rows][columns]
-                        
                         logging.info(show)
-                        
                     else:
                         sheet.cell(row=start_rows, column=idx).value = change_data[start_rows][columns]
                         
@@ -435,9 +433,8 @@ class convert_2_files:
                     ## read csv.    
                     target_df = self.read_csv(target_name)
                     _data = self.optimize_data(target_df, change_df)
-                    
                     ## write csv. 
-                    # state = self.write_csv(target_name, _data)
+                    state = self.write_csv(target_name, _data)
             
             except Exception as err:
                 record.update({"errors": err})
@@ -476,7 +473,7 @@ class convert_2_files:
         return target_df
     
     
-    def optimize_data(self,target_df: pd.DataFrame, change_df: pd.DataFrame) -> dict:
+    def optimize_data(self, target_df:pd.DataFrame, change_df:pd.DataFrame) -> dict:
 
         logging.info("Optimize Data Before Write to Target..")
         
@@ -487,45 +484,42 @@ class convert_2_files:
         try:
             ## check intial data types for existing data.
             target_df = self.initial_data_types(target_df)
-            
             ## filter data on batch date => (DataFrame)
             batch_df = target_df[target_df["CreateDate"].isin(np.array([pd.Timestamp(self.fmt_batch_date)]))]\
                 .reset_index(drop=True)
-            
             ## filter data not on batch date => (dict).
             _dict = target_df[~target_df["CreateDate"].isin(np.array([pd.Timestamp(self.fmt_batch_date)]))]\
                 .iloc[:,:-1].to_dict("index")
+            ## validate data change row by row
+            rows_data = self.validate_data_change(batch_df, change_df)
             
-            # ## validate data change row by row
-            rows_data = self.validate_data(batch_df, change_df)
+            ## merge data from new and old data.
+            max_rows = max(_dict, default=0)
+            for idx, values in rows_data.items():
+                if idx in self.change_rows or idx in self.remove_rows:
+                    values.update({"mark_row": idx})
+                _dict = {**_dict, **{max_rows + idx: values}}
             
-            # ## merge data from new and old data.
-            # max_rows = max(_dict, default=0)
-            # for idx, values in rows_data.items():
-            #     if idx in self.change_rows or idx in self.remove_rows:
-            #         values.update({"mark_row": idx})
-            #     _dict = {**_dict, **{max_rows + idx: values}}
-            
-            # ## sorted order data on batch date.
-            # i = 0
-            # start_rows = 2
-            # for idx, values in enumerate(sorted(_dict.values(), key=lambda d: d["CreateDate"])):
-            #     idx += start_rows
-            #     if "mark_row" in values.keys():
-            #         if values["mark_row"] in self.change_rows:
-            #             self.change_rows[str(idx)] = self.change_rows.pop(values["mark_row"])
-            #         elif values["mark_row"] in self.remove_rows:
-            #             self.remove_rows[i] = idx
-            #             i += 1
-            #         values.pop("mark_row")
-            #     _data.update({idx: values})
-        
-            # state = "succeed"
+            ## sorted order data on batch date.
+            i = 0
+            start_rows = 2
+            for idx, values in enumerate(sorted(_dict.values(), key=lambda d: d["CreateDate"])):
+                idx += start_rows
+                if "mark_row" in values.keys():
+                    if values["mark_row"] in self.change_rows:
+                        self.change_rows[str(idx)] = self.change_rows.pop(values["mark_row"])
+                    elif values["mark_row"] in self.remove_rows:
+                        self.remove_rows[i] = idx
+                        i += 1
+                    values.pop("mark_row")
+                _data.update({idx: values})
             
         except Exception as err:
             raise Exception(err)
         
+        state = "succeed"
         self.logging[-1].update({"state": state})
+        
         return _data
     
     
