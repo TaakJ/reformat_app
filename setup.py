@@ -50,7 +50,7 @@ def setup_config() -> dict:
 def setup_log() -> None:
     config_yaml  = None
     date = datetime.today().strftime("%d%m%y")
-    log_name = f'log_status-{date}.log'
+    log_name = f"_success-{date}.log"
 
     if os.path.exists(Folder._LOGGER_CONFIG_DIR):
         with open(Folder._LOGGER_CONFIG_DIR, 'rb') as logger:

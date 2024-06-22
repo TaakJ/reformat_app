@@ -384,8 +384,7 @@ class convert_2_files:
                             
                         elif start_rows in self.change_rows.keys() and change_data[start_rows][columns] in ["Insert","Update"]:
                             ## Update / Insert rows. 
-                            show = f'''{change_data[start_rows][columns]} Rows: "{start_rows}" in Tmp files.\n
-                                    Record Change: {self.change_rows[start_rows]}'''
+                            show = f'{change_data[start_rows][columns]} Rows: "{start_rows}" in Tmp files.\nRecord Change: {self.change_rows[start_rows]}'
                             sheet.cell(row=start_rows, column=idx).value = change_data[start_rows][columns]
                             
                         else:
@@ -563,8 +562,7 @@ class convert_2_files:
                 for idx in output:
                     if str(idx) in self.change_rows.keys() and output[idx]["remark"] in ["Update", "Insert"]:
                         
-                        logging.info(f'''"{output[idx]["remark"]}" Rows: "{idx}" in Target file.\n
-                                    Record Change:"{self.change_rows[str(idx)]}"''')
+                        logging.info(f'"{output[idx]["remark"]}" Rows: "{idx}" in Target file.\nRecord Change:"{self.change_rows[str(idx)]}"')
                         output[idx].pop('remark')
                         
                     else:
