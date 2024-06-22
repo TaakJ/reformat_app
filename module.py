@@ -551,16 +551,16 @@ class convert_2_files:
                 csv_writer.writeheader()
                 
                 for idx in _data:
-                    if str(idx) in self.change_rows.keys() and _data[idx]["remark"] in ["Updated", "Inserted"]:
-                        logging.info(f'"{_data[idx]["remark"]}" Rows: "{idx}" in Target file.\nRecord Changed:"{self.change_rows[str(idx)]}"')
+                    if str(idx) in self.change_rows.keys() and _data[idx]["remark"] in ["Update", "Insert"]:
+                        logging.info(f'"{_data[idx]["remark"]}" Rows: "{idx}" in Target file.\nRecord Change:"{self.change_rows[str(idx)]}"')
                         _data[idx].pop('remark')
                     else:
                         continue
-                    
+                
                     _data[idx].update({"CreateDate": _data[idx]["CreateDate"].strftime("%Y%m%d%H%M%S"), 
                                     "LastLogin":_data[idx]["LastLogin"].strftime("%Y%m%d%H%M%S"), 
                                     "LastUpdatedDate":_data[idx]["LastUpdatedDate"].strftime("%Y%m%d%H%M%S")})
-                    
+
                     if idx not in self.remove_rows:
                         csv_writer.writerow(_data[idx])
                         
