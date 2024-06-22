@@ -18,7 +18,7 @@ class module_adm(call_function):
         
         result = {"module": self.module, "task": "Completed"}
         try:
-            raise Exception("Test Exception")
+            raise CustomException("Test Exception")
             # await self.check_source_files()
             # await self.retrieve_data_from_source_files()
             # # await self.mapping_column()
