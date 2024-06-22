@@ -26,16 +26,16 @@ class module_cum(call_function):
                 await self.write_data_to_tmp_file()
             await self.write_data_to_target_file()
                 
-        except CustomException as error: 
+        except CustomException as err: 
             logging.error("Error Exception")
             
             result.update({"task": "Uncompleted"})
             while True:
                 try:
-                    logging.error(next(error))
+                    logging.error(next(err))
                 except StopIteration:
                     break
-        logging.info("Stop Run Module\n##### End #####\n")
+        logging.info("Stop Run Module\n")
         return result
         
         
@@ -55,7 +55,7 @@ class module_cum(call_function):
                         df = df.reset_index(drop=True)
                 
             except Exception as err:
-                record.update({'errors': err})
+                record.update({'err': err})
 
                 
     async def mock_data(self) -> None:

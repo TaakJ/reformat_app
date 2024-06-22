@@ -65,10 +65,10 @@ class convert_2_files:
                 record.update({"data": _data, "state": state})
 
             except Exception as err:
-                record.update({"errors": err})
+                record.update({"err": err})
 
-            if "errors" in record:
-                raise CustomException(errors=self.logging)
+            if "err" in record:
+                raise CustomException(err=self.logging)
 
 
     def read_text_files(func):
@@ -350,12 +350,12 @@ class convert_2_files:
                     record.update({"sheet_name": sheet_name, "state": state})
                     
             except Exception as err:
-                record.update({"errors": err})
+                record.update({"err": err})
 
             logging.info(f'Write Data to Tmp files: "{state}" rows')
             
-            if "errors" in record:
-                raise CustomException(errors=self.logging)
+            if "err" in record:
+                raise CustomException(err=self.logging)
 
 
     def write_worksheet(self, sheet:any, change_data:dict) -> str:
@@ -446,12 +446,12 @@ class convert_2_files:
                     state = self.write_csv(target_name, output)
             
             except Exception as err:
-                record.update({"errors": err})
+                record.update({"err": err})
                 
         logging.info(f'Write to Target Files status: "{state}".')
         
-        if "errors" in record:
-            raise CustomException(errors=self.logging)
+        if "err" in record:
+            raise CustomException(err=self.logging)
         
         
     def read_csv(self, target_name:str) -> pd.DataFrame:

@@ -27,13 +27,13 @@ class module_bos(call_function):
                 await self.write_data_to_tmp_file()
             await self.write_data_to_target_file()
                 
-        except CustomException as error: 
+        except CustomException as err: 
             logging.error("Error CustomException")
             
             result.update({"task": "Uncompleted"})
             while True:
                 try:
-                    logging.error(next(error))
+                    logging.error(next(err))
                 except StopIteration:
                     break
                 
@@ -56,7 +56,7 @@ class module_bos(call_function):
                         raise Exception("raise Exception")
                         
             except Exception as err:
-                record.update({'errors': err})
+                record.update({'err': err})
 
     async def mock_data(self) -> None:
             mock_data = [['ApplicationCode',	'AccountOwner', 'AccountName',	'AccountType',	'EntitlementName',	'SecondEntitlementName','ThirdEntitlementName', 'AccountStatus',	'IsPrivileged',	'AccountDescription',
