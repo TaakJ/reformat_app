@@ -333,7 +333,6 @@ class convert_2_files:
                     tmp_df = pd.DataFrame(data, columns=columns)
                     ## check intial data types for existing data.
                     tmp_df = self.initial_data_types(tmp_df)
-                    
                     logging.info(f'Generate Sheet_name: "{sheet_name}" in Tmp files.')
                     
                     ## validate data change row by row
