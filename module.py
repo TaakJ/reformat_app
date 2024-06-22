@@ -192,7 +192,7 @@ class convert_2_files:
         self.logging[-1].update({"function": "initial_data_types"})
         
         df = df.astype({"ApplicationCode": object,
-                        "AccountOwner": int,
+                        "AccountOwner": object,
                         "AccountName": object,
                         "AccountType": object,
                         "EntitlementName": object,
@@ -440,11 +440,10 @@ class convert_2_files:
                     
                     ## read csv.    
                     target_df = self.read_csv(target_name)
-                    print(target_df)
-                    # _data = self.optimize_data(target_df, change_df)
+                    _data = self.optimize_data(target_df, change_df)
                     
                     ## write csv. 
-                    # state = self.write_csv(target_name, _data)
+                    state = self.write_csv(target_name, _data)
             
             except Exception as err:
                 record.update({"errors": err})
