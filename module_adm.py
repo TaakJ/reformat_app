@@ -15,7 +15,11 @@ class module_adm(call_function):
     async def run(self, module, _params) -> dict:
         self._params_setter(module, _params)
         
-        logging.info(f'Run Module: "{self.module}", Manual: "{self.manual}", Batch Date: "{self.batch_date}", Store Tmp: "{self.store_tmp}", Write Mode: "{self.write_mode}"')
+        logging.info(f'''Run Module: "{self.module}"
+                    , Manual: "{self.manual}", 
+                    Batch Date: "{self.batch_date}", 
+                    Store Tmp: "{self.store_tmp}", 
+                    Write Mode: "{self.write_mode}"''')
         
         result = {"module": self.module, "task": "Completed"}
         try:
@@ -27,8 +31,7 @@ class module_adm(call_function):
             await self.write_data_to_target_file()
         
         except CustomException as error:
-            
-            logging.error("Error CustomException")
+            logging.error("Error Exception")
             
             result.update({"task": "Uncompleted"})
             while True:
@@ -36,9 +39,7 @@ class module_adm(call_function):
                     logging.error(next(error))
                 except StopIteration:
                     break
-                
         logging.info("Stop Run Module\n")
-        
         return result
         
         

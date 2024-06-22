@@ -14,10 +14,13 @@ class module_bos(call_function):
         self._log = log
         
     async def run(self, module, _params) -> dict:
-        
         self._params_setter(module, _params)
         
-        logging.info(f'Run Module: "{self.module}", Manual: "{self.manual}", Batch Date: "{self.batch_date}", Store Tmp: "{self.store_tmp}", Write Mode: "{self.write_mode}"')
+        logging.info(f'''Run Module: "{self.module}"
+                    , Manual: "{self.manual}", 
+                    Batch Date: "{self.batch_date}", 
+                    Store Tmp: "{self.store_tmp}", 
+                    Write Mode: "{self.write_mode}"''')
         
         result = {"module": self.module, "task": "Completed"}
         try:
@@ -30,7 +33,6 @@ class module_bos(call_function):
             await self.write_data_to_target_file()
                 
         except CustomException as error: 
-            
             logging.error("Error CustomException")
             
             result.update({"task": "Uncompleted"})
@@ -40,8 +42,7 @@ class module_bos(call_function):
                 except StopIteration:
                     break
                 
-        logging.info("Stop Run Module\n##### End #####\n")
-        
+        logging.info("Stop Run Module\n")
         return result
         
     async def mapping_column(self) -> None:
@@ -65,8 +66,8 @@ class module_bos(call_function):
     async def mock_data(self) -> None:
             mock_data = [['ApplicationCode',	'AccountOwner', 'AccountName',	'AccountType',	'EntitlementName',	'SecondEntitlementName','ThirdEntitlementName', 'AccountStatus',	'IsPrivileged',	'AccountDescription',
                         'CreateDate','LastLogin','LastUpdatedDate',	'AdditionalAttribute'],
-                        [1,2,3,4,5,6,7,8,9,10,self.fmt_batch_date,12, self.date,14],
-                        [15,16,17,18,19,20,21,22,23,24,self.fmt_batch_date,26, self.date,28],
+                        ["TAAK","2","3","4","5","6","7","8","9","10",self.fmt_batch_date, self.date, self.fmt_batch_date,"14"],
+                        ["TOKE","16","17","18","19","20","21","22","23","24",self.fmt_batch_date, self.date, self.fmt_batch_date,"28"],
                         ]
             df = pd.DataFrame(mock_data)
             df.columns = df.iloc[0].values
