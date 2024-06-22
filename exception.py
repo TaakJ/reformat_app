@@ -12,8 +12,8 @@ class CustomException(Exception):
         for key, value in self.__dict__.items():
             setattr(self, key, value)
         
-        self.setup_log()
         self.x = args[0]
+        self.setup_log()
         self.err_msg = self.generate_error()
         
     def __iter__(self):
