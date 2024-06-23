@@ -30,14 +30,12 @@ class module_adm(call_function):
         
         except CustomException as err:
             
-            logging.error('See Error Details.')
+            logging.error("See Error Details")
             
             result.update({"task": "Uncompleted"})
-            setup_log("_error")
             while True:
                 try:
-                    # logging.exception(next(err))
-                    logging.error(next(err))
+                    next(err)
                 except StopIteration:
                     break
             

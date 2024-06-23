@@ -50,10 +50,11 @@ def setup_config() -> dict:
     return config_yaml
 
 
-def setup_log(file) -> None:
+def setup_log() -> None:
     
     config_yaml  = None
     date = datetime.today().strftime("%d%m%y")
+    file = "_success"
     
     filename = Folder.LOG + join(date, file)
     if not os.path.exists(os.path.dirname(filename)):
@@ -69,10 +70,6 @@ def setup_log(file) -> None:
             for i in (config_yaml["handlers"].keys()):
                 if "filename" in config_yaml['handlers'][i]:
                     config_yaml["handlers"][i]["filename"] = filename
-                    
-                    if file == "_error":
-                        config_yaml["handlers"][i]["mode"] = 'a'
-
             logging.config.dictConfig(config_yaml)
     else:
         raise Exception(f"Yaml file file_path: '{Folder._LOGGER_CONFIG_DIR}' doesn't exist.")
