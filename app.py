@@ -353,7 +353,7 @@ class setup_app(QWidget):
 
 if __name__ == "__main__":
     setup_folder()
-    setup_log()
+    setup_log("_success")
     app = QApplication(sys.argv)
     apply_stylesheet(
         app,

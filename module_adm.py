@@ -1,3 +1,4 @@
+from setup import setup_log
 from func import call_function
 from exception import CustomException
 import pandas as pd
@@ -32,8 +33,10 @@ class module_adm(call_function):
             logging.error('See Error Details.')
             
             result.update({"task": "Uncompleted"})
+            setup_log("_error")
             while True:
                 try:
+                    # logging.exception(next(err))
                     logging.error(next(err))
                 except StopIteration:
                     break

@@ -13,7 +13,6 @@ class CustomException(Exception):
             setattr(self, key, value)
         
         self.x = args[0]
-        self.setup_log()
         self.err_msg = self.generate_error()
         
     def __iter__(self):
@@ -21,9 +20,6 @@ class CustomException(Exception):
 
     def __next__(self):
         return next(self.err_msg)
-
-    def setup_log(self) -> None:
-        print(self.x)
 
     def generate_error(self) -> any:
         yield self.x

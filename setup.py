@@ -5,6 +5,7 @@ import os
 from os.path import join
 from datetime import datetime
 
+
 class ArgumentParams:
     SHORT_NAME  = 'short_name'
     NAME        = 'name'
@@ -14,6 +15,7 @@ class ArgumentParams:
     ISFLAG      = 'flag'
     TYPE        = 'type'
     CHOICES     = 'choices'
+    
     
 class Folder:
     _CURRENT_DIR        =  os.getcwd()
@@ -48,19 +50,28 @@ def setup_config() -> dict:
     return config_yaml
 
 
-def setup_log() -> None:
+def setup_log(file) -> None:
+    
     config_yaml  = None
     date = datetime.today().strftime("%d%m%y")
-    log_name = f"_success-{date}"
+    
+    filename = Folder.LOG + join(date, file)
+    if not os.path.exists(os.path.dirname(filename)):
+        try:
+            os.makedirs(os.path.dirname(filename))
+        except OSError as err:
+            pass
 
     if os.path.exists(Folder._LOGGER_CONFIG_DIR):
         with open(Folder._LOGGER_CONFIG_DIR, 'rb') as logger:
             config_yaml  = yaml.safe_load(logger.read())
+            
             for i in (config_yaml["handlers"].keys()):
                 if "filename" in config_yaml['handlers'][i]:
-                    log_file = join(config_yaml["handlers"][i]["filename"], log_name)
+                    config_yaml["handlers"][i]["filename"] = filename
                     
-                    config_yaml["handlers"][i]["filename"] = log_file
+                    if file == "_error":
+                        config_yaml["handlers"][i]["mode"] = 'a'
 
             logging.config.dictConfig(config_yaml)
     else:
