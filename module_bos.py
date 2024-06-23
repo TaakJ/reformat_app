@@ -22,7 +22,7 @@ class module_bos(call_function):
         
         result = {"module": self.module, "task": "Completed"}
         try:
-            raise CustomException("Test Exception")
+            raise CustomException(f'Test Exception "{self.module}"')
             # await self.check_source_files()
             # await self.retrieve_data_from_source_files()
             # # await self.mapping_column()
@@ -34,6 +34,12 @@ class module_bos(call_function):
         except CustomException as err:
             
             logging.error("See Error Details")
+            
+            while True:
+                try:
+                    next(err)
+                except StopIteration:
+                    break
                 
             result.update({"task": "Uncompleted"})
                 
