@@ -13,7 +13,7 @@ class module_adm(call_function):
         self._log = log
         
         
-    async def run(self, module, _params, _logger) -> dict:
+    async def run(self, module, _params) -> dict:
         self._params_setter(module, _params)
         
         logging.info(f'Module: "{self.module}", Manual: "{self.manual}", Batch Date: "{self.batch_date}", Store Tmp: "{self.store_tmp}", Write Mode: "{self.write_mode}"')
@@ -35,7 +35,8 @@ class module_adm(call_function):
             
             while True:
                 try:
-                    _logger.critical(next(err))
+                    logging.debug(next(err))
+                    # _logger.critical(next(err))
                 except StopIteration:
                     break
             

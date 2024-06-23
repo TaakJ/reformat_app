@@ -19,36 +19,9 @@ class CustomException(Exception):
 
     def __next__(self):
         return next(self.err_msg)
-            
-    # def getLogger(self,
-    #             log_format = "%(asctime)s.%(msecs)03d | %(module)s | %(levelname)s | %(funcName)s::%(lineno)d | %(message)s",
-    #             log_name = __name__,
-    #             file = "_error"):
-        
-    #     date = datetime.today().strftime("%Y%m%d")
-    #     filename = Folder.LOG + join(date, file)
-        
-    #     if not os.path.exists(os.path.dirname(filename)):
-    #         try:
-    #             os.makedirs(os.path.dirname(filename))
-    #         except OSError:
-    #             pass
-        
-    #     errorlog = logging.getLogger(log_name)
-    #     errorlog.setLevel(logging.CRITICAL)
-    #     file_handler = logging.FileHandler(filename, mode="a")
-    #     formatter = logging.Formatter(fmt=log_format,
-    #                                 datefmt="%Y/%m/%d %H:%M:%S")
-    #     file_handler.setFormatter(formatter)
-    #     file_handler.setLevel(logging.CRITICAL)
-    #     errorlog.addHandler(file_handler)
-        
-    #     return errorlog
     
     
     def generate_error(self) -> any:
-        
-        # logger = self.getLogger()
         yield self.x
         # yield logger.critical(self.x)
         

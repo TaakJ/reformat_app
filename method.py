@@ -7,7 +7,7 @@ from module_cum import module_cum
 class run_module:
     def __init__(self, params:dict):
         self._params = params
-        self._logger = setup_errorlog()
+        # self._logger = setup_errorlog()
         self.loop = asyncio.get_event_loop()
         self.loop.run_until_complete(self.mapping_module())
         
@@ -16,15 +16,15 @@ class run_module:
         for module in self._params["source"]:
             
             if module == "ADM":
-                tasks  = module_adm().run(module, self._params, self._logger)
+                tasks  = module_adm().run(module, self._params)
                 coros.append(asyncio.create_task(tasks))
                 
             elif module == "BOS":
-                tasks  = module_bos().run(module, self._params, self._logger)
+                tasks  = module_bos().run(module, self._params)
                 coros.append(asyncio.create_task(tasks))
                 
             elif module == "CUM":
-                tasks  = module_cum().run(module, self._params, self._logger)
+                tasks  = module_cum().run(module, self._params)
                 coros.append(asyncio.create_task(tasks))
                 
         results = await asyncio.wait(coros)

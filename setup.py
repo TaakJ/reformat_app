@@ -88,12 +88,12 @@ def setup_errorlog(log_name = __name__,
                 pass
         
         errorlog = logging.getLogger(log_name)
-        errorlog.setLevel(logging.CRITICAL)
+        errorlog.setLevel(logging.INFO)
         file_handler = logging.FileHandler(filename, mode="a")
         formatter = logging.Formatter(fmt=log_format,
                                     datefmt="%Y/%m/%d %H:%M:%S")
         file_handler.setFormatter(formatter)
-        file_handler.setLevel(logging.CRITICAL)
+        file_handler.setLevel(logging.DEBUG)
         errorlog.addHandler(file_handler)
         
         return errorlog
