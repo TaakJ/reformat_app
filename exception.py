@@ -12,9 +12,8 @@ class CustomException(Exception):
         
         for key, value in self.__dict__.items():
             setattr(self, key, value)
-        
+            
         self.x = args[0]
-        self.setup_error()
         self.err_msg = self.generate_error()
         
     def __iter__(self):
@@ -41,16 +40,19 @@ class CustomException(Exception):
                 
                 for i in (config_yaml["handlers"].keys()):
                     if "filename" in config_yaml['handlers'][i]:
-                        config_yaml["handlers"][i]["level"] = "ERROR"
-                        config_yaml["handlers"][i]["mode"] = "a"
+                        # config_yaml["handlers"][i]["level"] = "ERROR"
+                        # config_yaml["handlers"][i]["mode"] = "a"
                         config_yaml["handlers"][i]["filename"] = filename
+                        
+                config_yaml["root"]["level"] = "CRITICAL"
+                
                 logging.config.dictConfig(config_yaml)
         else:
             raise Exception(f"Yaml file file_path: '{Folder._LOGGER_CONFIG_DIR}' doesn't exist.")
             
 
     def generate_error(self) -> any:
-        print(self.x)
+        self.setup_error()
         yield self.x
         
         
