@@ -31,7 +31,7 @@ class module_bos(call_function):
                 
         except CustomException as err:
             
-            logging.error("See Error Details")
+            logging.info("See Error Details")
             
             result.update({"task": "Uncompleted"})
             while True:
