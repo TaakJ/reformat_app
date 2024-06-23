@@ -1,4 +1,5 @@
 import argparse
+import logging
 import logging.config
 import yaml
 import os
@@ -6,7 +7,6 @@ from os.path import join
 from datetime import datetime
 
 class ArgumentParams:
-    
     SHORT_NAME  = 'short_name'
     NAME        = 'name'
     DESCRIPTION = 'description'
@@ -47,7 +47,7 @@ def setup_config() -> dict:
 def setup_log() -> None:
     config_yaml  = None
     date = datetime.today().strftime("%Y%m%d")
-    file = "_success"
+    file = "_success.log"
     
     filename = Folder.LOG + join(date, file)
     if not os.path.exists(os.path.dirname(filename)):
@@ -69,26 +69,26 @@ def setup_log() -> None:
 
 def setup_errorlog(log_format = "%(asctime)s.%(msecs)03d | %(module)s | %(levelname)s | %(funcName)s::%(lineno)d | %(message)s",
                 log_name = __name__,
-                file = "_error"):
-        
+                file = "_error.log"):
+    
     date = datetime.today().strftime("%Y%m%d")
     filename = Folder.LOG + join(date, file)
-    
     if not os.path.exists(os.path.dirname(filename)):
         try:
             os.makedirs(os.path.dirname(filename))
         except OSError:
             pass
-    
+        
     errorlog = logging.getLogger(log_name)
-    errorlog.setLevel(logging.DEBUG)
-    file_handler = logging.FileHandler(filename, mode="a")
+    file_handler = logging.FileHandler(filename, mode="w")
     formatter = logging.Formatter(fmt=log_format,
                                 datefmt="%Y/%m/%d %H:%M:%S")
     file_handler.setFormatter(formatter)
-    file_handler.setLevel(logging.DEBUG)
+    file_handler.setLevel(logging.INFO)
     errorlog.addHandler(file_handler)
-
+    
+    errorlog.setLevel(logging.INFO)
+    
     return errorlog
 
 class setup_parser:
@@ -168,10 +168,9 @@ class setup_parser:
                     self.parser.add_argument(short_name, name, help=description, required=required,
                                         default=default, action=action, choices=choices)
     
-    
 class Utility:
-    global PARAMS, CONFIG, ERRORLOG
+    global PARAMS, CONFIG #, ERRORLOG
+    
     PARAMS   = vars(setup_parser().parsed_params)
     CONFIG   = setup_config()
-    ERRORLOG = setup_errorlog()
-    
+    # ERRORLOG = setup_errorlog()

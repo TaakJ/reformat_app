@@ -18,22 +18,21 @@ class module_adm(call_function):
         
         result = {"module": self.module, "task": "Completed"}
         try:
-            raise CustomException(f'Test Exception "{self.module}"')
-            # await self.check_source_files()
-            # await self.retrieve_data_from_source_files()
-            # # await self.mapping_column()
-            # await self.mock_data()
-            # if self.store_tmp is True:
-            #     await self.write_data_to_tmp_file()
-            # await self.write_data_to_target_file()
+            # raise CustomException(f'Test Exception "{self.module}"')
+            await self.check_source_files()
+            await self.retrieve_data_from_source_files()
+            # await self.mapping_column()
+            await self.mock_data()
+            if self.store_tmp is True:
+                await self.write_data_to_tmp_file()
+            await self.write_data_to_target_file()
         
         except CustomException as err:
             
             logging.error("See Error Details")
-            
             while True:
                 try:
-                    next(err)
+                    logging.error(next(err))
                 except StopIteration:
                     break
             
@@ -66,7 +65,7 @@ class module_adm(call_function):
             mock_data = [['ApplicationCode',	'AccountOwner', 'AccountName',	'AccountType',	'EntitlementName',	'SecondEntitlementName','ThirdEntitlementName', 'AccountStatus',	'IsPrivileged',	'AccountDescription',
                         'CreateDate','LastLogin','LastUpdatedDate',	'AdditionalAttribute'],
                         ["TAAK","2","3","4","5","6","7","8","9","10",self.fmt_batch_date, self.date, self.fmt_batch_date,"14"],
-                        ["TOKE","16","17","18","19","20","21","22","23","24",self.fmt_batch_date, self.date, self.fmt_batch_date,"28"],
+                        # ["TOKE","16","17","18","19","20","21","22","23","24",self.fmt_batch_date, self.date, self.fmt_batch_date,"28"],
                         ]
             df = pd.DataFrame(mock_data)
             df.columns = df.iloc[0].values

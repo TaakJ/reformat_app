@@ -4,10 +4,11 @@ from module_bos import module_bos
 from module_cum import module_cum
 from setup import PARAMS
 
+
 class run_module:
     
     def __init__(self): 
-
+        
         self.loop = asyncio.get_event_loop()
         self.loop.run_until_complete(self.mapping_module())
         
