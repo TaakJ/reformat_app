@@ -10,8 +10,10 @@ class module_bos(call_function):
     def _params_setter(self, module: str, _params: dict) -> None:
         return super()._params_setter(module, _params)
     
+    
     def _log_setter(self, log) -> None:
         self._log = log
+        
         
     async def run(self, module, _params) -> dict:
         self._params_setter(module, _params)
@@ -33,15 +35,18 @@ class module_bos(call_function):
             
             logging.error("See Error Details")
             
-            result.update({"task": "Uncompleted"})
             while True:
                 try:
-                    next(err)
+                    err._logging.critical(next(err))
                 except StopIteration:
                     break
                 
+            result.update({"task": "Uncompleted"})
+                
         logging.info("Stop Run Module\n")
+        
         return result
+        
         
     async def mapping_column(self) -> None:
         
@@ -60,6 +65,7 @@ class module_bos(call_function):
                         
             except Exception as err:
                 record.update({'err': err})
+
 
     async def mock_data(self) -> None:
             mock_data = [['ApplicationCode',	'AccountOwner', 'AccountName',	'AccountType',	'EntitlementName',	'SecondEntitlementName','ThirdEntitlementName', 'AccountStatus',	'IsPrivileged',	'AccountDescription',
