@@ -69,7 +69,7 @@ def setup_log() -> None:
 
 def setup_errorlog(log_format = "%(asctime)s.%(msecs)03d | %(module)s | %(levelname)s | %(funcName)s::%(lineno)d | %(message)s",
                 log_name = __name__,
-                file = "_error.log"):
+                file = "_error.log") -> any:
     
     date = datetime.today().strftime("%Y%m%d")
     filename = Folder.LOG + join(date, file)
@@ -84,10 +84,10 @@ def setup_errorlog(log_format = "%(asctime)s.%(msecs)03d | %(module)s | %(leveln
     formatter = logging.Formatter(fmt=log_format,
                                 datefmt="%Y/%m/%d %H:%M:%S")
     file_handler.setFormatter(formatter)
-    file_handler.setLevel(logging.INFO)
+    file_handler.setLevel(logging.DEBUG)
     errorlog.addHandler(file_handler)
     
-    errorlog.setLevel(logging.INFO)
+    errorlog.setLevel(logging.DEBUG)
     
     return errorlog
 
@@ -173,4 +173,3 @@ class Utility:
     
     PARAMS   = vars(setup_parser().parsed_params)
     CONFIG   = setup_config()
-    # ERRORLOG = setup_errorlog()
