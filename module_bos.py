@@ -35,11 +35,14 @@ class module_bos(call_function):
             
             logging.error("See Error Details")
             
-            while True:
-                try:
-                    next(err)
-                except StopIteration:
-                    break
+            logger = err.getLogger()
+            logger.error(err)
+            
+            # while True:
+            #     try:
+            #         logger.error(next(err))
+            #     except StopIteration:
+            #         break
                 
             result.update({"task": "Uncompleted"})
                 

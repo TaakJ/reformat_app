@@ -34,11 +34,14 @@ class module_adm(call_function):
             
             logging.error("See Error Details")
             
-            while True:
-                try:
-                    err._logging.critical(next(err))
-                except StopIteration:
-                    break
+            logger = err.getLogger()
+            logger.error(err)
+            
+            # while True:
+            #     try:
+            #         logger.error(next(err))
+            #     except StopIteration:
+            #         break
             result.update({"task": "Uncompleted"})
             
         logging.info("Stop Run Module\n")

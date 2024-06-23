@@ -12,8 +12,7 @@ class CustomException(Exception):
             setattr(self, key, value)
             
         self.x = args[0]
-        self._logging = self.setup_err()
-        self.err_msg = self.generate_error()
+        # self.err_msg = self.generate_error()
         
     def __iter__(self):
         return self
@@ -21,30 +20,30 @@ class CustomException(Exception):
     def __next__(self):
         return next(self.err_msg)
             
-    def setup_err(self,
-                log_format =  "%(asctime)s.%(msecs)03d | %(module)s | %(levelname)s | %(funcName)s::%(lineno)d | %(message)s",
-                log_name  = __name__,
+    def getLogger(self,
+                log_format = "%(asctime)s.%(msecs)03d | %(module)s | %(levelname)s | %(funcName)s::%(lineno)d | %(message)s",
+                log_name = "ErrorLog",
                 file = "_error"):
         
         date = datetime.today().strftime("%Y%m%d")
         filename = Folder.LOG + join(date, file)
+        
         if not os.path.exists(os.path.dirname(filename)):
             try:
                 os.makedirs(os.path.dirname(filename))
             except OSError:
                 pass
             
-        log = logging.getLogger(log_name)
+        errorlog = logging.getLogger(log_name)
+        errorlog.setLevel(logging.ERROR)
+        file_handler = logging.FileHandler(filename, mode="a")
         formatter = logging.Formatter(fmt=log_format,
                                     datefmt="%Y/%m/%d %H:%M:%S")
-        
-        file_handler = logging.FileHandler(filename, mode="w")
         file_handler.setFormatter(formatter)
-        # file_handler.setLevel(logging.CRITICAL)
-        log.addHandler(file_handler)
+        file_handler.setLevel(logging.ERROR)
+        errorlog.addHandler(file_handler)
         
-        log.setLevel(logging.CRITICAL)
-        return log
+        return errorlog
     
     
     def generate_error(self) -> any:
