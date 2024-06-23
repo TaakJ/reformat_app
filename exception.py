@@ -41,9 +41,9 @@ class CustomException(Exception):
                 
                 for i in (config_yaml["handlers"].keys()):
                     if "filename" in config_yaml['handlers'][i]:
+                        config_yaml["handlers"][i]["level"] = "ERROR"
+                        config_yaml["handlers"][i]["mode"] = "a"
                         config_yaml["handlers"][i]["filename"] = filename
-                
-                config_yaml["root"]["level"] = "ERROR"
                 logging.config.dictConfig(config_yaml)
         else:
             raise Exception(f"Yaml file file_path: '{Folder._LOGGER_CONFIG_DIR}' doesn't exist.")

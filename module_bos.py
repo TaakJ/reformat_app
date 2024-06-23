@@ -36,7 +36,7 @@ class module_bos(call_function):
             result.update({"task": "Uncompleted"})
             while True:
                 try:
-                    next(err)
+                    logging.error(next(err))
                 except StopIteration:
                     break
                 

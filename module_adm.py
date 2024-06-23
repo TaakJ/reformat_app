@@ -38,9 +38,8 @@ class module_adm(call_function):
                     logging.error(next(err))
                 except StopIteration:
                     break
-        finally:
-            logging.info("Stop Run Module\n")
         
+        logging.info("Stop Run Module\n")
         return result
         
         
