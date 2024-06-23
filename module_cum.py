@@ -8,33 +8,39 @@ class module_cum(call_function):
     def _params_setter(self, module: str, _params: dict) -> None:
         return super()._params_setter(module, _params)
     
+    
     def _log_setter(self, log) -> None:
         self._log = log
     
-    async def run(self, module, _params) -> dict: 
+    
+    async def run(self, module, _params, _logger) -> dict: 
         self._params_setter(module, _params)
         
-        logging.info(f'Run Module: "{self.module}", Manual: "{self.manual}", Batch Date: "{self.batch_date}", Store Tmp: "{self.store_tmp}", Write Mode: "{self.write_mode}"')
+        logging.info(f'Module: "{self.module}", Manual: "{self.manual}", Batch Date: "{self.batch_date}", Store Tmp: "{self.store_tmp}", Write Mode: "{self.write_mode}"')
         
         result = {"module": self.module, "task": "Completed"}
         try:
-            await self.check_source_files()
-            await self.retrieve_data_from_source_files()
-            # await self.mapping_column()
-            await self.mock_data()
-            if self.store_tmp is True:
-                await self.write_data_to_tmp_file()
-            await self.write_data_to_target_file()
+            raise CustomException(f'Test Exception "{self.module}"')
+            # await self.check_source_files()
+            # await self.retrieve_data_from_source_files()
+            # # await self.mapping_column()
+            # await self.mock_data()
+            # if self.store_tmp is True:
+            #     await self.write_data_to_tmp_file()
+            # await self.write_data_to_target_file()
                 
-        except CustomException as err: 
-            logging.error("Error Exception")
+        except CustomException as err:
             
-            result.update({"task": "Uncompleted"})
+            logging.error("See Error Details")
+            
             while True:
                 try:
-                    logging.error(next(err))
+                    _logger.critical(next(err))
                 except StopIteration:
                     break
+            
+            result.update({"task": "Uncompleted"})
+            
         logging.info("Stop Run Module\n")
         return result
         

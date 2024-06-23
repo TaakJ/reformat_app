@@ -1,4 +1,3 @@
-from setup import setup_log
 from func import call_function
 from exception import CustomException
 import pandas as pd
@@ -15,7 +14,7 @@ class module_bos(call_function):
         self._log = log
         
         
-    async def run(self, module, _params) -> dict:
+    async def run(self, module, _params, _logger) -> dict:
         self._params_setter(module, _params)
         
         logging.info(f'Module: "{self.module}", Manual: "{self.manual}", Batch Date: "{self.batch_date}", Store Tmp: "{self.store_tmp}", Write Mode: "{self.write_mode}"')
@@ -37,7 +36,7 @@ class module_bos(call_function):
             
             while True:
                 try:
-                    next(err)
+                    _logger.critical(next(err))
                 except StopIteration:
                     break
                 
