@@ -5,16 +5,14 @@ import logging
 
 class module_adm(call_function):
     
-    def _params_setter(self, module: str, _params: dict) -> None:
-        return super()._params_setter(module, _params)
-    
+    def _params_setter(self, module:str) -> None:
+        return super()._params_setter(module)
     
     def _log_setter(self, log) -> None:
         self._log = log
         
-        
-    async def run(self, module, _params) -> dict:
-        self._params_setter(module, _params)
+    async def run(self, module) -> dict:
+        self._params_setter(module)
         
         logging.info(f'Module: "{self.module}", Manual: "{self.manual}", Batch Date: "{self.batch_date}", Store Tmp: "{self.store_tmp}", Write Mode: "{self.write_mode}"')
         

@@ -5,16 +5,14 @@ import logging
 
 class module_cum(call_function):
     
-    def _params_setter(self, module: str, _params: dict) -> None:
-        return super()._params_setter(module, _params)
-    
+    def _params_setter(self, module:str) -> None:
+        return super()._params_setter(module)
     
     def _log_setter(self, log) -> None:
         self._log = log
     
-    
-    async def run(self, module, _params) -> dict: 
-        self._params_setter(module, _params)
+    async def run(self, module) -> dict:
+        self._params_setter(module)
         
         logging.info(f'Module: "{self.module}", Manual: "{self.manual}", Batch Date: "{self.batch_date}", Store Tmp: "{self.store_tmp}", Write Mode: "{self.write_mode}"')
         
@@ -28,21 +26,21 @@ class module_cum(call_function):
             # if self.store_tmp is True:
             #     await self.write_data_to_tmp_file()
             # await self.write_data_to_target_file()
-                
+        
         except CustomException as err:
             
             logging.error("See Error Details")
             
             while True:
                 try:
-                    logging.critical(next(err))
-                    #_logger.critical(next(err))
+                    next(err)
                 except StopIteration:
                     break
             
             result.update({"task": "Uncompleted"})
             
         logging.info("Stop Run Module\n")
+        
         return result
         
         

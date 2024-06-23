@@ -5,8 +5,8 @@ import os
 from os.path import join
 from datetime import datetime
 
-
 class ArgumentParams:
+    
     SHORT_NAME  = 'short_name'
     NAME        = 'name'
     DESCRIPTION = 'description'
@@ -15,8 +15,6 @@ class ArgumentParams:
     ISFLAG      = 'flag'
     TYPE        = 'type'
     CHOICES     = 'choices'
-    
-    
 class Folder:
     _CURRENT_DIR        =  os.getcwd()
     _CONFIG_DIR         =  join(_CURRENT_DIR, "config.yaml")
@@ -25,18 +23,15 @@ class Folder:
     TMP                 =  join(_CURRENT_DIR, "TMP/")
     LOG                 =  join(_CURRENT_DIR, "LOG/")
 
-
 def setup_folder() -> None:
     _folders = [value for name, value in vars(Folder).items() if isinstance(value, str) and not name.startswith("_")]
     for folder in _folders:
         os.makedirs(folder, exist_ok=True)
     
-    
 def clear_tmp() -> None:
     _folders = [value for name, value in vars(Folder).items() if isinstance(value, str) and not name.startswith("_") and value.endswith("TMP/")]
     for file_path in [join(folder, files) for folder in _folders for files in os.listdir(folder) if os.path.isfile(join(folder, files))]:
         os.remove(file_path)
-        
         
 def setup_config() -> dict:
     config_yaml  = None
@@ -48,7 +43,6 @@ def setup_config() -> dict:
     else:
         raise Exception(f"Yaml config file path: '{config_dir}' doesn't exist.")
     return config_yaml
-
 
 def setup_log() -> None:
     config_yaml  = None
@@ -73,6 +67,29 @@ def setup_log() -> None:
     else:
         raise Exception(f"Yaml file file_path: '{Folder._LOGGER_CONFIG_DIR}' doesn't exist.")
 
+def setup_errorlog(log_format = "%(asctime)s.%(msecs)03d | %(module)s | %(levelname)s | %(funcName)s::%(lineno)d | %(message)s",
+                log_name = __name__,
+                file = "_error"):
+        
+    date = datetime.today().strftime("%Y%m%d")
+    filename = Folder.LOG + join(date, file)
+    
+    if not os.path.exists(os.path.dirname(filename)):
+        try:
+            os.makedirs(os.path.dirname(filename))
+        except OSError:
+            pass
+    
+    errorlog = logging.getLogger(log_name)
+    errorlog.setLevel(logging.DEBUG)
+    file_handler = logging.FileHandler(filename, mode="a")
+    formatter = logging.Formatter(fmt=log_format,
+                                datefmt="%Y/%m/%d %H:%M:%S")
+    file_handler.setFormatter(formatter)
+    file_handler.setLevel(logging.DEBUG)
+    errorlog.addHandler(file_handler)
+
+    return errorlog
 
 class setup_parser:
     
@@ -150,3 +167,11 @@ class setup_parser:
                 else:
                     self.parser.add_argument(short_name, name, help=description, required=required,
                                         default=default, action=action, choices=choices)
+    
+    
+class Utility:
+    global PARAMS, CONFIG, ERRORLOG
+    PARAMS   = vars(setup_parser().parsed_params)
+    CONFIG   = setup_config()
+    ERRORLOG = setup_errorlog()
+    

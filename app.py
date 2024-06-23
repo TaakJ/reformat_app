@@ -29,7 +29,8 @@ from PyQt6.QtGui import (
 )
 from PyQt6.QtCore import Qt
 from qt_material import apply_stylesheet
-from setup import setup_parser, setup_folder, setup_config, setup_log
+from setup import setup_parser, setup_folder, setup_log, PARAMS, CONFIG
+
 from method import start_app
 from pathlib import Path
 from os.path import join
@@ -37,6 +38,7 @@ import sys
 import time
 from datetime import datetime
 import webbrowser
+
 
 # class Jobber(QObject):
 #     set_total_progress = pyqtSignal(int)
@@ -62,19 +64,16 @@ import webbrowser
 #         else:
 #             self.set_total_progress.emit(100)
 #         self.finished.emit()
-        
 class setup_app(QWidget):
     def __init__(self):
         super().__init__()
-
-        params = setup_parser().parsed_params
-        setattr(params, "config", setup_config())
+        
         # self.__thread = QThread()
         
-        if params.manual is False:
-            start_app(vars(params))
+        if PARAMS["manual"] is False:
+            start_app()
         else:
-            self.ui(vars(params))
+            # self.ui()
             sys.exit(app.exec())
 
     def ui(self , params):
