@@ -51,7 +51,6 @@ def setup_config() -> dict:
 
 
 def setup_log() -> None:
-    
     config_yaml  = None
     date = datetime.today().strftime("%d%m%y")
     file = "_success"

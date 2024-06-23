@@ -22,6 +22,7 @@ class CustomException(Exception):
         return next(self.err_msg)
 
     def generate_error(self) -> any:
+        print(self.x)
         yield self.x
         
         
@@ -36,3 +37,27 @@ class CustomException(Exception):
         #         yield err_msg
         # except:
         #     pass
+
+
+# def setup_log() -> None:
+#     config_yaml  = None
+#     date = datetime.today().strftime("%d%m%y")
+#     file = "_success"
+    
+#     filename = Folder.LOG + join(date, file)
+#     if not os.path.exists(os.path.dirname(filename)):
+#         try:
+#             os.makedirs(os.path.dirname(filename))
+#         except OSError as err:
+#             pass
+
+#     if os.path.exists(Folder._LOGGER_CONFIG_DIR):
+#         with open(Folder._LOGGER_CONFIG_DIR, 'rb') as logger:
+#             config_yaml  = yaml.safe_load(logger.read())
+            
+#             for i in (config_yaml["handlers"].keys()):
+#                 if "filename" in config_yaml['handlers'][i]:
+#                     config_yaml["handlers"][i]["filename"] = filename
+#             logging.config.dictConfig(config_yaml)
+#     else:
+#         raise Exception(f"Yaml file file_path: '{Folder._LOGGER_CONFIG_DIR}' doesn't exist.")
