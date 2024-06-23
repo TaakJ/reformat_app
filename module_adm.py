@@ -36,7 +36,7 @@ class module_adm(call_function):
             
             while True:
                 try:
-                    next(err)
+                    err._logging.critical(next(err))
                 except StopIteration:
                     break
             result.update({"task": "Uncompleted"})

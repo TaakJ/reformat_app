@@ -10,8 +10,9 @@ class CustomException(Exception):
         
         for key, value in self.__dict__.items():
             setattr(self, key, value)
-        
+            
         self.x = args[0]
+        self._logging = self.setup_err()
         self.err_msg = self.generate_error()
         
     def __iter__(self):
@@ -23,8 +24,7 @@ class CustomException(Exception):
     def setup_err(self,
                 log_format =  "%(asctime)s.%(msecs)03d | %(module)s | %(levelname)s | %(funcName)s::%(lineno)d | %(message)s",
                 log_name  = __name__,
-                file = "_error"
-                ):
+                file = "_error"):
         
         date = datetime.today().strftime("%Y%m%d")
         filename = Folder.LOG + join(date, file)
@@ -33,14 +33,14 @@ class CustomException(Exception):
                 os.makedirs(os.path.dirname(filename))
             except OSError:
                 pass
-        
+            
         log = logging.getLogger(log_name)
         formatter = logging.Formatter(fmt=log_format,
                                     datefmt="%Y/%m/%d %H:%M:%S")
         
         file_handler = logging.FileHandler(filename, mode="w")
         file_handler.setFormatter(formatter)
-        file_handler.setLevel(logging.CRITICAL)
+        # file_handler.setLevel(logging.CRITICAL)
         log.addHandler(file_handler)
         
         log.setLevel(logging.CRITICAL)
@@ -48,8 +48,7 @@ class CustomException(Exception):
     
     
     def generate_error(self) -> any:
-        _logging = self.setup_err()
-        yield  _logging.info(self.x)
+        yield  self.x
         
         # try:
         #     for i in range(len(self.err)):
