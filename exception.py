@@ -12,13 +12,14 @@ class CustomException(Exception):
             setattr(self, key, value)
             
         self.x = args[0]
+        print(self.x)
         # self.err_msg = self.generate_error()
         
-    def __iter__(self):
-        return self
+    # def __iter__(self):
+    #     return self
 
-    def __next__(self):
-        return next(self.err_msg)
+    # def __next__(self):
+    #     return next(self.err_msg)
             
     def getLogger(self,
                 log_format = "%(asctime)s.%(msecs)03d | %(module)s | %(levelname)s | %(funcName)s::%(lineno)d | %(message)s",
@@ -46,8 +47,8 @@ class CustomException(Exception):
         return errorlog
     
     
-    def generate_error(self) -> any:
-        yield  self.x
+    def generate_error(self) -> None:
+        print("OK")
         
         # try:
         #     for i in range(len(self.err)):

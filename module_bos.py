@@ -34,15 +34,6 @@ class module_bos(call_function):
         except CustomException as err:
             
             logging.error("See Error Details")
-            
-            logger = err.getLogger()
-            logger.error(err)
-            
-            # while True:
-            #     try:
-            #         logger.error(next(err))
-            #     except StopIteration:
-            #         break
                 
             result.update({"task": "Uncompleted"})
                 
