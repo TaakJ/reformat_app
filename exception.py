@@ -4,26 +4,60 @@ import os
 from os.path import join
 from datetime import datetime
 
+LOGGER = False
 class CustomException(Exception):
     def __init__(self, *args:tuple, **kwargs:dict):
         self.__dict__.update(kwargs)
         
+        global LOGGER
         for key, value in self.__dict__.items():
             setattr(self, key, value)
+        
+        if LOGGER is False:
+            LOGGER = self.setup_errorlog()
         
         self.x = args[0]
         self.err_msg = self.generate_error()
         
     def __iter__(self):
         return self
-
+    
+    
     def __next__(self):
         return next(self.err_msg)
     
     
+    def setup_errorlog(self,
+                    log_format = "%(asctime)s.%(msecs)03d | %(module)s | %(levelname)s | %(funcName)s::%(lineno)d | %(message)s",
+                    log_name = __name__,
+                    file = "_error"):
+        
+        date = datetime.today().strftime("%Y%m%d")
+        filename = Folder.LOG + join(date, file)
+        
+        if not os.path.exists(os.path.dirname(filename)):
+            try:
+                os.makedirs(os.path.dirname(filename))
+            except OSError:
+                pass
+        
+        errorlog = logging.getLogger(log_name)
+        errorlog.setLevel(logging.DEBUG)
+        file_handler = logging.FileHandler(filename, mode="a")
+        formatter = logging.Formatter(fmt=log_format,
+                                    datefmt="%Y/%m/%d %H:%M:%S")
+        file_handler.setFormatter(formatter)
+        file_handler.setLevel(logging.DEBUG)
+        errorlog.addHandler(file_handler)
+    
+        return errorlog
+    
+    
     def generate_error(self) -> any:
-        yield self.x
-        # yield logger.critical(self.x)
+        try:
+            yield self.x
+        except:
+            raise
         
         # try:
         #     for i in range(len(self.err)):

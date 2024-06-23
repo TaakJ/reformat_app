@@ -35,8 +35,7 @@ class module_adm(call_function):
             
             while True:
                 try:
-                    logging.debug(next(err))
-                    # _logger.critical(next(err))
+                    next(err)
                 except StopIteration:
                     break
             
