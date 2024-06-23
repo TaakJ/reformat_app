@@ -7,69 +7,50 @@ from os.path import join
 from datetime import datetime
 
 class CustomException(Exception):
-    def __init__(self,*args: tuple, **kwargs: dict):
+    def __init__(self, *args:tuple, **kwargs:dict):
         self.__dict__.update(kwargs)
         
         for key, value in self.__dict__.items():
             setattr(self, key, value)
         
         self.x = args[0]
+        self._logging = self.setup_err()
         self.err_msg = self.generate_error()
-
         
     def __iter__(self):
         return self
 
     def __next__(self):
         return next(self.err_msg)
+            
+    def setup_err(self):
+
+        log_format =  "%(asctime)s.%(msecs)03d | %(module)s | %(levelname)s | %(funcName)s::%(lineno)d | %(message)s",
+        date = datetime.today().strftime("%Y%m%d")
+        file  = "_error"
+        filename = Folder.LOG + join(date, file)
+        
+        if not os.path.exists(os.path.dirname(filename)):
+            try:
+                os.makedirs(os.path.dirname(filename))
+            except OSError:
+                pass
+        
+        log  = logging.getLogger(__name__)
+        formatter = logging.Formatter(fmt=log_format,
+                                    datefmt="%Y/%m/%d %H:%M:%S")
+        
+        file_handler = logging.FileHandler(filename, mode="a")
+        file_handler.setFormatter(formatter)
+        file_handler.setLevel(logging.CRITICAL)
+        log.addHandler(file_handler)
+        
+        log.setLevel(logging.INFO)
+        return log
     
-    # def setup_error(self) -> None:
-    #     config_yaml  = None
-    #     date = datetime.today().strftime("%d%m%y")
-    #     file = "_error"
-    #     filename = Folder.LOG + join(date, file)
-        
-    #     if not os.path.exists(os.path.dirname(filename)):
-    #         try:
-    #             os.makedirs(os.path.dirname(filename))
-    #         except OSError:
-    #             pass
-            
-    #     if os.path.exists(Folder._LOGGER_CONFIG_DIR):
-    #         with open(Folder._LOGGER_CONFIG_DIR, 'rb') as logger:
-    #             config_yaml  = yaml.safe_load(logger.read())
-                
-    #             for i in (config_yaml["handlers"].keys()):
-    #                 if "filename" in config_yaml['handlers'][i]:
-    #                     # config_yaml["handlers"][i]["level"] = "ERROR"
-    #                     # config_yaml["handlers"][i]["mode"] = "a"
-    #                     config_yaml["handlers"][i]["filename"] = filename
-                        
-    #             config_yaml["root"]["level"] = "CRITICAL"
-                
-    #             logging.config.dictConfig(config_yaml)
-    #     else:
-    #         raise Exception(f"Yaml file file_path: '{Folder._LOGGER_CONFIG_DIR}' doesn't exist.")
-            
-    # def setup_error(self, log_name = '' , log_file_error  = "_error"):
-
-    #     log           = logging.getLogger(log_name)
-    #     # log_formatter = logging.Formatter(log_format)
-        
-    #     file_handler_error = logging.FileHandler(log_file_error, mode='w')
-    #     # file_handler_error.setFormatter(log_formatter)
-    #     file_handler_error.setLevel(logging.ERROR)
-    #     log.addHandler(file_handler_error)
-        
-    #     log.setLevel(logging.INFO)
-        
-    #     return log
-
     
     def generate_error(self) -> any:
-        # _logging = self.setup_error()
-        
-        yield self.x
+        yield self._logging.critical(self.x)
         
         # try:
         #     for i in range(len(self.err)):
@@ -82,27 +63,3 @@ class CustomException(Exception):
         #         yield err_msg
         # except:
         #     pass
-
-
-# def setup_log() -> None:
-#     config_yaml  = None
-#     date = datetime.today().strftime("%d%m%y")
-#     file = "_success"
-    
-#     filename = Folder.LOG + join(date, file)
-#     if not os.path.exists(os.path.dirname(filename)):
-#         try:
-#             os.makedirs(os.path.dirname(filename))
-#         except OSError as err:
-#             pass
-
-#     if os.path.exists(Folder._LOGGER_CONFIG_DIR):
-#         with open(Folder._LOGGER_CONFIG_DIR, 'rb') as logger:
-#             config_yaml  = yaml.safe_load(logger.read())
-            
-#             for i in (config_yaml["handlers"].keys()):
-#                 if "filename" in config_yaml['handlers'][i]:
-#                     config_yaml["handlers"][i]["filename"] = filename
-#             logging.config.dictConfig(config_yaml)
-#     else:
-#         raise Exception(f"Yaml file file_path: '{Folder._LOGGER_CONFIG_DIR}' doesn't exist.")

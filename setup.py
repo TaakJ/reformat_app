@@ -52,7 +52,7 @@ def setup_config() -> dict:
 
 def setup_log() -> None:
     config_yaml  = None
-    date = datetime.today().strftime("%d%m%y")
+    date = datetime.today().strftime("%Y%m%d")
     file = "_success"
     
     filename = Folder.LOG + join(date, file)
