@@ -59,7 +59,7 @@ def setup_log() -> None:
     if not os.path.exists(os.path.dirname(filename)):
         try:
             os.makedirs(os.path.dirname(filename))
-        except OSError as err:
+        except OSError:
             pass
 
     if os.path.exists(Folder._LOGGER_CONFIG_DIR):
