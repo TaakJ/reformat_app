@@ -12,8 +12,6 @@ class CustomException(Exception):
             setattr(self, key, value)
         
         self.x = args[0]
-        self._logging = self.setup_err()
-        
         self.err_msg = self.generate_error()
         
     def __iter__(self):
@@ -24,7 +22,7 @@ class CustomException(Exception):
             
     def setup_err(self,
                 log_format =  "%(asctime)s.%(msecs)03d | %(module)s | %(levelname)s | %(funcName)s::%(lineno)d | %(message)s",
-                log_name  = '',
+                log_name  = __name__,
                 file = "_error"
                 ):
         
@@ -36,7 +34,7 @@ class CustomException(Exception):
             except OSError:
                 pass
         
-        log  = logging.getLogger(log_name)
+        log = logging.getLogger(log_name)
         formatter = logging.Formatter(fmt=log_format,
                                     datefmt="%Y/%m/%d %H:%M:%S")
         
@@ -45,12 +43,13 @@ class CustomException(Exception):
         file_handler.setLevel(logging.CRITICAL)
         log.addHandler(file_handler)
         
-        log.setLevel(logging.INFO)
+        log.setLevel(logging.CRITICAL)
         return log
     
     
     def generate_error(self) -> any:
-        yield self.x
+        _logging = self.setup_err()
+        yield  _logging.info(self.x)
         
         # try:
         #     for i in range(len(self.err)):

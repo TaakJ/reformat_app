@@ -37,7 +37,7 @@ class module_bos(call_function):
             
             while True:
                 try:
-                    err._logging.critical(next(err))
+                    next(err)
                 except StopIteration:
                     break
                 
