@@ -11,7 +11,6 @@ class CustomException(Exception):
         for key, value in self.__dict__.items():
             setattr(self, key, value)
         
-        self.x = args[0]
         self.err_msg = self.generate_error()
         
     def __iter__(self):
@@ -23,8 +22,7 @@ class CustomException(Exception):
     def generate_error(self) -> any:
         try:
             for i in range(len(self.err)):
-                err_msg = f'''Module::{self.err[i]["module"]}, Path::{self.err[i]["input_dir"]}, Function::{self.err[i]["function"]}, Status::{self.err[i]["state"]}, Error::{self.err[i].get("errors")}'''
+                err_msg = f'Module::"{self.err[i]["module"]}", Path::"{self.err[i]["input_dir"]}", Function::"{self.err[i]["function"]}", Status::"{self.err[i]["state"]}", Error::"{self.err[i].get("err")}"'
                 yield err_msg
         except:
-            pass
-        
+            raise

@@ -37,7 +37,12 @@ class convert_2_files:
             logging.info(f'Source file: "{_dir}", Status: "{status_file}"')
             
         self._log_setter(set_log)
-
+        
+        ## test error.
+        if self.module == "ADM":
+            self.logging[0].update({"err": "FORCE ERROR", "state": "failed"})
+            raise CustomException(err=self.logging)
+        
 
     async def retrieve_data_from_source_files(self) -> None:
 
@@ -63,7 +68,7 @@ class convert_2_files:
                     continue
                 state = "succeed"
                 record.update({"data": _data, "state": state})
-
+                
             except Exception as err:
                 record.update({"err": err})
 

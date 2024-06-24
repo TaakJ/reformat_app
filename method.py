@@ -2,14 +2,12 @@ import asyncio
 from module_adm import module_adm
 from module_bos import module_bos
 from module_cum import module_cum
-from setup import PARAMS, setup_errorlog
+from setup import PARAMS
 
 
 class run_module:
     
     def __init__(self): 
-        self.logger = setup_errorlog()
-    
         self.loop = asyncio.get_event_loop()
         self.loop.run_until_complete(self.mapping_module())
         
@@ -18,11 +16,11 @@ class run_module:
         for module in PARAMS["source"]:
             
             if module == "ADM":
-                tasks  = module_adm().run(module, self.logger)
+                tasks  = module_adm().run(module)
                 coros.append(asyncio.create_task(tasks))
                 
             elif module == "BOS":
-                tasks  = module_bos().run(module, self.logger)
+                tasks  = module_bos().run(module)
                 coros.append(asyncio.create_task(tasks))
                 
             elif module == "CUM":

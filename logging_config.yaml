@@ -19,7 +19,7 @@ handlers:
     mode: w
     filename: 
 root: 
-  level: DEBUG
+  level: INFO
   handlers:
-    - console
+    # - console
     - file

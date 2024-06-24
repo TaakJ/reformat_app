@@ -12,28 +12,26 @@ class module_bos(call_function):
     def _log_setter(self, log) -> None:
         self._log = log
         
-    async def run(self, module:str, logger:any) -> dict:
+    async def run(self, module:str) -> dict:
         self._params_setter(module)
         
         logging.info(f'Module: "{self.module}", Manual: "{self.manual}", Batch Date: "{self.batch_date}", Store Tmp: "{self.store_tmp}", Write Mode: "{self.write_mode}"')
         
         result = {"module": self.module, "task": "Completed"}
         try:
-            raise CustomException(f'Test Exception "{self.module}"')
-            # await self.check_source_files()
-            # await self.retrieve_data_from_source_files()
-            # # await self.mapping_column()
-            # await self.mock_data()
-            # if self.store_tmp is True:
-            #     await self.write_data_to_tmp_file()
-            # await self.write_data_to_target_file()
+            await self.check_source_files()
+            await self.retrieve_data_from_source_files()
+            # await self.mapping_column()
+            await self.mock_data()
+            if self.store_tmp is True:
+                await self.write_data_to_tmp_file()
+            await self.write_data_to_target_file()
         
         except CustomException as err:
-            
-            logging.error("See Error Details")
+            logging.error("See Error Details in _error.log")
             while True:
                 try:
-                    logger.debug(next(err))
+                    logging.debug(next(err))
                 except StopIteration:
                     break
             
