@@ -63,8 +63,8 @@ class module_bos(call_function):
     async def mock_data(self) -> None:
             mock_data = [['ApplicationCode',	'AccountOwner', 'AccountName',	'AccountType',	'EntitlementName',	'SecondEntitlementName','ThirdEntitlementName', 'AccountStatus',	'IsPrivileged',	'AccountDescription',
                         'CreateDate','LastLogin','LastUpdatedDate',	'AdditionalAttribute'],
-                        ["TAAK","2","3","4","5","6","7","8","9","10",self.fmt_batch_date, self.date, self.fmt_batch_date,"14"],
-                        ["TOKE","16","17","18","19","20","21","22","23","24",self.fmt_batch_date, self.date, self.fmt_batch_date,"28"],
+                        ["MOCK1","2","3","4","5","6","7","8","9","10",self.fmt_batch_date, self.date, self.fmt_batch_date,"14"],
+                        ["MOCK2","16","17","18","19","20","21","22","23","24",self.fmt_batch_date, self.date, self.fmt_batch_date,"28"],
                         ]
             df = pd.DataFrame(mock_data)
             df.columns = df.iloc[0].values
