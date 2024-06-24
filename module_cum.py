@@ -1,5 +1,6 @@
 from func import call_function
 from exception import CustomException
+from setup import setup_errorlog
 import pandas as pd
 import logging
 
@@ -27,10 +28,13 @@ class module_cum(call_function):
             await self.write_data_to_target_file()
         
         except CustomException as err:
+            
             logging.error('See Error Details in "_error.log"')
+            
+            logger = setup_errorlog(log_name=__name__)
             while True:
                 try:
-                    logging.debug(next(err))
+                    logger.debug(next(err))
                 except StopIteration:
                     break
             
