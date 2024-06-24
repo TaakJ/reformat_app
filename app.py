@@ -31,7 +31,7 @@ from PyQt6.QtCore import Qt
 from qt_material import apply_stylesheet
 from setup import setup_parser, setup_folder, setup_log, PARAMS, CONFIG
 
-from method import start_app
+from main import start_app
 from pathlib import Path
 from os.path import join
 import sys

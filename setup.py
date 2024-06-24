@@ -68,7 +68,7 @@ def setup_log() -> None:
         raise Exception(f"Yaml file file_path: '{Folder._LOGGER_CONFIG_DIR}' doesn't exist.")
 
 def setup_errorlog(log_format = "%(asctime)s.%(msecs)03d | %(module)s | %(levelname)s | %(funcName)s::%(lineno)d | %(message)s",
-                log_name = __name__,
+                log_name = '',
                 file = "_error.log") -> any:
     
     date = datetime.today().strftime("%Y%m%d")
