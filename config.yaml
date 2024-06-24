@@ -1,20 +1,20 @@
 ADM:
-    input_dir: C:\Users\thanakit\Downloads\RAW\ADM
-    output_dir: C:\Users\thanakit\Downloads\EXPORT\IGA
+    input_dir: D:\IGAGD\ADM\download
+    output_dir: D:\IGAGD\ADM\upload
     input_file: ADM.txt
-    output_file: ADM.csv
+    output_file: ADMIGAWINT.csv
     require: []
 BOS:
-    input_dir: C:\Users\thanakit\Downloads\RAW\BOS
-    output_dir: C:\Users\thanakit\Downloads\EXPORT\IGA
+    input_dir: D:\IGAGD\BOS\download
+    output_dir: D:\IGAGD\BOS\upload
     input_file: BOS.xlsx
-    output_file: BOS.csv
+    output_file: BOSIGAWINT.csv
     require: []
 CUM:
-    input_dir: C:\Users\thanakit\Downloads\RAW\CUM
-    output_dir: C:\Users\thanakit\Downloads\EXPORT\IGA
+    input_dir: D:\IGAGD\CUM\download
+    output_dir: D:\IGAGD\CUM\upload
     input_file: CUM.xls
-    output_file: CUM.csv
+    output_file: CUMIGAWINT.csv
     require: []
 DOC:
     input_dir: C:\Users\thanakit\Downloads\RAW\DOC
@@ -22,33 +22,33 @@ DOC:
     input_file: DocImage.txt
     output_file: DOC.csv
     require: []
-ICAS:
-    input_dir: C:\Users\thanakit\Downloads\RAW\ICAS
-    output_dir: C:\Users\thanakit\Downloads\EXPORT\IGA
+ICA:
+    input_dir: D:\IGAGD\ICA\download
+    output_dir: D:\IGAGD\ICA\upload
     input_file: ICAS-NCR.xlsx
-    output_file: ICAS-NCR.csv
+    output_file: ICAIGAWINT.csv
     require: []
 IIC:
-    input_dir: C:\Users\thanakit\Downloads\RAW\IIC
-    output_dir: C:\Users\thanakit\Downloads\EXPORT\IGA
+    input_dir: D:\IGAGD\IIC\download
+    output_dir: D:\IGAGD\IIC\upload
     input_file: IIC.xlsx
-    output_file: IIC.csv
+    output_file: IICIGAWINT.csv
     require: []
 LDS:
-    input_dir: C:\Users\thanakit\Downloads\RAW\LDS
-    output_dir: C:\Users\thanakit\Downloads\EXPORT\IGA
+    input_dir: D:\IGAGD\LDS\download
+    output_dir: D:\IGAGD\LDS\upload
     input_file: LDS-P_UserDetail.txt
-    output_file: LDS.csv
+    output_file: LDSIGAWINT.csv
     require: []
-LEAD:
-    input_dir: C:\Users\thanakit\Downloads\RAW\LEAD
-    output_dir: C:\Users\thanakit\Downloads\EXPORT\IGA
+LMT:
+    input_dir: D:\IGAGD\LMT\download
+    output_dir: D:\IGAGD\LMT\upload
     input_file: Lead-Management.xlsx
-    output_file: LEAD.csv
+    output_file: LMTIGAWINT.csv
     require: []
 MOC:
-    input_dir: C:\Users\thanakit\Downloads\RAW\MOC
-    output_dir: C:\Users\thanakit\Downloads\EXPORT\IGA
+    input_dir: D:\IGAGD\MOC\download
+    output_dir: D:\IGAGD\MOC\upload
     input_file: MOC.xlsx
-    output_file: MOC.csv
+    output_file: MOCIGAWINT.csv
     require: []
