@@ -35,7 +35,7 @@ class module_bos(call_function):
             logger = setup_errorlog(log_name=__name__)
             while True:
                 try:
-                    logger.debug(next(err))
+                    logger.error(next(err))
                 except StopIteration:
                     break
             

@@ -84,10 +84,11 @@ def setup_errorlog(log_format = "%(asctime)s.%(msecs)03d | %(module)s | %(leveln
     formatter = logging.Formatter(fmt=log_format,
                                 datefmt="%Y/%m/%d %H:%M:%S")
     file_handler.setFormatter(formatter)
-    file_handler.setLevel(logging.DEBUG)
+    file_handler.setLevel(logging.ERROR)
     errorlog.addHandler(file_handler)
     
-    errorlog.setLevel(logging.DEBUG)
+    errorlog.setLevel(logging.INFO)
+    # errorlog.setLevel(logging.DEBUG)
     
     return errorlog
 
