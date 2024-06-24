@@ -373,13 +373,13 @@ class convert_2_files:
 
     def write_worksheet(self, sheet: any, change_data: dict) -> str:
 
-        state = "failed"
-        max_rows = max(change_data, default=0)
+        logging.info('Write to Worksheet.')
 
-        logging.info(f'Data for write: "{max_rows}" rows')
+        state = "failed"
         self.logging[-1].update({"function": "write_worksheet", "state": state})
 
         start_rows = 2
+        max_rows = max(change_data, default=0)
         try:
             # write columns.
             for idx, columns in enumerate(change_data[start_rows].keys(), 1):
