@@ -22,7 +22,8 @@ class CustomException(Exception):
     def generate_error(self) -> any:
         try:
             for i in range(len(self.err)):
-                err_msg = f'Module::"{self.err[i]["module"]}", Path::"{self.err[i]["input_dir"]}", Function::"{self.err[i]["function"]}", Status::"{self.err[i]["state"]}", Errors::"{self.err[i].get("err")}"'
-                yield err_msg
+                if self.err[i].get("err") is not None:
+                    err_msg = f'Module::"{self.err[i]["module"]}",\nPath::"{self.err[i]["input_dir"]}",\nFunction::"{self.err[i]["function"]}",\nStatus::"{self.err[i]["state"]}",\nErrors::"{self.err[i]["err"]}"\n'
+                    yield err_msg
         except:
             raise
