@@ -28,7 +28,7 @@ class module_bos(call_function):
             await self.write_data_to_target_file()
         
         except CustomException as err:
-            logging.error("See Error Details in _error.log")
+            logging.error('See Error Details in "_error.log"')
             while True:
                 try:
                     logging.debug(next(err))

@@ -18,29 +18,25 @@ class module_cum(call_function):
         
         result = {"module": self.module, "task": "Completed"}
         try:
-            raise CustomException(f'Test Exception "{self.module}"')
-            # await self.check_source_files()
-            # await self.retrieve_data_from_source_files()
-            # # await self.mapping_column()
-            # await self.mock_data()
-            # if self.store_tmp is True:
-            #     await self.write_data_to_tmp_file()
-            # await self.write_data_to_target_file()
+            await self.check_source_files()
+            await self.retrieve_data_from_source_files()
+            # await self.mapping_column()
+            await self.mock_data()
+            if self.store_tmp is True:
+                await self.write_data_to_tmp_file()
+            await self.write_data_to_target_file()
         
         except CustomException as err:
-            
-            logging.error("See Error Details")
-            
+            logging.error('See Error Details in "_error.log"')
             while True:
                 try:
-                    next(err)
+                    logging.debug(next(err))
                 except StopIteration:
                     break
             
             result.update({"task": "Uncompleted"})
             
         logging.info("Stop Run Module\n")
-        
         return result
         
         
