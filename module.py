@@ -413,11 +413,11 @@ class convert_2_files:
                         sheet.cell(row=start_rows, column=idx).value = change_data[start_rows][columns]
 
                 start_rows += 1
-            state = "succeed"
-
+                
         except KeyError as err:
             raise KeyError(f"Can not Write rows: {err} in Tmp files.")
-
+        
+        state = "succeed"
         self.logging[-1].update({"state": state})
 
         return state
@@ -609,6 +609,7 @@ class convert_2_files:
         except Exception as err:
             raise Exception(err)
 
+        state = "succeed"
         self.logging[-1].update({"state": state})
 
         return state

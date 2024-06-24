@@ -23,7 +23,7 @@ class CustomException(Exception):
         try:
             for i in range(len(self.err)):
                 if self.err[i].get("err") is not None:
-                    err_msg = f'Module::"{self.err[i]["module"]}", Path::"{self.err[i]["input_dir"]}", Function::"{self.err[i]["function"]}", Status::"{self.err[i]["state"]}", Errors::"{self.err[i]["err"]}"\n'
+                    err_msg = f'Module::"{self.err[i]["module"]}", Path::"{self.err[i]["input_dir"]}", Function::"{self.err[i]["function"]}", Status::"{self.err[i]["state"]}", Errors::"{self.err[i]["err"]}"'
                     yield err_msg
         except:
             raise
