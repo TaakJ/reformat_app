@@ -80,7 +80,7 @@ def setup_errorlog(log_format = "%(asctime)s.%(msecs)03d | %(module)s | %(leveln
             pass
         
     errorlog = logging.getLogger(log_name)
-    file_handler = logging.FileHandler(filename, mode="w")
+    file_handler = logging.FileHandler(filename, mode="a")
     formatter = logging.Formatter(fmt=log_format,
                                 datefmt="%Y/%m/%d %H:%M:%S")
     file_handler.setFormatter(formatter)
@@ -169,7 +169,7 @@ class setup_parser:
                                         default=default, action=action, choices=choices)
     
 class Utility:
-    global PARAMS, CONFIG #, ERRORLOG
+    global PARAMS, CONFIG
     
     PARAMS   = vars(setup_parser().parsed_params)
     CONFIG   = setup_config()
