@@ -4,7 +4,6 @@ from os.path import join
 from module import convert_2_files
 from setup import CONFIG, PARAMS
 
-
 class record_log(ABC):
     def __init__(self):
         self._log = []
