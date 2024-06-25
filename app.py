@@ -79,7 +79,8 @@ class setup_app(QWidget):
 
     def ui(self):
         
-        self.module = PARAMS["source"]
+        self.all_module = PARAMS["source"]
+        self.module = self.all_module
             
         grid = QGridLayout()
         grid.addWidget(self.layout1(), 0, 0)
@@ -90,7 +91,7 @@ class setup_app(QWidget):
         self.setLayout(grid)
 
         self.setWindowTitle("App")
-        self.setGeometry(700, 200, 600, 400)
+        self.setGeometry(700, 200, 620, 400)
         self.show()
 
     def layout1(self):
@@ -116,7 +117,7 @@ class setup_app(QWidget):
         self.today = datetime.today()
         self.calendar.setDisplayFormat("yyyy-MM-dd")
         self.calendar.calendarWidget().setSelectedDate(self.today)
-        hbox3.addWidget(QLabel("Set Date:"))
+        hbox3.addWidget(QLabel("Select Date:"))
         hbox3.addWidget(self.calendar)
 
         vbox = QVBoxLayout()
@@ -142,7 +143,7 @@ class setup_app(QWidget):
         hbox1.addWidget(radio2)
         
         hbox2 = QHBoxLayout()
-        self.tmp_checked = QCheckBox("Tmp file")
+        self.tmp_checked = QCheckBox("Generate Tmp file")
         self.tmp_checked.setCheckable(True)
         self.tmp_checked.setChecked(True)
         # self.clear_tmp = QCheckBox("Clear Tmp file")
@@ -266,7 +267,7 @@ class setup_app(QWidget):
             self.input_btn.setEnabled(False)
             self.output_btn.setEnabled(False)
             ## select all module
-            self.module = PARAMS["source"]
+            self.module = self.all_module
         else:
             self.combobox.setDisabled(False)
             self.input_dir.setEnabled(True)
@@ -293,14 +294,14 @@ class setup_app(QWidget):
 
     def task_open_dialog(self, event):
         if event == 1:
-            _dir = "input_dir"
-            browse =  self.input_dir
+            key_dir = "input_dir"
+            default_dir =  self.input_dir
         else:
-            _dir = "output_dir"
-            browse =  self.output_dir
+            key_dir = "output_dir"
+            default_dir =  self.output_dir
             
         self.get_value = self.combobox.currentText()
-        select_dir = CONFIG[self.get_value][_dir]
+        select_dir = CONFIG[self.get_value][key_dir]
         
         dialog = QFileDialog()
         dir_name = dialog.getExistingDirectory(
@@ -309,13 +310,13 @@ class setup_app(QWidget):
             directory=select_dir,
             options=QFileDialog.Option.ShowDirsOnly)
         if dir_name: 
-            CONFIG[self.value_combo][_dir] = join(Path(dir_name))
-            browse.setText(dir_name)
+            CONFIG[self.get_value][key_dir] = join(Path(dir_name))
+            default_dir.setText(dir_name)
 
     def task_run_job(self):
-        print(self.module)
-        # print(PARAMS)
-        # print(CONFIG)
+        
+        PARAMS["source"] = self.module
+        print(PARAMS)
             
     # def run_job_tasks(self):
     #     self.groupbox1.setChecked(False)
