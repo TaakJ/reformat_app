@@ -22,14 +22,9 @@ from PyQt6.QtCore import (
     QObject, 
     pyqtSignal
 )
-from PyQt6.QtGui import (
-    QFont,
-    QPalette,
-    QColor
-)
 from PyQt6.QtCore import Qt
 from qt_material import apply_stylesheet
-from setup import setup_parser, setup_folder, setup_log, PARAMS, CONFIG
+from setup import PARAMS, CONFIG
 
 from main import start_app
 from pathlib import Path
@@ -38,7 +33,7 @@ import sys
 import time
 from datetime import datetime
 import webbrowser
-
+from time import sleep
 
 class Jobber(QObject):
     set_total_progress = pyqtSignal(int)
@@ -47,24 +42,17 @@ class Jobber(QObject):
     
     def __init__(self):
         super().__init__()
+        self.results = None
 
     def run(self):
+        self.results = ''
+        # func = start_app()
+        # results = func.results
         
-        func = start_app()
-        results = func.results
+        for i in range(1, 11):
+            self.set_current_progress.emit(int(i*10))
+            sleep(0.5)
         
-        
-        # self._status = method._status
-        # read_bytes = 0
-        # chunk_size = 1024
-        # if self._status:
-        #     self.set_total_progress.emit(Path(join(Folder.EXPORT, Folder._FILE)).stat().st_size)
-        #     while read_bytes <= Path(join(Folder.EXPORT, Folder._FILE)).stat().st_size:
-        #         time.sleep(1)
-        #         read_bytes += chunk_size
-        #         self.set_current_progress.emit(read_bytes)
-        # else:
-        #     self.set_total_progress.emit(100)
         self.finished.emit()
 
 class setup_app(QWidget):
@@ -253,9 +241,10 @@ class setup_app(QWidget):
         
         vbox = QVBoxLayout()
         self.time_label = QLabel("No Output.")
+        self.time_label = QLabel("No Output.")
         vbox.addWidget(self.time_label)
         vbox.addLayout(hbox)
-        #vbox.addStretch(1)
+        vbox.addStretch(1)
         self.groupbox5.setLayout(vbox)
         
         # self.log.clicked.connect(lambda: self.open_files(1))
@@ -317,6 +306,9 @@ class setup_app(QWidget):
             default_dir.setText(dir_name)
 
     def task_run_job(self):
+        self.label.setText("Job is running...")
+        self.time_label.setHidden(True)
+        
         PARAMS.update({
             "source": self.module,
             "batch_date": self.calendar.calendarWidget().selectedDate().toPyDate(),
@@ -334,7 +326,6 @@ class setup_app(QWidget):
             self.__thread = self.__get_thread()
             self.__thread.start()
         
-        
     def __get_thread(self):
         thread = QThread()
         tasks = Jobber()
@@ -344,11 +335,20 @@ class setup_app(QWidget):
         thread.started.connect(tasks.run)
         tasks.finished.connect(thread.quit)
         
-        # tasks.set_total_progress.connect(self.progress.setMaximum)
-        # tasks.set_current_progress.connect(self.progress.setValue)
-        # tasks.finished.connect(lambda _status=tasks._status: self.run_job_finished(tasks._status))
-
+        tasks.set_total_progress.connect(self.progress.setMaximum)
+        tasks.set_current_progress.connect(self.progress.setValue)
+        tasks.finished.connect(lambda x=tasks.results: self.task_job_finished(tasks.results))
+        
         return thread
+    
+    def task_job_finished(self, results):
+        # self.label = QLabel("Press the button to start job.")
+        self.label.setText("Press the button to start job.")
+        self.progress.reset()
+        self.time_label.setText(f"Last Updated: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
+        self.time_label.setHidden(False)
+        
+        print(results)
 
     # def run_job_finished(self, _status):
     #     self.groupbox1.setChecked(True)
@@ -365,30 +365,6 @@ class setup_app(QWidget):
     #         self.file.setHidden(False)
     #     else:
     #         self.label.setText("Job has been errored. Please check log file!")
-    
-    # def select_mode(self):
-    #     if self.radio1.isChecked():
-    #         self.mode = "overwrite"
-    #         self.mode_lable.setText("e.g. Export_manual.xlsx")
-    #     else:
-    #         self.mode = "new"
-    #         self.mode_lable.setText("e.g. Export_manual_DDMMYYYY.xlsx")
-
-    # def open_dirs(self, select_path, event):
-    #     dialog = QFileDialog()
-    #     dir_name = dialog.getExistingDirectory(
-    #         parent=self,
-    #         caption="Select a directory",
-    #         directory=select_path,
-    #         options=QFileDialog.Option.ShowDirsOnly,
-    #     )
-    #     if dir_name: 
-    #         if event == 1:
-    #             Folder.RAW = join(Path(dir_name), '')
-    #             self.path1.setText(Folder.RAW)
-    #         else:
-    #             Folder.EXPORT = join(Path(dir_name), '')
-    #             self.path2.setText(Folder.EXPORT)
             
     # def open_files(self, event):
     #     if event == 1:
@@ -399,8 +375,6 @@ class setup_app(QWidget):
     #     webbrowser.open(open_files)
 
 if __name__ == "__main__":
-    setup_folder()
-    setup_log()
     app = QApplication(sys.argv)
     apply_stylesheet(
         app,
