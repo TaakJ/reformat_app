@@ -49,8 +49,10 @@ class Jobber(QObject):
         super().__init__()
 
     def run(self):
-        start_app()
-        # method = run_batch(self.param)
+        results = start_app()
+        print(f'Run Task: {len(results[0])}')
+        [print(f'- Module:: {completed_task.result()["module"]} - Status:: {completed_task.result()["task"]}')\
+            for completed_task in results[0]]   
         # self._status = method._status
         # read_bytes = 0
         # chunk_size = 1024
@@ -62,7 +64,7 @@ class Jobber(QObject):
         #         self.set_current_progress.emit(read_bytes)
         # else:
         #     self.set_total_progress.emit(100)
-        # self.finished.emit()
+        self.finished.emit()
 
 class setup_app(QWidget):
     def __init__(self):
