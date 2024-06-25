@@ -45,10 +45,8 @@ class Jobber(QObject):
         self.results = None
 
     def run(self):
-        self.results = ''
-        # func = start_app()
-        # results = func.results
-        
+        func = start_app()
+        self.results = func.results
         for i in range(1, 11):
             self.set_current_progress.emit(int(i*10))
             sleep(0.5)
@@ -207,11 +205,7 @@ class setup_app(QWidget):
                                         border: 2px solid grey;
                                         border-radius: 5px;
                                         text-align: center;}
-                                    QProgressBar::chunk {
-                                        background-color: #a5c6ff;
-                                        width: 10px;
-                                        margin: 0.5px;
-                                    }""")
+                                        """)
         self.label = QLabel("Press the button to start job.")
         self.run_btn = QPushButton("START")
         self.run_btn.setFixedSize(110, 40)
@@ -228,22 +222,20 @@ class setup_app(QWidget):
         return self.groupbox4
     
     def layout5(self):
-        self.groupbox5 = QGroupBox("Output")
+        self.groupbox5 = QGroupBox("log file")
 
-        hbox = QHBoxLayout()
+        vbox1 = QVBoxLayout()
+        self.time_label = QLabel("No Output.")
         self._error_log = QPushButton("_error.log")
         self._error_log.setHidden(True)
         self._success_log = QPushButton("_success.log")
         self._success_log.setHidden(True)
-        hbox.addWidget(self._error_log)
-        hbox.addWidget(self._success_log)
-        hbox.addStretch(1)
+        vbox1.addWidget(self.time_label)
+        vbox1.addWidget(self._success_log)
+        vbox1.addWidget(self._error_log)
         
         vbox = QVBoxLayout()
-        self.time_label = QLabel("No Output.")
-        self.time_label = QLabel("No Output.")
-        vbox.addWidget(self.time_label)
-        vbox.addLayout(hbox)
+        vbox.addLayout(vbox1)
         vbox.addStretch(1)
         self.groupbox5.setLayout(vbox)
         
@@ -304,8 +296,17 @@ class setup_app(QWidget):
         if dir_name: 
             CONFIG[self.get_value][key_dir] = join(Path(dir_name))
             default_dir.setText(dir_name)
+            
+    # def open_files(self, event):
+    #     if event == 1:
+    #         date = self.today.strftime("%d%m%Y")
+    #         open_files =  join(Folder.LOG, f'log_{date}.log')
+    #     else:
+    #         open_files = join(Folder.EXPORT, Folder._FILE) 
+    #     webbrowser.open(open_files)
 
     def task_run_job(self):
+        self.progress.reset()
         self.label.setText("Job is running...")
         self.time_label.setHidden(True)
         
@@ -342,44 +343,25 @@ class setup_app(QWidget):
         return thread
     
     def task_job_finished(self, results):
-        # self.label = QLabel("Press the button to start job.")
-        self.label.setText("Press the button to start job.")
-        self.progress.reset()
+        
+        self.progress.setValue(self.progress.maximum())
+        
         self.time_label.setText(f"Last Updated: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
         self.time_label.setHidden(False)
+        self._success_log.setHidden(False)
         
-        print(results)
-
-    # def run_job_finished(self, _status):
-    #     self.groupbox1.setChecked(True)
-    #     self.groupbox2.setChecked(True)
-    #     self.groupbox3.setChecked(True)
-    #     self.groupbox4.setChecked(True)
-    #     self.progress.setValue(self.progress.maximum())
-    #     self.time_label.setHidden(False)
-    #     self.log.setHidden(False)
-    #     self.time_label.setText(f"Last Updated: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
-        
-    #     if _status:
-    #         self.label.setText("Job has been succeed.")
-    #         self.file.setHidden(False)
-    #     else:
-    #         self.label.setText("Job has been errored. Please check log file!")
-            
-    # def open_files(self, event):
-    #     if event == 1:
-    #         date = self.today.strftime("%d%m%Y")
-    #         open_files =  join(Folder.LOG, f'log_{date}.log')
-    #     else:
-    #         open_files = join(Folder.EXPORT, Folder._FILE) 
-    #     webbrowser.open(open_files)
+        if "Uncompleted" in [completed_task.result()["task"]  for completed_task in results[0]]:
+            self.label.setText("Job has been errored. Please check log file!")
+            self._error_log.setHidden(False)
+        else:
+            self.label.setText("Job has been succeed.")
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
     apply_stylesheet(
         app,
         theme="light_blue.xml",
-        # invert_secondary=True,
+        invert_secondary=True,
         extra={
             "font_family": "monoespace",
             "density_scale": "0",
