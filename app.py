@@ -40,36 +40,35 @@ from datetime import datetime
 import webbrowser
 
 
-# class Jobber(QObject):
-#     set_total_progress = pyqtSignal(int)
-#     set_current_progress = pyqtSignal(int)
-#     finished  = pyqtSignal()
+class Jobber(QObject):
+    set_total_progress = pyqtSignal(int)
+    set_current_progress = pyqtSignal(int)
+    finished  = pyqtSignal()
     
-#     def __init__(self, params):
-#         super().__init__()
-#         self.param = params
-#         self._status = False
+    def __init__(self):
+        super().__init__()
 
-#     def run(self):
-#         method = run_batch(self.param)
-#         self._status = method._status
-#         read_bytes = 0
-#         chunk_size = 1024
-#         if self._status:
-#             self.set_total_progress.emit(Path(join(Folder.EXPORT, Folder._FILE)).stat().st_size)
-#             while read_bytes <= Path(join(Folder.EXPORT, Folder._FILE)).stat().st_size:
-#                 time.sleep(1)
-#                 read_bytes += chunk_size
-#                 self.set_current_progress.emit(read_bytes)
-#         else:
-#             self.set_total_progress.emit(100)
-#         self.finished.emit()
+    def run(self):
+        start_app()
+        # method = run_batch(self.param)
+        # self._status = method._status
+        # read_bytes = 0
+        # chunk_size = 1024
+        # if self._status:
+        #     self.set_total_progress.emit(Path(join(Folder.EXPORT, Folder._FILE)).stat().st_size)
+        #     while read_bytes <= Path(join(Folder.EXPORT, Folder._FILE)).stat().st_size:
+        #         time.sleep(1)
+        #         read_bytes += chunk_size
+        #         self.set_current_progress.emit(read_bytes)
+        # else:
+        #     self.set_total_progress.emit(100)
+        # self.finished.emit()
 
 class setup_app(QWidget):
     def __init__(self):
         super().__init__()
         
-        # self.__thread = QThread()
+        self.__thread = QThread()
         
         if PARAMS["manual"] is False:
             start_app()
@@ -80,6 +79,7 @@ class setup_app(QWidget):
     def ui(self):
         
         self.all_module = PARAMS["source"]
+        self.filename = {module: f'Manual_{CONFIG[module]["output_file"]}' for module in self.all_module}
         self.module = self.all_module
             
         grid = QGridLayout()
@@ -318,54 +318,34 @@ class setup_app(QWidget):
             "source": self.module,
             "batch_date": self.calendar.calendarWidget().selectedDate().toPyDate(),
             "store_tmp": self.tmp_checked.isChecked(),
-            "write_mode": self.mode
-        })
-            
-    # def run_job_tasks(self):
-    #     self.groupbox1.setChecked(False)
-    #     self.groupbox2.setChecked(False)
-    #     self.groupbox3.setChecked(False)
-    #     self.groupbox4.setChecked(False)
-    #     self.progress.reset()
-    #     self.label.setText("Job is running...")
-    #     self.time_label.setHidden(True)
-    #     self.log.setHidden(True)
-    #     self.file.setHidden(True)
+            "write_mode": self.mode})
+        
+        for module in self.module:
+            if module in self.filename.keys() and self.mode == "new":
+                suffix = PARAMS["batch_date"].strftime('%Y%m%d')
+                CONFIG[module]["output_file"] = f"{Path(self.filename[module]).stem}_{suffix}.csv"
+            else:
+                CONFIG[module]["output_file"] = self.filename[module]
+        
+        if not self.__thread.isRunning():
+            self.__thread = self.__get_thread()
+            self.__thread.start()
+        
+        
+    def __get_thread(self):
+        thread = QThread()
+        tasks = Jobber()
+        tasks.moveToThread(thread)
+        
+        thread.worker = tasks
+        thread.started.connect(tasks.run)
+        tasks.finished.connect(thread.quit)
+        
+        # tasks.set_total_progress.connect(self.progress.setMaximum)
+        # tasks.set_current_progress.connect(self.progress.setValue)
+        # tasks.finished.connect(lambda _status=tasks._status: self.run_job_finished(tasks._status))
 
-    #     # set params for run job.
-    #     batch_date = self.calendar.calendarWidget().selectedDate().toPyDate()
-    #     mode = self.mode
-    #     tmp = self.checkbok.isChecked()
-    #     if self.mode == "overwrite":
-    #         Folder._FILE = "manual_export.xlsx" 
-    #     else:
-    #         Folder._FILE = f"manual_export_{batch_date.strftime('%d%m%Y')}.xlsx"
-    #     self.params = {
-    #         "manual": True,
-    #         "batch_date": batch_date,
-    #         "store_tmp": tmp,
-    #         "write_mode": mode,
-    #     }
-    #     if not self.__thread.isRunning():
-    #         self.__thread = self.__get_thread()
-    #         self.__thread.start()
-        
-    # def __get_thread(self):
-    #     thread = QThread()
-    #     tasks = Jobber(self.params)
-    #     tasks.moveToThread(thread)
-        
-    #     thread.worker = tasks
-    #     thread.started.connect(tasks.run)
-    #     tasks.finished.connect(thread.quit)
-        
-    #     tasks.set_total_progress.connect(self.progress.setMaximum)
-    #     tasks.set_current_progress.connect(self.progress.setValue)
-    #     tasks.finished.connect(
-    #         lambda _status=tasks._status: self.run_job_finished(tasks._status)
-    #         )
-
-    #     return thread
+        return thread
 
     # def run_job_finished(self, _status):
     #     self.groupbox1.setChecked(True)

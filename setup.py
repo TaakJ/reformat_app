@@ -91,7 +91,6 @@ def setup_errorlog(log_format = "%(asctime)s.%(msecs)03d | %(module)s | %(leveln
     return errorlog
 
 class setup_parser:
-    
     def __init__(self):
         self.parser = argparse.ArgumentParser()
         self.set_arguments()
