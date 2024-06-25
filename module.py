@@ -311,7 +311,7 @@ class convert_2_files:
             try:
                 if record["module"] == "Target_file":
 
-                    tmp_name = join(Folder.TMP,f"TMP_{self.module}-{self.batch_date.strftime('%d%m%y')}.xlsx")
+                    tmp_name = join(Folder.TMP,f"TMP_{self.module}-{self.batch_date.strftime('%Y%m%d')}.xlsx")
                     record.update({
                             "input_dir": tmp_name,
                             "function": "write_data_to_tmp_file",
@@ -450,7 +450,7 @@ class convert_2_files:
                     if self.write_mode == "overwrite" or self.manual:
                         target_name = join(self.output_dir, self.output_file)
                     else:
-                        suffix = f"{self.batch_date.strftime('%d%m%y')}"
+                        suffix = f"{self.batch_date.strftime('%Y%m%d')}"
                         self.output_file = f"{Path(self.output_file).stem}_{suffix}.csv"
                         target_name = join(self.output_dir, self.output_file)
 
@@ -513,22 +513,14 @@ class convert_2_files:
             target_df = self.initial_data_types(target_df)
 
             ## filter data on batch date => (DataFrame).
-            batch_df = target_df[
-                target_df["CreateDate"].isin(
-                    np.array([pd.Timestamp(self.fmt_batch_date)])
-                )
-            ].reset_index(drop=True)
+            batch_df = target_df[target_df["CreateDate"]\
+                .isin(np.array([pd.Timestamp(self.fmt_batch_date)]))]\
+                .reset_index(drop=True)
 
             ## filter data not on batch date => (dict).
-            merge_data = (
-                target_df[
-                    ~target_df["CreateDate"].isin(
-                        np.array([pd.Timestamp(self.fmt_batch_date)])
-                    )
-                ]
-                .iloc[:, :-1]
-                .to_dict("index")
-            )
+            merge_data = (target_df[~target_df["CreateDate"]\
+                .isin(np.array([pd.Timestamp(self.fmt_batch_date)]))]\
+                .iloc[:, :-1].to_dict("index"))
 
             ## validate data change row by row.
             data_dict = self.validate_data_change(batch_df, change_df)

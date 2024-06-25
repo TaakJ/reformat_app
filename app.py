@@ -153,7 +153,7 @@ class setup_app(QWidget):
         # hbox2.addWidget(self.clear_tmp)
         
         vbox1 = QVBoxLayout()
-        self.mode_label = QLabel('e.g. Manual_{module}.csv')
+        self.mode_label = QLabel("e.g. Manual_{module}.csv")
         vbox1.addWidget(self.mode_label)
         
         vbox = QVBoxLayout()
@@ -257,6 +257,7 @@ class setup_app(QWidget):
         
         # self.log.clicked.connect(lambda: self.open_files(1))
         # self.file.clicked.connect(lambda: self.open_files(2))
+        
         return self.groupbox5
     
     def task_all_checked(self):
@@ -277,7 +278,6 @@ class setup_app(QWidget):
             ## select each module
             self.module = [self.combobox.currentText()]
             
-    
     def task_select_module(self):
         self.get_value = self.combobox.currentText()
         self.module = [self.get_value]
@@ -286,12 +286,12 @@ class setup_app(QWidget):
         
     def task_select_mode(self):
         if self.radio1.isChecked():
-            self.mode = "overwrite"
             self.mode_label.setText("e.g. Manual_{module}.csv")
+            self.mode = "overwrite"
         else:
-            self.mode = "new"
             self.mode_label.setText("e.g. Manual_{module}_YYYYYMMDD.csv")
-
+            self.mode = "new"
+        
     def task_open_dialog(self, event):
         if event == 1:
             key_dir = "input_dir"
@@ -314,9 +314,12 @@ class setup_app(QWidget):
             default_dir.setText(dir_name)
 
     def task_run_job(self):
-        
-        PARAMS["source"] = self.module
-        print(PARAMS)
+        PARAMS.update({
+            "source": self.module,
+            "batch_date": self.calendar.calendarWidget().selectedDate().toPyDate(),
+            "store_tmp": self.tmp_checked.isChecked(),
+            "write_mode": self.mode
+        })
             
     # def run_job_tasks(self):
     #     self.groupbox1.setChecked(False)
