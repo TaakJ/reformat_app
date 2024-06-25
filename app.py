@@ -64,6 +64,7 @@ import webbrowser
 #         else:
 #             self.set_total_progress.emit(100)
 #         self.finished.emit()
+
 class setup_app(QWidget):
     def __init__(self):
         super().__init__()
@@ -73,18 +74,13 @@ class setup_app(QWidget):
         if PARAMS["manual"] is False:
             start_app()
         else:
-            # self.ui()
+            self.ui()
             sys.exit(app.exec())
 
-    def ui(self , params):
+    def ui(self):
         
-        self._params = params
-        self.module = self._params["source"]
-        self.config  = self._params["config"]
-        
-        self.bold = QFont()
-        self.bold.setBold(True)
-        
+        self.module = PARAMS["source"]
+            
         grid = QGridLayout()
         grid.addWidget(self.layout1(), 0, 0)
         grid.addWidget(self.layout2(), 0, 1)
@@ -94,109 +90,125 @@ class setup_app(QWidget):
         self.setLayout(grid)
 
         self.setWindowTitle("App")
-        self.setGeometry(650, 200, 660, 360)
+        self.setGeometry(700, 200, 600, 400)
         self.show()
 
     def layout1(self):
-        self.groupbox1 = QGroupBox("Date.")
-        self.groupbox1.setCheckable(True)
-        self.groupbox1.setChecked(True)
-
-        radio = QRadioButton("Manual")
-        radio.setChecked(True)
-        radio.setEnabled(False)
-
+        self.groupbox1 = QGroupBox("RUN EACH MODULE")
+        
+        hbox1 = QHBoxLayout()
+        self._all = QCheckBox("ALL")
+        self._all.setChecked(True)
+        self._all.setEnabled(True)
+        hbox1.addWidget(QLabel("Module :"))
+        hbox1.addWidget(self._all)
+        
+        hbox2 = QHBoxLayout()
+        self.combobox = QComboBox()
+        self.combobox.addItems(self.module)
+        self.combobox.setDisabled(True)
+        hbox2.addWidget(QLabel("Select Module:"))
+        hbox2.addWidget(self.combobox)
+        
+        hbox3 = QHBoxLayout()
         self.calendar = QDateEdit()
         self.calendar.setCalendarPopup(True)
         self.today = datetime.today()
         self.calendar.setDisplayFormat("yyyy-MM-dd")
         self.calendar.calendarWidget().setSelectedDate(self.today)
-
-        hbox1 = QHBoxLayout()
-        hbox1.addWidget(QLabel("Status Run:"))
-        hbox1.addWidget(radio)
-
-        hbox2 = QHBoxLayout()
-        hbox2.addWidget(QLabel("Set Date:"))
-        hbox2.addWidget(self.calendar)
-        
-        hbox3 = QHBoxLayout()
-        hbox3.addWidget(QLabel("Select Module:"))
-        self.combobox = QComboBox()
-        self.combobox.addItems(self.module)
-        hbox3.addWidget(self.combobox)
+        hbox3.addWidget(QLabel("Set Date:"))
+        hbox3.addWidget(self.calendar)
 
         vbox = QVBoxLayout()
         vbox.addLayout(hbox1)
         vbox.addLayout(hbox2)
         vbox.addLayout(hbox3)
-        # vbox.addStretch(1)
         self.groupbox1.setLayout(vbox)
-
+        
+        self._all.clicked.connect(self.task_all_checked)
+        self.combobox.activated.connect(self.task_select_module)
+        
         return self.groupbox1
 
     def layout2(self):
-        self.groupbox2 = QGroupBox("Mode.")
-        self.groupbox2.setCheckable(True)
-        self.groupbox2.setChecked(True)
-
-        self.radio1 = QRadioButton("Overwrite file")
+        self.groupbox2 = QGroupBox("Specify Output file")
+        
+        hbox1 = QHBoxLayout()
+        self.radio1 = QRadioButton("Overwrite")
         self.radio1.setChecked(True)
+        radio2 = QRadioButton("Create new")
         self.mode = "overwrite"
-        radio2 = QRadioButton("New file")
-        self.mode_lable = QLabel("e.g. manual_export.xlsx")
-        self.checkbok = QCheckBox("Tmp file")
-        self.checkbok.setCheckable(True)
-        self.checkbok.setChecked(True)
-
+        hbox1.addWidget(self.radio1)
+        hbox1.addWidget(radio2)
+        
+        hbox2 = QHBoxLayout()
+        self.tmp_checked = QCheckBox("Tmp file")
+        self.tmp_checked.setCheckable(True)
+        self.tmp_checked.setChecked(True)
+        # self.clear_tmp = QCheckBox("Clear Tmp file")
+        # self.clear_tmp.setCheckable(True)
+        # self.clear_tmp.setChecked(False)
+        hbox2.addWidget(self.tmp_checked)
+        # hbox2.addWidget(self.clear_tmp)
+        
+        vbox1 = QVBoxLayout()
+        self.mode_label = QLabel('e.g. Manual_{module}.csv')
+        vbox1.addWidget(self.mode_label)
+        
         vbox = QVBoxLayout()
-        vbox.addWidget(self.radio1)
-        vbox.addWidget(radio2)
-        vbox.addWidget(self.mode_lable)
-        vbox.addWidget(self.checkbok)
-        vbox.addStretch(1)
-        self.groupbox2.setLayout(vbox)
+        vbox.addLayout(hbox1)
+        vbox.addLayout(hbox2)
+        vbox.addLayout(vbox1)
 
-        # self.radio1.clicked.connect(self.select_mode)
-        # radio2.clicked.connect(self.select_mode)
+        self.groupbox2.setLayout(vbox)
+        self.radio1.clicked.connect(self.task_select_mode)
+        radio2.clicked.connect(self.task_select_mode)
 
         return self.groupbox2
-
+        
     def layout3(self):
-        self.groupbox3 = QGroupBox("Path.")
-        self.groupbox3.setCheckable(True)
-        self.groupbox3.setChecked(True)
+        self.groupbox3 = QGroupBox("Directory Each module")
 
-        button1 = QPushButton("Browse")
-        self.path1 = QLineEdit()
-        # self.path1.setText(Folder.RAW)
-        self.path1.setReadOnly(True)
+        self.get_value =  self.combobox.currentText()
+        defualt_input_dir = CONFIG[self.get_value]["input_dir"]
+        defualt_output_dir =  CONFIG[self.get_value]["output_dir"]
+        
+        input_lable = QLabel("Incoming Path :")
+        self.input_dir = QLineEdit()
+        self.input_dir.setText(defualt_input_dir)
+        self.input_dir.setEnabled(False)
+        self.input_dir.setReadOnly(True)
+        self.input_btn = QPushButton("Download")
+        self.input_btn.setEnabled(False)
 
-        button2 = QPushButton("Save")
-        self.path2 = QLineEdit()
-        # self.path2.setText(Folder.EXPORT)
-        self.path2.setReadOnly(True)
+        output_lable = QLabel("Outgoing Path :")
+        self.output_dir = QLineEdit()
+        self.output_dir.setText(defualt_output_dir)
+        self.output_dir.setEnabled(False)
+        self.output_dir.setReadOnly(True)
+        self.output_btn = QPushButton("Upload")
+        self.output_btn.setEnabled(False)
 
         layout = QGridLayout()
-        layout.addWidget(QLabel("Incoming Path :"), 0, 0)
-        layout.addWidget(self.path1, 0, 1)
-        layout.addWidget(button1, 0, 2)
+        layout.addWidget(input_lable, 0, 0)
+        layout.addWidget(self.input_dir, 0, 1)
+        layout.addWidget(self.input_btn , 0, 2)
 
-        layout.addWidget(QLabel("Outgoing Path :"), 2, 0)
-        layout.addWidget(self.path2, 2, 1)
-        layout.addWidget(button2, 2, 2)
+        layout.addWidget(output_lable, 2, 0)
+        layout.addWidget(self.output_dir, 2, 1)
+        layout.addWidget(self.output_btn, 2, 2)
         self.groupbox3.setLayout(layout)
 
-        # button1.clicked.connect(lambda: self.open_dirs(Folder.RAW, 1))
-        # button2.clicked.connect(lambda: self.open_dirs(Folder.EXPORT, 2))
+        self.input_btn.clicked.connect(lambda: self.task_open_dialog(1))
+        self.output_btn.clicked.connect(lambda: self.task_open_dialog(2))
 
         return self.groupbox3
-
+    
     def layout4(self):
-        self.groupbox4 = QGroupBox("Run Job.")
-        self.groupbox4.setCheckable(True)
-        self.groupbox4.setChecked(True)
-
+        
+        self.groupbox4 = QGroupBox("RUN AND STATUS JOB")
+        
+        vbox1 = QVBoxLayout()
         self.progress = QProgressBar()
         self.progress.setStyleSheet("""QProgressBar {
                                         color: #000;
@@ -207,54 +219,103 @@ class setup_app(QWidget):
                                         background-color: #a5c6ff;
                                         width: 10px;
                                         margin: 0.5px;
-                                    }"""
-        )
-
+                                    }""")
         self.label = QLabel("Press the button to start job.")
         self.run_btn = QPushButton("START")
-        self.run_btn.setFixedSize(90, 40)
+        self.run_btn.setFixedSize(110, 40)
+        vbox1.addWidget(self.progress)
+        vbox1.addWidget(self.label)
+        vbox1.addWidget(self.run_btn)
         
         vbox = QVBoxLayout()
-        vbox.addWidget(self.progress)
-        vbox.addWidget(self.label)
-
-        hbox = QHBoxLayout()
-        hbox.addWidget(self.run_btn)
-        hbox.addStretch(1)
-
-        vbox.addLayout(hbox)
-        vbox.addStretch(1)
+        vbox.addLayout(vbox1)
         self.groupbox4.setLayout(vbox)
         
-        # self.run_btn.clicked.connect(self.run_job_tasks)
+        self.run_btn.clicked.connect(self.task_run_job)
 
         return self.groupbox4
-
+    
     def layout5(self):
-        groupbox = QGroupBox("Output.")
-        groupbox.setFlat(True)
-        self.log = QPushButton("Open Log")
-        self.log.setHidden(True)
-        self.file = QPushButton("Open File")
-        self.file.setHidden(True)
-
-        self.time_label = QLabel("No Output.")
-        vbox = QVBoxLayout()
-        vbox.addWidget(self.time_label)
+        self.groupbox5 = QGroupBox("Output")
 
         hbox = QHBoxLayout()
-        hbox.addWidget(self.log)
-        hbox.addWidget(self.file)
+        self._error_log = QPushButton("_error.log")
+        self._error_log.setHidden(True)
+        self._success_log = QPushButton("_success.log")
+        self._success_log.setHidden(True)
+        hbox.addWidget(self._error_log)
+        hbox.addWidget(self._success_log)
         hbox.addStretch(1)
-
-        vbox.addLayout(hbox)
-        vbox.addStretch(1)
-        groupbox.setLayout(vbox)
         
-        self.log.clicked.connect(lambda: self.open_files(1))
-        self.file.clicked.connect(lambda: self.open_files(2))
+        vbox = QVBoxLayout()
+        self.time_label = QLabel("No Output.")
+        vbox.addWidget(self.time_label)
+        vbox.addLayout(hbox)
+        #vbox.addStretch(1)
+        self.groupbox5.setLayout(vbox)
+        
+        # self.log.clicked.connect(lambda: self.open_files(1))
+        # self.file.clicked.connect(lambda: self.open_files(2))
+        return self.groupbox5
+    
+    def task_all_checked(self):
+        if self._all.isChecked():
+            self.combobox.setDisabled(True)
+            self.input_dir.setEnabled(False)
+            self.output_dir.setEnabled(False)
+            self.input_btn.setEnabled(False)
+            self.output_btn.setEnabled(False)
+            ## select all module
+            self.module = PARAMS["source"]
+        else:
+            self.combobox.setDisabled(False)
+            self.input_dir.setEnabled(True)
+            self.output_dir.setEnabled(True)
+            self.input_btn.setEnabled(True)
+            self.output_btn.setEnabled(True)
+            ## select each module
+            self.module = [self.combobox.currentText()]
+            
+    
+    def task_select_module(self):
+        self.get_value = self.combobox.currentText()
+        self.module = [self.get_value]
+        self.input_dir.setText(CONFIG[self.get_value]["input_dir"])
+        self.output_dir.setText(CONFIG[self.get_value]["output_dir"])
+        
+    def task_select_mode(self):
+        if self.radio1.isChecked():
+            self.mode = "overwrite"
+            self.mode_label.setText("e.g. Manual_{module}.csv")
+        else:
+            self.mode = "new"
+            self.mode_label.setText("e.g. Manual_{module}_YYYYYMMDD.csv")
 
-        return groupbox
+    def task_open_dialog(self, event):
+        if event == 1:
+            _dir = "input_dir"
+            browse =  self.input_dir
+        else:
+            _dir = "output_dir"
+            browse =  self.output_dir
+            
+        self.get_value = self.combobox.currentText()
+        select_dir = CONFIG[self.get_value][_dir]
+        
+        dialog = QFileDialog()
+        dir_name = dialog.getExistingDirectory(
+            parent=self,
+            caption="Select a directory",
+            directory=select_dir,
+            options=QFileDialog.Option.ShowDirsOnly)
+        if dir_name: 
+            CONFIG[self.value_combo][_dir] = join(Path(dir_name))
+            browse.setText(dir_name)
+
+    def task_run_job(self):
+        print(self.module)
+        # print(PARAMS)
+        # print(CONFIG)
             
     # def run_job_tasks(self):
     #     self.groupbox1.setChecked(False)
@@ -356,12 +417,10 @@ if __name__ == "__main__":
     app = QApplication(sys.argv)
     apply_stylesheet(
         app,
-        theme="dark_yellow.xml",
+        theme="light_blue.xml",
         # invert_secondary=True,
         extra={
             "font_family": "monoespace",
-            "font_size": "14px",
-            "line_height": "14px",
             "density_scale": "0",
             "pyside6": True,
             "linux": True },

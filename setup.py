@@ -88,8 +88,6 @@ def setup_errorlog(log_format = "%(asctime)s.%(msecs)03d | %(module)s | %(leveln
     errorlog.addHandler(file_handler)
     
     errorlog.setLevel(logging.INFO)
-    # errorlog.setLevel(logging.DEBUG)
-    
     return errorlog
 
 class setup_parser:
@@ -109,7 +107,7 @@ class setup_parser:
                 ArgumentParams.REQUIRED : False,
                 ArgumentParams.ISFLAG : False,
                 ArgumentParams.TYPE : lambda s: [str(item).upper() for item in s.split(',')],
-                ArgumentParams.DEFAULT: "ADM,BOS,CUM,DOC,ICAS"
+                ArgumentParams.DEFAULT: "adm,bos,cum,ica,iic,lds,lmt,moc"
             },
             {
                 ArgumentParams.SHORT_NAME : "-m",
