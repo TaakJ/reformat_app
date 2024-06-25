@@ -1,3 +1,9 @@
+import sys
+from pathlib import Path
+from os.path import join
+from datetime import datetime
+import webbrowser
+from time import sleep
 from PyQt6.QtWidgets import (
     QApplication,
     QWidget,
@@ -22,18 +28,9 @@ from PyQt6.QtCore import (
     QObject, 
     pyqtSignal
 )
-from PyQt6.QtCore import Qt
 from qt_material import apply_stylesheet
-from setup import PARAMS, CONFIG
-
+from setup import PARAMS, CONFIG, Folder
 from main import start_app
-from pathlib import Path
-from os.path import join
-import sys
-import time
-from datetime import datetime
-import webbrowser
-from time import sleep
 
 class Jobber(QObject):
     set_total_progress = pyqtSignal(int)
@@ -205,6 +202,10 @@ class setup_app(QWidget):
                                         border: 2px solid grey;
                                         border-radius: 5px;
                                         text-align: center;}
+                                    QProgressBar::chunk {
+                                        background-color: #a5c6ff;
+                                        width: 10px;
+                                        margin: 0.5px;}
                                         """)
         self.label = QLabel("Press the button to start job.")
         self.run_btn = QPushButton("START")
@@ -226,21 +227,30 @@ class setup_app(QWidget):
 
         vbox1 = QVBoxLayout()
         self.time_label = QLabel("No Output.")
-        self._error_log = QPushButton("_error.log")
-        self._error_log.setHidden(True)
+        vbox1.addWidget(self.time_label)
+        
+        hbox1 = QHBoxLayout()
         self._success_log = QPushButton("_success.log")
         self._success_log.setHidden(True)
-        vbox1.addWidget(self.time_label)
-        vbox1.addWidget(self._success_log)
-        vbox1.addWidget(self._error_log)
+        hbox1.addWidget(self._success_log)
+        hbox1.addStretch(1)
+        
+        hbox2 = QHBoxLayout()
+        self._error_log = QPushButton("_error.log")
+        self._error_log.setHidden(True)
+        hbox2.addWidget(self._error_log)
+        hbox2.addStretch(1)
         
         vbox = QVBoxLayout()
         vbox.addLayout(vbox1)
+        vbox.addLayout(hbox1)
+        vbox.addLayout(hbox2)
         vbox.addStretch(1)
+        
         self.groupbox5.setLayout(vbox)
         
-        # self.log.clicked.connect(lambda: self.open_files(1))
-        # self.file.clicked.connect(lambda: self.open_files(2))
+        self._success_log.clicked.connect(lambda: self.task_open_log(1))
+        self._error_log.clicked.connect(lambda: self.task_open_log(2))
         
         return self.groupbox5
     
@@ -297,18 +307,21 @@ class setup_app(QWidget):
             CONFIG[self.get_value][key_dir] = join(Path(dir_name))
             default_dir.setText(dir_name)
             
-    # def open_files(self, event):
-    #     if event == 1:
-    #         date = self.today.strftime("%d%m%Y")
-    #         open_files =  join(Folder.LOG, f'log_{date}.log')
-    #     else:
-    #         open_files = join(Folder.EXPORT, Folder._FILE) 
-    #     webbrowser.open(open_files)
+    def task_open_log(self, event):
+        date = datetime.now().strftime("%Y%m%d")
+        log_dir = join(Folder.LOG, date)
+        if event == 1:
+            open_log = join(log_dir, "_success.log")
+        else:
+            open_log = join(log_dir, "_error.log") 
+        webbrowser.open(open_log)
 
     def task_run_job(self):
         self.progress.reset()
         self.label.setText("Job is running...")
         self.time_label.setHidden(True)
+        self._success_log.setHidden(True)
+        self._error_log.setHidden(True)
         
         PARAMS.update({
             "source": self.module,
@@ -361,7 +374,7 @@ if __name__ == "__main__":
     apply_stylesheet(
         app,
         theme="light_blue.xml",
-        invert_secondary=True,
+        # invert_secondary=True,
         extra={
             "font_family": "monoespace",
             "density_scale": "0",
