@@ -3,7 +3,7 @@ from exception import CustomException
 from setup import setup_errorlog
 import pandas as pd
 import logging
-
+from setup import CONFIG, PARAMS
 
 class module_bos(call_function):
     
@@ -21,6 +21,9 @@ class module_bos(call_function):
         result = {"module": self.module, "task": "Completed"}
         try:
             print(self.module)
+            print(CONFIG[self.module]["input_dir"])
+            print(CONFIG[self.module]["output_dir"])
+            print(CONFIG[self.module]["output_file"])
             # await self.check_source_files()
             # await self.retrieve_data_from_source_files()
             # # await self.mapping_column()

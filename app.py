@@ -49,10 +49,11 @@ class Jobber(QObject):
         super().__init__()
 
     def run(self):
-        results = start_app()
-        print(f'Run Task: {len(results[0])}')
-        [print(f'- Module:: {completed_task.result()["module"]} - Status:: {completed_task.result()["task"]}')\
-            for completed_task in results[0]]   
+        
+        func = start_app()
+        results = func.results
+        
+        
         # self._status = method._status
         # read_bytes = 0
         # chunk_size = 1024
