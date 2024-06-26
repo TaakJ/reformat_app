@@ -5,6 +5,7 @@ from module import convert_2_files
 from setup import CONFIG, PARAMS
 import logging
 import re
+
 class collect_log(ABC):
     def __init__(self):
         self._log = []
@@ -20,6 +21,7 @@ class collect_log(ABC):
     @abstractmethod
     def log_setter(self, log: list):
         pass
+    
 class collect_params:
     def params_setter(self, module:str) -> None:
         
@@ -267,6 +269,10 @@ class collect_data:
         state = "succeed"
         self.logging[i].update({"state": state})
         return data
+    
+class backup:
+    def __init__(self) -> None:
+        pass
         
 class call_function(convert_2_files, collect_log, collect_params, collect_data):
     pass

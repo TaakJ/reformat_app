@@ -1,4 +1,4 @@
-from func import call_function
+from function import call_function
 from exception import CustomException
 from setup import setup_errorlog
 import pandas as pd
@@ -19,7 +19,7 @@ class module_adm(call_function):
             await self.check_source_files()
             await self.retrieve_data_from_source_files()
             # await self.mapping_column()
-            # await self.mock_data()
+            await self.mock_data()
             if self.store_tmp is True:
                 await self.write_data_to_tmp_file()
             await self.write_data_to_target_file()
@@ -63,7 +63,7 @@ class module_adm(call_function):
     async def mock_data(self) -> None:
             mock_data = [['ApplicationCode',	'AccountOwner', 'AccountName',	'AccountType',	'EntitlementName',	'SecondEntitlementName','ThirdEntitlementName', 'AccountStatus',	'IsPrivileged',	'AccountDescription',
                         'CreateDate','LastLogin','LastUpdatedDate',	'AdditionalAttribute'],
-                        ["MOCK1","2","3","4","5","6","7","8","9","10",self.fmt_batch_date, self.date, self.fmt_batch_date,"14"],
+                        ["MOCK1","","3","4","5","6","7","8","9","10",self.fmt_batch_date, self.date, self.fmt_batch_date,"14"],
                         ["MOCK2","16","17","18","19","20","21","22","23","24",self.fmt_batch_date, self.date, self.fmt_batch_date,"28"],
                         ]
             df = pd.DataFrame(mock_data)
