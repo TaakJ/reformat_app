@@ -356,9 +356,7 @@ class setup_app(QWidget):
         return thread
     
     def task_job_finished(self, results):
-        
         self.progress.setValue(self.progress.maximum())
-        
         self.time_label.setText(f"Last Updated: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
         self.time_label.setHidden(False)
         self._success_log.setHidden(False)
