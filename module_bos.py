@@ -6,9 +6,6 @@ import logging
 
 class module_bos(call_function):
     
-    def params_setter(self, module: str) -> None:
-        return super().params_setter(module)
-    
     def log_setter(self, log: list):
         self._log = log
         

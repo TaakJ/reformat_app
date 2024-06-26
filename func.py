@@ -20,23 +20,20 @@ class collect_log(ABC):
     def log_setter(self, log: list):
         pass
 
-class collect_params(ABC):
-    
-    @abstractmethod
+class collect_params:
     def params_setter(self, module:str) -> None:
         
         for key, value in PARAMS.items():
             setattr(self, key, value)
 
         self.module = module
+        self.fmt_batch_date = self.batch_date
+        self.date = datetime.now()
         self.input_dir = [join(CONFIG[self.module]["input_dir"], CONFIG[self.module]["input_file"])]
         # for i in CONFIG[self.module]["require"]:
         #     self.input_dir += [join(CONFIG[i]["input_dir"], CONFIG[i]["input_file"])]
         self.output_dir = CONFIG[self.module]["output_dir"]
         self.output_file = CONFIG[self.module]["output_file"]
-        
-        self.fmt_batch_date = self.batch_date
-        self.date = datetime.now()
     
 
 class call_function(convert_2_files, collect_log, collect_params):
