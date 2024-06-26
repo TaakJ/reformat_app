@@ -14,7 +14,7 @@ class collect_log(ABC):
 
     @logging.setter
     def logging(self, log: list) -> None:
-        self._log_setter(log)
+        self.log_setter(log)
 
     @abstractmethod
     def log_setter(self, log: list):
