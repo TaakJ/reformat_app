@@ -22,20 +22,20 @@ class convert_2_files:
         logging.info("Check Source files.")
 
         set_log = []
-        for _dir in self.input_dir:
+        for input_dir in self.input_dir:
 
             status_file = "not_found"
-            if glob.glob(_dir, recursive=True):
+            if glob.glob(input_dir, recursive=True):
                 status_file = "found"
 
             record = {
                 "module": self.module,
-                "input_dir": _dir,
+                "input_dir": input_dir,
                 "status_file": status_file,
                 "function": "check_source_files",
             }
             set_log.append(record)
-            logging.info(f'Source file: "{_dir}", Status: "{status_file}"')
+            logging.info(f'Source file: "{input_dir}", Status: "{status_file}"')
 
         self.log_setter(set_log)
 
@@ -47,16 +47,16 @@ class convert_2_files:
         for i, record in enumerate(self.logging):
             record.update({"function": "retrieve_data_from_source_files", "state": state})
 
-            _dir = record["input_dir"]
-            types = Path(_dir).suffix
+            input_dir = record["input_dir"]
+            types = Path(input_dir).suffix
             status_file = record["status_file"]
             try:
                 if status_file == "found":
                     if [".xlsx", ".xls"].__contains__(types):
-                        logging.info(f'Read Excel file: "{_dir}"')
+                        logging.info(f'Read Excel file: "{input_dir}"')
                         data = self.read_excel_file(i)
                     else:
-                        logging.info(f'Read Text file: "{_dir}"')
+                        logging.info(f'Read Text file: "{input_dir}"')
                         data = self.read_text_file(i)
                 else:
                     raise FileNotFoundError(f"status_file: {status_file}")
@@ -76,10 +76,10 @@ class convert_2_files:
         input_dir = self.logging[i]["input_dir"]
         module = self.logging[i]["module"]
         
-        files = open(input_dir, "rb")
-        encoded = chardet.detect(files.read())["encoding"]
-        files.seek(0)
-        decode_data = StringIO(files.read().decode(encoded))
+        file = open(input_dir, "rb")
+        encoded = chardet.detect(file.read())["encoding"]
+        file.seek(0)
+        decode_data = StringIO(file.read().decode(encoded))
         
         if module == "ADM":
             data = self.extract_adm_data(i, decode_data)
@@ -93,48 +93,18 @@ class convert_2_files:
             data = self.extract_lds_data(i, decode_data)
             return data
         
-        
-    def extract_excel_data(func):
-        def wrapper(*args: tuple, **kwargs: dict) -> dict:
-
-            by_sheets = iter(func(*args, **kwargs))
-
-            _data = {}
-            while True:
-                try:
-                    for sheets, data in next(by_sheets).items():
-                        if not all(
-                            dup == data[0] for dup in data
-                        ) and not data.__contains__(
-                            "Centralized User Management : User List."
-                        ):
-                            if sheets not in _data:
-                                _data[sheets] = [data]
-                            else:
-                                _data[sheets].append(data)
-
-                except StopIteration:
-                    break
-            return _data
-
-        return wrapper
-
-    @extract_excel_data
     def read_excel_file(self, i: int) -> any:
 
-        self.logging[i].update({"function": "excel_data_cleaning"})
-
-        workbook = xlrd.open_workbook(self.logging[i]["input_dir"])
-        sheet_list = [
-            sheet for sheet in workbook.sheet_names() if sheet != "StyleSheet"
-        ]
-
-        for sheets in sheet_list:
-            cells = workbook.sheet_by_name(sheets)
-            for row in range(0, cells.nrows):
-                yield {
-                    sheets: [cells.cell(row, col).value for col in range(cells.ncols)]
-                }
+        self.logging[i].update({"function": "read_excel_file"})
+        input_dir = self.logging[i]["input_dir"]
+        module = self.logging[i]["module"]
+        
+        workbook = xlrd.open_workbook(input_dir)
+        
+        if module == "BOS":
+            data = self.extract_bos_data(i, workbook)
+            return data
+        
 
     def initial_data_types(self, df: pd.DataFrame) -> pd.DataFrame:
 

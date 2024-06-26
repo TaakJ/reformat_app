@@ -39,7 +39,6 @@ class collect_params:
 
 class collect_data:
     
-    
     def extract_adm_data(self, i, line):
         
         logging.info("Extract Data for ADM Module.")
@@ -57,7 +56,6 @@ class collect_data:
         state = "succeed"
         self.logging[i].update({"state": state})
         return  {"ADM": data}
-    
     
     def extract_doc_data(self, i, line):
         
@@ -95,7 +93,6 @@ class collect_data:
         self.logging[i].update({"state": state})
         return  {"DOC": fix_data}
     
-    
     def extract_lds_data(self, i, line):
         
         logging.info("Extract Data for LDS Module.")
@@ -132,6 +129,22 @@ class collect_data:
         self.logging[i].update({"state": state})
         return  {"LDS": fix_data}
         
+    def extract_bos_data(self, i, workbook):
+        
+        logging.info("Extract Data for BOS Module.")
+        
+        state = "failed"
+        self.logging[i].update({"function": "extract_bos_data", "state": state})
+        
+        sheet_list = [sheet for sheet in workbook.sheet_names()]
+        data = {}
+        for sheets in sheet_list:
+            cells = workbook.sheet_by_name(sheets)
+            for row in range(0, cells.nrows):
+                data = [cells.cell(row, col).value for col in range(cells.ncols)]
+                
+                
+                print(data)
         
 class call_function(convert_2_files, collect_log, collect_params, collect_data):
     pass
