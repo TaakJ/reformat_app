@@ -61,6 +61,9 @@ class convert_2_files:
                 else:
                     raise FileNotFoundError(f"status_file: {status_file}")
 
+                print(data)
+                print()
+                
                 state = "succeed"
                 record.update({"data": data, "state": state})
 
@@ -105,6 +108,25 @@ class convert_2_files:
             data = self.extract_bos_data(i, workbook)
             return data
         
+        elif module == "CUM":
+            data = self.extract_cum_data(i, workbook)
+            return data
+        
+        elif module == "ICA":
+            data = self.extract_ica_data(i, workbook)
+            return data
+        
+        elif module == "IIC":
+            data = self.extract_iic_data(i, workbook)
+            return data
+        
+        elif module == "LMT":
+            data = self.extract_lmt_data(i, workbook)
+            return data
+        
+        elif module == "MOC":
+            data = self.extract_moc_data(i, workbook)
+            return data
 
     def initial_data_types(self, df: pd.DataFrame) -> pd.DataFrame:
 

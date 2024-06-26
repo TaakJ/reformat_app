@@ -20,7 +20,6 @@ class collect_log(ABC):
     @abstractmethod
     def log_setter(self, log: list):
         pass
-
 class collect_params:
     def params_setter(self, module:str) -> None:
         
@@ -35,7 +34,6 @@ class collect_params:
         #     self.input_dir += [join(CONFIG[i]["input_dir"], CONFIG[i]["input_file"])]
         self.output_dir = CONFIG[self.module]["output_dir"]
         self.output_file = CONFIG[self.module]["output_file"]
-    
 
 class collect_data:
     
@@ -76,10 +74,10 @@ class collect_data:
             if rows == 0:
                 continue
             elif rows == 1:
-                ## clean task header
+                ## header
                 fix_data += [" ".join(value).split(" ")]
             else:
-                ## clean task value
+                ## value
                 fix_column = []
                 for idx, column in enumerate(value, 1):
                     if idx == 4:
@@ -110,10 +108,10 @@ class collect_data:
         fix_data = []
         for rows, value in enumerate(data):
             if rows == 0:
-                ## clean task header
+                ## header
                 fix_data += [" ".join(value).split(" ")]
             else:
-                ## clean task value
+                ## value
                 fix_column = []
                 for idx, column in enumerate(value, 1):
                     if idx == 1:
@@ -135,16 +133,140 @@ class collect_data:
         
         state = "failed"
         self.logging[i].update({"function": "extract_bos_data", "state": state})
-        
+
         sheet_list = [sheet for sheet in workbook.sheet_names()]
+        
         data = {}
         for sheets in sheet_list:
             cells = workbook.sheet_by_name(sheets)
             for row in range(0, cells.nrows):
-                data = [cells.cell(row, col).value for col in range(cells.ncols)]
-                
-                
-                print(data)
+                by_sheets = [cells.cell(row, col).value for col in range(cells.ncols)]
+                if sheets not in data:
+                    data[sheets] = [by_sheets]
+                else:
+                    data[sheets].append(by_sheets)
+                    
+        state = "succeed"
+        self.logging[i].update({"state": state})
+        return data
+    
+    def extract_cum_data(self, i, workbook):
+        
+        logging.info("Extract Data for CUM Module.")
+        
+        state = "failed"
+        self.logging[i].update({"function": "extract_cum_data", "state": state})
+
+        sheet_list = [sheet for sheet in workbook.sheet_names()]
+        
+        data = {}
+        for sheets in sheet_list:
+            cells = workbook.sheet_by_name(sheets)
+            for row in range(0, cells.nrows):
+                by_sheets = [cells.cell(row, col).value for col in range(cells.ncols)][1:]
+                if not all(empty == "" for empty in by_sheets):
+                    if sheets not in data:
+                        data[sheets] = [by_sheets]
+                    else:
+                        data[sheets].append(by_sheets)
+                        
+        state = "succeed"
+        self.logging[i].update({"state": state})
+        return data
+    
+    def extract_ica_data(self, i, workbook):
+        
+        logging.info("Extract Data for ICA Module.")
+        
+        state = "failed"
+        self.logging[i].update({"function": "extract_ica_data", "state": state})
+
+        sheet_list = [sheet for sheet in workbook.sheet_names()]
+        
+        data = {}
+        for sheets in sheet_list:
+            cells = workbook.sheet_by_name(sheets)
+            for row in range(0, cells.nrows):
+                by_sheets = [cells.cell(row, col).value for col in range(cells.ncols)]
+                if sheets not in data:
+                    data[sheets] = [by_sheets]
+                else:
+                    data[sheets].append(by_sheets)
+                    
+        state = "succeed"
+        self.logging[i].update({"state": state})
+        return data
+    
+    def extract_iic_data(self, i, workbook):
+        
+        logging.info("Extract Data for IIC Module.")
+        
+        state = "failed"
+        self.logging[i].update({"function": "extract_iic_data", "state": state})
+
+        sheet_list = [sheet for sheet in workbook.sheet_names() if sheet != "StyleSheet"]
+        
+        data = {}
+        for sheets in sheet_list:
+            cells = workbook.sheet_by_name(sheets)
+            for row in range(0, cells.nrows):
+                by_sheets = [cells.cell(row, col).value for col in range(cells.ncols)]
+                if not all(empty == "" for empty in by_sheets):
+                    if sheets not in data:
+                        data[sheets] = [by_sheets]
+                    else:
+                        data[sheets].append(by_sheets)
+                        
+        state = "succeed"
+        self.logging[i].update({"state": state})
+        return data
+    
+    def extract_lmt_data(self, i, workbook):
+        
+        logging.info("Extract Data for LMT Module.")
+        
+        state = "failed"
+        self.logging[i].update({"function": "extract_lmt_data", "state": state})
+
+        sheet_list = [sheet for sheet in workbook.sheet_names() if sheet != "StyleSheet"]
+        
+        data = {}
+        for sheets in sheet_list:
+            cells = workbook.sheet_by_name(sheets)
+            for row in range(0, cells.nrows):
+                by_sheets = [cells.cell(row, col).value for col in range(cells.ncols)]
+                if sheets not in data:
+                    data[sheets] = [by_sheets]
+                else:
+                    data[sheets].append(by_sheets)
+        
+        state = "succeed"
+        self.logging[i].update({"state": state})
+        return data
+    
+    def extract_moc_data(self, i, workbook):
+        
+        logging.info("Extract Data for MOC Module.")
+        
+        state = "failed"
+        self.logging[i].update({"function": "extract_moc_data", "state": state})
+
+        sheet_list = [sheet for sheet in workbook.sheet_names() if sheet != "StyleSheet"]
+        
+        data = {}
+        for sheets in sheet_list:
+            cells = workbook.sheet_by_name(sheets)
+            for row in range(0, cells.nrows):
+                by_sheets = [cells.cell(row, col).value for col in range(cells.ncols)]
+                if not all(empty == "" for empty in by_sheets):
+                    if sheets not in data:
+                        data[sheets] = [by_sheets]
+                    else:
+                        data[sheets].append(by_sheets)
+        
+        state = "succeed"
+        self.logging[i].update({"state": state})
+        return data
         
 class call_function(convert_2_files, collect_log, collect_params, collect_data):
     pass

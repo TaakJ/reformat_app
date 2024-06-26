@@ -19,10 +19,10 @@ class module_lmt(call_function):
             await self.check_source_files()
             await self.retrieve_data_from_source_files()
             # await self.mapping_column()
-            await self.mock_data()
-            if self.store_tmp is True:
-                await self.write_data_to_tmp_file()
-            await self.write_data_to_target_file()
+            # await self.mock_data()
+            # if self.store_tmp is True:
+            #     await self.write_data_to_tmp_file()
+            # await self.write_data_to_target_file()
         
         except CustomException as err:
             
@@ -31,7 +31,7 @@ class module_lmt(call_function):
             logger = setup_errorlog(log_name=__name__)
             while True:
                 try:
-                    logger.error(next(err))
+                    logger.exception(next(err))
                 except StopIteration:
                     break
             

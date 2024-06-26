@@ -4,6 +4,10 @@ from module_bos import module_bos
 from module_cum import module_cum
 from module_doc import module_doc
 from module_lds import module_lds
+from module_ica import module_ica
+from module_iic import module_iic
+from module_lmt import module_lmt
+from module_moc import module_moc
 from setup import PARAMS, setup_log, setup_folder
 
 
@@ -36,8 +40,24 @@ class run_module:
                 tasks  = module_doc().run(module)
                 coros.append(asyncio.create_task(tasks))
                 
+            elif module == "ICA":
+                tasks  = module_ica().run(module)
+                coros.append(asyncio.create_task(tasks))
+                
+            elif module == "IIC":
+                tasks  = module_iic().run(module)
+                coros.append(asyncio.create_task(tasks))
+                
             elif module == "LDS":
                 tasks  = module_lds().run(module)
+                coros.append(asyncio.create_task(tasks))
+                
+            elif module == "LMT":
+                tasks  = module_lmt().run(module)
+                coros.append(asyncio.create_task(tasks))
+                
+            elif module == "MOC":
+                tasks  = module_moc().run(module)
                 coros.append(asyncio.create_task(tasks))
                 
         return await asyncio.wait(coros)
