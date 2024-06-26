@@ -39,6 +39,7 @@ class collect_params:
 
 class collect_data:
     
+    
     def extract_adm_data(self, i, line):
         
         logging.info("Extract Data for ADM Module.")
@@ -57,6 +58,7 @@ class collect_data:
         self.logging[i].update({"state": state})
         return  {"ADM": data}
     
+    
     def extract_doc_data(self, i, line):
         
         logging.info("Extract Data for DOC Module.")
@@ -68,13 +70,31 @@ class collect_data:
         for l in line:
             regex = re.compile(r"\w+.*")
             find_word = regex.findall(l)
-            print(find_word)
-            # if find_word != []:
-            #    data += [re.sub(r"\W\s+", "||", "".join(find_word).strip()).split("||")]
+            if find_word != []:
+                data += [re.sub(r"\W\s+", "||", "".join(find_word).strip()).split("||")]
         
-        # state = "succeed"
-        # self.logging[i].update({"state": state})
-        # return  {"DOC": data}
+        fix_data = []
+        for rows, value in enumerate(data):
+            if rows == 0:
+                continue
+            elif rows == 1:
+                ## clean task header
+                fix_data += [" ".join(value).split(" ")]
+            else:
+                ## clean task value
+                fix_column = []
+                for idx, column in enumerate(value, 1):
+                    if idx == 4:
+                        l = re.sub(r"\s+", ",", column).split(",")
+                        fix_column.extend(l)
+                    else:
+                        fix_column.append(column)
+                fix_data.append(fix_column)
+        
+        state = "succeed"
+        self.logging[i].update({"state": state})
+        return  {"DOC": fix_data}
+    
     
     def extract_lds_data(self, i, line):
         
@@ -93,8 +113,10 @@ class collect_data:
         fix_data = []
         for rows, value in enumerate(data):
             if rows == 0:
-                fix_data += ["".join(value).split(" ")]
+                ## clean task header
+                fix_data += [" ".join(value).split(" ")]
             else:
+                ## clean task value
                 fix_column = []
                 for idx, column in enumerate(value, 1):
                     if idx == 1:
@@ -105,7 +127,7 @@ class collect_data:
                     else:
                         fix_column.append(column)
                 fix_data.append(fix_column)
-                
+        
         state = "succeed"
         self.logging[i].update({"state": state})
         return  {"LDS": fix_data}
