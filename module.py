@@ -60,9 +60,6 @@ class convert_2_files:
                         data = self.read_text_file(i)
                 else:
                     raise FileNotFoundError(f"status_file: {status_file}")
-
-                print(data)
-                print()
                 
                 state = "succeed"
                 record.update({"data": data, "state": state})
