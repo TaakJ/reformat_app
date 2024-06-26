@@ -311,9 +311,9 @@ class setup_app(QWidget):
         date = datetime.now().strftime("%Y%m%d")
         log_dir = join(Folder.LOG, date)
         if event == 1:
-            open_log = join(log_dir, "_success.log")
+            open_log = join(log_dir, "_success")
         else:
-            open_log = join(log_dir, "_error.log") 
+            open_log = join(log_dir, "_error") 
         webbrowser.open(open_log)
 
     def task_run_job(self):
