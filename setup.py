@@ -3,8 +3,12 @@ import logging
 import logging.config
 import yaml
 import os
-from os.path import join
-from datetime import datetime
+from os.path import (
+    join,
+)
+from datetime import (
+    datetime,
+)
 
 
 class ArgumentParams:
@@ -20,34 +24,69 @@ class ArgumentParams:
 
 class Folder:
     _CURRENT_DIR = os.getcwd()
-    _CONFIG_DIR = join(_CURRENT_DIR, "config.yaml")
-    _LOGGER_CONFIG_DIR = join(_CURRENT_DIR, "logging_config.yaml")
-    TEMPLATE = join(_CURRENT_DIR, "TEMPLATE/")
-    TMP = join(_CURRENT_DIR, "TMP/")
-    LOG = join(_CURRENT_DIR, "LOG/")
+    _CONFIG_DIR = join(
+        _CURRENT_DIR,
+        "config.yaml",
+    )
+    _LOGGER_CONFIG_DIR = join(
+        _CURRENT_DIR,
+        "logging_config.yaml",
+    )
+    TEMPLATE = join(
+        _CURRENT_DIR,
+        "TEMPLATE/",
+    )
+    TMP = join(
+        _CURRENT_DIR,
+        "TMP/",
+    )
+    LOG = join(
+        _CURRENT_DIR,
+        "LOG/",
+    )
 
 
 def setup_folder() -> None:
     _folders = [
         value
         for name, value in vars(Folder).items()
-        if isinstance(value, str) and not name.startswith("_")
+        if isinstance(
+            value,
+            str,
+        )
+        and not name.startswith("_")
     ]
     for folder in _folders:
-        os.makedirs(folder, exist_ok=True)
+        os.makedirs(
+            folder,
+            exist_ok=True,
+        )
 
 
 def clear_tmp() -> None:
     _folders = [
         value
         for name, value in vars(Folder).items()
-        if isinstance(value, str) and not name.startswith("_") and value.endswith("TMP/")
+        if isinstance(
+            value,
+            str,
+        )
+        and not name.startswith("_")
+        and value.endswith("TMP/")
     ]
     for file_path in [
-        join(folder, files)
+        join(
+            folder,
+            files,
+        )
         for folder in _folders
         for files in os.listdir(folder)
-        if os.path.isfile(join(folder, files))
+        if os.path.isfile(
+            join(
+                folder,
+                files,
+            )
+        )
     ]:
         os.remove(file_path)
 
@@ -57,7 +96,10 @@ def setup_config() -> dict:
     config_dir = Folder._CONFIG_DIR
 
     if os.path.exists(config_dir):
-        with open(config_dir, "rb") as conf:
+        with open(
+            config_dir,
+            "rb",
+        ) as conf:
             config_yaml = yaml.safe_load(conf.read())
     else:
         raise Exception(f"Yaml config file path: '{config_dir}' doesn't exist.")
@@ -69,7 +111,10 @@ def setup_log() -> None:
     date = datetime.today().strftime("%Y%m%d")
     file = "_success.log"
 
-    filename = Folder.LOG + join(date, file)
+    filename = Folder.LOG + join(
+        date,
+        file,
+    )
     if not os.path.exists(os.path.dirname(filename)):
         try:
             os.makedirs(os.path.dirname(filename))
@@ -77,7 +122,10 @@ def setup_log() -> None:
             pass
 
     if os.path.exists(Folder._LOGGER_CONFIG_DIR):
-        with open(Folder._LOGGER_CONFIG_DIR, "rb") as logger:
+        with open(
+            Folder._LOGGER_CONFIG_DIR,
+            "rb",
+        ) as logger:
             config_yaml = yaml.safe_load(logger.read())
 
             for i in config_yaml["handlers"].keys():
@@ -95,7 +143,10 @@ def setup_errorlog(
 ) -> any:
 
     date = datetime.today().strftime("%Y%m%d")
-    filename = Folder.LOG + join(date, file)
+    filename = Folder.LOG + join(
+        date,
+        file,
+    )
     if not os.path.exists(os.path.dirname(filename)):
         try:
             os.makedirs(os.path.dirname(filename))
@@ -103,8 +154,14 @@ def setup_errorlog(
             pass
 
     errorlog = logging.getLogger(log_name)
-    file_handler = logging.FileHandler(filename, mode="a")
-    formatter = logging.Formatter(fmt=log_format, datefmt="%Y/%m/%d %H:%M:%S")
+    file_handler = logging.FileHandler(
+        filename,
+        mode="a",
+    )
+    formatter = logging.Formatter(
+        fmt=log_format,
+        datefmt="%Y/%m/%d %H:%M:%S",
+    )
     file_handler.setFormatter(formatter)
     file_handler.setLevel(logging.ERROR)
     errorlog.addHandler(file_handler)
@@ -114,7 +171,9 @@ def setup_errorlog(
 
 
 class setup_parser:
-    def __init__(self):
+    def __init__(
+        self,
+    ):
         self.parser = argparse.ArgumentParser()
         self.set_arguments()
         self.parsed_params = self.parser.parse_args()
@@ -145,7 +204,10 @@ class setup_parser:
                 ArgumentParams.DESCRIPTION: "format YYYY-MM-DD",
                 ArgumentParams.REQUIRED: False,
                 ArgumentParams.ISFLAG: False,
-                ArgumentParams.TYPE: lambda d: datetime.strptime(d, "%Y-%m-%d").date(),
+                ArgumentParams.TYPE: lambda d: datetime.strptime(
+                    d,
+                    "%Y-%m-%d",
+                ).date(),
                 ArgumentParams.DEFAULT: datetime.today().date(),
             },
             {
@@ -166,7 +228,9 @@ class setup_parser:
             },
         ]
 
-    def set_arguments(self) -> None:
+    def set_arguments(
+        self,
+    ) -> None:
         # set arguments
         for args in self.get_args_list():
             short_name = args.get(ArgumentParams.SHORT_NAME)
