@@ -37,7 +37,7 @@ class convert_2_files:
             set_log.append(record)
             logging.info(f'Source file: "{_dir}", Status: "{status_file}"')
 
-        self._log_setter(set_log)
+        self.log_setter(set_log)
 
     async def retrieve_data_from_source_files(self) -> None:
 

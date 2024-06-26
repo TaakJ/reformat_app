@@ -17,7 +17,7 @@ class collect_log(ABC):
         self._log_setter(log)
 
     @abstractmethod
-    def _log_setter(self, log: list):
+    def log_setter(self, log: list):
         pass
 
 class collect_params(ABC):
