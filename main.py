@@ -2,6 +2,7 @@ import asyncio
 from module_adm import module_adm
 from module_bos import module_bos
 from module_cum import module_cum
+from module_doc import module_doc
 from module_lds import module_lds
 from setup import PARAMS, setup_log, setup_folder
 
@@ -29,6 +30,10 @@ class run_module:
                 
             elif module == "CUM":
                 tasks  = module_cum().run(module)
+                coros.append(asyncio.create_task(tasks))
+                
+            elif module == "DOC":
+                tasks  = module_doc().run(module)
                 coros.append(asyncio.create_task(tasks))
                 
             elif module == "LDS":
