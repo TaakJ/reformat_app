@@ -9,9 +9,6 @@ class module_cum(call_function):
     def params_setter(self, module: str) -> None:
         return super().params_setter(module)
     
-    def _log_setter(self, log) -> None:
-        self._log = log
-        
     def log_setter(self, log: list):
         return super().log_setter(log)
     
