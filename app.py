@@ -95,8 +95,7 @@ class setup_app(QWidget):
 
         self.all_module = PARAMS["source"]
         self.filename = {
-            module: f'Manual_{CONFIG[module]["output_file"]}'
-            for module in self.all_module
+            module: f'Manual_{CONFIG[module]["output_file"]}' for module in self.all_module
         }
         self.module = self.all_module
 
@@ -457,9 +456,7 @@ class setup_app(QWidget):
         for module in self.module:
             if module in self.filename.keys() and self.mode == "new":
                 suffix = PARAMS["batch_date"].strftime("%Y%m%d")
-                CONFIG[module][
-                    "output_file"
-                ] = f"{Path(self.filename[module]).stem}_{suffix}.csv"
+                CONFIG[module]["output_file"] = f"{Path(self.filename[module]).stem}_{suffix}.csv"
             else:
                 CONFIG[module]["output_file"] = self.filename[module]
 
@@ -480,9 +477,7 @@ class setup_app(QWidget):
 
         tasks.set_total_progress.connect(self.progress.setMaximum)
         tasks.set_current_progress.connect(self.progress.setValue)
-        tasks.finished.connect(
-            lambda x=tasks.results: self.task_job_finished(tasks.results)
-        )
+        tasks.finished.connect(lambda x=tasks.results: self.task_job_finished(tasks.results))
 
         return thread
 
@@ -491,15 +486,11 @@ class setup_app(QWidget):
         results,
     ):
         self.progress.setValue(self.progress.maximum())
-        self.time_label.setText(
-            f"Last Updated: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}"
-        )
+        self.time_label.setText(f"Last Updated: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
         self.time_label.setHidden(False)
         self._success_log.setHidden(False)
 
-        if "Uncompleted" in [
-            completed_task.result()["task"] for completed_task in results[0]
-        ]:
+        if "Uncompleted" in [completed_task.result()["task"] for completed_task in results[0]]:
             self.label.setText("Job has been errored. Please check log file!")
             self._error_log.setHidden(False)
         else:
