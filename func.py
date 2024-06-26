@@ -4,7 +4,7 @@ from os.path import join
 from module import convert_2_files
 from setup import CONFIG, PARAMS
 
-class record_log(ABC):
+class collect_log(ABC):
     def __init__(self):
         self._log = []
 
@@ -20,20 +20,18 @@ class record_log(ABC):
     def _log_setter(self, log: list):
         pass
 
-class parameter(ABC):
+class collect_params(ABC):
     
     @abstractmethod
-    def _params_setter(self, module:str) -> None:
+    def params_setter(self, module:str) -> None:
         
         for key, value in PARAMS.items():
             setattr(self, key, value)
 
         self.module = module
         self.input_dir = [join(CONFIG[self.module]["input_dir"], CONFIG[self.module]["input_file"])]
-
-        for i in CONFIG[self.module]["require"]:
-            self.input_dir += [join(CONFIG[i]["input_dir"], CONFIG[i]["input_file"])]
-        
+        # for i in CONFIG[self.module]["require"]:
+        #     self.input_dir += [join(CONFIG[i]["input_dir"], CONFIG[i]["input_file"])]
         self.output_dir = CONFIG[self.module]["output_dir"]
         self.output_file = CONFIG[self.module]["output_file"]
         
@@ -41,5 +39,5 @@ class parameter(ABC):
         self.date = datetime.now()
     
 
-class call_function(convert_2_files, record_log, parameter):
+class call_function(convert_2_files, collect_log, collect_params):
     pass
