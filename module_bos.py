@@ -1,38 +1,20 @@
-from function import (
-    call_function,
-)
-from exception import (
-    CustomException,
-)
-from setup import (
-    setup_errorlog,
-)
+from function import call_function
+from exception import CustomException
+from setup import setup_errorlog
 import pandas as pd
 import logging
 
-
 class module_bos(call_function):
 
-    def log_setter(
-        self,
-        log: list,
-    ):
+    def log_setter(self,log: list):
         self._log = log
 
-    async def run(
-        self,
-        module: str,
-    ) -> dict:
+    async def run(self,module: str) -> dict:
         self.params_setter(module)
 
-        logging.info(
-            f'Module: "{self.module}", Manual: "{self.manual}", Batch Date: "{self.batch_date}", Store Tmp: "{self.store_tmp}", Write Mode: "{self.write_mode}"'
-        )
+        logging.info(f'Module: "{self.module}", Manual: "{self.manual}", Batch Date: "{self.batch_date}", Store Tmp: "{self.store_tmp}", Write Mode: "{self.write_mode}"')
 
-        result = {
-            "module": self.module,
-            "task": "Completed",
-        }
+        result = {"module": self.module,"task": "Completed"}
         try:
             await self.check_source_files()
             await self.retrieve_data_from_source_files()
@@ -58,23 +40,13 @@ class module_bos(call_function):
         logging.info("Stop Run Module\n")
         return result
 
-    async def mapping_column(
-        self,
-    ) -> None:
+    async def mapping_column(self) -> None:
 
         state = "failed"
         for record in self.logging:
-            record.update(
-                {
-                    "function": "mapping_module_bos",
-                    "state": state,
-                }
-            )
+            record.update({"function": "mapping_column","state": state})
             try:
-                for (
-                    sheet,
-                    data,
-                ) in record["data"].items():
+                for sheet,data in record["data"].items():
                     logging.info(f'Mapping Column From Sheet: "{sheet}"')
 
                     if "BOS_export_BrUser" in sheet:
@@ -86,9 +58,7 @@ class module_bos(call_function):
             except Exception as err:
                 record.update({"err": err})
 
-    async def mock_data(
-        self,
-    ) -> None:
+    async def mock_data(self) -> None:
         mock_data = [
             [
                 "ApplicationCode",
@@ -143,9 +113,4 @@ class module_bos(call_function):
         df.columns = df.iloc[0].values
         df = df[1:]
         df = df.reset_index(drop=True)
-        self.logging.append(
-            {
-                "module": "Target_file",
-                "data": df.to_dict("list"),
-            }
-        )
+        self.logging.append({"module": "Target_file","data": df.to_dict("list")})

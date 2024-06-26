@@ -13,9 +13,7 @@ class module_adm(call_function):
     async def run(self, module: str) -> dict:
         self.params_setter(module)
 
-        logging.info(
-            f'Module: "{self.module}", Manual: "{self.manual}", Batch Date: "{self.batch_date}", Store Tmp: "{self.store_tmp}", Write Mode: "{self.write_mode}"'
-        )
+        logging.info(f'Module: "{self.module}", Manual: "{self.manual}", Batch Date: "{self.batch_date}", Store Tmp: "{self.store_tmp}", Write Mode: "{self.write_mode}"')
 
         result = {"module": self.module, "task": "Completed"}
         try:
@@ -47,7 +45,7 @@ class module_adm(call_function):
 
         state = "failed"
         for record in self.logging:
-            record.update({"function": "mapping_module_adm", "state": state})
+            record.update({"function": "mapping_column", "state": state})
             try:
                 for sheet, data in record["data"].items():
                     logging.info(f'Mapping Column From Sheet: "{sheet}"')
