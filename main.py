@@ -12,9 +12,7 @@ from module_moc import module_moc
 from setup import (PARAMS, setup_folder, setup_log)
 
 class run_module:
-    def __init__(
-        self,
-    ) -> None:
+    def __init__(self) -> None:
         setup_folder()
         setup_log()
 
@@ -22,9 +20,7 @@ class run_module:
         asyncio.set_event_loop(self.loop)
         self.results = self.loop.run_until_complete(self.mapping_module())
 
-    async def mapping_module(
-        self,
-    ):
+    async def mapping_module(self):
         coros = []
         for module in PARAMS["source"]:
 
@@ -65,7 +61,6 @@ class run_module:
                 coros.append(asyncio.create_task(tasks))
 
         return await asyncio.wait(coros)
-
 
 class start_app(run_module):
     pass
