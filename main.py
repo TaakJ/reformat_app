@@ -10,7 +10,6 @@ from module_lmt import module_lmt
 from module_moc import module_moc
 from setup import PARAMS, setup_log, setup_folder
 
-
 class run_module:
     def __init__(self) -> None:
         setup_folder()
