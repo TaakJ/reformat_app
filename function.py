@@ -2,15 +2,9 @@ from abc import (
     ABC,
     abstractmethod,
 )
-from datetime import (
-    datetime,
-)
-from os.path import (
-    join,
-)
-from module import (
-    convert_2_files,
-)
+from datetime import datetime
+from os.path import join
+from module import convert_2_files
 from setup import (
     CONFIG,
     PARAMS,
@@ -380,7 +374,9 @@ class collect_data:
             }
         )
 
-        sheet_list = [sheet for sheet in workbook.sheet_names() if sheet != "StyleSheet"]
+        sheet_list = [
+            sheet for sheet in workbook.sheet_names() if sheet != "StyleSheet"
+        ]
 
         data = {}
         for sheets in sheet_list:
@@ -422,7 +418,9 @@ class collect_data:
             }
         )
 
-        sheet_list = [sheet for sheet in workbook.sheet_names() if sheet != "StyleSheet"]
+        sheet_list = [
+            sheet for sheet in workbook.sheet_names() if sheet != "StyleSheet"
+        ]
 
         data = {}
         for sheets in sheet_list:
@@ -463,7 +461,9 @@ class collect_data:
             }
         )
 
-        sheet_list = [sheet for sheet in workbook.sheet_names() if sheet != "StyleSheet"]
+        sheet_list = [
+            sheet for sheet in workbook.sheet_names() if sheet != "StyleSheet"
+        ]
 
         data = {}
         for sheets in sheet_list:

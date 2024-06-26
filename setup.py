@@ -133,7 +133,9 @@ def setup_log() -> None:
                     config_yaml["handlers"][i]["filename"] = filename
             logging.config.dictConfig(config_yaml)
     else:
-        raise Exception(f"Yaml file file_path: '{Folder._LOGGER_CONFIG_DIR}' doesn't exist.")
+        raise Exception(
+            f"Yaml file file_path: '{Folder._LOGGER_CONFIG_DIR}' doesn't exist."
+        )
 
 
 def setup_errorlog(
@@ -187,7 +189,9 @@ class setup_parser:
                 ArgumentParams.DESCRIPTION: "-s: source",
                 ArgumentParams.REQUIRED: False,
                 ArgumentParams.ISFLAG: False,
-                ArgumentParams.TYPE: lambda s: [str(item).upper() for item in s.split(",")],
+                ArgumentParams.TYPE: lambda s: [
+                    str(item).upper() for item in s.split(",")
+                ],
                 ArgumentParams.DEFAULT: "adm,bos,cum,ica,iic,lds,lmt,moc",
             },
             {

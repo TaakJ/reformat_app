@@ -183,13 +183,16 @@ class convert_2_files:
             return (
                 "{"
                 + "\n".join(
-                    "{!r} => {!r},".format(columns, values) for columns, values in record.items()
+                    "{!r} => {!r},".format(columns, values)
+                    for columns, values in record.items()
                 )
                 + "}"
             )
 
         if len(df.index) > len(change_df.index):
-            self.remove_rows = [idx for idx in list(df.index) if idx not in list(change_df.index)]
+            self.remove_rows = [
+                idx for idx in list(df.index) if idx not in list(change_df.index)
+            ]
 
         try:
             ## merge index.
@@ -197,9 +200,9 @@ class convert_2_files:
             ## as starter dataframe for compare.
             df = df.reindex(index=merge_index, columns=df.columns).iloc[:, :-1]
             ## change data / new data.
-            change_df = change_df.reindex(index=merge_index, columns=change_df.columns).iloc[
-                :, :-1
-            ]
+            change_df = change_df.reindex(
+                index=merge_index, columns=change_df.columns
+            ).iloc[:, :-1]
 
             ## compare data.
             df["count"] = pd.DataFrame(
@@ -356,32 +359,32 @@ class convert_2_files:
                         ):
                             ## Remove rows.
                             show = f'{change_data[start_rows][columns]} Rows: "{start_rows}" in Tmp files.'
-                            sheet.cell(row=start_rows, column=idx).value = change_data[start_rows][
-                                columns
-                            ]
+                            sheet.cell(row=start_rows, column=idx).value = change_data[
+                                start_rows
+                            ][columns]
 
-                        elif start_rows in self.change_rows.keys() and change_data[start_rows][
-                            columns
-                        ] in ["Insert", "Update"]:
+                        elif start_rows in self.change_rows.keys() and change_data[
+                            start_rows
+                        ][columns] in ["Insert", "Update"]:
                             ## Update / Insert rows.
                             show = f'{change_data[start_rows][columns]} Rows: "{start_rows}" in Tmp files.\nRecord Change: {self.change_rows[start_rows]}'
-                            sheet.cell(row=start_rows, column=idx).value = change_data[start_rows][
-                                columns
-                            ]
+                            sheet.cell(row=start_rows, column=idx).value = change_data[
+                                start_rows
+                            ][columns]
 
                         else:
                             ## No change rows.
                             show = f'No Change Rows: "{start_rows}" in Tmp files.'
-                            sheet.cell(row=start_rows, column=idx).value = change_data[start_rows][
-                                columns
-                            ]
+                            sheet.cell(row=start_rows, column=idx).value = change_data[
+                                start_rows
+                            ][columns]
 
                         logging.info(show)
 
                     else:
-                        sheet.cell(row=start_rows, column=idx).value = change_data[start_rows][
-                            columns
-                        ]
+                        sheet.cell(row=start_rows, column=idx).value = change_data[
+                            start_rows
+                        ][columns]
 
                 start_rows += 1
 
@@ -497,13 +500,17 @@ class convert_2_files:
 
             ## filter data on batch date => (DataFrame).
             batch_df = target_df[
-                target_df["CreateDate"].isin(np.array([pd.Timestamp(self.fmt_batch_date)]))
+                target_df["CreateDate"].isin(
+                    np.array([pd.Timestamp(self.fmt_batch_date)])
+                )
             ].reset_index(drop=True)
 
             ## filter data not on batch date => (dict).
             merge_data = (
                 target_df[
-                    ~target_df["CreateDate"].isin(np.array([pd.Timestamp(self.fmt_batch_date)]))
+                    ~target_df["CreateDate"].isin(
+                        np.array([pd.Timestamp(self.fmt_batch_date)])
+                    )
                 ]
                 .iloc[:, :-1]
                 .to_dict("index")
@@ -528,7 +535,9 @@ class convert_2_files:
                 idx += start_rows
                 if "mark_row" in values.keys():
                     if values["mark_row"] in self.change_rows:
-                        self.change_rows[str(idx)] = self.change_rows.pop(values["mark_row"])
+                        self.change_rows[str(idx)] = self.change_rows.pop(
+                            values["mark_row"]
+                        )
 
                     elif values["mark_row"] in self.remove_rows:
                         self.remove_rows[i] = idx
@@ -547,7 +556,9 @@ class convert_2_files:
 
     def write_csv(self, target_name: str, output: dict) -> str:
 
-        logging.info(f'Write mode: "{self.write_mode}" in Target files: "{target_name}"')
+        logging.info(
+            f'Write mode: "{self.write_mode}" in Target files: "{target_name}"'
+        )
 
         state = "failed"
         self.logging[-1].update({"function": "write_csv", "state": state})
@@ -569,7 +580,9 @@ class convert_2_files:
                         if columns != "remark"
                     }
 
-                    if str(idx) in self.change_rows.keys() and output[idx]["remark"] in [
+                    if str(idx) in self.change_rows.keys() and output[idx][
+                        "remark"
+                    ] in [
                         "Update",
                         "Insert",
                     ]:
@@ -595,11 +608,15 @@ class convert_2_files:
                     if idx not in self.remove_rows:
                         rows[idx].update(
                             {
-                                "CreateDate": rows[idx]["CreateDate"].strftime("%Y%m%d%H%M%S"),
-                                "LastLogin": rows[idx]["LastLogin"].strftime("%Y%m%d%H%M%S"),
-                                "LastUpdatedDate": rows[idx]["LastUpdatedDate"].strftime(
+                                "CreateDate": rows[idx]["CreateDate"].strftime(
                                     "%Y%m%d%H%M%S"
                                 ),
+                                "LastLogin": rows[idx]["LastLogin"].strftime(
+                                    "%Y%m%d%H%M%S"
+                                ),
+                                "LastUpdatedDate": rows[idx][
+                                    "LastUpdatedDate"
+                                ].strftime("%Y%m%d%H%M%S"),
                             }
                         )
                         csvout.writerow(rows[idx])
