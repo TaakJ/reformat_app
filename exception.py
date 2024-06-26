@@ -1,36 +1,19 @@
 class CustomException(Exception):
-    def __init__(
-        self,
-        *args: tuple,
-        **kwargs: dict,
-    ):
+    def __init__(self,*args: tuple,**kwargs: dict,):
         self.__dict__.update(kwargs)
 
-        for (
-            key,
-            value,
-        ) in self.__dict__.items():
-            setattr(
-                self,
-                key,
-                value,
-            )
+        for key, value in self.__dict__.items():
+            setattr(self,key,value)
 
         self.err_msg = self.generate_error()
 
-    def __iter__(
-        self,
-    ):
+    def __iter__(self):
         return self
 
-    def __next__(
-        self,
-    ):
+    def __next__(self):
         return next(self.err_msg)
 
-    def generate_error(
-        self,
-    ) -> any:
+    def generate_error(self) -> any:
         try:
             for i in range(len(self.err)):
                 if self.err[i].get("err") is not None:

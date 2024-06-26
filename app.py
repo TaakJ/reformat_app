@@ -54,21 +54,14 @@ class Jobber(QObject):
     set_current_progress = pyqtSignal(int)
     finished = pyqtSignal()
 
-    def __init__(
-        self,
-    ):
+    def __init__(self):
         super().__init__()
         self.results = None
 
-    def run(
-        self,
-    ):
+    def run(self):
         func = start_app()
         self.results = func.results
-        for i in range(
-            1,
-            11,
-        ):
+        for i in range(1,11):
             self.set_current_progress.emit(int(i * 10))
             sleep(0.5)
 
@@ -76,9 +69,7 @@ class Jobber(QObject):
 
 
 class setup_app(QWidget):
-    def __init__(
-        self,
-    ):
+    def __init__(self):
         super().__init__()
 
         self.__thread = QThread()
@@ -89,9 +80,7 @@ class setup_app(QWidget):
             self.ui()
             sys.exit(app.exec())
 
-    def ui(
-        self,
-    ):
+    def ui(self):
 
         self.all_module = PARAMS["source"]
         self.filename = {
@@ -100,47 +89,18 @@ class setup_app(QWidget):
         self.module = self.all_module
 
         grid = QGridLayout()
-        grid.addWidget(
-            self.layout1(),
-            0,
-            0,
-        )
-        grid.addWidget(
-            self.layout2(),
-            0,
-            1,
-        )
-        grid.addWidget(
-            self.layout3(),
-            1,
-            0,
-            1,
-            2,
-        )
-        grid.addWidget(
-            self.layout4(),
-            2,
-            0,
-        )
-        grid.addWidget(
-            self.layout5(),
-            2,
-            1,
-        )
+        grid.addWidget(self.layout1(),0,0)
+        grid.addWidget(self.layout2(),0,1)
+        grid.addWidget(self.layout3(),1,0,1,2)
+        grid.addWidget(self.layout4(),2,0)
+        grid.addWidget(self.layout5(),2,1)
         self.setLayout(grid)
 
         self.setWindowTitle("App")
-        self.setGeometry(
-            700,
-            200,
-            620,
-            400,
-        )
+        self.setGeometry(700,200,620,400)
         self.show()
 
-    def layout1(
-        self,
-    ):
+    def layout1(self):
         self.groupbox1 = QGroupBox("RUN EACH MODULE")
 
         hbox1 = QHBoxLayout()
@@ -177,9 +137,7 @@ class setup_app(QWidget):
 
         return self.groupbox1
 
-    def layout2(
-        self,
-    ):
+    def layout2(self):
         self.groupbox2 = QGroupBox("Specify Output file")
 
         hbox1 = QHBoxLayout()
@@ -215,9 +173,7 @@ class setup_app(QWidget):
 
         return self.groupbox2
 
-    def layout3(
-        self,
-    ):
+    def layout3(self):
         self.groupbox3 = QGroupBox("Directory Each module")
 
         self.get_value = self.combobox.currentText()
@@ -241,37 +197,13 @@ class setup_app(QWidget):
         self.output_btn.setEnabled(False)
 
         layout = QGridLayout()
-        layout.addWidget(
-            input_lable,
-            0,
-            0,
-        )
-        layout.addWidget(
-            self.input_dir,
-            0,
-            1,
-        )
-        layout.addWidget(
-            self.input_btn,
-            0,
-            2,
-        )
+        layout.addWidget(input_lable,0,0)
+        layout.addWidget(self.input_dir,0,1)
+        layout.addWidget(self.input_btn,0,2)
 
-        layout.addWidget(
-            output_lable,
-            2,
-            0,
-        )
-        layout.addWidget(
-            self.output_dir,
-            2,
-            1,
-        )
-        layout.addWidget(
-            self.output_btn,
-            2,
-            2,
-        )
+        layout.addWidget(output_lable,2,0)
+        layout.addWidget(self.output_dir,2,1)
+        layout.addWidget(self.output_btn,2,2)
         self.groupbox3.setLayout(layout)
 
         self.input_btn.clicked.connect(lambda: self.task_open_dialog(1))
@@ -279,9 +211,7 @@ class setup_app(QWidget):
 
         return self.groupbox3
 
-    def layout4(
-        self,
-    ):
+    def layout4(self):
 
         self.groupbox4 = QGroupBox("RUN AND STATUS JOB")
 
@@ -301,10 +231,7 @@ class setup_app(QWidget):
         )
         self.label = QLabel("Press the button to start job.")
         self.run_btn = QPushButton("START")
-        self.run_btn.setFixedSize(
-            110,
-            40,
-        )
+        self.run_btn.setFixedSize(110,40)
         vbox1.addWidget(self.progress)
         vbox1.addWidget(self.label)
         vbox1.addWidget(self.run_btn)
@@ -317,9 +244,7 @@ class setup_app(QWidget):
 
         return self.groupbox4
 
-    def layout5(
-        self,
-    ):
+    def layout5(self):
         self.groupbox5 = QGroupBox("log file")
 
         vbox1 = QVBoxLayout()
@@ -351,9 +276,7 @@ class setup_app(QWidget):
 
         return self.groupbox5
 
-    def task_all_checked(
-        self,
-    ):
+    def task_all_checked(self):
         if self._all.isChecked():
             self.combobox.setDisabled(True)
             self.input_dir.setEnabled(False)
@@ -371,17 +294,13 @@ class setup_app(QWidget):
             ## select each module
             self.module = [self.combobox.currentText()]
 
-    def task_select_module(
-        self,
-    ):
+    def task_select_module(self):
         self.get_value = self.combobox.currentText()
         self.module = [self.get_value]
         self.input_dir.setText(CONFIG[self.get_value]["input_dir"])
         self.output_dir.setText(CONFIG[self.get_value]["output_dir"])
 
-    def task_select_mode(
-        self,
-    ):
+    def task_select_mode(self):
         if self.radio1.isChecked():
             self.mode_label.setText("e.g. Manual_{module}.csv")
             self.mode = "overwrite"
@@ -389,10 +308,7 @@ class setup_app(QWidget):
             self.mode_label.setText("e.g. Manual_{module}_YYYYYMMDD.csv")
             self.mode = "new"
 
-    def task_open_dialog(
-        self,
-        event,
-    ):
+    def task_open_dialog(self,event):
         if event == 1:
             key_dir = "input_dir"
             default_dir = self.input_dir
@@ -414,30 +330,16 @@ class setup_app(QWidget):
             CONFIG[self.get_value][key_dir] = join(Path(dir_name))
             default_dir.setText(dir_name)
 
-    def task_open_log(
-        self,
-        event,
-    ):
+    def task_open_log(self,event):
         date = datetime.now().strftime("%Y%m%d")
-        log_dir = join(
-            Folder.LOG,
-            date,
-        )
+        log_dir = join(Folder.LOG,date)
         if event == 1:
-            open_log = join(
-                log_dir,
-                "_success",
-            )
+            open_log = join(log_dir,"_success")
         else:
-            open_log = join(
-                log_dir,
-                "_error",
-            )
+            open_log = join(log_dir,"_error")
         webbrowser.open(open_log)
 
-    def task_run_job(
-        self,
-    ):
+    def task_run_job(self):
         self.progress.reset()
         self.label.setText("Job is running...")
         self.time_label.setHidden(True)
@@ -464,9 +366,7 @@ class setup_app(QWidget):
             self.__thread = self.__get_thread()
             self.__thread.start()
 
-    def __get_thread(
-        self,
-    ):
+    def __get_thread(self):
         thread = QThread()
         tasks = Jobber()
         tasks.moveToThread(thread)
@@ -481,10 +381,7 @@ class setup_app(QWidget):
 
         return thread
 
-    def task_job_finished(
-        self,
-        results,
-    ):
+    def task_job_finished(self,results):
         self.progress.setValue(self.progress.maximum())
         self.time_label.setText(f"Last Updated: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
         self.time_label.setHidden(False)
@@ -495,7 +392,6 @@ class setup_app(QWidget):
             self._error_log.setHidden(False)
         else:
             self.label.setText("Job has been succeed.")
-
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
