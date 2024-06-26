@@ -45,7 +45,12 @@ class convert_2_files:
 
         state = "failed"
         for i, record in enumerate(self.logging):
-            record.update({"function": "retrieve_data_from_source_files", "state": state})
+            record.update(
+                {
+                    "function": "retrieve_data_from_source_files",
+                    "state": state,
+                }
+            )
 
             input_dir = record["input_dir"]
             types = Path(input_dir).suffix
@@ -198,7 +203,9 @@ class convert_2_files:
 
             ## compare data.
             df["count"] = pd.DataFrame(
-                np.where(df.ne(change_df), True, df), index=df.index, columns=df.columns
+                np.where(df.ne(change_df), True, df),
+                index=df.index,
+                columns=df.columns,
             ).apply(lambda x: (x == True).sum(), axis=1)
 
             i = 0
@@ -280,7 +287,10 @@ class convert_2_files:
                         workbook.active = sheet_num
 
                     except FileNotFoundError:
-                        template_name = join(Folder.TEMPLATE, "Application Data Requirements.xlsx")
+                        template_name = join(
+                            Folder.TEMPLATE,
+                            "Application Data Requirements.xlsx",
+                        )
                         try:
                             if not glob.glob(tmp_name, recursive=True):
                                 shutil.copy2(template_name, tmp_name)
@@ -391,12 +401,21 @@ class convert_2_files:
             try:
 
                 if record["module"] == "Target_file":
-                    record.update({"function": "write_data_to_target_file", "state": state})
+                    record.update(
+                        {
+                            "function": "write_data_to_target_file",
+                            "state": state,
+                        }
+                    )
 
                     if self.store_tmp is True:
                         tmp_name = record["input_dir"]
                         sheet_name = record["sheet_name"]
-                        change_df = pd.read_excel(tmp_name, sheet_name=sheet_name, dtype=object)
+                        change_df = pd.read_excel(
+                            tmp_name,
+                            sheet_name=sheet_name,
+                            dtype=object,
+                        )
                     else:
                         data = record["data"]
                         change_df = pd.DataFrame(data)
@@ -431,13 +450,22 @@ class convert_2_files:
         logging.info(f'Read Target files: "{target_name}"')
 
         state = "failed"
-        self.logging[-1].update({"input_dir": target_name, "function": "read_csv", "state": state})
+        self.logging[-1].update(
+            {
+                "input_dir": target_name,
+                "function": "read_csv",
+                "state": state,
+            }
+        )
 
         try:
             data = []
             with open(target_name, "r", newline="") as reader:
                 csv_reader = csv.reader(
-                    reader, skipinitialspace=True, quoting=csv.QUOTE_ALL, quotechar='"'
+                    reader,
+                    skipinitialspace=True,
+                    quoting=csv.QUOTE_ALL,
+                    quotechar='"',
                 )
                 header = next(csv_reader)
 
@@ -528,7 +556,10 @@ class convert_2_files:
             start_row = 2
             with open(target_name, "r", newline="") as reader:
                 csvin = csv.DictReader(
-                    reader, skipinitialspace=True, quoting=csv.QUOTE_ALL, quotechar='"'
+                    reader,
+                    skipinitialspace=True,
+                    quoting=csv.QUOTE_ALL,
+                    quotechar='"',
                 )
                 rows = {idx + start_row: value for idx, value in enumerate(csvin)}
                 for idx in output:
@@ -554,7 +585,10 @@ class convert_2_files:
             # write csv file.
             with open(target_name, "w", newline="") as writer:
                 csvout = csv.DictWriter(
-                    writer, csvin.fieldnames, quoting=csv.QUOTE_ALL, quotechar='"'
+                    writer,
+                    csvin.fieldnames,
+                    quoting=csv.QUOTE_ALL,
+                    quotechar='"',
                 )
                 csvout.writeheader()
                 for idx in rows:
