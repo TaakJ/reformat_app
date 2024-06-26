@@ -130,8 +130,7 @@ class convert_2_files:
         state = "failed"
         self.logging[-1].update({"function": "initial_data_types", "state": state})
         try:
-            df = df.astype(
-                {
+            df = df.astype({
                     "ApplicationCode": object,
                     "AccountOwner": object,
                     "AccountName": object,
@@ -146,11 +145,9 @@ class convert_2_files:
                     "LastLogin": "datetime64[ms]",
                     "LastUpdatedDate": "datetime64[ms]",
                     "AdditionalAttribute": object,
-                }
-            )
-            df[["CreateDate", "LastLogin", "LastUpdatedDate"]] = df[
-                ["CreateDate", "LastLogin", "LastUpdatedDate"]
-            ].apply(pd.to_datetime, format="%Y%m%d%H%M%S")
+                })
+            df[["CreateDate", "LastLogin", "LastUpdatedDate"]] = df[["CreateDate", "LastLogin", "LastUpdatedDate"]]\
+                .apply(pd.to_datetime, format="%Y%m%d%H%M%S")
 
             if "remark" in df.columns:
                 df = df.loc[df["remark"] != "Remove"]
@@ -175,14 +172,9 @@ class convert_2_files:
         self.logging[-1].update({"function": "validate_data_change", "state": state})
 
         def format_record(record):
-            return (
-                "{"
-                + "\n".join(
+            return ("{"+ "\n".join(
                     "{!r} => {!r},".format(columns, values)
-                    for columns, values in record.items()
-                )
-                + "}"
-            )
+                    for columns, values in record.items())+ "}")
 
         if len(df.index) > len(change_df.index):
             self.remove_rows = [idx for idx in list(df.index) if idx not in list(change_df.index)]
@@ -193,14 +185,11 @@ class convert_2_files:
             ## as starter dataframe for compare.
             df = df.reindex(index=merge_index, columns=df.columns).iloc[:, :-1]
             ## change data / new data.
-            change_df = change_df.reindex(
-                index=merge_index, columns=change_df.columns
-            ).iloc[:, :-1]
+            change_df = change_df.reindex(index=merge_index, columns=change_df.columns).iloc[:, :-1]
 
             ## compare data.
-            df["count"] = pd.DataFrame(
-                np.where(df.ne(change_df), True, df), index=df.index, columns=df.columns
-            ).apply(lambda x: (x == True).sum(), axis=1)
+            df["count"] = pd.DataFrame(np.where(df.ne(change_df), True, df), index=df.index, columns=df.columns)\
+                .apply(lambda x: (x == True).sum(), axis=1)
 
             i = 0
             start_rows = 2
@@ -256,17 +245,11 @@ class convert_2_files:
             try:
                 if record["module"] == "Target_file":
 
-                    tmp_name = join(
-                        Folder.TMP,
-                        f"TMP_{self.module}-{self.batch_date.strftime('%Y%m%d')}.xlsx",
-                    )
-                    record.update(
-                        {
+                    tmp_name = join(Folder.TMP,f"TMP_{self.module}-{self.batch_date.strftime('%Y%m%d')}.xlsx")
+                    record.update({
                             "input_dir": tmp_name,
                             "function": "write_data_to_tmp_file",
-                            "state": state,
-                        }
-                    )
+                            "state": state})
 
                     data = record["data"]
                     change_df = pd.DataFrame(data)
@@ -281,9 +264,7 @@ class convert_2_files:
                         workbook.active = sheet_num
 
                     except FileNotFoundError:
-                        template_name = join(
-                            Folder.TEMPLATE, "Application Data Requirements.xlsx"
-                        )
+                        template_name = join(Folder.TEMPLATE, "Application Data Requirements.xlsx")
                         try:
                             if not glob.glob(tmp_name, recursive=True):
                                 shutil.copy2(template_name, tmp_name)
@@ -343,38 +324,25 @@ class convert_2_files:
                 for idx, columns in enumerate(change_data[start_rows].keys(), 1):
 
                     if columns == "remark":
-                        if (
-                            start_rows in self.remove_rows
-                            and change_data[start_rows][columns] == "Remove"
-                        ):
+                        if (start_rows in self.remove_rows and change_data[start_rows][columns] == "Remove"):
                             ## Remove rows.
                             show = f'{change_data[start_rows][columns]} Rows: "{start_rows}" in Tmp files.'
-                            sheet.cell(row=start_rows, column=idx).value = change_data[
-                                start_rows
-                            ][columns]
+                            sheet.cell(row=start_rows, column=idx).value = change_data[start_rows][columns]
 
-                        elif start_rows in self.change_rows.keys() and change_data[
-                            start_rows
-                        ][columns] in ["Insert", "Update"]:
+                        elif start_rows in self.change_rows.keys() and change_data[start_rows][columns] in ["Insert", "Update"]:
                             ## Update / Insert rows.
                             show = f'{change_data[start_rows][columns]} Rows: "{start_rows}" in Tmp files.\nRecord Change: {self.change_rows[start_rows]}'
-                            sheet.cell(row=start_rows, column=idx).value = change_data[
-                                start_rows
-                            ][columns]
+                            sheet.cell(row=start_rows, column=idx).value = change_data[start_rows][columns]
 
                         else:
                             ## No change rows.
                             show = f'No Change Rows: "{start_rows}" in Tmp files.'
-                            sheet.cell(row=start_rows, column=idx).value = change_data[
-                                start_rows
-                            ][columns]
+                            sheet.cell(row=start_rows, column=idx).value = change_data[start_rows][columns]
 
                         logging.info(show)
 
                     else:
-                        sheet.cell(row=start_rows, column=idx).value = change_data[
-                            start_rows
-                        ][columns]
+                        sheet.cell(row=start_rows, column=idx).value = change_data[start_rows][columns]
 
                 start_rows += 1
 
