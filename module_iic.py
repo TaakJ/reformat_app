@@ -4,14 +4,14 @@ from setup import setup_errorlog
 import pandas as pd
 import logging
 
-class module_adm(call_function):
+class module_iic(call_function):
     
     def params_setter(self, module: str) -> None:
         return super().params_setter(module)
     
-    def log_setter(self, log: list):
+    def log_setter(self, log: list) -> None:
         return super().log_setter(log)
-        
+    
     async def run(self, module:str) -> dict:
         self.params_setter(module)
         
@@ -22,7 +22,7 @@ class module_adm(call_function):
             await self.check_source_files()
             await self.retrieve_data_from_source_files()
             # await self.mapping_column()
-            # await self.mock_data()
+            await self.mock_data()
             if self.store_tmp is True:
                 await self.write_data_to_tmp_file()
             await self.write_data_to_target_file()
@@ -48,20 +48,20 @@ class module_adm(call_function):
         
         state = "failed"
         for record in self.logging:
-            record.update({"function": "mapping_module_adm", "state": state})
+            record.update({"function": "mapping_module_cum", "state": state})
             try:
                 for sheet, data in record["data"].items():
                     logging.info(f'Mapping Column From Sheet: "{sheet}"')
-                    
-                    if "ADM" in sheet:
+        
+                    if "USER REPORT" in sheet:
                         df = pd.DataFrame(data)
                         df.columns = df.iloc[0].values
                         df = df[1:]
                         df = df.reset_index(drop=True)
-                        
+                
             except Exception as err:
                 record.update({'err': err})
-                
+
                 
     async def mock_data(self) -> None:
             mock_data = [['ApplicationCode',	'AccountOwner', 'AccountName',	'AccountType',	'EntitlementName',	'SecondEntitlementName','ThirdEntitlementName', 'AccountStatus',	'IsPrivileged',	'AccountDescription',
