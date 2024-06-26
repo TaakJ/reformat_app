@@ -10,7 +10,7 @@ class module_cum(call_function):
         return super().params_setter(module)
     
     def log_setter(self, log: list):
-        return super().log_setter(log)
+        self._log = log
     
     async def run(self, module:str) -> dict:
         self.params_setter(module)

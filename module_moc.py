@@ -9,8 +9,8 @@ class module_moc(call_function):
     def params_setter(self, module: str) -> None:
         return super().params_setter(module)
     
-    def log_setter(self, log: list) -> None:
-        return super().log_setter(log)
+    def log_setter(self, log: list):
+        self._log = log
     
     async def run(self, module:str) -> dict:
         self.params_setter(module)

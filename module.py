@@ -44,10 +44,9 @@ class convert_2_files:
         logging.info("Retrieve Data from Source files..")
 
         state = "failed"
+        print(self.logging)
         for i, record in enumerate(self.logging):
-            record.update(
-                {"function": "retrieve_data_from_source_files", "state": state}
-            )
+            record.update({"function": "retrieve_data_from_source_files", "state": state})
 
             _dir = record["input_dir"]
             types = Path(_dir).suffix
@@ -57,7 +56,6 @@ class convert_2_files:
                     if [".xlsx", ".xls"].__contains__(types):
                         logging.info(f'Read Excel file: "{_dir}"')
                         _data = self.excel_data_cleaning(i)
-
                     else:
                         logging.info(f'Read Text file: "{_dir}"')
                         _data = self.text_data_cleaning(i)
@@ -137,6 +135,8 @@ class convert_2_files:
 
         _dir = self.logging[i]["input_dir"]
         sheets = self.logging[i]["module"]
+        
+        logging.info(f'Extract Data from Source "{_dir}"')
 
         files = open(_dir, "rb")
         encoded = chardet.detect(files.read())["encoding"]
@@ -425,9 +425,9 @@ class convert_2_files:
     async def write_data_to_target_file(self) -> None:
 
         logging.info("Write Data to Target files..")
-
         state = "failed"
         for record in self.logging:
+            print(record)
             try:
 
                 if record["module"] == "Target_file":
