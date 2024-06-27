@@ -232,11 +232,11 @@ class setup_app(QWidget):
 
         hbox = QHBoxLayout()
         self._success_log = QPushButton("success")
-        self._success_log.setFixedSize(90,40)
+        self._success_log.setFixedSize(80,40)
         self._success_log.setHidden(True)
         self._error_log = QPushButton("error")
         self._error_log.setHidden(True)
-        self._error_log.setFixedSize(90,40)
+        self._error_log.setFixedSize(80,40)
         hbox.addWidget(self._success_log)
         hbox.addWidget(self._error_log)
         hbox.addStretch(1)
