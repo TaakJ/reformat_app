@@ -50,7 +50,7 @@ class Jobber(QObject):
         self.finished.emit()
 
 class setup_app(QWidget):
-    def __init__(self):
+    def __init__(self, app):
         super().__init__()
 
         self.__thread = QThread()
@@ -59,6 +59,7 @@ class setup_app(QWidget):
             start_app()
         else:
             self.ui()
+            sys.exit(app.exec())
 
     def ui(self):
 
@@ -384,7 +385,7 @@ def main():
             "linux": True,
         },
     )
-    setup_app()
+    setup_app(app)
     
 # if __name__ == "__main__":
 #     app = QApplication(sys.argv)
