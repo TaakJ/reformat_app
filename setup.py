@@ -5,5 +5,5 @@ setup(
     version="0.1",
     packages=find_packages(),
     description="build package reformat uob app",
-    entry_points={"console_script":["reformat_app:reformat_app:main"]},
+    entry_points={"console_scripts":["reformat_app:reformat_app:main"]},
     )
