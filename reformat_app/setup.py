@@ -17,12 +17,12 @@ class ArgumentParams:
     CHOICES = "choices"
 
 class Folder:
-    _CURRENT_DIR    = os.getcwd()
-    _CONFIG_DIR     = join(_CURRENT_DIR,"config.yaml")
-    _LOGGER_CONFIG_DIR = join(_CURRENT_DIR,"logging_config.yaml")
-    TEMPLATE        = join(_CURRENT_DIR,"TEMPLATE/")
-    TMP             = join(_CURRENT_DIR,"TMP/")
-    LOG             = join(_CURRENT_DIR,"LOG/")
+    _CURRENT_DIR        = join(os.getcwd(), "reformat_app")
+    _CONFIG_DIR         = join(_CURRENT_DIR,"config.yaml")
+    _LOGGER_CONFIG_DIR  = join(_CURRENT_DIR,"logging_config.yaml")
+    TEMPLATE            = join(_CURRENT_DIR,"TEMPLATE/")
+    TMP                 = join(_CURRENT_DIR,"TMP/")
+    LOG                 = join(_CURRENT_DIR,"LOG/")
 
 def setup_folder() -> None:
     _folders = [value for name, value in vars(Folder).items() if isinstance(value,str) and not name.startswith("_")]

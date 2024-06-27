@@ -28,7 +28,7 @@ from PyQt6.QtCore import (
     pyqtSignal,
 )
 from qt_material import apply_stylesheet
-from setup import Folder, PARAMS, CONFIG
+from .setup import Folder, PARAMS, CONFIG
 from main import start_app
 
 class Jobber(QObject):
