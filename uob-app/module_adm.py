@@ -1,8 +1,9 @@
 import pandas as pd
 import logging
-from .function import call_function
-from .exception import CustomException
-from .setup import setup_errorlog
+from function import call_function
+from exception import CustomException
+from setup import setup_errorlog
+from function import collect_params
 
 class module_adm(call_function):
 
@@ -10,19 +11,22 @@ class module_adm(call_function):
         self._log = log
 
     async def run(self, module: str) -> dict:
-        self.params_setter(module)
+        collect_params(module)
+        
+        # self.params_setter(module)
 
         logging.info(f'Module: "{self.module}", Manual: "{self.manual}", Batch Date: "{self.batch_date}", Store Tmp: "{self.store_tmp}", Write Mode: "{self.write_mode}"')
 
         result = {"module": self.module, "task": "Completed"}
         try:
-            await self.check_source_files()
-            await self.retrieve_data_from_source_files()
-            # await self.mapping_column()
-            await self.mock_data()
-            if self.store_tmp is True:
-                await self.write_data_to_tmp_file()
-            await self.write_data_to_target_file()
+            print(self.module)
+            # await self.check_source_files()
+            # await self.retrieve_data_from_source_files()
+            # # await self.mapping_column()
+            # await self.mock_data()
+            # if self.store_tmp is True:
+            #     await self.write_data_to_tmp_file()
+            # await self.write_data_to_target_file()
 
         except CustomException as err:
 

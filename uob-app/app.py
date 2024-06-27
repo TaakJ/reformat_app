@@ -28,8 +28,8 @@ from PyQt6.QtCore import (
     pyqtSignal,
 )
 from qt_material import apply_stylesheet
-from .setup import Folder, PARAMS, CONFIG
-from .main import start_app
+from setup import Folder, PARAMS, CONFIG
+from main import start_app
 
 
 class Jobber(QObject):
@@ -375,7 +375,23 @@ class setup_app(QWidget):
         else:
             self.label.setText("Job has been succeed.")
 
-def main():
+# def main():
+#     app = QApplication(sys.argv)
+#     apply_stylesheet(
+#         app,
+#         theme="light_blue.xml",
+#         # invert_secondary=True,
+#         extra={
+#             "font_family": "monoespace",
+#             "density_scale": "0",
+#             "pyside6": True,
+#             "linux": True,
+#         },
+#     )
+#     setup_app()
+    
+    
+if __name__ == "__main__":
     app = QApplication(sys.argv)
     apply_stylesheet(
         app,
