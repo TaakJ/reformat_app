@@ -388,7 +388,6 @@ def main():
     )
     setup_app()
     
-    
 # if __name__ == "__main__":
 #     app = QApplication(sys.argv)
 #     apply_stylesheet(

@@ -23,23 +23,18 @@ class collect_log(ABC):
         pass
 
 class collect_params:
-    def __init__(self, module) -> None:
+    def params_setter(self,module: str) -> None:
         for key, value  in PARAMS.items():
             setattr(self, key, value)
-    
-    # def params_setter(self,module: str) -> None:
 
-    #     for key, value  in PARAMS.items():
-    #         setattr(self, key, value)
-
-    #     self.module = module
-    #     self.fmt_batch_date = self.batch_date
-    #     self.date = datetime.now()
-    #     self.input_dir = [join(CONFIG[self.module]["input_dir"], CONFIG[self.module]["input_file"])]
-    #     # for i in CONFIG[self.module]["require"]:
-    #     #     self.input_dir += [join(CONFIG[i]["input_dir"], CONFIG[i]["input_file"])]
-    #     self.output_dir = CONFIG[self.module]["output_dir"]
-    #     self.output_file = CONFIG[self.module]["output_file"]
+        self.module = module
+        self.fmt_batch_date = self.batch_date
+        self.date = datetime.now()
+        self.input_dir = [join(CONFIG[self.module]["input_dir"], CONFIG[self.module]["input_file"])]
+        # for i in CONFIG[self.module]["require"]:
+        #     self.input_dir += [join(CONFIG[i]["input_dir"], CONFIG[i]["input_file"])]
+        self.output_dir = CONFIG[self.module]["output_dir"]
+        self.output_file = CONFIG[self.module]["output_file"]
 
 
 class collect_data:
