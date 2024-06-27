@@ -24,7 +24,6 @@ class Folder:
     TMP             = join(_CURRENT_DIR,"TMP/")
     LOG             = join(_CURRENT_DIR,"LOG/")
 
-
 def setup_folder() -> None:
     _folders = [value for name, value in vars(Folder).items() if isinstance(value,str) and not name.startswith("_")]
     for folder in _folders:
@@ -45,7 +44,6 @@ def setup_config() -> dict:
     else:
         raise Exception(f"Yaml config file path: '{config_dir}' doesn't exist.")
     return config_yaml
-
 
 def setup_log() -> None:
     config_yaml = None
@@ -69,7 +67,6 @@ def setup_log() -> None:
             logging.config.dictConfig(config_yaml)
     else:
         raise Exception(f"Yaml file file_path: '{Folder._LOGGER_CONFIG_DIR}' doesn't exist.")
-
 
 def setup_errorlog(
     log_format="%(asctime)s.%(msecs)03d | %(module)s | %(levelname)s | %(funcName)s::%(lineno)d | %(message)s",
