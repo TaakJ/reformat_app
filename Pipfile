@@ -39,6 +39,7 @@ wcwidth = "==0.2.13"
 xlrd = "==1.2.0"
 xlsxwriter = "==3.1.9"
 cython = "*"
+reformat-app = {path = "./dist/reformat_app-0.1-py3-none-any.whl"}
 
 [dev-packages]
 
