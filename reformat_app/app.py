@@ -230,22 +230,18 @@ class setup_app(QWidget):
         self.time_label = QLabel("No Output.")
         vbox1.addWidget(self.time_label)
 
-        hbox1 = QHBoxLayout()
-        self._success_log = QPushButton("success")
+        hbox = QHBoxLayout()
+        self._success_log = QPushButton("_success.log")
         self._success_log.setHidden(True)
-        hbox1.addWidget(self._success_log)
-        hbox1.addStretch(1)
-
-        hbox2 = QHBoxLayout()
-        self._error_log = QPushButton("error")
+        self._error_log = QPushButton("_error.log")
         self._error_log.setHidden(True)
-        hbox2.addWidget(self._error_log)
-        hbox2.addStretch(1)
+        hbox.addWidget(self._success_log)
+        hbox.addWidget(self._error_log)
+        hbox.addStretch(1)
 
         vbox = QVBoxLayout()
         vbox.addLayout(vbox1)
-        vbox.addLayout(hbox1)
-        vbox.addLayout(hbox2)
+        vbox.addLayout(hbox)
         vbox.addStretch(1)
 
         self.groupbox5.setLayout(vbox)
@@ -386,18 +382,3 @@ def main():
         },
     )
     setup_app(app)
-    
-# if __name__ == "__main__":
-#     app = QApplication(sys.argv)
-#     apply_stylesheet(
-#         app,
-#         theme="light_blue.xml",
-#         # invert_secondary=True,
-#         extra={
-#             "font_family": "monoespace",
-#             "density_scale": "0",
-#             "pyside6": True,
-#             "linux": True,
-#         },
-#     )
-#     setup_app()
