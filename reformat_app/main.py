@@ -1,14 +1,14 @@
 import asyncio
-from module_adm import module_adm
-from module_bos import module_bos
-from module_cum import module_cum
-from module_doc import module_doc
-from module_ica import module_ica
-from module_iic import module_iic
-from module_lds import module_lds
-from module_lmt import module_lmt
-from module_moc import module_moc
-from setup import PARAMS, setup_folder, setup_log
+from .module_adm import module_adm
+from .module_bos import module_bos
+from .module_cum import module_cum
+from .module_doc import module_doc
+from .module_ica import module_ica
+from .module_iic import module_iic
+from .module_lds import module_lds
+from .module_lmt import module_lmt
+from .module_moc import module_moc
+from .setup import PARAMS, setup_folder, setup_log
 
 class run_module:
     def __init__(self) -> None:
