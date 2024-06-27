@@ -45,7 +45,7 @@ class Jobber(QObject):
         self.results = func.results
         for i in range(1,11):
             self.set_current_progress.emit(int(i * 10))
-            sleep(0.5)
+            sleep(0.1)
 
         self.finished.emit()
 
