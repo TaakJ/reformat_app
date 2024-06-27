@@ -231,13 +231,13 @@ class setup_app(QWidget):
         vbox1.addWidget(self.time_label)
 
         hbox1 = QHBoxLayout()
-        self._success_log = QPushButton("_success.log")
+        self._success_log = QPushButton("success")
         self._success_log.setHidden(True)
         hbox1.addWidget(self._success_log)
         hbox1.addStretch(1)
 
         hbox2 = QHBoxLayout()
-        self._error_log = QPushButton("_error.log")
+        self._error_log = QPushButton("error")
         self._error_log.setHidden(True)
         hbox2.addWidget(self._error_log)
         hbox2.addStretch(1)
@@ -313,9 +313,9 @@ class setup_app(QWidget):
         date = datetime.now().strftime("%Y%m%d")
         log_dir = join(Folder.LOG,date)
         if event == 1:
-            open_log = join(log_dir,"_success")
+            open_log = join(log_dir,"_success.log")
         else:
-            open_log = join(log_dir,"_error")
+            open_log = join(log_dir,"_error.log")
         webbrowser.open(open_log)
 
     def task_run_job(self):
