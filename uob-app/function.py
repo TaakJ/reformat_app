@@ -270,11 +270,5 @@ class collect_data:
         self.logging[i].update({"state": state})
         return data
 
-
-class backup:
-    def __init__(self,) -> None:
-        pass
-
-
 class call_function(convert_2_files,collect_log,collect_params,collect_data):
     pass
