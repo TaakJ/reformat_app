@@ -1,7 +1,7 @@
 {
     "_meta": {
         "hash": {
-            "sha256": "ed898749efb368516fc2d638acbee33d9212abf413e552314a1098b980cc6c70"
+            "sha256": "f564c3d0420b78c9bcb13dd5e3075694983a0003350c2d38e599cad514afd133"
         },
         "pipfile-spec": 6,
         "requires": {
@@ -481,13 +481,6 @@
             ],
             "index": "pypi",
             "version": "==5.0.1"
-        },
-        "reformat-app": {
-            "hashes": [
-                "sha256:99c1a41210e32519f267aaf54023b8580e14c09cf2fb6a6d9a61139a0b4fc5fe"
-            ],
-            "path": "./dist/reformat_app-0.1-py3-none-any.whl",
-            "version": "==0.1"
         },
         "shiboken6": {
             "hashes": [
