@@ -10,7 +10,7 @@ import chardet
 from io import StringIO
 import xlrd
 import csv
-from exception import CustomException 
+from .exception import CustomException 
 from .setup import Folder
 
 class convert_2_files:
