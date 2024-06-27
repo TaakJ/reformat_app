@@ -214,9 +214,11 @@ class setup_app(QWidget):
         vbox1.addWidget(self.progress)
         vbox1.addWidget(self.label)
         vbox1.addWidget(self.run_btn)
+        vbox1.addStretch(1)
 
         vbox = QVBoxLayout()
         vbox.addLayout(vbox1)
+        vbox.addStretch(1)
         self.groupbox4.setLayout(vbox)
 
         self.run_btn.clicked.connect(self.task_run_job)
@@ -232,11 +234,11 @@ class setup_app(QWidget):
 
         hbox = QHBoxLayout()
         self._success_log = QPushButton("success")
-        self._success_log.setFixedSize(80,40)
+        self._success_log.setFixedSize(110,40)
         self._success_log.setHidden(True)
         self._error_log = QPushButton("error")
         self._error_log.setHidden(True)
-        self._error_log.setFixedSize(80,40)
+        self._error_log.setFixedSize(110,40)
         hbox.addWidget(self._success_log)
         hbox.addWidget(self._error_log)
         hbox.addStretch(1)
@@ -365,7 +367,7 @@ class setup_app(QWidget):
         self._success_log.setHidden(False)
 
         if "Uncompleted" in [completed_task.result()["task"] for completed_task in results[0]]:
-            self.label.setText("Job has been errored. Please check log file!")
+            self.label.setText("Job has errored. Please see log file!")
             self._error_log.setHidden(False)
         else:
             self.label.setText("Job has been succeed.")
