@@ -1,16 +1,15 @@
-from function import call_function
-from exception import CustomException
-from setup import setup_errorlog
 import pandas as pd
 import logging
-
+from .function import call_function
+from .exception import CustomException
+from .setup import setup_errorlog
 
 class module_iic(call_function):
 
-    def log_setter(self,log: list):
+    def log_setter(self, log: list):
         self._log = log
 
-    async def run(self,module: str) -> dict:
+    async def run(self, module: str) -> dict:
         self.params_setter(module)
 
         logging.info(f'Module: "{self.module}", Manual: "{self.manual}", Batch Date: "{self.batch_date}", Store Tmp: "{self.store_tmp}", Write Mode: "{self.write_mode}"')

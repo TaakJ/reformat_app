@@ -28,8 +28,8 @@ from PyQt6.QtCore import (
     pyqtSignal,
 )
 from qt_material import apply_stylesheet
-from setup import PARAMS, CONFIG
-from main import start_app
+from .setup import Folder, PARAMS, CONFIG
+from .main import start_app
 
 
 class Jobber(QObject):
@@ -61,7 +61,6 @@ class setup_app(QWidget):
             start_app()
         else:
             self.ui()
-            sys.exit(app.exec())
 
     def ui(self):
 

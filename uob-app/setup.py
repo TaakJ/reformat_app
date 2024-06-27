@@ -167,7 +167,6 @@ class setup_parser:
                 else:
                     self.parser.add_argument(short_name,name,help=description,required=required,default=default,action=action,choices=choices)
 
-
 class Utility:
     global PARAMS, CONFIG
     PARAMS = vars(setup_parser().parsed_params)

@@ -1,9 +1,8 @@
-from function import call_function
-from exception import CustomException
-from setup import setup_errorlog
 import pandas as pd
 import logging
-
+from .function import call_function
+from .exception import CustomException
+from .setup import setup_errorlog
 
 class module_adm(call_function):
 

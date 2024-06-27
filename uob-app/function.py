@@ -1,10 +1,10 @@
 from abc import ABC,abstractmethod
+import re
+import logging
 from datetime import datetime
 from os.path import join
-from module import convert_2_files
-from setup import CONFIG,PARAMS
-import logging
-import re
+from .module import convert_2_files
+from .setup import CONFIG,PARAMS
 
 
 class collect_log(ABC):

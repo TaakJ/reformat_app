@@ -1,5 +1,3 @@
-from exception import CustomException
-from setup import Folder
 import logging
 from pathlib import Path
 from os.path import join
@@ -10,9 +8,10 @@ import numpy as np
 import openpyxl
 import chardet
 from io import StringIO
-import re
 import xlrd
 import csv
+from .exception import CustomException
+from .setup import Folder
 
 
 class convert_2_files:

@@ -1,12 +1,12 @@
-from function import call_function
-from exception import CustomException
-from setup import setup_errorlog
 import pandas as pd
 import logging
+from .function import call_function
+from .exception import CustomException
+from .setup import setup_errorlog
 
 class module_ica(call_function):
 
-    def log_setter(self,log: list):
+    def log_setter(self, log: list):
         self._log = log
 
     async def run(self,module: str) -> dict:
