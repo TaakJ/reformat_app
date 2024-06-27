@@ -31,7 +31,6 @@ from qt_material import apply_stylesheet
 from setup import Folder, PARAMS, CONFIG
 from main import start_app
 
-
 class Jobber(QObject):
     set_total_progress = pyqtSignal(int)
     set_current_progress = pyqtSignal(int)
@@ -49,7 +48,6 @@ class Jobber(QObject):
             sleep(0.5)
 
         self.finished.emit()
-
 
 class setup_app(QWidget):
     def __init__(self):
@@ -200,7 +198,7 @@ class setup_app(QWidget):
         vbox1 = QVBoxLayout()
         self.progress = QProgressBar()
         self.progress.setStyleSheet(
-            """QProgressBar {
+                                    """QProgressBar {
                                         color: #000;
                                         border: 2px solid grey;
                                         border-radius: 5px;
@@ -375,23 +373,7 @@ class setup_app(QWidget):
         else:
             self.label.setText("Job has been succeed.")
 
-# def main():
-#     app = QApplication(sys.argv)
-#     apply_stylesheet(
-#         app,
-#         theme="light_blue.xml",
-#         # invert_secondary=True,
-#         extra={
-#             "font_family": "monoespace",
-#             "density_scale": "0",
-#             "pyside6": True,
-#             "linux": True,
-#         },
-#     )
-#     setup_app()
-    
-    
-if __name__ == "__main__":
+def main():
     app = QApplication(sys.argv)
     apply_stylesheet(
         app,
@@ -405,3 +387,19 @@ if __name__ == "__main__":
         },
     )
     setup_app()
+    
+    
+# if __name__ == "__main__":
+#     app = QApplication(sys.argv)
+#     apply_stylesheet(
+#         app,
+#         theme="light_blue.xml",
+#         # invert_secondary=True,
+#         extra={
+#             "font_family": "monoespace",
+#             "density_scale": "0",
+#             "pyside6": True,
+#             "linux": True,
+#         },
+#     )
+#     setup_app()
