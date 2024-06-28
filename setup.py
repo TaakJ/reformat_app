@@ -16,5 +16,5 @@ setup(
         "console_scripts": [
             "reformat_app = reformat_app:main",
         ],
-    },
+    }
 )
