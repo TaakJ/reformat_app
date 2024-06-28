@@ -17,7 +17,7 @@ class ArgumentParams:
     CHOICES = "choices"
 
 class Folder:
-    _CURRENT_DIR        = join(os.getcwd(), "src")
+    _CURRENT_DIR        = join(os.getcwd(), "SRC")
     _CONFIG_DIR         = join(_CURRENT_DIR,"config.yaml")
     _LOGGER_CONFIG_DIR  = join(_CURRENT_DIR,"logging_config.yaml")
     TEMPLATE            = join(_CURRENT_DIR,"TEMPLATE/")
