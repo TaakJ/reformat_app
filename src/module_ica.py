@@ -1,8 +1,8 @@
 import pandas as pd
 import logging
 from function import call_function
-from exception import CustomException
-from setup import setup_errorlog
+from .exception import CustomException
+from .setup import setup_errorlog
 
 class module_ica(call_function):
 

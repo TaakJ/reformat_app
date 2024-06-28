@@ -3,8 +3,8 @@ import re
 import logging
 from datetime import datetime
 from os.path import join
-from module import convert_2_files
-from setup import CONFIG, PARAMS
+from .module import convert_2_files
+from .setup import CONFIG, PARAMS
 
 class collect_log(ABC):
     def __init__(self):
