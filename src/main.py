@@ -20,7 +20,7 @@ class run_module:
             asyncio.set_event_loop(self.loop)
             self.results = self.loop.run_until_complete(self.mapping_module())
         except Exception as err:
-            print(err)
+            raise Exception(err)
 
     async def mapping_module(self):
         coros = []
