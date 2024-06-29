@@ -1,69 +1,66 @@
 import asyncio
-from .module_adm import module_adm
-from .module_bos import module_bos
-from .module_cum import module_cum
-from .module_doc import module_doc
-from .module_ica import module_ica
-from .module_iic import module_iic
-from .module_lds import module_lds
-from .module_lmt import module_lmt
-from .module_moc import module_moc
+from .module_adm import ModuleADM
+from .module_bos import ModuleBOS
+from .module_cum import ModuleCUM
+from .module_doc import ModuleDOC
+from .module_ica import ModuleICA
+from .module_iic import ModuleIIC
+from .module_lds import ModuleLDS
+from .module_lmt import ModuleLMT
+from .module_moc import ModuleMOC
+from .function import CollectParams
 from .setup import PARAMS, setup_folder, setup_log
 
-class run_module:
+class RunModule:
     def __init__(self) -> None:
-        try:
-            setup_folder()
-            setup_log()
+        setup_folder()
+        setup_log()
 
-            self.loop = asyncio.new_event_loop()
-            asyncio.set_event_loop(self.loop)
-            self.results = self.loop.run_until_complete(self.mapping_module())
-    
-        except RuntimeError as err:
-            raise err
-
+        self.loop = asyncio.new_event_loop()
+        asyncio.set_event_loop(self.loop)
+        self.results = self.loop.run_until_complete(self.mapping_module())
+        
     async def mapping_module(self):
         coros = []
         for module in PARAMS["source"]:
 
             if module == "ADM":
-                tasks = module_adm().run(module)
+                tasks = ModuleADM().Run(module)
                 coros.append(asyncio.create_task(tasks))
 
             elif module == "BOS":
-                tasks = module_bos().run(module)
+                tasks = ModuleBOS().Run(module)
                 coros.append(asyncio.create_task(tasks))
 
             elif module == "CUM":
-                tasks = module_cum().run(module)
+                tasks = ModuleCUM().Run(module)
                 coros.append(asyncio.create_task(tasks))
 
             elif module == "DOC":
-                tasks = module_doc().run(module)
+                tasks = ModuleDOC().Run(module)
                 coros.append(asyncio.create_task(tasks))
 
             elif module == "ICA":
-                tasks = module_ica().run(module)
+                tasks = ModuleICA().Run(module)
                 coros.append(asyncio.create_task(tasks))
 
             elif module == "IIC":
-                tasks = module_iic().run(module)
+                tasks = ModuleIIC().Run(module)
                 coros.append(asyncio.create_task(tasks))
 
             elif module == "LDS":
-                tasks = module_lds().run(module)
+                tasks = ModuleLDS().Run(module)
                 coros.append(asyncio.create_task(tasks))
 
             elif module == "LMT":
-                tasks = module_lmt().run(module)
+                tasks = ModuleLMT().Run(module)
                 coros.append(asyncio.create_task(tasks))
 
             elif module == "MOC":
-                tasks = module_moc().run(module)
+                tasks = ModuleMOC().Run(module)
                 coros.append(asyncio.create_task(tasks))
 
         return await asyncio.wait(coros)
 
-class start_app(run_module):
+class start_app(RunModule):
     pass

@@ -18,12 +18,12 @@ class ArgumentParams:
 
 class Folder:
     _CURRENT_DIR        = os.getcwd()
-    _CONFIG_DIR         = join(_CURRENT_DIR,"config.yaml")
-    _LOGGER_CONFIG_DIR  = join(_CURRENT_DIR,"logging_config.yaml")
     TEMPLATE            = join(_CURRENT_DIR,"TEMPLATE/")
     TMP                 = join(_CURRENT_DIR,"TMP/")
     LOG                 = join(_CURRENT_DIR,"LOG/")
-    BACKUP              = join(_CURRENT_DIR,"BACKUP/")
+    CONFIG              = join(_CURRENT_DIR,"CONFIG/")
+    _CONFIG_DIR         = join(CONFIG,"config.yaml")
+    _LOGGER_CONFIG_DIR  = join(CONFIG,"logging_config.yaml")
 
 def setup_folder() -> None:
     _folders = [value for name, value in vars(Folder).items() if isinstance(value,str) and not name.startswith("_")]

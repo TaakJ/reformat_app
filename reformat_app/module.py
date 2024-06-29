@@ -13,11 +13,11 @@ import csv
 from .exception import CustomException 
 from .setup import Folder
 
-class convert_2_files:
+class Convert2File:
+    
+    async def check_source_file(self) -> None:
 
-    async def check_source_files(self) -> None:
-
-        logging.info("Check Source files.")
+        logging.info("Check Source file.")
 
         set_log = []
         for input_dir in self.input_dir:
@@ -30,20 +30,20 @@ class convert_2_files:
                 "module": self.module,
                 "input_dir": input_dir,
                 "status_file": status_file,
-                "function": "check_source_files",
+                "function": "check_source_file",
             }
             set_log.append(record)
             logging.info(f'Source file: "{input_dir}", Status: "{status_file}"')
 
-        self.log_setter(set_log)
+        self.logSetter(set_log)
 
-    async def retrieve_data_from_source_files(self) -> None:
+    async def retrieve_data_from_source_file(self) -> None:
 
-        logging.info("Retrieve Data from Source files.")
+        logging.info("Retrieve Data from Source file.")
 
         state = "failed"
         for i, record in enumerate(self.logging):
-            record.update({"function": "retrieve_data_from_source_files","state": state})
+            record.update({"function": "retrieve_data_from_source_file","state": state})
 
             input_dir = record["input_dir"]
             types = Path(input_dir).suffix
@@ -62,7 +62,7 @@ class convert_2_files:
                 state = "succeed"
                 record.update({"data": data, "state": state})
 
-            except ValueError as err:
+            except Exception as err:
                 record.update({"err": err})
 
             if "err" in record:
@@ -72,24 +72,22 @@ class convert_2_files:
 
         self.logging[i].update({"function": "read_text_file"})
         input_dir = self.logging[i]["input_dir"]
-        module = self.logging[i]["module"]
-
-        file = open(input_dir, "rb")
-        encoded = chardet.detect(file.read())["encoding"]
-        file.seek(0)
-        decode_data = StringIO(file.read().decode(encoded))
-
-        if module == "ADM":
-            data = self.extract_adm_data(i, decode_data)
+        try:
+            file = open(input_dir, "rb")
+            encoded = chardet.detect(file.read())["encoding"]
+            file.seek(0)
+            read_data = StringIO(file.read().decode(encoded))
+            
+            data = self.get_function(i, read_data)
+            print(data)
+            print()
+            print(self.logging)
+            print()
             return data
-
-        elif module == "DOC":
-            data = self.extract_doc_data(i, decode_data)
-            return data
-
-        elif module == "LDS":
-            data = self.extract_lds_data(i, decode_data)
-            return data
+            
+        except Exception as err:
+            raise Exception(err)
+    
 
     def read_excel_file(self, i: int) -> any:
 

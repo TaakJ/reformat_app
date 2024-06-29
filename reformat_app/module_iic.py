@@ -1,28 +1,27 @@
 import pandas as pd
 import logging
-from .function import call_function
+from .function import CallFunction, CollectParams
 from .exception import CustomException
 from .setup import setup_errorlog
 
-class module_iic(call_function):
+class ModuleIIC(CallFunction):
 
-    def log_setter(self, log: list):
+    def logSetter(self, log: list):
         self._log = log
 
-    async def run(self, module: str) -> dict:
+    async def Run(self, module: str) -> dict:
         self.params_setter(module)
 
         logging.info(f'Module: "{self.module}", Manual: "{self.manual}", Batch Date: "{self.batch_date}", Store Tmp: "{self.store_tmp}", Write Mode: "{self.write_mode}"')
 
         result = {"module": self.module, "task": "Completed"}
         try:
-            await self.check_source_files()
-            await self.retrieve_data_from_source_files()
-            # await self.mapping_column()
-            await self.mock_data()
-            if self.store_tmp is True:
-                await self.write_data_to_tmp_file()
-            await self.write_data_to_target_file()
+            await self.check_source_file()
+            await self.retrieve_data_from_source_file()
+            # await self.mock_data()
+            # if self.store_tmp is True:
+            #     await self.write_data_to_tmp_file()
+            # await self.write_data_to_target_file()
 
         except CustomException as err:
 
