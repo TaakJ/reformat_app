@@ -17,7 +17,7 @@ class Convert2File:
     
     async def check_source_file(self) -> None:
 
-        logging.info("Check Source file.")
+        logging.info("Check Source file")
 
         set_log = []
         for input_dir in self.input_dir:
@@ -39,7 +39,7 @@ class Convert2File:
 
     async def retrieve_data_from_source_file(self) -> None:
 
-        logging.info("Retrieve Data from Source file.")
+        logging.info("Retrieve Data from Source file")
 
         state = "failed"
         for i, record in enumerate(self.logging):
@@ -58,7 +58,7 @@ class Convert2File:
                         data = self.read_text_file(i)
                 else:
                     raise FileNotFoundError(f"status_file: {status_file}")
-
+                
                 state = "succeed"
                 record.update({"data": data, "state": state})
 
@@ -76,55 +76,29 @@ class Convert2File:
             file = open(input_dir, "rb")
             encoded = chardet.detect(file.read())["encoding"]
             file.seek(0)
-            read_data = StringIO(file.read().decode(encoded))
-            
-            data = self.get_function(i, read_data)
-            print(data)
-            print()
-            print(self.logging)
-            print()
-            return data
+            line = StringIO(file.read().decode(encoded))
+            data = self.get_extract_data(i, line)
             
         except Exception as err:
             raise Exception(err)
-    
+        return data
 
     def read_excel_file(self, i: int) -> any:
 
         self.logging[i].update({"function": "read_excel_file"})
         input_dir = self.logging[i]["input_dir"]
-        module = self.logging[i]["module"]
+        try:
+            workbook = xlrd.open_workbook(input_dir)
+            data = self.get_extract_data(i, workbook)
+            
+        except Exception as err:
+            raise Exception(err)
+        return data
 
-        workbook = xlrd.open_workbook(input_dir)
-
-        if module == "BOS":
-            data = self.extract_bos_data(i, workbook)
-            return data
-
-        elif module == "CUM":
-            data = self.extract_cum_data(i, workbook)
-            return data
-
-        elif module == "ICA":
-            data = self.extract_ica_data(i, workbook)
-            return data
-
-        elif module == "IIC":
-            data = self.extract_iic_data(i, workbook)
-            return data
-
-        elif module == "LMT":
-            data = self.extract_lmt_data(i, workbook)
-            return data
-
-        elif module == "MOC":
-            data = self.extract_moc_data(i, workbook)
-            return data
-
-    def initial_data_types(self, df: pd.DataFrame) -> pd.DataFrame:
+    def initial_data_type(self, df: pd.DataFrame) -> pd.DataFrame:
 
         state = "failed"
-        self.logging[-1].update({"function": "initial_data_types", "state": state})
+        self.logging[-1].update({"function": "initial_data_type", "state": state})
         try:
             df = df.astype(
                 {
@@ -152,12 +126,11 @@ class Convert2File:
             else:
                 df["remark"] = "Insert"
 
-        except ValueError as err:
-            raise ValueError(err)
+        except Exception as err:
+            raise Exception(err)
 
         state = "succeed"
         self.logging[-1].update({"state": state})
-
         return df
 
     def validate_data_change(self, df: pd.DataFrame, change_df: pd.DataFrame) -> dict:
@@ -188,7 +161,6 @@ class Convert2File:
             df = df.reindex(index=merge_index, columns=df.columns).iloc[:, :-1]
             ## change data / new data.
             change_df = change_df.reindex(index=merge_index, columns=change_df.columns).iloc[:, :-1]
-
             ## compare data.
             df["count"] = pd.DataFrame(np.where(df.ne(change_df), True, df),index=df.index,columns=df.columns)\
                 .apply(lambda x: (x == True).sum(), axis=1)
@@ -230,57 +202,56 @@ class Convert2File:
             df.index += start_rows
             data_dict = df.to_dict(orient="index")
 
-        except ValueError as err:
-            raise ValueError(err)
+        except Exception as err:
+            raise Exception(err)
 
         state = "succeed"
         self.logging[-1].update({"state": state})
-
         return data_dict
 
     async def write_data_to_tmp_file(self) -> None:
 
-        logging.info("Write Data to Tmp files..")
+        logging.info("Write Data to Tmp file")
 
         for record in self.logging:
             try:
                 if record["module"] == "Target_file":
-                
-                    data = record["data"]
-                    change_df = pd.DataFrame(data)
-                    change_df = self.initial_data_types(change_df)
-
-                    state = "failed"
-                    tmp_name = join(Folder.TMP,f"TMP_{self.module}-{self.batch_date.strftime('%Y%m%d')}.xlsx")
-                    record.update({"input_dir": tmp_name, "function": "write_data_to_tmp_file","state": state})
                     try:
-                        workbook = openpyxl.load_workbook(tmp_name)
-                        get_sheet = workbook.get_sheet_names()
-                        sheet_num = len(get_sheet)
-                        sheet_name = f"RUN_TIME_{sheet_num - 1}"
-                        sheet = workbook.get_sheet_by_name(sheet_name)
-                        workbook.active = sheet_num
-
-                    except FileNotFoundError:
-                        template_name = join(Folder.TEMPLATE,"Application Data Requirements.xlsx")
+                        data = record["data"]
+                        change_df = pd.DataFrame(data)
+                        change_df = self.initial_data_types(change_df)
+                        
+                        state = "failed"
+                        tmp_name = join(Folder.TMP,f"TMP_{self.module}-{self.batch_date.strftime('%Y%m%d')}.xlsx")
+                        
+                        record.update({"input_dir": tmp_name, "function": "write_data_to_tmp_file","state": state})
                         try:
-                            if not glob.glob(tmp_name, recursive=True):
-                                shutil.copy2(template_name, tmp_name)
-                                state = "succeed"
-                        except:
-                            raise
-                        workbook = openpyxl.load_workbook(tmp_name)
-                        sheet = workbook.worksheets[0]
-                        sheet_name = "RUN_TIME_1"
-                        sheet_num = 1
-                        sheet.title = sheet_name
+                            workbook = openpyxl.load_workbook(tmp_name)
+                            get_sheet = workbook.get_sheet_names()
+                            sheet_num = len(get_sheet)
+                            sheet_name = f"RUN_TIME_{sheet_num - 1}"
+                            sheet = workbook.get_sheet_by_name(sheet_name)
+                            workbook.active = sheet_num
 
-                    try:
+                        except FileNotFoundError:
+                            template_name = join(Folder.TEMPLATE,"Application Data Requirements.xlsx")
+                            try:
+                                if not glob.glob(tmp_name, recursive=True):
+                                    shutil.copy2(template_name, tmp_name)
+                                    state = "succeed"
+                            except:
+                                raise
+                            workbook = openpyxl.load_workbook(tmp_name)
+                            sheet = workbook.worksheets[0]
+                            sheet_name = "RUN_TIME_1"
+                            sheet_num = 1
+                            sheet.title = sheet_name
+
                         ## read tmp files.
                         data = sheet.values
                         columns = next(data)[0:]
                         tmp_df = pd.DataFrame(data, columns=columns)
-                        tmp_df = self.initial_data_types(tmp_df)
+                        tmp_df = self.initial_data_type(tmp_df)
 
                         ## validate data change row by row
                         data_dict = self.validate_data_change(tmp_df, change_df)
@@ -295,13 +266,13 @@ class Convert2File:
                         workbook.move_sheet(workbook.active, offset=-sheet_num)
                         workbook.save(tmp_name)
 
-                    except ValueError as err:
-                        raise ValueError(err)
+                    except Exception as err:
+                        raise Exception(err)
                     
                     record.update({"sheet_name": sheet_name, "state": state})
                     logging.info(f'Write Data to Tmp files: "{state}".')
 
-            except ValueError as err:
+            except Exception as err:
                 record.update({"err": err})
 
             if "err" in record:

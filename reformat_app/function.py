@@ -23,7 +23,6 @@ class CollectLog(ABC):
         pass
 
 class SetParams:
-    
     def get_params(self, module) -> None:
         for key, value in PARAMS.items():
             setattr(self, key, value)
@@ -35,20 +34,45 @@ class SetParams:
         self.output_dir     = CONFIG[module]["output_dir"]
         self.output_file    = CONFIG[module]["output_file"]
         
-    def get_function(self, i:int, line:any):
+    def get_extract_data(self, i:int, format_file:any):
+        
+        logging.info("Extract Data Each Module")
         module = self.logging[i]["module"]
         
         if module == "ADM":
-            self.extract_adm_data(i, line)
+            data = self.extract_adm(i, format_file)
+            return data
         elif module == "DOC":
-            self.extract_doc_data(i, line)
+            data = self.extract_doc(i, format_file)
+            return data
+        elif module == "LDS":
+            data = self.extract_lds(i, format_file)
+            return data
+        elif module == "BOS":
+            data = self.extract_bos(i, format_file)
+            return data
+        elif module == "CUM":
+            data = self.extract_cum(i, format_file)
+            return data
+        elif module == "ICA":
+            data = self.extract_ica(i, format_file)
+            return data
+        elif module == "IIC":
+            data = self.extract_iic(i, format_file)
+            return data
+        elif module == "LMT":
+            data = self.extract_lmt(i, format_file)
+            return data
+        elif module == "MOC":
+            data = self.extract_moc(i, format_file)
+            return data
         
-    def extract_adm_data(self, i:int, line:any) -> dict:
+    def extract_adm(self, i:int, line:any) -> dict:
 
-        logging.info("Extract Data for ADM Module.")
+        logging.info("Data for ADM")
 
         state = "failed"
-        self.logging[i].update({"function": "extract_adm_data","state": state})
+        self.logging[i].update({"function": "extract_adm","state": state})
 
         data = []
         for l in line:
@@ -62,12 +86,12 @@ class SetParams:
         
         return {"ADM": data}
     
-    def extract_doc_data(self, i:int, line:any) -> dict:
+    def extract_doc(self, i:int, line:any) -> dict:
 
-        logging.info("Extract Data for DOC Module.")
+        logging.info("Data for DOC")
 
         state = "failed"
-        self.logging[i].update({"function": "extract_doc_data","state": state})
+        self.logging[i].update({"function": "extract_doc","state": state})
 
         data = []
         for l in line:
@@ -96,8 +120,184 @@ class SetParams:
 
         state = "succeed"
         self.logging[i].update({"state": state})
-        
         return {"DOC": fix_data}
+
+    def extract_lds(self, i:int, line:any) -> dict:
+
+        logging.info("Data for LDS")
+
+        state = "failed"
+        self.logging[i].update({"function": "extract_lds","state": state})
+
+        data = []
+        for l in line:
+            regex = re.compile(r"\w+.*")
+            find_word = regex.findall(l)
+            if find_word != []:
+                data += [re.sub(r"\W\s+",",","".join(find_word).strip()).split(",")]
+
+        fix_data = []
+        for rows, value in enumerate(data):
+            if rows == 0:
+                ## header
+                fix_data += [" ".join(value).split(" ")]
+            else:
+                ## value
+                fix_column = []
+                for idx, column in enumerate(value,1):
+                    if idx == 1:
+                        l = re.sub(r"\s+",",",column).split(",")
+                        fix_column.extend(l)
+                    elif idx == 32:
+                        continue
+                    else:
+                        fix_column.append(column)
+                fix_data.append(fix_column)
+
+        state = "succeed"
+        self.logging[i].update({"state": state})
+        return {"LDS": fix_data}
+
+    def extract_bos(self, i:int, workbook:any) -> dict:
+
+        logging.info("Data for BOS")
+
+        state = "failed"
+        self.logging[i].update({"function": "extract_bos","state": state})
+
+        sheet_list = [sheet for sheet in workbook.sheet_names()]
+
+        data = {}
+        for sheets in sheet_list:
+            cells = workbook.sheet_by_name(sheets)
+            for row in range(0, cells.nrows):
+                by_sheets = [cells.cell(row, col).value for col in range(cells.ncols)]
+                if sheets not in data:
+                    data[sheets] = [by_sheets]
+                else:
+                    data[sheets].append(by_sheets)
+
+        state = "succeed"
+        self.logging[i].update({"state": state})
+        return data
+    
+    def extract_cum(self, i:int, workbook:any) -> dict:
+
+        logging.info("Data for CUM")
+
+        state = "failed"
+        self.logging[i].update({"function": "extract_cum", "state": state})
+
+        sheet_list = [sheet for sheet in workbook.sheet_names()]
+
+        data = {}
+        for sheets in sheet_list:
+            cells = workbook.sheet_by_name(sheets)
+            for row in range(0, cells.nrows):
+                by_sheets = [cells.cell(row,col).value for col in range(cells.ncols)][1:]
+                if not all(empty == "" for empty in by_sheets):
+                    if sheets not in data:
+                        data[sheets] = [by_sheets]
+                    else:
+                        data[sheets].append(by_sheets)
+
+        state = "succeed"
+        self.logging[i].update({"state": state})
+        return data
+    
+    def extract_ica(self, i:int, workbook:any) -> dict:
+
+        logging.info("Data for ICA")
+
+        state = "failed"
+        self.logging[i].update({"function": "extract_ica", "state": state})
+
+        sheet_list = [sheet for sheet in workbook.sheet_names()]
+
+        data = {}
+        for sheets in sheet_list:
+            cells = workbook.sheet_by_name(sheets)
+            for row in range(0, cells.nrows):
+                by_sheets = [cells.cell(row,col).value for col in range(cells.ncols)]
+                if sheets not in data:
+                    data[sheets] = [by_sheets]
+                else:
+                    data[sheets].append(by_sheets)
+
+        state = "succeed"
+        self.logging[i].update({"state": state})
+        return data
+
+    def extract_iic(self, i:int, workbook:any) -> dict:
+
+        logging.info("Data for IIC")
+
+        state = "failed"
+        self.logging[i].update({"function": "extract_iic", "state": state})
+
+        sheet_list = [sheet for sheet in workbook.sheet_names() if sheet != "StyleSheet"]
+
+        data = {}
+        for sheets in sheet_list:
+            cells = workbook.sheet_by_name(sheets)
+            for row in range(0,cells.nrows):
+                by_sheets = [cells.cell(row, col).value for col in range(cells.ncols)]
+                if not all(empty == "" for empty in by_sheets):
+                    if sheets not in data:
+                        data[sheets] = [by_sheets]
+                    else:
+                        data[sheets].append(by_sheets)
+
+        state = "succeed"
+        self.logging[i].update({"state": state})
+        return data
+    
+    def extract_lmt(self, i:int, workbook:any) -> dict:
+
+        logging.info("Data for LMT")
+
+        state = "failed"
+        self.logging[i].update({"function": "extract_lmt","state": state})
+
+        sheet_list = [sheet for sheet in workbook.sheet_names() if sheet != "StyleSheet"]
+
+        data = {}
+        for sheets in sheet_list:
+            cells = workbook.sheet_by_name(sheets)
+            for row in range(0,cells.nrows):
+                by_sheets = [cells.cell(row,col).value for col in range(cells.ncols)]
+                if sheets not in data:
+                    data[sheets] = [by_sheets]
+                else:
+                    data[sheets].append(by_sheets)
+
+        state = "succeed"
+        self.logging[i].update({"state": state})
+        return data
+    
+    def extract_moc(self, i:int, workbook:any) -> dict:
+
+        logging.info("Data for MOC")
+
+        state = "failed"
+        self.logging[i].update({"function": "extract_moc","state": state})
+
+        sheet_list = [sheet for sheet in workbook.sheet_names() if sheet != "StyleSheet"]
+
+        data = {}
+        for sheets in sheet_list:
+            cells = workbook.sheet_by_name(sheets)
+            for row in range(0, cells.nrows):
+                by_sheets = [cells.cell(row,col).value for col in range(cells.ncols)]
+                if not all(empty == "" for empty in by_sheets):
+                    if sheets not in data:
+                        data[sheets] = [by_sheets]
+                    else:
+                        data[sheets].append(by_sheets)
+
+        state = "succeed"
+        self.logging[i].update({"state": state})
+        return data
 
 class CollectParams(SetParams):
     pass
