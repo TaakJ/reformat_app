@@ -8,7 +8,6 @@ from .module_iic import ModuleIIC
 from .module_lds import ModuleLDS
 from .module_lmt import ModuleLMT
 from .module_moc import ModuleMOC
-from .function import CollectParams
 from .setup import PARAMS, setup_folder, setup_log
 
 class RunModule:
@@ -62,5 +61,5 @@ class RunModule:
 
         return await asyncio.wait(coros)
 
-class start_app(RunModule):
+class StartApp(RunModule):
     pass

@@ -3,7 +3,6 @@ import logging
 from .function import CallFunction
 from .exception import CustomException
 from .setup import setup_errorlog
-
 class ModuleLDS(CallFunction):
 
     def logSetter(self, log: list):

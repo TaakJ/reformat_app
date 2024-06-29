@@ -1,17 +1,17 @@
 import pandas as pd
 import logging
-from .function import CallFunction, CollectParams
+from .function import CallFunction
 from .exception import CustomException
 from .setup import setup_errorlog
 
 class ModuleMOC(CallFunction):
 
-    def logSetter(self,log: list):
+    def logSetter(self, log: list):
         self._log = log
 
     async def Run(self, module: str) -> dict:
         
-        self.params_setter(module)
+        self.get_params(module)
         logging.info(f'Module: "{self.module}", Manual: "{self.manual}", Batch Date: "{self.batch_date}", Store Tmp: "{self.store_tmp}", Write Mode: "{self.write_mode}"')
 
         result = {"module": self.module, "task": "Completed"}

@@ -30,11 +30,6 @@ def setup_folder() -> None:
     for folder in _folders:
         os.makedirs(folder,exist_ok=True)
 
-# def clear_tmp() -> None:
-#     _folders = [value for name, value in vars(Folder).items() if isinstance(value,str) and not name.startswith("_") and value.endswith("TMP/")]
-#     for file_path in [join(folder,files) for folder in _folders for files in os.listdir(folder) if os.path.isfile(join(folder,files))]:
-#         os.remove(file_path)
-
 def setup_config() -> dict:
     config_yaml = None
     config_dir = Folder._CONFIG_DIR
@@ -92,7 +87,7 @@ def setup_errorlog(
     errorlog.setLevel(logging.INFO)
     return errorlog
 
-class setup_parser:
+class SetupParser:
     def __init__(self):
         self.parser = argparse.ArgumentParser()
         self.set_arguments()
@@ -167,5 +162,5 @@ class setup_parser:
 
 class Utility:
     global PARAMS, CONFIG
-    PARAMS = vars(setup_parser().parsed_params)
+    PARAMS = vars(SetupParser().parsed_params)
     CONFIG = setup_config()

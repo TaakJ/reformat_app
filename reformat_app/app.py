@@ -29,7 +29,7 @@ from PyQt6.QtCore import (
 )
 from qt_material import apply_stylesheet
 from .setup import Folder, PARAMS, CONFIG
-from .main import start_app
+from .main import StartApp
 
 class Jobber(QObject):
     set_total_progress = pyqtSignal(int)
@@ -41,7 +41,7 @@ class Jobber(QObject):
         self.results = None
 
     def run(self):
-        func = start_app()
+        func = StartApp()
         self.results = func.results
         for i in range(1,11):
             self.set_current_progress.emit(int(i * 10))
@@ -56,7 +56,7 @@ class setup_app(QWidget):
         self.__thread = QThread()
 
         if PARAMS["manual"] is False:
-            start_app()
+            StartApp()
         else:
             self.ui()
             sys.exit(app.exec())
@@ -377,7 +377,6 @@ def main():
     apply_stylesheet(
         app,
         theme="light_blue.xml",
-        # invert_secondary=True,
         extra={
             "font_family": "monoespace",
             "density_scale": "0",
