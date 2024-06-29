@@ -303,7 +303,7 @@ class Convert2File:
                             sheet.cell(row=start_rows, column=idx).value = change_data[start_rows][columns]
                         elif start_rows in self.change_rows.keys() and change_data[start_rows][columns] in ["Insert", "Update"]:
                             ## Update / Insert rows.
-                            show = f'{change_data[start_rows][columns]} Rows: "{start_rows}" in Tmp files.\nRecord Change: {self.change_rows[start_rows]}'
+                            show = f'{change_data[start_rows][columns]} Rows: "{start_rows}" in Tmp file\nRecord Change: {self.change_rows[start_rows]}'
                             sheet.cell(row=start_rows, column=idx).value = change_data[start_rows][columns]
                         else:
                             ## No change rows.
@@ -468,7 +468,7 @@ class Convert2File:
                     data = {columns: values for columns, values in output[idx].items() if columns != "remark"}
 
                     if str(idx) in self.change_rows.keys() and output[idx]["remark"] in ["Update","Insert"]:
-                        logging.info(f'"{output[idx]["remark"]}" Rows: "{idx}" in Target file.\nRecord Change:"{self.change_rows[str(idx)]}"')
+                        logging.info(f'"{output[idx]["remark"]}" Rows: "{idx}" in Target file\nRecord Change:"{self.change_rows[str(idx)]}"')
                         rows.update({idx: data})
                     else:
                         if idx in self.remove_rows:

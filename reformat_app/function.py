@@ -302,5 +302,9 @@ class SetParams:
 class CollectParams(SetParams):
     pass
 
+class CollectBackup:
+    def __init__(self) -> None:
+        pass
+
 class CallFunction(Convert2File, CollectLog, CollectParams):
     pass
