@@ -62,7 +62,7 @@ class convert_2_files:
                 state = "succeed"
                 record.update({"data": data, "state": state})
 
-            except Exception as err:
+            except ValueError as err:
                 record.update({"err": err})
 
             if "err" in record:
@@ -154,8 +154,8 @@ class convert_2_files:
             else:
                 df["remark"] = "Insert"
 
-        except Exception as err:
-            raise Exception(err)
+        except ValueError as err:
+            raise ValueError(err)
 
         state = "succeed"
         self.logging[-1].update({"state": state})
@@ -232,8 +232,8 @@ class convert_2_files:
             df.index += start_rows
             data_dict = df.to_dict(orient="index")
 
-        except Exception as err:
-            raise Exception(err)
+        except ValueError as err:
+            raise ValueError(err)
 
         state = "succeed"
         self.logging[-1].update({"state": state})
@@ -244,18 +244,17 @@ class convert_2_files:
 
         logging.info("Write Data to Tmp files..")
 
-        state = "failed"
         for record in self.logging:
             try:
                 if record["module"] == "Target_file":
-
-                    tmp_name = join(Folder.TMP,f"TMP_{self.module}-{self.batch_date.strftime('%Y%m%d')}.xlsx")
-                    record.update({"input_dir": tmp_name, "function": "write_data_to_tmp_file","state": state})
-
+                
                     data = record["data"]
                     change_df = pd.DataFrame(data)
                     change_df = self.initial_data_types(change_df)
 
+                    state = "failed"
+                    tmp_name = join(Folder.TMP,f"TMP_{self.module}-{self.batch_date.strftime('%Y%m%d')}.xlsx")
+                    record.update({"input_dir": tmp_name, "function": "write_data_to_tmp_file","state": state})
                     try:
                         workbook = openpyxl.load_workbook(tmp_name)
                         get_sheet = workbook.get_sheet_names()
@@ -278,29 +277,33 @@ class convert_2_files:
                         sheet_num = 1
                         sheet.title = sheet_name
 
-                    ## read tmp files.
-                    data = sheet.values
-                    columns = next(data)[0:]
-                    tmp_df = pd.DataFrame(data, columns=columns)
-                    tmp_df = self.initial_data_types(tmp_df)
+                    try:
+                        ## read tmp files.
+                        data = sheet.values
+                        columns = next(data)[0:]
+                        tmp_df = pd.DataFrame(data, columns=columns)
+                        tmp_df = self.initial_data_types(tmp_df)
 
-                    ## validate data change row by row
-                    data_dict = self.validate_data_change(tmp_df, change_df)
+                        ## validate data change row by row
+                        data_dict = self.validate_data_change(tmp_df, change_df)
 
-                    ## write to tmp files.
-                    if state != "succeed":
-                        sheet_name = f"RUN_TIME_{sheet_num}"
-                        sheet = workbook.create_sheet(sheet_name)
-                    logging.info(f'Generate Sheet_name: "{sheet_name}" in Tmp files.')
+                        ## write to tmp files.
+                        if state != "succeed":
+                            sheet_name = f"RUN_TIME_{sheet_num}"
+                            sheet = workbook.create_sheet(sheet_name)
+                        logging.info(f'Generate Sheet_name: "{sheet_name}" in Tmp files.')
 
-                    state = self.write_worksheet(sheet, data_dict)
-                    workbook.move_sheet(workbook.active, offset=-sheet_num)
-                    workbook.save(tmp_name)
+                        state = self.write_worksheet(sheet, data_dict)
+                        workbook.move_sheet(workbook.active, offset=-sheet_num)
+                        workbook.save(tmp_name)
 
+                    except ValueError as err:
+                        raise ValueError(err)
+                    
                     record.update({"sheet_name": sheet_name, "state": state})
                     logging.info(f'Write Data to Tmp files: "{state}".')
 
-            except Exception as err:
+            except ValueError as err:
                 record.update({"err": err})
 
             if "err" in record:
@@ -356,13 +359,10 @@ class convert_2_files:
     async def write_data_to_target_file(self) -> None:
 
         logging.info("Write Data to Target files..")
-        state = "failed"
         for record in self.logging:
             try:
 
                 if record["module"] == "Target_file":
-                    record.update({"function": "write_data_to_target_file","state": state})
-
                     if self.store_tmp is True:
                         tmp_name = record["input_dir"]
                         sheet_name = record["sheet_name"]
@@ -375,22 +375,28 @@ class convert_2_files:
                     change_df = self.initial_data_types(change_df)
 
                     ## set target name for read csv.
+                    state = "failed"
+                    record.update({"function": "write_data_to_target_file","state": state})
                     if self.write_mode == "overwrite" or self.manual:
                         target_name = join(self.output_dir, self.output_file)
                     else:
                         suffix = f"{self.batch_date.strftime('%Y%m%d')}"
                         self.output_file = f"{Path(self.output_file).stem}_{suffix}.csv"
                         target_name = join(self.output_dir, self.output_file)
+                        
+                    try:
+                        ## read csv.
+                        target_df = self.read_csv(target_name)
+                        output = self.optimize_data(target_df, change_df)
 
-                    ## read csv.
-                    target_df = self.read_csv(target_name)
-                    output = self.optimize_data(target_df, change_df)
+                        ## write csv.
+                        state = self.write_csv(target_name, output)
+                        logging.info(f'Write to Target Files status: "{state}"')
+                        
+                    except ValueError as err:
+                        raise ValueError(err)
 
-                    ## write csv.
-                    state = self.write_csv(target_name, output)
-                    logging.info(f'Write to Target Files status: "{state}"')
-
-            except Exception as err:
+            except ValueError as err:
                 record.update({"err": err})
 
         if "err" in record:
@@ -474,8 +480,8 @@ class convert_2_files:
 
                 output.update({idx: values})
 
-        except Exception as err:
-            raise Exception(err)
+        except ValueError as err:
+            raise ValueError(err)
 
         state = "succeed"
         self.logging[-1].update({"state": state})
@@ -525,8 +531,8 @@ class convert_2_files:
                         csvout.writerow(rows[idx])
             writer.closed
 
-        except Exception as err:
-            raise Exception(err)
+        except ValueError as err:
+            raise ValueError(err)
 
         state = "succeed"
         self.logging[-1].update({"state": state})
