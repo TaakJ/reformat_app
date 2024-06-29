@@ -21,7 +21,7 @@ class ModuleCUM(CallFunction):
             await self.mock_data()
             if self.store_tmp is True:
                 await self.write_data_to_tmp_file()
-            # await self.write_data_to_target_file()
+            await self.write_data_to_target_file()
 
         except CustomException as err:
 

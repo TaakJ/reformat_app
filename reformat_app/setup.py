@@ -35,7 +35,6 @@ def setup_folder() -> None:
 #     for file_path in [join(folder,files) for folder in _folders for files in os.listdir(folder) if os.path.isfile(join(folder,files))]:
 #         os.remove(file_path)
 
-
 def setup_config() -> dict:
     config_yaml = None
     config_dir = Folder._CONFIG_DIR
