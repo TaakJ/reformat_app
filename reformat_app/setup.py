@@ -30,10 +30,11 @@ def setup_folder() -> None:
     for folder in _folders:
         os.makedirs(folder,exist_ok=True)
 
-def clear_tmp() -> None:
-    _folders = [value for name, value in vars(Folder).items() if isinstance(value,str) and not name.startswith("_") and value.endswith("TMP/")]
-    for file_path in [join(folder,files) for folder in _folders for files in os.listdir(folder) if os.path.isfile(join(folder,files))]:
-        os.remove(file_path)
+# def clear_tmp() -> None:
+#     _folders = [value for name, value in vars(Folder).items() if isinstance(value,str) and not name.startswith("_") and value.endswith("TMP/")]
+#     for file_path in [join(folder,files) for folder in _folders for files in os.listdir(folder) if os.path.isfile(join(folder,files))]:
+#         os.remove(file_path)
+
 
 def setup_config() -> dict:
     config_yaml = None
@@ -43,7 +44,7 @@ def setup_config() -> dict:
         with open(config_dir,"rb") as conf:
             config_yaml = yaml.safe_load(conf.read())
     else:
-        raise Exception(f"Yaml config file path: '{config_dir}' doesn't exist.")
+        raise FileNotFoundError(f"Yaml config file path: '{config_dir}' doesn't exist.")
     return config_yaml
 
 def setup_log() -> None:
@@ -67,7 +68,7 @@ def setup_log() -> None:
                     config_yaml["handlers"][i]["filename"] = filename
             logging.config.dictConfig(config_yaml)
     else:
-        raise Exception(f"Yaml file file_path: '{Folder._LOGGER_CONFIG_DIR}' doesn't exist.")
+        raise FileNotFoundError(f"Yaml file file_path: '{Folder._LOGGER_CONFIG_DIR}' doesn't exist.")
 
 def setup_errorlog(
     log_format="%(asctime)s.%(msecs)03d | %(module)s | %(levelname)s | %(funcName)s::%(lineno)d | %(message)s",
