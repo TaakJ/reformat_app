@@ -22,7 +22,7 @@ class CollectLog(ABC):
     def logSetter(self, log: list):
         pass
 
-class SetParams:
+class SetterParams:
     def get_params(self, module) -> None:
         for key, value in PARAMS.items():
             setattr(self, key, value)
@@ -67,7 +67,7 @@ class SetParams:
             data = self.extract_moc(i, format_file)
             return data
         
-    def extract_adm(self, i:int, line:any) -> dict:
+    def extract_adm(self, i:int, format_file:any) -> dict:
 
         logging.info("Data for ADM")
 
@@ -75,9 +75,9 @@ class SetParams:
         self.logging[i].update({"function": "extract_adm","state": state})
 
         data = []
-        for l in line:
+        for line in format_file:
             regex = re.compile(r"\w+.*")
-            find_word = regex.findall(l)
+            find_word = regex.findall(line)
             if find_word != []:
                 data += [re.sub(r"\W\s+","||","".join(find_word).strip(),).split("||")]
 
@@ -86,7 +86,7 @@ class SetParams:
         
         return {"ADM": data}
     
-    def extract_doc(self, i:int, line:any) -> dict:
+    def extract_doc(self, i:int, format_file:any) -> dict:
 
         logging.info("Data for DOC")
 
@@ -94,9 +94,9 @@ class SetParams:
         self.logging[i].update({"function": "extract_doc","state": state})
 
         data = []
-        for l in line:
+        for line in format_file:
             regex = re.compile(r"\w+.*")
-            find_word = regex.findall(l)
+            find_word = regex.findall(line)
             if find_word != []:
                 data += [re.sub(r"\W\s+","||","".join(find_word).strip(),).split("||")]
 
@@ -122,7 +122,7 @@ class SetParams:
         self.logging[i].update({"state": state})
         return {"DOC": fix_data}
 
-    def extract_lds(self, i:int, line:any) -> dict:
+    def extract_lds(self, i:int, format_file:any) -> dict:
 
         logging.info("Data for LDS")
 
@@ -130,9 +130,9 @@ class SetParams:
         self.logging[i].update({"function": "extract_lds","state": state})
 
         data = []
-        for l in line:
+        for line in format_file:
             regex = re.compile(r"\w+.*")
-            find_word = regex.findall(l)
+            find_word = regex.findall(line)
             if find_word != []:
                 data += [re.sub(r"\W\s+",",","".join(find_word).strip()).split(",")]
 
@@ -158,18 +158,18 @@ class SetParams:
         self.logging[i].update({"state": state})
         return {"LDS": fix_data}
 
-    def extract_bos(self, i:int, workbook:any) -> dict:
+    def extract_bos(self, i:int, format_file:any) -> dict:
 
         logging.info("Data for BOS")
 
         state = "failed"
         self.logging[i].update({"function": "extract_bos","state": state})
 
-        sheet_list = [sheet for sheet in workbook.sheet_names()]
+        sheet_list = [sheet for sheet in format_file.sheet_names()]
 
         data = {}
         for sheets in sheet_list:
-            cells = workbook.sheet_by_name(sheets)
+            cells = format_file.sheet_by_name(sheets)
             for row in range(0, cells.nrows):
                 by_sheets = [cells.cell(row, col).value for col in range(cells.ncols)]
                 if sheets not in data:
@@ -181,18 +181,18 @@ class SetParams:
         self.logging[i].update({"state": state})
         return data
     
-    def extract_cum(self, i:int, workbook:any) -> dict:
+    def extract_cum(self, i:int, format_file:any) -> dict:
 
         logging.info("Data for CUM")
 
         state = "failed"
         self.logging[i].update({"function": "extract_cum", "state": state})
 
-        sheet_list = [sheet for sheet in workbook.sheet_names()]
+        sheet_list = [sheet for sheet in format_file.sheet_names()]
 
         data = {}
         for sheets in sheet_list:
-            cells = workbook.sheet_by_name(sheets)
+            cells = format_file.sheet_by_name(sheets)
             for row in range(0, cells.nrows):
                 by_sheets = [cells.cell(row,col).value for col in range(cells.ncols)][1:]
                 if not all(empty == "" for empty in by_sheets):
@@ -205,18 +205,18 @@ class SetParams:
         self.logging[i].update({"state": state})
         return data
     
-    def extract_ica(self, i:int, workbook:any) -> dict:
+    def extract_ica(self, i:int, format_file:any) -> dict:
 
         logging.info("Data for ICA")
 
         state = "failed"
         self.logging[i].update({"function": "extract_ica", "state": state})
 
-        sheet_list = [sheet for sheet in workbook.sheet_names()]
+        sheet_list = [sheet for sheet in format_file.sheet_names()]
 
         data = {}
         for sheets in sheet_list:
-            cells = workbook.sheet_by_name(sheets)
+            cells = format_file.sheet_by_name(sheets)
             for row in range(0, cells.nrows):
                 by_sheets = [cells.cell(row,col).value for col in range(cells.ncols)]
                 if sheets not in data:
@@ -228,18 +228,18 @@ class SetParams:
         self.logging[i].update({"state": state})
         return data
 
-    def extract_iic(self, i:int, workbook:any) -> dict:
+    def extract_iic(self, i:int, format_file:any) -> dict:
 
         logging.info("Data for IIC")
 
         state = "failed"
         self.logging[i].update({"function": "extract_iic", "state": state})
 
-        sheet_list = [sheet for sheet in workbook.sheet_names() if sheet != "StyleSheet"]
+        sheet_list = [sheet for sheet in format_file.sheet_names() if sheet != "StyleSheet"]
 
         data = {}
         for sheets in sheet_list:
-            cells = workbook.sheet_by_name(sheets)
+            cells = format_file.sheet_by_name(sheets)
             for row in range(0,cells.nrows):
                 by_sheets = [cells.cell(row, col).value for col in range(cells.ncols)]
                 if not all(empty == "" for empty in by_sheets):
@@ -252,18 +252,18 @@ class SetParams:
         self.logging[i].update({"state": state})
         return data
     
-    def extract_lmt(self, i:int, workbook:any) -> dict:
+    def extract_lmt(self, i:int, format_file:any) -> dict:
 
         logging.info("Data for LMT")
 
         state = "failed"
         self.logging[i].update({"function": "extract_lmt","state": state})
 
-        sheet_list = [sheet for sheet in workbook.sheet_names() if sheet != "StyleSheet"]
+        sheet_list = [sheet for sheet in format_file.sheet_names() if sheet != "StyleSheet"]
 
         data = {}
         for sheets in sheet_list:
-            cells = workbook.sheet_by_name(sheets)
+            cells = format_file.sheet_by_name(sheets)
             for row in range(0,cells.nrows):
                 by_sheets = [cells.cell(row,col).value for col in range(cells.ncols)]
                 if sheets not in data:
@@ -275,18 +275,18 @@ class SetParams:
         self.logging[i].update({"state": state})
         return data
     
-    def extract_moc(self, i:int, workbook:any) -> dict:
+    def extract_moc(self, i:int, format_file:any) -> dict:
 
         logging.info("Data for MOC")
 
         state = "failed"
         self.logging[i].update({"function": "extract_moc","state": state})
 
-        sheet_list = [sheet for sheet in workbook.sheet_names() if sheet != "StyleSheet"]
+        sheet_list = [sheet for sheet in format_file.sheet_names() if sheet != "StyleSheet"]
 
         data = {}
         for sheets in sheet_list:
-            cells = workbook.sheet_by_name(sheets)
+            cells = format_file.sheet_by_name(sheets)
             for row in range(0, cells.nrows):
                 by_sheets = [cells.cell(row,col).value for col in range(cells.ncols)]
                 if not all(empty == "" for empty in by_sheets):
@@ -299,12 +299,19 @@ class SetParams:
         self.logging[i].update({"state": state})
         return data
 
-class CollectParams(SetParams):
+class CollectParams(SetterParams):
     pass
 
 class CollectBackup:
     def __init__(self) -> None:
-        pass
+        print(self.module)
+        
+    def backup_date(self):
+        try:
+            print(self.module1)
+        except Exception as err:
+            print(err)
+            raise Exception(err)
 
-class CallFunction(Convert2File, CollectLog, CollectParams):
+class CallFunction(Convert2File, CollectLog, CollectParams, CollectBackup):
     pass
