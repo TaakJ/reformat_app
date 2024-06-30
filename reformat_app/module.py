@@ -413,10 +413,8 @@ class Convert2File:
 
             ## filter data on batch date => DataFrame
             batch_df = target_df[target_df["CreateDate"].isin(np.array([pd.Timestamp(self.batch_date)]))].reset_index(drop=True)
-
             ## validate data change row by row
             data_dict = self.validate_data_change(batch_df, change_df)
-
             ## filter data not on batch date => dict
             merge_data = (target_df[~target_df["CreateDate"].isin(np.array([pd.Timestamp(self.batch_date)]))].iloc[:, :-1].to_dict("index"))
 
@@ -474,9 +472,9 @@ class Convert2File:
                         
             with open(target_name, "w", newline="") as writer:
                 csvout = csv.DictWriter(writer, 
-                                        csvin.fieldnames, 
+                                        csvin.fieldnames,
                                         quoting=csv.QUOTE_ALL, 
-                                        quotechar='"')
+                                        quotechar='"',)
                 csvout.writeheader()
                 for idx in rows:
                     if idx not in self.remove_rows:
