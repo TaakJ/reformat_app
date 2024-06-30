@@ -74,7 +74,7 @@ class Convert2File:
         self.logging[i].update({"function": "read_text_file"})
         input_dir = self.logging[i]["input_dir"]
         try:
-            file = open(input_dir, "r")
+            file = open(input_dir, "rb")
             encoded = chardet.detect(file.read())["encoding"]
             file.seek(0)
             line = StringIO(file.read().decode(encoded))

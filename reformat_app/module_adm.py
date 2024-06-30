@@ -34,7 +34,6 @@ class ModuleADM(CallFunction):
                     break
 
             result.update({"task": "Uncompleted"})
-
         logging.info("Stop Run Module\n")
 
         return result
@@ -91,22 +90,22 @@ class ModuleADM(CallFunction):
                 self.batch_date,
                 "14",
             ],
-            # [
-            #     "MOCK2",
-            #     "16",
-            #     "17",
-            #     "18",
-            #     "19",
-            #     "20",
-            #     "21",
-            #     "22",
-            #     "23",
-            #     "24",
-            #     self.batch_date,
-            #     self.date,
-            #     self.batch_date,
-            #     "28",
-            # ],
+            [
+                "MOCK2",
+                "16",
+                "17",
+                "18",
+                "19",
+                "20",
+                "21",
+                "22",
+                "23",
+                "24",
+                self.batch_date,
+                self.date,
+                self.batch_date,
+                "28",
+            ],
         ]
         df = pd.DataFrame(mock_data)
         df.columns = df.iloc[0].values
