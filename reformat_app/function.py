@@ -23,7 +23,6 @@ class CollectLog(ABC):
     def logSetter(self, log: list):
         pass
 
-
 class SetterParams:
     def get_params(self, module) -> None:
         for key, value in PARAMS.items():
@@ -240,9 +239,7 @@ class SetterParams:
         state = "failed"
         self.logging[i].update({"function": "extract_iic", "state": state})
 
-        sheet_list = [
-            sheet for sheet in format_file.sheet_names() if sheet != "StyleSheet"
-        ]
+        sheet_list = [sheet for sheet in format_file.sheet_names() if sheet != "StyleSheet"]
 
         data = {}
         for sheets in sheet_list:
@@ -308,7 +305,6 @@ class SetterParams:
 
 class CollectParams(SetterParams):
     pass
-
 
 class CollectBackup:
     def __init__(self) -> None:
