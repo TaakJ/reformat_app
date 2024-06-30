@@ -470,11 +470,9 @@ class Convert2File:
                 csvout.writeheader()
                 for idx in rows:
                     if idx not in self.remove_rows:
-                        rows[idx].update({
-                                "CreateDate": rows[idx]["CreateDate"].strftime("%Y%m%d%H%M%S"),
-                                "LastLogin": rows[idx]["LastLogin"].strftime("%Y%m%d%H%M%S"),
-                                "LastUpdatedDate": rows[idx]["LastUpdatedDate"].strftime("%Y%m%d%H%M%S"),
-                            })
+                        rows[idx].update({"CreateDate": rows[idx]["CreateDate"].strftime("%Y%m%d%H%M%S"),
+                                        "LastLogin": rows[idx]["LastLogin"].strftime("%Y%m%d%H%M%S"),
+                                        "LastUpdatedDate": rows[idx]["LastUpdatedDate"].strftime("%Y%m%d%H%M%S")})
                         csvout.writerow(rows[idx])
             writer.closed
 
