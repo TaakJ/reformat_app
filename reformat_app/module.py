@@ -285,14 +285,14 @@ class Convert2File:
         state = "failed"
         self.logging[-1].update({"function": "write_worksheet", "state": state})
 
-        start_rows = 2
-        max_rows = max(change_data, default=0)
         try:
             # write columns.
             for idx, columns in enumerate(change_data[start_rows].keys(), 1):
                 sheet.cell(row=1, column=idx).value = columns
 
             ## write data.
+            start_rows = 2
+            max_rows = max(change_data, default=0)
             while start_rows <= max_rows:
                 for idx, columns in enumerate(change_data[start_rows].keys(), 1):
 
@@ -426,6 +426,7 @@ class Convert2File:
                 if idx in self.change_rows or idx in self.remove_rows:
                     values.update({"mark_row": idx})
                 merge_data = {**merge_data, **{max_rows + idx: values}}
+            
             ## sorted order data on batch date
             i = 0
             for idx, values in enumerate(sorted(merge_data.values(), key=lambda d: d["CreateDate"]), 2):
@@ -453,15 +454,16 @@ class Convert2File:
         state = "failed"
         self.logging[-1].update({"function": "write_csv", "state": state})
         try:
-            start_row = 2
             with open(target_name, "r", newline="") as reader:
                 csvin = csv.DictReader(reader,
                                     skipinitialspace=True,
                                     quoting=csv.QUOTE_ALL,
                                     quotechar='"')
-                # rows = {idx + start_row: value for idx, value in enumerate(csvin)}
-                for idx in data_output:
+                rows = {idx: values for idx, values in enumerate(csvin, 2)}
+                for idx, value in data_output.items():
                     print(idx)
+                    print()
+                    print(value)
                     # data = {columns: values for columns, values in data_output[idx].items() if columns != "remark"}
 
                     # if str(idx) in self.change_rows.keys() and data_output[idx]["remark"] in ["Update","Insert"]:
