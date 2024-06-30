@@ -351,8 +351,8 @@ class Convert2File:
                         
                         ## read / write csv.
                         target_df = self.read_csv(target_name)
-                        output = self.optimize_data(target_df, change_df)
-                        state = self.write_csv(target_name, output)
+                        data_output = self.optimize_data(target_df, change_df)
+                        state = self.write_csv(target_name, data_output)
                         
                     except Exception as err:
                         raise Exception(err)
@@ -403,54 +403,50 @@ class Convert2File:
         state = "failed"
         self.logging[-1].update({"function": "optimize_data", "state": state})
 
-        output = {}
+        data_output = {}
         try:
             target_df = self.initial_data_type(target_df)
-
-            ## filter data on batch date => (DataFrame).
+            
+            ## filter data on batch date => DataFrame
             batch_df = target_df[target_df["CreateDate"]\
                 .isin(np.array([pd.Timestamp(self.fmt_batch_date)]))]\
                 .reset_index(drop=True)
-
-            ## filter data not on batch date => (dict).
+                
+            ## validate data change row by row
+            data_dict = self.validate_data_change(batch_df, change_df)
+            
+            ## filter data not on batch date => dict
             merge_data = target_df[~target_df["CreateDate"]\
                 .isin(np.array([pd.Timestamp(self.fmt_batch_date)]))]\
                 .iloc[:, :-1].to_dict("index")
-
-            ## validate data change row by row.
-            data_dict = self.validate_data_change(batch_df, change_df)
-
-            ## merge data from new and old data. / sorted order data on batch date.
+                
+            ## merge data from new and old data
             max_rows = max(merge_data, default=0)
             for idx, values in data_dict.items():
                 if idx in self.change_rows or idx in self.remove_rows:
                     values.update({"mark_row": idx})
                 merge_data = {**merge_data, **{max_rows + idx: values}}
-                
+            ## sorted order data on batch date
             i = 0
-            start_rows = 2
-            for idx, values in enumerate(sorted(merge_data.values(), key=lambda d: d["CreateDate"])):
-                idx += start_rows
+            for idx, values in enumerate(sorted(merge_data.values(), key=lambda d: d["CreateDate"]), 2):
                 if "mark_row" in values.keys():
                     if values["mark_row"] in self.change_rows:
-                        self.change_rows[str(idx)] = self.change_rows.pop(values["mark_row"])
-
-                    elif values["mark_row"] in self.remove_rows:
+                        self.change_rows[idx] = self.change_rows.pop(values["mark_row"])
+                    else:
                         self.remove_rows[i] = idx
                         i += 1
                     values.pop("mark_row")
-
-                output.update({idx: values})
-
+                data_output.update({idx: values})
+            
         except Exception as err:
             raise Exception(err)
 
         state = "succeed"
         self.logging[-1].update({"state": state})
         
-        return output
+        return data_output
 
-    def write_csv(self, target_name: str, output: dict) -> str:
+    def write_csv(self, target_name: str, data_output: dict) -> str:
 
         logging.info(f'Write mode: "{self.write_mode}" in Target files: "{target_name}"')
 
@@ -463,34 +459,35 @@ class Convert2File:
                                     skipinitialspace=True,
                                     quoting=csv.QUOTE_ALL,
                                     quotechar='"')
-                rows = {idx + start_row: value for idx, value in enumerate(csvin)}
-                for idx in output:
-                    data = {columns: values for columns, values in output[idx].items() if columns != "remark"}
+                # rows = {idx + start_row: value for idx, value in enumerate(csvin)}
+                for idx in data_output:
+                    print(idx)
+                    # data = {columns: values for columns, values in data_output[idx].items() if columns != "remark"}
 
-                    if str(idx) in self.change_rows.keys() and output[idx]["remark"] in ["Update","Insert"]:
-                        logging.info(f'"{output[idx]["remark"]}" Rows: "{idx}" in Target file\nRecord Change:"{self.change_rows[str(idx)]}"')
-                        rows.update({idx: data})
-                    else:
-                        if idx in self.remove_rows:
-                            continue
-                        rows[idx].update(data)
+                    # if str(idx) in self.change_rows.keys() and data_output[idx]["remark"] in ["Update","Insert"]:
+                    #     logging.info(f'"{data_output[idx]["remark"]}" Rows: "{idx}" in Target file\nRecord Change:"{self.change_rows[str(idx)]}"')
+                    #     rows.update({idx: data})
+                    # else:
+                    #     if idx in self.remove_rows:
+                    #         continue
+                    #     rows[idx].update(data)
 
-            # write csv file.
-            with open(target_name, "w", newline="") as writer:
-                csvout = csv.DictWriter(writer,
-                                        csvin.fieldnames,
-                                        quoting=csv.QUOTE_ALL,
-                                        quotechar='"')
-                csvout.writeheader()
-                for idx in rows:
-                    if idx not in self.remove_rows:
-                        rows[idx].update({
-                                "CreateDate": rows[idx]["CreateDate"].strftime("%Y%m%d%H%M%S"),
-                                "LastLogin": rows[idx]["LastLogin"].strftime("%Y%m%d%H%M%S"),
-                                "LastUpdatedDate": rows[idx]["LastUpdatedDate"].strftime("%Y%m%d%H%M%S"),
-                            })
-                        csvout.writerow(rows[idx])
-            writer.closed
+            # # write csv file.
+            # with open(target_name, "w", newline="") as writer:
+            #     csvout = csv.DictWriter(writer,
+            #                             csvin.fieldnames,
+            #                             quoting=csv.QUOTE_ALL,
+            #                             quotechar='"')
+            #     csvout.writeheader()
+            #     for idx in rows:
+            #         if idx not in self.remove_rows:
+            #             rows[idx].update({
+            #                     "CreateDate": rows[idx]["CreateDate"].strftime("%Y%m%d%H%M%S"),
+            #                     "LastLogin": rows[idx]["LastLogin"].strftime("%Y%m%d%H%M%S"),
+            #                     "LastUpdatedDate": rows[idx]["LastUpdatedDate"].strftime("%Y%m%d%H%M%S"),
+            #                 })
+            #             csvout.writerow(rows[idx])
+            # writer.closed
 
         except Exception as err:
             raise Exception(err)
