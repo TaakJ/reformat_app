@@ -24,7 +24,6 @@ class ModuleMOC(CallFunction):
             await self.write_data_to_target_file()
 
         except CustomException as err:
-
             logging.error('See Error Details in "_error.log"')
 
             logger = setup_errorlog(log_name=__name__)

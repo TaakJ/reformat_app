@@ -12,9 +12,7 @@ class ModuleIIC(CallFunction):
     async def Run(self, module: str) -> dict:
 
         self.get_params(module)
-        logging.info(
-            f'Module: "{self.module}", Manual: "{self.manual}", Batch Date: "{self.batch_date}", Store Tmp: "{self.store_tmp}", Write Mode: "{self.write_mode}"'
-        )
+        logging.info(f'Module: "{self.module}", Manual: "{self.manual}", Batch Date: "{self.batch_date}", Store Tmp: "{self.store_tmp}", Write Mode: "{self.write_mode}"')
 
         result = {"module": self.module, "task": "Completed"}
         try:
@@ -26,7 +24,6 @@ class ModuleIIC(CallFunction):
             await self.write_data_to_target_file()
 
         except CustomException as err:
-
             logging.error('See Error Details in "_error.log"')
 
             logger = setup_errorlog(log_name=__name__)
