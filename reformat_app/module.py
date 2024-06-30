@@ -74,7 +74,7 @@ class Convert2File:
         self.logging[i].update({"function": "read_text_file"})
         input_dir = self.logging[i]["input_dir"]
         try:
-            file = open(input_dir, "rb")
+            file = open(input_dir, "r")
             encoded = chardet.detect(file.read())["encoding"]
             file.seek(0)
             line = StringIO(file.read().decode(encoded))
@@ -344,16 +344,16 @@ class Convert2File:
                                     "state": state})
                         
                         if self.write_mode == "overwrite" or self.manual:
-                            target_name = join(self.output_dir, self.output_file)
+                            full_target = join(self.output_dir, self.output_file)
                         else:
                             suffix = f"{self.batch_date.strftime('%Y%m%d')}"
                             self.output_file = f"{Path(self.output_file).stem}_{suffix}.csv"
-                            target_name = join(self.output_dir, self.output_file)
+                            full_target = join(self.output_dir, self.output_file)
 
                         ## read / write csv.
-                        target_df = self.read_csv(target_name)
+                        target_df = self.read_csv(full_target)
                         data_output = self.optimize_data(target_df, change_df)
-                        state = self.write_csv(target_name, data_output)
+                        state = self.write_csv(full_target, data_output)
 
                     except Exception as err:
                         raise Exception(err)
@@ -368,18 +368,18 @@ class Convert2File:
         if "err" in record:
             raise CustomException(err=self.logging)
 
-    def read_csv(self, target_name: str) -> pd.DataFrame:
+    def read_csv(self, full_target: str) -> pd.DataFrame:
 
-        logging.info(f'Read Target files: "{target_name}"')
+        logging.info(f'Read Target files: "{full_target}"')
 
         state = "failed"
-        self.logging[-1].update({"input_dir": target_name, 
+        self.logging[-1].update({"input_dir": full_target, 
                                 "function": "read_csv", 
                                 "state": state})
 
         try:
             data = []
-            with open(target_name, "r") as reader:
+            with open(full_target, "r", newline="") as reader:
                 csv_reader = csv.reader(reader, 
                                         skipinitialspace=True, 
                                         quoting=csv.QUOTE_ALL, 
@@ -393,7 +393,7 @@ class Convert2File:
         except FileNotFoundError:
             template_name = join(Folder.TEMPLATE, "Application Data Requirements.xlsx")
             target_df = pd.read_excel(template_name)
-            target_df.to_csv(target_name, index=None, header=True)
+            target_df.to_csv(full_target, index=None, header=True)
 
         state = "succeed"
         self.logging[-1].update({"state": state})
@@ -471,8 +471,8 @@ class Convert2File:
                             continue
                     else:
                         rows[idx].update(data_output[idx])
-
-            with open(target_name, "w") as writer:
+                        
+            with open(target_name, "w", newline="") as writer:
                 csvout = csv.DictWriter(writer, 
                                         csvin.fieldnames, 
                                         quoting=csv.QUOTE_ALL, 
@@ -485,7 +485,7 @@ class Convert2File:
                                 "LastLogin": rows[idx]["LastLogin"].strftime("%Y%m%d%H%M%S"),
                                 "LastUpdatedDate": rows[idx]["LastUpdatedDate"].strftime("%Y%m%d%H%M%S"),})
                         csvout.writerow(rows[idx])
-            writer.closed
+                writer.closed
 
         except Exception as err:
             raise Exception(err)
