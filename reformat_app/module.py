@@ -139,17 +139,12 @@ class Convert2File:
 
         self.change_rows = {}
         self.remove_rows = []
+        
         state = "failed"
         self.logging[-1].update({"function": "validate_data_change", "state": state})
 
         def format_record(record):
-            return (
-                "{"
-                + "\n".join(
-                    "{!r} => {!r},".format(columns, values) for columns, values in record.items()
-                )
-                + "}"
-            )
+            return ("\n".join("{!r} => {!r},".format(columns, values) for columns, values in record.items()))
 
         if len(df.index) > len(change_df.index):
             self.remove_rows = [idx for idx in list(df.index) if idx not in list(change_df.index)]
@@ -158,48 +153,45 @@ class Convert2File:
             ## merge index.
             merge_index = np.union1d(df.index, change_df.index)
             ## as starter dataframe for compare.
-            df = df.reindex(index=merge_index, columns=df.columns).iloc[:, :-1]
+            df = df.reindex(index=merge_index, columns=df.columns).iloc[:,:-1]
             ## change data / new data.
-            change_df = change_df.reindex(index=merge_index, columns=change_df.columns).iloc[:, :-1]
+            change_df = change_df.reindex(index=merge_index, columns=change_df.columns).iloc[:,:-1]
             ## compare data.
             df["count"] = pd.DataFrame(np.where(df.ne(change_df), True, df),index=df.index,columns=df.columns)\
                 .apply(lambda x: (x == True).sum(), axis=1)
 
             i = 0
-            start_rows = 2
-            for idx in merge_index:
-                if idx not in self.remove_rows:
+            for idx, row in enumerate(merge_index, 2):
+                if row not in self.remove_rows:
                     record = {}
-                    ## data[0] => column
-                    ## data[1] => value
                     for data, change_data in zip(df.items(), change_df.items()):
-                        if df.loc[idx, "count"] != 14:
-                            if df.loc[idx, "count"] < 1:
-                                df.loc[idx, data[0]] = data[1][idx]
-                                df.loc[idx, "remark"] = "No_change"
-
+                        ## No Change
+                        if df.loc[row, "count"] != 14:
+                            if df.loc[row, "count"] < 1:
+                                df.loc[row, data[0]] = data[1][row]
+                                df.loc[row, "remark"] = "No_change"
                             else:
-                                if data[1][idx] != change_data[1][idx]:
-                                    record.update({data[0]: change_data[1][idx]})
-                                df.loc[idx, data[0]] = change_data[1][idx]
-                                df.loc[idx, "remark"] = "Update"
-
+                                ## Update
+                                if data[1][row] != change_data[1][row]:
+                                    record.update({data[0]: change_data[1][row]})
+                                df.loc[row, data[0]] = change_data[1][row]
+                                df.loc[row, "remark"] = "Update"
                         else:
-                            record.update({data[0]: change_data[1][idx]})
-                            df.loc[idx, data[0]] = change_data[1][idx]
-                            df.loc[idx, "remark"] = "Insert"
-
+                            ## Insert
+                            record.update({data[0]: change_data[1][row]})
+                            df.loc[row, data[0]] = change_data[1][row]
+                            df.loc[row, "remark"] = "Insert"
                     if record != {}:
-                        self.change_rows[start_rows + idx] = format_record(record)
-
+                        self.change_rows[idx] = format_record(record)
                 else:
-                    self.remove_rows[i] = start_rows + idx
-                    df.loc[idx, "remark"] = "Remove"
+                    ## Remove
+                    self.remove_rows[i] = idx
+                    df.loc[row, "remark"] = "Remove"
                     i += 1
-
+                    
             ## set dataframe.
             df = df.drop(["count"], axis=1)
-            df.index += start_rows
+            df.index += 2
             data_dict = df.to_dict(orient="index")
 
         except Exception as err:
@@ -285,14 +277,14 @@ class Convert2File:
         state = "failed"
         self.logging[-1].update({"function": "write_worksheet", "state": state})
 
+        start_rows = 2
+        max_rows = max(change_data, default=0)
         try:
             # write columns.
             for idx, columns in enumerate(change_data[start_rows].keys(), 1):
                 sheet.cell(row=1, column=idx).value = columns
 
             ## write data.
-            start_rows = 2
-            max_rows = max(change_data, default=0)
             while start_rows <= max_rows:
                 for idx, columns in enumerate(change_data[start_rows].keys(), 1):
 
