@@ -10,10 +10,12 @@ class ModuleIIC(CallFunction):
         self._log = log
 
     async def Run(self, module: str) -> dict:
-        
+
         self.get_params(module)
-        logging.info(f'Module: "{self.module}", Manual: "{self.manual}", Batch Date: "{self.batch_date}", Store Tmp: "{self.store_tmp}", Write Mode: "{self.write_mode}"')
-        
+        logging.info(
+            f'Module: "{self.module}", Manual: "{self.manual}", Batch Date: "{self.batch_date}", Store Tmp: "{self.store_tmp}", Write Mode: "{self.write_mode}"'
+        )
+
         result = {"module": self.module, "task": "Completed"}
         try:
             await self.check_source_file()
@@ -43,7 +45,7 @@ class ModuleIIC(CallFunction):
 
         state = "failed"
         for record in self.logging:
-            record.update({"function": "mapping_column","state": state})
+            record.update({"function": "mapping_column", "state": state})
             try:
                 for (
                     sheet,
@@ -91,9 +93,9 @@ class ModuleIIC(CallFunction):
                 "8",
                 "9",
                 "10",
-                self.fmt_batch_date,
+                self.batch_date,
                 self.date,
-                self.fmt_batch_date,
+                self.batch_date,
                 "14",
             ],
             [
@@ -107,9 +109,9 @@ class ModuleIIC(CallFunction):
                 "22",
                 "23",
                 "24",
-                self.fmt_batch_date,
+                self.batch_date,
                 self.date,
-                self.fmt_batch_date,
+                self.batch_date,
                 "28",
             ],
         ]
@@ -117,4 +119,4 @@ class ModuleIIC(CallFunction):
         df.columns = df.iloc[0].values
         df = df[1:]
         df = df.reset_index(drop=True)
-        self.logging.append({"module": "Target_file","data": df.to_dict("list")})
+        self.logging.append({"module": "Target_file", "data": df.to_dict("list")})

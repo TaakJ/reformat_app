@@ -1,10 +1,11 @@
-from abc import ABC,abstractmethod
+from abc import ABC, abstractmethod
 import re
 import logging
 from datetime import datetime
 from os.path import join
 from .module import Convert2File
 from .setup import CONFIG, PARAMS
+
 
 class CollectLog(ABC):
     def __init__(self):
@@ -22,23 +23,23 @@ class CollectLog(ABC):
     def logSetter(self, log: list):
         pass
 
+
 class SetterParams:
     def get_params(self, module) -> None:
         for key, value in PARAMS.items():
             setattr(self, key, value)
-            
-        self.module         = module
-        self.fmt_batch_date = self.batch_date
-        self.date           = datetime.now()
-        self.input_dir      = [join(CONFIG[module]["input_dir"], CONFIG[module]["input_file"])]
-        self.output_dir     = CONFIG[module]["output_dir"]
-        self.output_file    = CONFIG[module]["output_file"]
-        
-    def get_extract_data(self, i:int, format_file:any):
-        
+
+        self.module = module
+        self.date = datetime.now()
+        self.input_dir = [join(CONFIG[module]["input_dir"], CONFIG[module]["input_file"])]
+        self.output_dir = CONFIG[module]["output_dir"]
+        self.output_file = CONFIG[module]["output_file"]
+
+    def get_extract_data(self, i: int, format_file: any):
+
         logging.info("Extract Data Each Module")
         module = self.logging[i]["module"]
-        
+
         if module == "ADM":
             data = self.extract_adm(i, format_file)
             return data
@@ -66,39 +67,41 @@ class SetterParams:
         elif module == "MOC":
             data = self.extract_moc(i, format_file)
             return data
-        
-    def extract_adm(self, i:int, format_file:any) -> dict:
+
+    def extract_adm(self, i: int, format_file: any) -> dict:
 
         logging.info("Data for ADM")
 
         state = "failed"
-        self.logging[i].update({"function": "extract_adm","state": state})
+        self.logging[i].update({"function": "extract_adm", "state": state})
 
         data = []
         for line in format_file:
             regex = re.compile(r"\w+.*")
             find_word = regex.findall(line)
             if find_word != []:
-                data += [re.sub(r"\W\s+","||","".join(find_word).strip(),).split("||")]
+                data += [
+                    re.sub(r"\W\s+","||","".join(find_word).strip()).split("||")]
 
         state = "succeed"
         self.logging[i].update({"state": state})
-        
+
         return {"ADM": data}
-    
-    def extract_doc(self, i:int, format_file:any) -> dict:
+
+    def extract_doc(self, i: int, format_file: any) -> dict:
 
         logging.info("Data for DOC")
 
         state = "failed"
-        self.logging[i].update({"function": "extract_doc","state": state})
+        self.logging[i].update({"function": "extract_doc", "state": state})
 
         data = []
         for line in format_file:
             regex = re.compile(r"\w+.*")
             find_word = regex.findall(line)
             if find_word != []:
-                data += [re.sub(r"\W\s+","||","".join(find_word).strip(),).split("||")]
+                data += [
+                    re.sub(r"\W\s+","||","".join(find_word).strip()).split("||")]
 
         fix_data = []
         for rows, value in enumerate(data):
@@ -110,9 +113,9 @@ class SetterParams:
             else:
                 ## value
                 fix_column = []
-                for idx, column in enumerate(value,1):
+                for idx, column in enumerate(value, 1):
                     if idx == 4:
-                        l = re.sub(r"\s+",",",column).split(",")
+                        l = re.sub(r"\s+", ",", column).split(",")
                         fix_column.extend(l)
                     else:
                         fix_column.append(column)
@@ -122,19 +125,19 @@ class SetterParams:
         self.logging[i].update({"state": state})
         return {"DOC": fix_data}
 
-    def extract_lds(self, i:int, format_file:any) -> dict:
+    def extract_lds(self, i: int, format_file: any) -> dict:
 
         logging.info("Data for LDS")
 
         state = "failed"
-        self.logging[i].update({"function": "extract_lds","state": state})
+        self.logging[i].update({"function": "extract_lds", "state": state})
 
         data = []
         for line in format_file:
             regex = re.compile(r"\w+.*")
             find_word = regex.findall(line)
             if find_word != []:
-                data += [re.sub(r"\W\s+",",","".join(find_word).strip()).split(",")]
+                data += [re.sub(r"\W\s+", ",", "".join(find_word).strip()).split(",")]
 
         fix_data = []
         for rows, value in enumerate(data):
@@ -144,9 +147,9 @@ class SetterParams:
             else:
                 ## value
                 fix_column = []
-                for idx, column in enumerate(value,1):
+                for idx, column in enumerate(value, 1):
                     if idx == 1:
-                        l = re.sub(r"\s+",",",column).split(",")
+                        l = re.sub(r"\s+", ",", column).split(",")
                         fix_column.extend(l)
                     elif idx == 32:
                         continue
@@ -158,12 +161,12 @@ class SetterParams:
         self.logging[i].update({"state": state})
         return {"LDS": fix_data}
 
-    def extract_bos(self, i:int, format_file:any) -> dict:
+    def extract_bos(self, i: int, format_file: any) -> dict:
 
         logging.info("Data for BOS")
 
         state = "failed"
-        self.logging[i].update({"function": "extract_bos","state": state})
+        self.logging[i].update({"function": "extract_bos", "state": state})
 
         sheet_list = [sheet for sheet in format_file.sheet_names()]
 
@@ -180,8 +183,8 @@ class SetterParams:
         state = "succeed"
         self.logging[i].update({"state": state})
         return data
-    
-    def extract_cum(self, i:int, format_file:any) -> dict:
+
+    def extract_cum(self, i: int, format_file: any) -> dict:
 
         logging.info("Data for CUM")
 
@@ -194,7 +197,9 @@ class SetterParams:
         for sheets in sheet_list:
             cells = format_file.sheet_by_name(sheets)
             for row in range(0, cells.nrows):
-                by_sheets = [cells.cell(row,col).value for col in range(cells.ncols)][1:]
+                by_sheets = [cells.cell(row, col).value for col in range(cells.ncols)][
+                    1:
+                ]
                 if not all(empty == "" for empty in by_sheets):
                     if sheets not in data:
                         data[sheets] = [by_sheets]
@@ -204,8 +209,8 @@ class SetterParams:
         state = "succeed"
         self.logging[i].update({"state": state})
         return data
-    
-    def extract_ica(self, i:int, format_file:any) -> dict:
+
+    def extract_ica(self, i: int, format_file: any) -> dict:
 
         logging.info("Data for ICA")
 
@@ -218,7 +223,7 @@ class SetterParams:
         for sheets in sheet_list:
             cells = format_file.sheet_by_name(sheets)
             for row in range(0, cells.nrows):
-                by_sheets = [cells.cell(row,col).value for col in range(cells.ncols)]
+                by_sheets = [cells.cell(row, col).value for col in range(cells.ncols)]
                 if sheets not in data:
                     data[sheets] = [by_sheets]
                 else:
@@ -228,19 +233,21 @@ class SetterParams:
         self.logging[i].update({"state": state})
         return data
 
-    def extract_iic(self, i:int, format_file:any) -> dict:
+    def extract_iic(self, i: int, format_file: any) -> dict:
 
         logging.info("Data for IIC")
 
         state = "failed"
         self.logging[i].update({"function": "extract_iic", "state": state})
 
-        sheet_list = [sheet for sheet in format_file.sheet_names() if sheet != "StyleSheet"]
+        sheet_list = [
+            sheet for sheet in format_file.sheet_names() if sheet != "StyleSheet"
+        ]
 
         data = {}
         for sheets in sheet_list:
             cells = format_file.sheet_by_name(sheets)
-            for row in range(0,cells.nrows):
+            for row in range(0, cells.nrows):
                 by_sheets = [cells.cell(row, col).value for col in range(cells.ncols)]
                 if not all(empty == "" for empty in by_sheets):
                     if sheets not in data:
@@ -251,21 +258,21 @@ class SetterParams:
         state = "succeed"
         self.logging[i].update({"state": state})
         return data
-    
-    def extract_lmt(self, i:int, format_file:any) -> dict:
+
+    def extract_lmt(self, i: int, format_file: any) -> dict:
 
         logging.info("Data for LMT")
 
         state = "failed"
-        self.logging[i].update({"function": "extract_lmt","state": state})
+        self.logging[i].update({"function": "extract_lmt", "state": state})
 
         sheet_list = [sheet for sheet in format_file.sheet_names() if sheet != "StyleSheet"]
 
         data = {}
         for sheets in sheet_list:
             cells = format_file.sheet_by_name(sheets)
-            for row in range(0,cells.nrows):
-                by_sheets = [cells.cell(row,col).value for col in range(cells.ncols)]
+            for row in range(0, cells.nrows):
+                by_sheets = [cells.cell(row, col).value for col in range(cells.ncols)]
                 if sheets not in data:
                     data[sheets] = [by_sheets]
                 else:
@@ -274,13 +281,13 @@ class SetterParams:
         state = "succeed"
         self.logging[i].update({"state": state})
         return data
-    
-    def extract_moc(self, i:int, format_file:any) -> dict:
+
+    def extract_moc(self, i: int, format_file: any) -> dict:
 
         logging.info("Data for MOC")
 
         state = "failed"
-        self.logging[i].update({"function": "extract_moc","state": state})
+        self.logging[i].update({"function": "extract_moc", "state": state})
 
         sheet_list = [sheet for sheet in format_file.sheet_names() if sheet != "StyleSheet"]
 
@@ -288,7 +295,7 @@ class SetterParams:
         for sheets in sheet_list:
             cells = format_file.sheet_by_name(sheets)
             for row in range(0, cells.nrows):
-                by_sheets = [cells.cell(row,col).value for col in range(cells.ncols)]
+                by_sheets = [cells.cell(row, col).value for col in range(cells.ncols)]
                 if not all(empty == "" for empty in by_sheets):
                     if sheets not in data:
                         data[sheets] = [by_sheets]
@@ -302,16 +309,18 @@ class SetterParams:
 class CollectParams(SetterParams):
     pass
 
+
 class CollectBackup:
     def __init__(self) -> None:
         print(self.module)
-        
+
     def backup_date(self):
         try:
             print(self.module1)
         except Exception as err:
             print(err)
             raise Exception(err)
+
 
 class CallFunction(Convert2File, CollectLog, CollectParams, CollectBackup):
     pass

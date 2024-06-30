@@ -10,9 +10,11 @@ class ModuleADM(CallFunction):
         self._log = log
 
     async def Run(self, module: str) -> dict:
-        
+
         self.get_params(module)
-        logging.info(f'Module: "{self.module}", Manual: "{self.manual}", Batch Date: "{self.batch_date}", Store Tmp: "{self.store_tmp}", Write Mode: "{self.write_mode}"')
+        logging.info(
+            f'Module: "{self.module}", Manual: "{self.manual}", Batch Date: "{self.batch_date}", Store Tmp: "{self.store_tmp}", Write Mode: "{self.write_mode}"'
+        )
 
         result = {"module": self.module, "task": "Completed"}
         try:
@@ -24,7 +26,7 @@ class ModuleADM(CallFunction):
             await self.write_data_to_target_file()
 
         except CustomException as err:
-            
+
             logging.error('See Error Details in "_error.log"')
 
             logger = setup_errorlog(log_name=__name__)
@@ -37,7 +39,7 @@ class ModuleADM(CallFunction):
             result.update({"task": "Uncompleted"})
 
         logging.info("Stop Run Module\n")
-        
+
         return result
 
     async def mapping_column(self) -> None:
@@ -87,27 +89,27 @@ class ModuleADM(CallFunction):
                 "8",
                 "9",
                 "10",
-                self.fmt_batch_date,
+                self.batch_date,
                 self.date,
-                self.fmt_batch_date,
+                self.batch_date,
                 "14",
             ],
-            [
-                "MOCK2",
-                "16",
-                "17",
-                "18",
-                "19",
-                "20",
-                "21",
-                "22",
-                "23",
-                "24",
-                self.fmt_batch_date,
-                self.date,
-                self.fmt_batch_date,
-                "28",
-            ],
+            # [
+            #     "MOCK2",
+            #     "16",
+            #     "17",
+            #     "18",
+            #     "19",
+            #     "20",
+            #     "21",
+            #     "22",
+            #     "23",
+            #     "24",
+            #     self.batch_date,
+            #     self.date,
+            #     self.batch_date,
+            #     "28",
+            # ],
         ]
         df = pd.DataFrame(mock_data)
         df.columns = df.iloc[0].values

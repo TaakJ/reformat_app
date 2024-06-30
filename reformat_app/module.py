@@ -216,11 +216,15 @@ class Convert2File:
                         change_df = self.initial_data_type(change_df)
 
                         state = "failed"
-                        tmp_name = join(Folder.TMP,f"TMP_{self.module}-{self.batch_date.strftime('%Y%m%d')}.xlsx",)
+                        tmp_name = f"TMP_{self.module}-{self.batch_date.strftime('%Y%m%d')}.xlsx"
+                        full_tmp = join(Folder.TMP, tmp_name)
 
-                        record.update({"input_dir": tmp_name,"function": "write_data_to_tmp_file","state": state})
+                        record.update({"input_dir": full_tmp,
+                                    "function": "write_data_to_tmp_file",
+                                    "state": state})
+                        
                         try:
-                            workbook = openpyxl.load_workbook(tmp_name)
+                            workbook = openpyxl.load_workbook(full_tmp)
                             get_sheet = workbook.get_sheet_names()
                             sheet_num = len(get_sheet)
                             sheet_name = f"RUN_TIME_{sheet_num - 1}"
@@ -228,16 +232,15 @@ class Convert2File:
                             workbook.active = sheet_num
 
                         except FileNotFoundError:
-                            template_name = join(
-                                Folder.TEMPLATE, "Application Data Requirements.xlsx"
-                            )
+                            template_name = "Application Data Requirements.xlsx"
+                            full_template = join(Folder.TEMPLATE, template_name)
                             try:
-                                if not glob.glob(tmp_name, recursive=True):
-                                    shutil.copy2(template_name, tmp_name)
+                                if not glob.glob(full_tmp, recursive=True):
+                                    shutil.copy2(full_template, full_tmp)
                                     state = "succeed"
                             except:
                                 raise
-                            workbook = openpyxl.load_workbook(tmp_name)
+                            workbook = openpyxl.load_workbook(full_tmp)
                             sheet = workbook.worksheets[0]
                             sheet_name = "RUN_TIME_1"
                             sheet_num = 1
@@ -248,6 +251,7 @@ class Convert2File:
                         columns = next(data)[0:]
                         tmp_df = pd.DataFrame(data, columns=columns)
                         tmp_df = self.initial_data_type(tmp_df)
+                        
                         ## validate data change row by row
                         data_dict = self.validate_data_change(tmp_df, change_df)
 
@@ -259,7 +263,7 @@ class Convert2File:
 
                         state = self.write_worksheet(sheet, data_dict)
                         workbook.move_sheet(workbook.active, offset=-sheet_num)
-                        workbook.save(tmp_name)
+                        workbook.save(full_tmp)
 
                     except Exception as err:
                         raise Exception(err)
@@ -280,35 +284,35 @@ class Convert2File:
         state = "failed"
         self.logging[-1].update({"function": "write_worksheet", "state": state})
 
-        start_rows = 2
-        max_rows = max(change_data, default=0)
+        start_row = 2
+        max_row = max(change_data, default=0)
         try:
             # write columns.
-            for idx, columns in enumerate(change_data[start_rows].keys(), 1):
-                sheet.cell(row=1, column=idx).value = columns
+            for idx, col in enumerate(change_data[start_row].keys(), 1):
+                sheet.cell(row=1, column=idx).value = col
 
-            ## write data.
-            while start_rows <= max_rows:
-                for idx, columns in enumerate(change_data[start_rows].keys(), 1):
+            ## write rows.
+            while start_row <= max_row:
+                for idx, col in enumerate(change_data[start_row].keys(), 1):
 
-                    if columns == "remark":
-                        if (start_rows in self.remove_rows and change_data[start_rows][columns] == "Remove"):
+                    if col == "remark":
+                        if start_row in self.remove_rows:
                             ## Remove rows.
-                            show = f'{change_data[start_rows][columns]} Rows: "{start_rows}" in Tmp file'
-                            sheet.cell(row=start_rows, column=idx).value = change_data[start_rows][columns]
-                        elif start_rows in self.change_rows.keys() and change_data[start_rows][columns] in ["Insert", "Update"]:
+                            show = f'{change_data[start_row][col]} Rows: "{start_row}" in Tmp file'
+                            sheet.cell(row=start_row, column=idx).value = change_data[start_row][col]
+                        elif start_row in self.change_rows.keys():
                             ## Update / Insert rows.
-                            show = f'{change_data[start_rows][columns]} Rows: "{start_rows}" in Tmp file\nRecord Change: {self.change_rows[start_rows]}'
-                            sheet.cell(row=start_rows, column=idx).value = change_data[start_rows][columns]
+                            show = f'{change_data[start_row][col]} Rows: "{start_row}" in Tmp file\nRecord Change: {self.change_rows[start_row]}'
+                            sheet.cell(row=start_row, column=idx).value = change_data[start_row][col]
                         else:
                             ## No change rows.
-                            show = f'No Change Rows: "{start_rows}" in Tmp file'
-                            sheet.cell(row=start_rows, column=idx).value = change_data[start_rows][columns]
+                            show = f'No Change Rows: "{start_row}" in Tmp file'
+                            sheet.cell(row=start_row, column=idx).value = change_data[start_row][col]
 
                         logging.info(show)
                     else:
-                        sheet.cell(row=start_rows, column=idx).value = change_data[start_rows][columns]
-                start_rows += 1
+                        sheet.cell(row=start_row, column=idx).value = change_data[start_row][col]
+                start_row += 1
 
         except KeyError as err:
             raise KeyError(f"Can not Write rows: {err} in Tmp file")
@@ -326,9 +330,9 @@ class Convert2File:
                 if record["module"] == "Target_file":
                     try:
                         if self.store_tmp is True:
-                            tmp_name = record["input_dir"]
+                            full_tmp = record["input_dir"]
                             sheet_name = record["sheet_name"]
-                            change_df = pd.read_excel(tmp_name, sheet_name=sheet_name, dtype=object)
+                            change_df = pd.read_excel(full_tmp, sheet_name=sheet_name, dtype=object)
                         else:
                             data = record["data"]
                             change_df = pd.DataFrame(data)
@@ -336,12 +340,14 @@ class Convert2File:
 
                         ## set target name for read csv.
                         state = "failed"
-                        record.update({"function": "write_data_to_target_file", "state": state})
+                        record.update({"function": "write_data_to_target_file", 
+                                    "state": state})
+                        
                         if self.write_mode == "overwrite" or self.manual:
                             target_name = join(self.output_dir, self.output_file)
                         else:
                             suffix = f"{self.batch_date.strftime('%Y%m%d')}"
-                            self.output_file = (f"{Path(self.output_file).stem}_{suffix}.csv")
+                            self.output_file = f"{Path(self.output_file).stem}_{suffix}.csv"
                             target_name = join(self.output_dir, self.output_file)
 
                         ## read / write csv.
@@ -352,7 +358,8 @@ class Convert2File:
                     except Exception as err:
                         raise Exception(err)
 
-                    record.update({"function": "write_data_to_target_file", "state": state})
+                    record.update({"function": "write_data_to_target_file", 
+                                "state": state})
                     logging.info(f'Write to Target file status: "{state}"')
 
             except Exception as err:
@@ -366,14 +373,16 @@ class Convert2File:
         logging.info(f'Read Target files: "{target_name}"')
 
         state = "failed"
-        self.logging[-1].update({"input_dir": target_name, "function": "read_csv", "state": state})
+        self.logging[-1].update({"input_dir": target_name, 
+                                "function": "read_csv", 
+                                "state": state})
 
         try:
             data = []
-            with open(target_name, "r", newline="") as reader:
+            with open(target_name, "r") as reader:
                 csv_reader = csv.reader(reader, 
-                                        skipinitialspace=True,
-                                        quoting=csv.QUOTE_ALL,
+                                        skipinitialspace=True, 
+                                        quoting=csv.QUOTE_ALL, 
                                         quotechar='"')
                 header = next(csv_reader)
 
@@ -403,13 +412,13 @@ class Convert2File:
             target_df = self.initial_data_type(target_df)
 
             ## filter data on batch date => DataFrame
-            batch_df = target_df[target_df["CreateDate"].isin(np.array([pd.Timestamp(self.fmt_batch_date)]))].reset_index(drop=True)
+            batch_df = target_df[target_df["CreateDate"].isin(np.array([pd.Timestamp(self.batch_date)]))].reset_index(drop=True)
 
             ## validate data change row by row
             data_dict = self.validate_data_change(batch_df, change_df)
 
             ## filter data not on batch date => dict
-            merge_data = (target_df[~target_df["CreateDate"].isin(np.array([pd.Timestamp(self.fmt_batch_date)]))].iloc[:, :-1].to_dict("index"))
+            merge_data = (target_df[~target_df["CreateDate"].isin(np.array([pd.Timestamp(self.batch_date)]))].iloc[:, :-1].to_dict("index"))
 
             ## merge data from new and old data
             max_rows = max(merge_data, default=0)
@@ -420,7 +429,7 @@ class Convert2File:
 
             ## sorted order data on batch date
             i = 0
-            for idx, values in enumerate(sorted(merge_data.values(), key=lambda d: d["CreateDate"]), 2):
+            for idx, values in enumerate(sorted(merge_data.values(), key=lambda d: d["CreateDate"]),2):
                 if "mark_row" in values.keys():
                     if values["mark_row"] in self.change_rows:
                         self.change_rows[idx] = self.change_rows.pop(values["mark_row"])
@@ -443,13 +452,14 @@ class Convert2File:
         logging.info(f'Write mode: "{self.write_mode}" in Target files: "{target_name}"')
 
         state = "failed"
-        self.logging[-1].update({"function": "write_csv", "state": state})
+        self.logging[-1].update({"function": "write_csv",
+                                "state": state})
         try:
             with open(target_name, "r", newline="") as reader:
-                csvin = csv.DictReader(reader,
-                                        skipinitialspace=True, 
-                                        quoting=csv.QUOTE_ALL, 
-                                        quotechar='"')
+                csvin = csv.DictReader(reader, 
+                                    skipinitialspace=True, 
+                                    quoting=csv.QUOTE_ALL, 
+                                    quotechar='"')
                 rows = {idx: values for idx, values in enumerate(csvin, 2)}
                 for idx, value in data_output.items():
                     if value.get("remark") is not None:
@@ -461,18 +471,19 @@ class Convert2File:
                             continue
                     else:
                         rows[idx].update(data_output[idx])
-                        
-            with open(target_name, "wb") as writer:
-                csvout = csv.DictWriter(writer,
-                                        csvin.fieldnames,
-                                        quoting=csv.QUOTE_ALL,
+
+            with open(target_name, "w") as writer:
+                csvout = csv.DictWriter(writer, 
+                                        csvin.fieldnames, 
+                                        quoting=csv.QUOTE_ALL, 
                                         quotechar='"')
                 csvout.writeheader()
                 for idx in rows:
                     if idx not in self.remove_rows:
-                        rows[idx].update({"CreateDate": rows[idx]["CreateDate"].strftime("%Y%m%d%H%M%S"),
-                                        "LastLogin": rows[idx]["LastLogin"].strftime("%Y%m%d%H%M%S"),
-                                        "LastUpdatedDate": rows[idx]["LastUpdatedDate"].strftime("%Y%m%d%H%M%S")})
+                        rows[idx].update({
+                                "CreateDate": rows[idx]["CreateDate"].strftime("%Y%m%d%H%M%S"),
+                                "LastLogin": rows[idx]["LastLogin"].strftime("%Y%m%d%H%M%S"),
+                                "LastUpdatedDate": rows[idx]["LastUpdatedDate"].strftime("%Y%m%d%H%M%S"),})
                         csvout.writerow(rows[idx])
             writer.closed
 

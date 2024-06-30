@@ -9,12 +9,14 @@ class ModuleICA(CallFunction):
     def logSetter(self, log: list):
         self._log = log
 
-    async def Run(self,module: str) -> dict:
-        
-        self.get_params(module)
-        logging.info(f'Module: "{self.module}", Manual: "{self.manual}", Batch Date: "{self.batch_date}", Store Tmp: "{self.store_tmp}", Write Mode: "{self.write_mode}"')
+    async def Run(self, module: str) -> dict:
 
-        result = {"module": self.module,"task": "Completed"}
+        self.get_params(module)
+        logging.info(
+            f'Module: "{self.module}", Manual: "{self.manual}", Batch Date: "{self.batch_date}", Store Tmp: "{self.store_tmp}", Write Mode: "{self.write_mode}"'
+        )
+
+        result = {"module": self.module, "task": "Completed"}
         try:
             await self.check_source_file()
             await self.retrieve_data_from_source_file()
@@ -43,9 +45,9 @@ class ModuleICA(CallFunction):
 
         state = "failed"
         for record in self.logging:
-            record.update({"function": "mapping_column","state": state})
+            record.update({"function": "mapping_column", "state": state})
             try:
-                for sheet,data in record["data"].items():
+                for sheet, data in record["data"].items():
                     logging.info(f'Mapping Column From Sheet: "{sheet}"')
 
                     if "USER REPORT" in sheet:
@@ -88,9 +90,9 @@ class ModuleICA(CallFunction):
                 "8",
                 "9",
                 "10",
-                self.fmt_batch_date,
+                self.batch_date,
                 self.date,
-                self.fmt_batch_date,
+                self.batch_date,
                 "14",
             ],
             [
@@ -104,9 +106,9 @@ class ModuleICA(CallFunction):
                 "22",
                 "23",
                 "24",
-                self.fmt_batch_date,
+                self.batch_date,
                 self.date,
-                self.fmt_batch_date,
+                self.batch_date,
                 "28",
             ],
         ]
@@ -114,4 +116,4 @@ class ModuleICA(CallFunction):
         df.columns = df.iloc[0].values
         df = df[1:]
         df = df.reset_index(drop=True)
-        self.logging.append({"module": "Target_file","data": df.to_dict("list")})
+        self.logging.append({"module": "Target_file", "data": df.to_dict("list")})
