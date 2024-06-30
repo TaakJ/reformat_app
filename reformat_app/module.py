@@ -455,26 +455,30 @@ class Convert2File:
                     if value.get("remark") is not None:
                         if idx in self.change_rows.keys():
                             logging.info(f'"{value["remark"]}" Rows: "{idx}" in Target file\nRecord Change:"{self.change_rows[idx]}"')
+                            value.popitem()
                             rows.update({idx: value})
                         elif idx in self.remove_rows:
                             continue
                     else:
                         rows[idx].update(data_output[idx])
-                        
-            # write csv file.
-            with open(target_name, "wb", newline="") as writer:
-                csvout = csv.DictWriter(writer,
-                                        csvin.fieldnames,
-                                        quoting=csv.QUOTE_ALL,
-                                        quotechar='"')
-                csvout.writeheader()
-                for idx in rows:
-                    if idx not in self.remove_rows:
-                        rows[idx].update({"CreateDate": rows[idx]["CreateDate"].strftime("%Y%m%d%H%M%S"),
-                                        "LastLogin": rows[idx]["LastLogin"].strftime("%Y%m%d%H%M%S"),
-                                        "LastUpdatedDate": rows[idx]["LastUpdatedDate"].strftime("%Y%m%d%H%M%S")})
-                        csvout.writerow(rows[idx])
-            writer.closed
+            
+            for x, y in rows.items():
+                print(x)
+                print(y)
+            
+            # with open(target_name, "wb", newline="") as writer:
+            #     csvout = csv.DictWriter(writer,
+            #                             csvin.fieldnames,
+            #                             quoting=csv.QUOTE_ALL,
+            #                             quotechar='"')
+            #     csvout.writeheader()
+            #     for idx in rows:
+            #         if idx not in self.remove_rows:
+            #             rows[idx].update({"CreateDate": rows[idx]["CreateDate"].strftime("%Y%m%d%H%M%S"),
+            #                             "LastLogin": rows[idx]["LastLogin"].strftime("%Y%m%d%H%M%S"),
+            #                             "LastUpdatedDate": rows[idx]["LastUpdatedDate"].strftime("%Y%m%d%H%M%S")})
+            #             csvout.writerow(rows[idx])
+            # writer.closed
 
         except Exception as err:
             raise Exception(err)
