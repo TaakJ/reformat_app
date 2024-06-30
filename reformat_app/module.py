@@ -454,15 +454,13 @@ class Convert2File:
                 for idx, value in data_output.items():
                     if value.get("remark") is not None:
                         if idx in self.change_rows.keys():
-                            print(idx)
                             logging.info(f'"{value["remark"]}" Rows: "{idx}" in Target file\nRecord Change:"{self.change_rows[idx]}"')
-                            a = value.popitem()
-                            print(a)
-                            print(value["remark"])
+                            rows.update({idx: value})
                         elif idx in self.remove_rows:
                             continue
                     else:
                         rows[idx].update(data_output[idx])
+                        
 
             # # write csv file.
             # with open(target_name, "w", newline="") as writer:
