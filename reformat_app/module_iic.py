@@ -1,20 +1,37 @@
+from os.path import join
+from datetime import datetime
 import pandas as pd
 import logging
 from .function import CallFunction
 from .exception import CustomException
-from .setup import setup_errorlog
+from .setup import PARAMS, CONFIG, setup_errorlog
+from .function import CollectBackup
 
 class ModuleIIC(CallFunction):
 
     def logSetter(self, log: list):
         self._log = log
+        
+    def paramsSetter(self, module: str) -> None:
+        ## setup params
+        for key, value in PARAMS.items():
+            setattr(self, key, value)
+        self.module = module
+        self.date = datetime.now()
+        self.input_dir = [join(CONFIG[module]["input_dir"], CONFIG[module]["input_file"])]
+        self.output_dir = CONFIG[module]["output_dir"]
+        self.output_file = CONFIG[module]["output_file"]
+        
+        ## backup tar.gz
+        CollectBackup()
 
     async def Run(self, module: str) -> dict:
 
-        self.get_params(module)
+        self.paramsSetter(module)
+        
         logging.info(f'Module: "{self.module}", Manual: "{self.manual}", Batch Date: "{self.batch_date}", Store Tmp: "{self.store_tmp}", Write Mode: "{self.write_mode}"')
-
         result = {"module": self.module, "task": "Completed"}
+        
         try:
             await self.check_source_file()
             await self.retrieve_data_from_source_file()

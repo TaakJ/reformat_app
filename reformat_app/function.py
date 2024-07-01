@@ -22,16 +22,11 @@ class CollectLog(ABC):
     def logSetter(self, log: list):
         pass
 
-class SetterParams:
-    def get_params(self, module) -> None:
-        for key, value in PARAMS.items():
-            setattr(self, key, value)
-
-        self.module = module
-        self.date = datetime.now()
-        self.input_dir = [join(CONFIG[module]["input_dir"], CONFIG[module]["input_file"])]
-        self.output_dir = CONFIG[module]["output_dir"]
-        self.output_file = CONFIG[module]["output_file"]
+class SetterParams(ABC):
+    
+    @abstractmethod
+    def paramsSetter(self, module: str):
+        pass
 
     def get_extract_data(self, i: int, format_file: any) -> dict:
 
@@ -309,23 +304,18 @@ class CollectParams(SetterParams):
 import os
 import tarfile
 import time
-class CollectBackup(ABC):
+class CollectBackup:
     def __init__(self) -> None:
-        self.date = datetime.now()
-        self.backup_folder()
-        # schedule.every().day.at("13:46").do(self.backup_folder)
-    
+        print(self)
+        
     def backup_folder(self):
         
         date = self.date.date().strftime("%Y%m%d")
-        suffix = time.strftime("%H%M%S")
+        hour = time.strftime("%H")
         
-        print(date)
-        print(suffix)
-        # backup_folder = join(Folder.BACKUP, date)
-        # print(backup_folder)
+        _folder = Folder.BACKUP + join(date, hour)
+        print(_folder)
         
-        # filename = Folder.LOG + join(date,file)
         # if not os.path.exists(os.path.dirname(filename)):
         #     try:
         #         os.makedirs(os.path.dirname(filename))
