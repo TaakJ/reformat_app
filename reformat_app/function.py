@@ -41,8 +41,12 @@ class CollectParams(ABC):
         pass
 
 class CollectBackup:
-    def __init__(self) -> None:
-        print(self.date)
+    def __init__(self, bk) -> None:
+        print(bk.module)
+        print(bk.date)
+        print(bk.input_dir)
+        print(bk.output_dir)
+        print(bk.output_file)
         
     def backup_folder(self):
         
