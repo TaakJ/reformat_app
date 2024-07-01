@@ -1,6 +1,7 @@
 from os.path import join
 from datetime import datetime
 import pandas as pd
+import re
 import logging
 from .function import CallFunction
 from .exception import CustomException
@@ -23,7 +24,26 @@ class ModuleADM(CallFunction):
         self.output_file = CONFIG[module]["output_file"]
         
         ## backup tar.gz
-        CollectBackup()
+        # CollectBackup()
+        
+    def extract_adm(self, i: int, format_file: any):
+        logging.info("Data for ADM")
+
+        state = "failed"
+        self.logging[i].update({"function": "extract_adm", "state": state})
+
+        data = []
+        for line in format_file:
+            regex = re.compile(r"\w+.*")
+            find_word = regex.findall(line)
+            if find_word != []:
+                data += [
+                    re.sub(r"\W\s+","||","".join(find_word).strip()).split("||")]
+
+        state = "succeed"
+        self.logging[i].update({"state": state})
+        
+        return {"ADM": data}
         
     async def Run(self, module: str) -> dict:
         self.paramsSetter(module)
@@ -32,9 +52,10 @@ class ModuleADM(CallFunction):
         result = {"module": self.module, "task": "Completed"}
         
         try:
-            ''
-            # await self.check_source_file()
-            # await self.retrieve_data_from_source_file()
+            await self.check_source_file()
+            await self.retrieve_data_from_source_file()
+            print()
+            print(self.logging)
             # await self.mock_data()
             # if self.store_tmp is True:
             #     await self.write_data_to_tmp_file()
@@ -55,23 +76,23 @@ class ModuleADM(CallFunction):
 
         return result
 
-    async def mapping_column(self) -> None:
+    # async def mapping_column(self) -> None:
 
-        state = "failed"
-        for record in self.logging:
-            record.update({"function": "mapping_column", "state": state})
-            try:
-                for sheet, data in record["data"].items():
-                    logging.info(f'Mapping Column From Sheet: "{sheet}"')
+    #     state = "failed"
+    #     for record in self.logging:
+    #         record.update({"function": "mapping_column", "state": state})
+    #         try:
+    #             for sheet, data in record["data"].items():
+    #                 logging.info(f'Mapping Column From Sheet: "{sheet}"')
 
-                    if "ADM" in sheet:
-                        df = pd.DataFrame(data)
-                        df.columns = df.iloc[0].values
-                        df = df[1:]
-                        df = df.reset_index(drop=True)
+    #                 if "ADM" in sheet:
+    #                     df = pd.DataFrame(data)
+    #                     df.columns = df.iloc[0].values
+    #                     df = df[1:]
+    #                     df = df.reset_index(drop=True)
 
-            except Exception as err:
-                record.update({"err": err})
+    #         except Exception as err:
+    #             record.update({"err": err})
 
     async def mock_data(self) -> None:
         mock_data = [

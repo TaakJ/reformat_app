@@ -1,6 +1,7 @@
 from os.path import join
 from datetime import datetime
 import pandas as pd
+import re
 import logging
 from .function import CallFunction
 from .exception import CustomException
@@ -23,7 +24,44 @@ class ModuleLDS(CallFunction):
         self.output_file = CONFIG[module]["output_file"]
         
         ## backup tar.gz
-        CollectBackup()
+        # CollectBackup()
+    
+    def extract_lds(self, i: int, format_file: any) -> dict:
+
+        logging.info("Data for LDS")
+
+        state = "failed"
+        self.logging[i].update({"function": "extract_lds", "state": state})
+
+        data = []
+        for line in format_file:
+            regex = re.compile(r"\w+.*")
+            find_word = regex.findall(line)
+            if find_word != []:
+                data += [re.sub(r"\W\s+", ",", "".join(find_word).strip()).split(",")]
+
+        fix_data = []
+        for rows, value in enumerate(data):
+            if rows == 0:
+                ## header
+                fix_data += [" ".join(value).split(" ")]
+            else:
+                ## value
+                fix_column = []
+                for idx, column in enumerate(value, 1):
+                    if idx == 1:
+                        l = re.sub(r"\s+", ",", column).split(",")
+                        fix_column.extend(l)
+                    elif idx == 32:
+                        continue
+                    else:
+                        fix_column.append(column)
+                fix_data.append(fix_column)
+
+        state = "succeed"
+        self.logging[i].update({"state": state})
+        
+        return {"LDS": fix_data}
 
     async def Run(self, module: str) -> dict:
 
@@ -35,10 +73,12 @@ class ModuleLDS(CallFunction):
         try:
             await self.check_source_file()
             await self.retrieve_data_from_source_file()
-            await self.mock_data()
-            if self.store_tmp is True:
-                await self.write_data_to_tmp_file()
-            await self.write_data_to_target_file()
+            print()
+            print(self.logging)
+            # await self.mock_data()
+            # if self.store_tmp is True:
+            #     await self.write_data_to_tmp_file()
+            # await self.write_data_to_target_file()
 
         except CustomException as err:
             logging.error('See Error Details in "_error.log"')
@@ -55,23 +95,23 @@ class ModuleLDS(CallFunction):
         logging.info("Stop Run Module\n")
         return result
 
-    async def mapping_column(self) -> None:
+    # async def mapping_column(self) -> None:
 
-        state = "failed"
-        for record in self.logging:
-            record.update({"function": "mapping_column", "state": state})
-            try:
-                for sheet, data in record["data"].items():
-                    logging.info(f'Mapping Column From Sheet: "{sheet}"')
+    #     state = "failed"
+    #     for record in self.logging:
+    #         record.update({"function": "mapping_column", "state": state})
+    #         try:
+    #             for sheet, data in record["data"].items():
+    #                 logging.info(f'Mapping Column From Sheet: "{sheet}"')
 
-                    if "USER REPORT" in sheet:
-                        df = pd.DataFrame(data)
-                        df.columns = df.iloc[0].values
-                        df = df[1:]
-                        df = df.reset_index(drop=True)
+    #                 if "USER REPORT" in sheet:
+    #                     df = pd.DataFrame(data)
+    #                     df.columns = df.iloc[0].values
+    #                     df = df[1:]
+    #                     df = df.reset_index(drop=True)
 
-            except Exception as err:
-                record.update({"err": err})
+    #         except Exception as err:
+    #             record.update({"err": err})
 
     async def mock_data(self) -> None:
         mock_data = [

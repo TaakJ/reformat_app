@@ -1,6 +1,7 @@
 from os.path import join
 from datetime import datetime
 import pandas as pd
+import re
 import logging
 from .function import CallFunction
 from .exception import CustomException
@@ -23,7 +24,31 @@ class ModuleBOS(CallFunction):
         self.output_file = CONFIG[module]["output_file"]
         
         ## backup tar.gz
-        CollectBackup()
+        # CollectBackup()
+        
+    def extract_bos(self, i: int, format_file: any) -> dict:
+
+        logging.info("Data for BOS")
+
+        state = "failed"
+        self.logging[i].update({"function": "extract_bos", "state": state})
+
+        sheet_list = [sheet for sheet in format_file.sheet_names()]
+
+        data = {}
+        for sheets in sheet_list:
+            cells = format_file.sheet_by_name(sheets)
+            for row in range(0, cells.nrows):
+                by_sheets = [cells.cell(row, col).value for col in range(cells.ncols)]
+                if sheets not in data:
+                    data[sheets] = [by_sheets]
+                else:
+                    data[sheets].append(by_sheets)
+
+        state = "succeed"
+        self.logging[i].update({"state": state})
+        
+        return data
 
     async def Run(self, module: str) -> dict:
         self.paramsSetter(module)
@@ -33,8 +58,9 @@ class ModuleBOS(CallFunction):
         
         try:
             await self.check_source_file()
+            await self.retrieve_data_from_source_file()
+            print()
             print(self.logging)
-            # await self.retrieve_data_from_source_file()
             # await self.mock_data()
             # if self.store_tmp is True:
             #     await self.write_data_to_tmp_file()
@@ -55,23 +81,23 @@ class ModuleBOS(CallFunction):
         logging.info("Stop Run Module\n")
         return result
 
-    async def mapping_column(self) -> None:
+    # async def mapping_column(self) -> None:
 
-        state = "failed"
-        for record in self.logging:
-            record.update({"function": "mapping_column", "state": state})
-            try:
-                for sheet, data in record["data"].items():
-                    logging.info(f'Mapping Column From Sheet: "{sheet}"')
+    #     state = "failed"
+    #     for record in self.logging:
+    #         record.update({"function": "mapping_column", "state": state})
+    #         try:
+    #             for sheet, data in record["data"].items():
+    #                 logging.info(f'Mapping Column From Sheet: "{sheet}"')
 
-                    if "BOS_export_BrUser" in sheet:
-                        print(data)
+    #                 if "BOS_export_BrUser" in sheet:
+    #                     print(data)
 
-                    elif "BOS_export_role" in sheet:
-                        raise Exception("raise Exception")
+    #                 elif "BOS_export_role" in sheet:
+    #                     raise Exception("raise Exception")
 
-            except Exception as err:
-                record.update({"err": err})
+    #         except Exception as err:
+    #             record.update({"err": err})
 
     async def mock_data(self) -> None:
         mock_data = [

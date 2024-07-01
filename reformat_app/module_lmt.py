@@ -1,6 +1,7 @@
 from os.path import join
 from datetime import datetime
 import pandas as pd
+import re
 import logging
 from .function import CallFunction
 from .exception import CustomException
@@ -24,6 +25,30 @@ class ModuleLMT(CallFunction):
         
         ## backup tar.gz
         CollectBackup()
+        
+    def extract_lmt(self, i: int, format_file: any) -> dict:
+
+        logging.info("Data for LMT")
+
+        state = "failed"
+        self.logging[i].update({"function": "extract_lmt", "state": state})
+
+        sheet_list = [sheet for sheet in format_file.sheet_names() if sheet != "StyleSheet"]
+
+        data = {}
+        for sheets in sheet_list:
+            cells = format_file.sheet_by_name(sheets)
+            for row in range(0, cells.nrows):
+                by_sheets = [cells.cell(row, col).value for col in range(cells.ncols)]
+                if sheets not in data:
+                    data[sheets] = [by_sheets]
+                else:
+                    data[sheets].append(by_sheets)
+
+        state = "succeed"
+        self.logging[i].update({"state": state})
+        
+        return data
 
     async def Run(self, module: str) -> dict:
 

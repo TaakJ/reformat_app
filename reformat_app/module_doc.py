@@ -1,6 +1,7 @@
 from os.path import join
 from datetime import datetime
 import pandas as pd
+import re
 import logging
 from .function import CallFunction
 from .exception import CustomException
@@ -23,7 +24,45 @@ class ModuleDOC(CallFunction):
         self.output_file = CONFIG[module]["output_file"]
         
         ## backup tar.gz
-        CollectBackup()
+        # CollectBackup()
+        
+    def extract_doc(self, i: int, format_file: any) -> dict:
+
+        logging.info("Data for DOC")
+
+        state = "failed"
+        self.logging[i].update({"function": "extract_doc", "state": state})
+
+        data = []
+        for line in format_file:
+            regex = re.compile(r"\w+.*")
+            find_word = regex.findall(line)
+            if find_word != []:
+                data += [
+                    re.sub(r"\W\s+","||","".join(find_word).strip()).split("||")]
+
+        fix_data = []
+        for rows, value in enumerate(data):
+            if rows == 0:
+                continue
+            elif rows == 1:
+                ## header
+                fix_data += [" ".join(value).split(" ")]
+            else:
+                ## value
+                fix_column = []
+                for idx, column in enumerate(value, 1):
+                    if idx == 4:
+                        l = re.sub(r"\s+", ",", column).split(",")
+                        fix_column.extend(l)
+                    else:
+                        fix_column.append(column)
+                fix_data.append(fix_column)
+
+        state = "succeed"
+        self.logging[i].update({"state": state})
+        
+        return {"DOC": fix_data}
     
     async def Run(self, module: str) -> dict:
 
@@ -35,10 +74,12 @@ class ModuleDOC(CallFunction):
         try:
             await self.check_source_file()
             await self.retrieve_data_from_source_file()
-            await self.mock_data()
-            if self.store_tmp is True:
-                await self.write_data_to_tmp_file()
-            await self.write_data_to_target_file()
+            print()
+            print(self.logging)
+            # await self.mock_data()
+            # if self.store_tmp is True:
+            #     await self.write_data_to_tmp_file()
+            # await self.write_data_to_target_file()
 
         except CustomException as err:
             logging.error('See Error Details in "_error.log"')
