@@ -311,8 +311,15 @@ class CollectBackup(ABC):
         self.backup_folder()
     
     def backup_folder(self):
-        a = Folder.BACKUP
-        print(a)
-        print(self.date)
+        date = self.date.date().strftime("%Y%m%d")
+        backup_folder = join(Folder.BACKUP, date)
+        print(backup_folder)
+        
+        # filename = Folder.LOG + join(date,file)
+        # if not os.path.exists(os.path.dirname(filename)):
+        #     try:
+        #         os.makedirs(os.path.dirname(filename))
+        #     except OSError:
+        #         pass
 class CallFunction(Convert2File, CollectLog, CollectParams):
     pass
