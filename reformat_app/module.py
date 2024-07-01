@@ -209,14 +209,14 @@ class Convert2File:
                 if record["module"] == "Target_file":
                     try:
                         ## new data from dataframe.
-                        new_data = record["data"]
-                        change_df = pd.DataFrame(new_data)
-                        change_df = self.initial_data_type(new_data)
+                        data = record["data"]
+                        change_df = pd.DataFrame(data)
+                        change_df = self.initial_data_type(change_df)
                                     
                         ## read tmp file.
                         tmp_path = join(Folder.TMP, self.module)
                         os.makedirs(tmp_path, exist_ok=True)
-                        tmp_name =  f"Tmp_{self.batch_date.strftime('%Y%m%d')}.xlsx"
+                        tmp_name =  f"TMP_{self.batch_date.strftime('%Y%m%d')}.xlsx"
                         
                         state = "failed"
                         full_tmp = join(tmp_path, tmp_name)
@@ -278,7 +278,8 @@ class Convert2File:
 
     def write_worksheet(self, sheet: any, change_data: dict) -> str:
 
-        logging.info("Write to Worksheet")
+        full_tmp =  self.logging[-1]["input_dir"]
+        logging.info(f'Write to Worksheet: "{full_tmp}"')
 
         state = "failed"
         self.logging[-1].update({"function": "write_worksheet", "state": state})
@@ -351,8 +352,8 @@ class Convert2File:
 
                         ## read / write csv.
                         target_df = self.read_csv(full_target)
-                        data_output = self.optimize_data(target_df, change_df)
-                        state = self.write_csv(full_target, data_output)
+                        data = self.optimize_data(target_df, change_df)
+                        state = self.write_csv(full_target, data)
 
                     except Exception as err:
                         raise Exception(err)
@@ -406,7 +407,7 @@ class Convert2File:
         state = "failed"
         self.logging[-1].update({"function": "optimize_data", "state": state})
 
-        data_output = {}
+        data = {}
         try:
             target_df = self.initial_data_type(target_df)
 
@@ -434,7 +435,7 @@ class Convert2File:
                         self.remove_rows[i] = idx
                         i += 1
                     values.pop("mark_row")
-                data_output.update({idx: values})
+                data.update({idx: values})
 
         except Exception as err:
             raise Exception(err)
@@ -442,9 +443,9 @@ class Convert2File:
         state = "succeed"
         self.logging[-1].update({"state": state})
 
-        return data_output
+        return data
 
-    def write_csv(self, target_name: str, data_output: dict) -> str:
+    def write_csv(self, target_name: str, data: dict) -> str:
 
         logging.info(f'Write mode: "{self.write_mode}" in Target files: "{target_name}"')
 
@@ -459,7 +460,7 @@ class Convert2File:
                                     quotechar='"')
                 rows = {idx: values for idx, values in enumerate(csvin, 2)}
                 
-                for idx, value in data_output.items():
+                for idx, value in data.items():
                     if value.get("remark") is not None:
                         if idx in self.change_rows.keys():
                             logging.info(f'"{value["remark"]}" Rows: "{idx}" in Target file\nRecord Change:"{self.change_rows[idx]}"')
@@ -468,7 +469,7 @@ class Convert2File:
                         elif idx in self.remove_rows:
                             continue
                     else:
-                        rows[idx].update(data_output[idx])
+                        rows[idx].update(data[idx])
                         
             with open(target_name, "w", newline="") as writer:
                 csvout = csv.DictWriter(writer, 
