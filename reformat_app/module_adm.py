@@ -24,30 +24,8 @@ class ModuleADM(CallFunction):
         self.output_file = CONFIG[module]["output_file"]
         
         ## backup tar.gz
-        # CollectBackup()
-        
-    def collect_data(self, i: int, format_file: any):
-        
-        state = "failed"
-        module = self.logging[i]["module"]
-        
-        logging.info(f"Data for {module}")
-        
-        self.logging[i].update({"function": "collect_data", "state": state})
-
-        data = []
-        for line in format_file:
-            regex = re.compile(r"\w+.*")
-            find_word = regex.findall(line)
-            if find_word != []:
-                data += [
-                    re.sub(r"\W\s+","||","".join(find_word).strip()).split("||")]
-
-        state = "succeed"
-        self.logging[i].update({"state": state})
-        
-        return {module: data}
-        
+        CollectBackup()
+    
     async def Run(self, module: str) -> dict:
         self.paramsSetter(module)
         
@@ -55,10 +33,9 @@ class ModuleADM(CallFunction):
         result = {"module": self.module, "task": "Completed"}
         
         try:
-            await self.check_source_file()
-            await self.retrieve_data_from_source_file()
-            print("ADM")
-            print(self.logging)
+            ''
+            # await self.check_source_file()
+            # await self.retrieve_data_from_source_file()
             # await self.mock_data()
             # if self.store_tmp is True:
             #     await self.write_data_to_tmp_file()
@@ -78,24 +55,27 @@ class ModuleADM(CallFunction):
         logging.info("Stop Run Module\n")
 
         return result
+    
+    def collect_data(self, i: int, format_file: any):
+        
+        state = "failed"
+        module = self.logging[i]["module"]
+        
+        logging.info(f"Data for {module}")
+        
+        self.logging[i].update({"function": "collect_data", "state": state})
 
-    # async def mapping_column(self) -> None:
+        data = []
+        for line in format_file:
+            regex = re.compile(r"\w+.*")
+            find_word = regex.findall(line)
+            if find_word != []:
+                data += [
+                    re.sub(r"\W\s+","||","".join(find_word).strip()).split("||")]
 
-    #     state = "failed"
-    #     for record in self.logging:
-    #         record.update({"function": "mapping_column", "state": state})
-    #         try:
-    #             for sheet, data in record["data"].items():
-    #                 logging.info(f'Mapping Column From Sheet: "{sheet}"')
-
-    #                 if "ADM" in sheet:
-    #                     df = pd.DataFrame(data)
-    #                     df.columns = df.iloc[0].values
-    #                     df = df[1:]
-    #                     df = df.reset_index(drop=True)
-
-    #         except Exception as err:
-    #             record.update({"err": err})
+        state = "succeed"
+        self.logging[i].update({"state": state})
+        return {module: data}
 
     async def mock_data(self) -> None:
         mock_data = [

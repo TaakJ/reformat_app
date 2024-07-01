@@ -22,7 +22,7 @@ class CollectLog(ABC):
     def logSetter(self, log: list):
         pass
 
-class SetterParams(ABC):
+class CollectParams(ABC):
     
     @abstractmethod
     def paramsSetter(self, module: str):
@@ -36,9 +36,6 @@ class SetterParams(ABC):
     @abstractmethod
     def collect_data(self, i: int, format_file: any):
         pass
-
-class CollectParams(SetterParams):
-    pass
 
 import os
 import tarfile
