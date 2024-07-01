@@ -101,8 +101,7 @@ class Convert2File:
         state = "failed"
         self.logging[-1].update({"function": "initial_data_type", "state": state})
         try:
-            df = df.astype(
-                {
+            df = df.astype({
                     "ApplicationCode": object,
                     "AccountOwner": object,
                     "AccountName": object,
@@ -117,8 +116,7 @@ class Convert2File:
                     "LastLogin": "datetime64[ms]",
                     "LastUpdatedDate": "datetime64[ms]",
                     "AdditionalAttribute": object,
-                }
-            )
+                })
             df[["CreateDate", "LastLogin", "LastUpdatedDate"]] = df[["CreateDate", "LastLogin", "LastUpdatedDate"]].apply(pd.to_datetime, format="%Y%m%d%H%M%S")
 
             if "remark" in df.columns:
@@ -144,9 +142,7 @@ class Convert2File:
         self.logging[-1].update({"function": "validate_data_change", "state": state})
 
         def format_record(record):
-            return "\n".join(
-                "{!r} => {!r},".format(columns, values)
-                for columns, values in record.items())
+            return "\n".join("{!r} => {!r},".format(columns, values) for columns, values in record.items())
 
         if len(df.index) > len(change_df.index):
             self.remove_rows = [idx for idx in list(df.index) if idx not in list(change_df.index)]
@@ -192,7 +188,8 @@ class Convert2File:
 
             ## set dataframe.
             df = df.drop(["count"], axis=1)
-            df.index += 2
+            rows = 2
+            df.index += rows
             data_dict = df.to_dict(orient="index")
 
         except Exception as err:
@@ -284,35 +281,35 @@ class Convert2File:
         state = "failed"
         self.logging[-1].update({"function": "write_worksheet", "state": state})
 
-        start_row = 2
+        rows = 2
         max_row = max(change_data, default=0)
         try:
             # write columns.
-            for idx, col in enumerate(change_data[start_row].keys(), 1):
+            for idx, col in enumerate(change_data[rows].keys(), 1):
                 sheet.cell(row=1, column=idx).value = col
 
             ## write rows.
-            while start_row <= max_row:
-                for idx, col in enumerate(change_data[start_row].keys(), 1):
+            while rows <= max_row:
+                for idx, col in enumerate(change_data[rows].keys(), 1):
 
                     if col == "remark":
-                        if start_row in self.remove_rows:
+                        if rows in self.remove_rows:
                             ## Remove rows.
-                            show = f'{change_data[start_row][col]} Rows: "{start_row}" in Tmp file'
-                            sheet.cell(row=start_row, column=idx).value = change_data[start_row][col]
-                        elif start_row in self.change_rows.keys():
+                            show = f'{change_data[rows][col]} Rows: "{rows}" in Tmp file'
+                            sheet.cell(row=rows, column=idx).value = change_data[rows][col]
+                        elif rows in self.change_rows.keys():
                             ## Update / Insert rows.
-                            show = f'{change_data[start_row][col]} Rows: "{start_row}" in Tmp file\nRecord Change: {self.change_rows[start_row]}'
-                            sheet.cell(row=start_row, column=idx).value = change_data[start_row][col]
+                            show = f'{change_data[rows][col]} Rows: "{rows}" in Tmp file\nRecord Change: {self.change_rows[rows]}'
+                            sheet.cell(row=rows, column=idx).value = change_data[rows][col]
                         else:
                             ## No change rows.
-                            show = f'No Change Rows: "{start_row}" in Tmp file'
-                            sheet.cell(row=start_row, column=idx).value = change_data[start_row][col]
+                            show = f'No Change Rows: "{rows}" in Tmp file'
+                            sheet.cell(row=rows, column=idx).value = change_data[rows][col]
 
                         logging.info(show)
                     else:
-                        sheet.cell(row=start_row, column=idx).value = change_data[start_row][col]
-                start_row += 1
+                        sheet.cell(row=rows, column=idx).value = change_data[rows][col]
+                rows += 1
 
         except KeyError as err:
             raise KeyError(f"Can not Write rows: {err} in Tmp file")
@@ -381,14 +378,14 @@ class Convert2File:
             data = []
             with open(full_target, "r", newline="") as reader:
                 csv_reader = csv.reader(reader, 
-                                        skipinitialspace=True, 
-                                        quoting=csv.QUOTE_ALL, 
+                                        skipinitialspace=True,
+                                        delimiter=',',
                                         quotechar='"')
+            
                 header = next(csv_reader)
-
                 for row in csv_reader:
                     data.append(row)
-                target_df = pd.DataFrame(data, columns=header)
+            target_df = pd.DataFrame(data, columns=header)
 
         except FileNotFoundError:
             template_name = join(Folder.TEMPLATE, "Application Data Requirements.xlsx")
@@ -455,10 +452,11 @@ class Convert2File:
         try:
             with open(target_name, "r", newline="") as reader:
                 csvin = csv.DictReader(reader, 
-                                    skipinitialspace=True, 
-                                    quoting=csv.QUOTE_ALL, 
+                                    skipinitialspace=True,
+                                    delimiter=',',
                                     quotechar='"')
                 rows = {idx: values for idx, values in enumerate(csvin, 2)}
+                
                 for idx, value in data_output.items():
                     if value.get("remark") is not None:
                         if idx in self.change_rows.keys():
@@ -473,8 +471,8 @@ class Convert2File:
             with open(target_name, "w", newline="") as writer:
                 csvout = csv.DictWriter(writer, 
                                         csvin.fieldnames,
-                                        quoting=csv.QUOTE_ALL, 
-                                        quotechar='"',)
+                                        delimiter=',',
+                                        quotechar='"')
                 csvout.writeheader()
                 for idx in rows:
                     if idx not in self.remove_rows:
