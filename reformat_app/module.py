@@ -1,6 +1,7 @@
 import logging
 from pathlib import Path
 from os.path import join
+import os
 import glob
 import shutil
 import pandas as pd
@@ -207,18 +208,21 @@ class Convert2File:
             try:
                 if record["module"] == "Target_file":
                     try:
-                        data = record["data"]
-                        change_df = pd.DataFrame(data)
-                        change_df = self.initial_data_type(change_df)
-
+                        ## new data from dataframe.
+                        new_data = record["data"]
+                        change_df = pd.DataFrame(new_data)
+                        change_df = self.initial_data_type(new_data)
+                                    
+                        ## read tmp file.
+                        tmp_path = join(Folder.TMP, self.module)
+                        os.makedirs(tmp_path, exist_ok=True)
+                        tmp_name =  f"Tmp_{self.batch_date.strftime('%Y%m%d')}.xlsx"
+                        
                         state = "failed"
-                        tmp_name = f"TMP_{self.module}-{self.batch_date.strftime('%Y%m%d')}.xlsx"
-                        full_tmp = join(Folder.TMP, tmp_name)
-
+                        full_tmp = join(tmp_path, tmp_name)
                         record.update({"input_dir": full_tmp,
                                     "function": "write_data_to_tmp_file",
                                     "state": state})
-                        
                         try:
                             workbook = openpyxl.load_workbook(full_tmp)
                             get_sheet = workbook.get_sheet_names()
@@ -242,7 +246,6 @@ class Convert2File:
                             sheet_num = 1
                             sheet.title = sheet_name
 
-                        ## read tmp files.
                         data = sheet.values
                         columns = next(data)[0:]
                         tmp_df = pd.DataFrame(data, columns=columns)
