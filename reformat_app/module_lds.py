@@ -91,7 +91,6 @@ class ModuleLDS(CallFunction):
 
         state = "succeed"
         self.logging[i].update({"state": state})
-        
         return {module: fix_data}
 
     async def mock_data(self) -> None:

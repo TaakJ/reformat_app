@@ -78,7 +78,6 @@ class ModuleIIC(CallFunction):
 
         state = "succeed"
         self.logging[i].update({"state": state})
-        
         return data
 
     async def mock_data(self) -> None:

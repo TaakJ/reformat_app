@@ -42,20 +42,13 @@ class CollectParams(ABC):
 
 class CollectBackup:
     def __init__(self, bk) -> None:
-        pass
-        # print(bk.module)
-        # print(bk.date)
-        # print(bk.input_dir)
-        # print(bk.output_dir)
-        # print(bk.output_file)
+        self.backup_folder(bk)
         
-    def backup_folder(self):
+    def backup_folder(self, bk):
         
         date = self.date.date().strftime("%Y%m%d")
         hour = time.strftime("%H")
         
-        _folder = Folder.BACKUP + join(date, hour)
-        print(_folder)
         
         # if not os.path.exists(os.path.dirname(filename)):
         #     try:
