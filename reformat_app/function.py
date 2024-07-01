@@ -55,9 +55,25 @@ class CollectBackup:
                 os.makedirs(full_backup)
             except OSError:
                 pass
-            
-        hour = time.strftime("%H")
-        print(hour)
+        
+        # import os
+        # import tarfile
+        # import time
+        # root="c:\\"
+        # source=os.path.join(root,"Documents and Settings","rgolwalkar","Desktop","Desktop","Dr Py","Final_Py")
+        # destination=os.path.join(root,"Documents and Settings","rgolwalkar","Desktop","Desktop","PyDevResourse")
+        # targetBackup = destination + time.strftime('%Y%m%d%H%M%S') + 'tar.gz'    
+        # tar = tarfile.open(targetBackup, "w:gz")
+        # tar.add(source)
+        # tar.close()
+        
+        _time = time.strftime("%H%M%S")
+        print(_time)
+        
+        ## output_dir
+        full_output = bk.output_dir
+        print(full_output)
+        print(full_backup)
         
     
 class CallFunction(Convert2File, CollectLog, CollectParams):
