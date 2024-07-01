@@ -26,11 +26,14 @@ class ModuleADM(CallFunction):
         ## backup tar.gz
         # CollectBackup()
         
-    def extract_adm(self, i: int, format_file: any):
-        logging.info("Data for ADM")
-
+    def collect_data(self, i: int, format_file: any):
+        
         state = "failed"
-        self.logging[i].update({"function": "extract_adm", "state": state})
+        module = self.logging[i]["module"]
+        
+        logging.info(f"Data for {module}")
+        
+        self.logging[i].update({"function": "collect_data", "state": state})
 
         data = []
         for line in format_file:
@@ -43,7 +46,7 @@ class ModuleADM(CallFunction):
         state = "succeed"
         self.logging[i].update({"state": state})
         
-        return {"ADM": data}
+        return {module: data}
         
     async def Run(self, module: str) -> dict:
         self.paramsSetter(module)
@@ -54,7 +57,7 @@ class ModuleADM(CallFunction):
         try:
             await self.check_source_file()
             await self.retrieve_data_from_source_file()
-            print()
+            print("ADM")
             print(self.logging)
             # await self.mock_data()
             # if self.store_tmp is True:

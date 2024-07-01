@@ -26,13 +26,14 @@ class ModuleBOS(CallFunction):
         ## backup tar.gz
         # CollectBackup()
         
-    def extract_bos(self, i: int, format_file: any) -> dict:
-
-        logging.info("Data for BOS")
+    def collect_data(self, i: int, format_file: any) -> dict:
 
         state = "failed"
-        self.logging[i].update({"function": "extract_bos", "state": state})
-
+        module = self.logging[i]["module"]
+        
+        logging.info(f"Data for {module}")
+        
+        self.logging[i].update({"function": "collect_data", "state": state})
         sheet_list = [sheet for sheet in format_file.sheet_names()]
 
         data = {}
@@ -47,7 +48,6 @@ class ModuleBOS(CallFunction):
 
         state = "succeed"
         self.logging[i].update({"state": state})
-        
         return data
 
     async def Run(self, module: str) -> dict:
@@ -59,7 +59,7 @@ class ModuleBOS(CallFunction):
         try:
             await self.check_source_file()
             await self.retrieve_data_from_source_file()
-            print()
+            print("BOS")
             print(self.logging)
             # await self.mock_data()
             # if self.store_tmp is True:

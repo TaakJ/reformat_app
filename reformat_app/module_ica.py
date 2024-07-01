@@ -26,13 +26,14 @@ class ModuleICA(CallFunction):
         ## backup tar.gz
         # CollectBackup()
         
-    def extract_ica(self, i: int, format_file: any) -> dict:
-
-        logging.info("Data for ICA")
+    def collect_data(self, i: int, format_file: any) -> dict:
 
         state = "failed"
-        self.logging[i].update({"function": "extract_ica", "state": state})
-
+        module = self.logging[i]["module"]
+        
+        logging.info(f"Data for {module}")
+        
+        self.logging[i].update({"function": "collect_data", "state": state})
         sheet_list = [sheet for sheet in format_file.sheet_names()]
 
         data = {}
@@ -60,10 +61,12 @@ class ModuleICA(CallFunction):
         try:
             await self.check_source_file()
             await self.retrieve_data_from_source_file()
-            await self.mock_data()
-            if self.store_tmp is True:
-                await self.write_data_to_tmp_file()
-            await self.write_data_to_target_file()
+            print("ICA")
+            print(self.logging)
+            # await self.mock_data()
+            # if self.store_tmp is True:
+            #     await self.write_data_to_tmp_file()
+            # await self.write_data_to_target_file()
 
         except CustomException as err:
             logging.error('See Error Details in "_error.log"')

@@ -26,12 +26,14 @@ class ModuleDOC(CallFunction):
         ## backup tar.gz
         # CollectBackup()
         
-    def extract_doc(self, i: int, format_file: any) -> dict:
-
-        logging.info("Data for DOC")
+    def collect_data(self, i: int, format_file: any) -> dict:
 
         state = "failed"
-        self.logging[i].update({"function": "extract_doc", "state": state})
+        module = self.logging[i]["module"]
+        
+        logging.info(f"Data for {module}")
+        
+        self.logging[i].update({"function": "collect_data", "state": state})
 
         data = []
         for line in format_file:
@@ -62,7 +64,7 @@ class ModuleDOC(CallFunction):
         state = "succeed"
         self.logging[i].update({"state": state})
         
-        return {"DOC": fix_data}
+        return {module: fix_data}
     
     async def Run(self, module: str) -> dict:
 
@@ -74,7 +76,7 @@ class ModuleDOC(CallFunction):
         try:
             await self.check_source_file()
             await self.retrieve_data_from_source_file()
-            print()
+            print("DOC")
             print(self.logging)
             # await self.mock_data()
             # if self.store_tmp is True:
