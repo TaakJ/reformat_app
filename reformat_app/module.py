@@ -483,7 +483,7 @@ class Convert2File:
                                 "LastLogin": rows[idx]["LastLogin"].strftime("%Y%m%d%H%M%S"),
                                 "LastUpdatedDate": rows[idx]["LastUpdatedDate"].strftime("%Y%m%d%H%M%S"),})
                         csvout.writerow(rows[idx])
-                writer.closed
+            writer.closed
 
         except Exception as err:
             raise Exception(err)
