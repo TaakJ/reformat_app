@@ -46,9 +46,11 @@ class CollectBackup:
         
     def backup_folder(self, bk):
         
-        date = self.date.date().strftime("%Y%m%d")
+        date = bk.date.date().strftime("%Y%m%d")
         hour = time.strftime("%H")
         
+        _folder = join(Folder.BACKUP, date)
+        print(_folder)
         
         # if not os.path.exists(os.path.dirname(filename)):
         #     try:

@@ -69,8 +69,7 @@ class ModuleADM(CallFunction):
             regex = re.compile(r"\w+.*")
             find_word = regex.findall(line)
             if find_word != []:
-                data += [
-                    re.sub(r"\W\s+","||","".join(find_word).strip()).split("||")]
+                data += [re.sub(r"\W\s+","||","".join(find_word).strip()).split("||")]
 
         state = "succeed"
         self.logging[i].update({"state": state})
