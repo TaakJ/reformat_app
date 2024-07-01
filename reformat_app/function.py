@@ -47,9 +47,9 @@ class CollectBackup:
     def genarate_backup(self, bk):
         
         date = bk.date.date().strftime("%Y%m%d")
-        _folder = join(bk.module, date)
+        # _folder = join(bk.module, date)
         
-        full_backup = join(Folder.BACKUP, _folder)
+        full_backup = join(Folder.BACKUP, date)
         if not os.path.exists(full_backup):
             try:
                 os.makedirs(full_backup)
