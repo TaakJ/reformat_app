@@ -22,6 +22,7 @@ class Folder:
     TMP                 = join(_CURRENT_DIR,"TMP/")
     LOG                 = join(_CURRENT_DIR,"LOG/")
     CONFIG              = join(_CURRENT_DIR,"CONFIG/")
+    BACKUP              = join(_CURRENT_DIR,"BACKUP/")
     _CONFIG_DIR         = join(CONFIG,"config.yaml")
     _LOGGER_CONFIG_DIR  = join(CONFIG,"logging_config.yaml")
 

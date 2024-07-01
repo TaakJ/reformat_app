@@ -4,8 +4,7 @@ import logging
 from datetime import datetime
 from os.path import join
 from .module import Convert2File
-from .setup import CONFIG, PARAMS
-
+from .setup import CONFIG, PARAMS, Folder
 
 class CollectLog(ABC):
     def __init__(self):
@@ -34,7 +33,7 @@ class SetterParams:
         self.output_dir = CONFIG[module]["output_dir"]
         self.output_file = CONFIG[module]["output_file"]
 
-    def get_extract_data(self, i: int, format_file: any):
+    def get_extract_data(self, i: int, format_file: any) -> dict:
 
         logging.info("Extract Data Each Module")
         module = self.logging[i]["module"]
@@ -306,17 +305,14 @@ class SetterParams:
 class CollectParams(SetterParams):
     pass
 
-class CollectBackup:
+class CollectBackup(ABC):
     def __init__(self) -> None:
-        print(self.module)
-
-    def backup_date(self):
-        try:
-            print(self.module1)
-        except Exception as err:
-            print(err)
-            raise Exception(err)
-
-
-class CallFunction(Convert2File, CollectLog, CollectParams, CollectBackup):
+        self.date = datetime.now()
+        self.backup_folder()
+    
+    def backup_folder(self):
+        a = Folder.BACKUP
+        print(a)
+        print(self.date)
+class CallFunction(Convert2File, CollectLog, CollectParams):
     pass
