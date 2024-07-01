@@ -305,15 +305,26 @@ class SetterParams:
 class CollectParams(SetterParams):
     pass
 
+# import schedule
 class CollectBackup(ABC):
     def __init__(self) -> None:
         self.date = datetime.now()
         self.backup_folder()
+        # schedule.every().day.at("13:46").do(self.backup_folder)
     
     def backup_folder(self):
         date = self.date.date().strftime("%Y%m%d")
-        backup_folder = join(Folder.BACKUP, date)
-        print(backup_folder)
+        if self.date.hour < 12:
+            h = "00"
+        else:
+            h = "12"
+        
+        print(h)
+        
+        # suffix = self.date.strftime("")
+        
+        # backup_folder = join(Folder.BACKUP, date)
+        # print(backup_folder)
         
         # filename = Folder.LOG + join(date,file)
         # if not os.path.exists(os.path.dirname(filename)):
