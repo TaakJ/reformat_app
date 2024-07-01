@@ -13,7 +13,6 @@ import csv
 from .exception import CustomException
 from .setup import Folder
 
-
 class Convert2File:
 
     async def check_source_file(self) -> None:

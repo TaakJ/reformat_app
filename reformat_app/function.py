@@ -306,6 +306,9 @@ class CollectParams(SetterParams):
     pass
 
 # import schedule
+import os
+import tarfile
+import time
 class CollectBackup(ABC):
     def __init__(self) -> None:
         self.date = datetime.now()
@@ -313,16 +316,12 @@ class CollectBackup(ABC):
         # schedule.every().day.at("13:46").do(self.backup_folder)
     
     def backup_folder(self):
+        
         date = self.date.date().strftime("%Y%m%d")
-        if self.date.hour < 12:
-            h = "00"
-        else:
-            h = "12"
+        suffix = time.strftime("%H%M%S")
         
-        print(h)
-        
-        # suffix = self.date.strftime("")
-        
+        print(date)
+        print(suffix)
         # backup_folder = join(Folder.BACKUP, date)
         # print(backup_folder)
         
