@@ -24,7 +24,7 @@ class ModuleADM(CallFunction):
         self.output_file = CONFIG[module]["output_file"]
         
         ## backup tar.gz
-        CollectBackup()
+        CollectBackup(self)
     
     async def Run(self, module: str) -> dict:
         self.paramsSetter(module)
