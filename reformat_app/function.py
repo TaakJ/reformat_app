@@ -42,20 +42,23 @@ class CollectParams(ABC):
 
 class CollectBackup:
     def __init__(self, bk) -> None:
-        self.backup_folder(bk)
+        self.genarate_backup(bk)
         
-    def backup_folder(self, bk):
+    def genarate_backup(self, bk):
         
         date = bk.date.date().strftime("%Y%m%d")
+        _folder = join(bk.module, date)
+        
+        full_backup = join(Folder.BACKUP, _folder)
+        if not os.path.exists(full_backup):
+            try:
+                os.makedirs(full_backup)
+            except OSError:
+                pass
+            
         hour = time.strftime("%H")
+        print(hour)
         
-        _folder = join(Folder.BACKUP, date)
-        print(_folder)
-        
-        # if not os.path.exists(os.path.dirname(filename)):
-        #     try:
-        #         os.makedirs(os.path.dirname(filename))
-        #     except OSError:
-        #         pass
+    
 class CallFunction(Convert2File, CollectLog, CollectParams):
     pass
