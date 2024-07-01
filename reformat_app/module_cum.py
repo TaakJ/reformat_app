@@ -62,8 +62,7 @@ class ModuleCUM(CallFunction):
 
         state = "failed"
         module = self.logging[i]["module"]
-        
-        logging.info(f"Data for {module}")
+        logging.info(f"Collect Data for {module}")
         
         self.logging[i].update({"function": "collect_data", "state": state})
         sheet_list = [sheet for sheet in format_file.sheet_names()]

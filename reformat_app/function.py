@@ -1,5 +1,8 @@
 from abc import ABC, abstractmethod
 import re
+import os
+import tarfile
+import time
 import logging
 from datetime import datetime
 from os.path import join
@@ -37,12 +40,9 @@ class CollectParams(ABC):
     def collect_data(self, i: int, format_file: any):
         pass
 
-import os
-import tarfile
-import time
 class CollectBackup:
     def __init__(self) -> None:
-        print("OK")
+        print(self.date)
         
     def backup_folder(self):
         
