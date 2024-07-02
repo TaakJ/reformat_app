@@ -50,55 +50,45 @@ class CollectBackup:
             setattr(self, key, value)
         
         self._date = self.batch_date.strftime("%Y%m%d")
-        self._time = time.strftime("%H")
-        
-        # past_date_before_2yrs = ini_time_for_now - timedelta(days = 2)
-        # self.backup_dir = join(Folder.BACKUP, self._date)
-        # if not os.path.exists(self.backup_dir):
-        #     self.zip_backup()
-        # else:
-        #     self.genarate_backup()
-        
+        self._time = time.strftime("%H%M")
         self.zip_backup()
 
     def zip_backup(self):
         for module in self.source:
-            ## set full path for backup file.
-            dirname = CONFIG[module]["output_dir"]
-            file = CONFIG[module]["output_file"]
-            full_dir = join(dirname, file)
+            root_dir = join(Folder.BACKUP, module)
+            try:
+                for date_dir in [_dir for _dir in os.listdir(root_dir) if not _dir.endswith(".zip")]:
+                    if date_dir >= self._date:
+                        zip_dir  = join(root_dir, date_dir)
+                        zip_name = join(root_dir, f"{date_dir}.zip")
+                        ## zip file.
+                        with zipfile.ZipFile(zip_name, "w", zipfile.ZIP_DEFLATED) as zf:
+                            for file in Path(zip_dir).rglob("*"):
+                                zf.write(file, file.relative_to(zip_dir))
+                        ## remove dir after zip file.
+                        shutil.rmtree(zip_dir)
+                        
+            except FileNotFoundError:
+                self.genarate_backup(module)
             
-            backup_dir = join(Folder.BACKUP, module, self._date)
-            if not os.path.exists(backup_dir):
-                try:
-                    os.makedirs(backup_dir)
-                except OSError:
-                    pass
-            
-            root_dir = os.path.dirname(backup_dir)
-            for date_dir in os.listdir(root_dir):
-                if date_dir < self._date:
-                    print("OK")
-                else:
-                    self.genarate_backup(full_dir, backup_dir)
-                
-        # for root_dir in Path(Folder.BACKUP).iterdir():
-        #     sub_dir = Path(root_dir).stem
-        #     if sub_dir < self._date:
-        #         ## zip file.   
-        #         zip_name = join(Folder.BACKUP, f"{sub_dir}.zip")
-        #         with zipfile.ZipFile(zip_name, "w", zipfile.ZIP_DEFLATED) as zf:
-        #             for file in root_dir.rglob("*"):
-        #                 zf.write(file, file.relative_to(root_dir))
-        #         ## remove 
-        #         shutil.rmtree(sub_dir)
+    def genarate_backup(self, module: str) -> None:
+        output_dir  = CONFIG[module]["output_dir"]
+        output_name = CONFIG[module]["output_file"]
+        backup_name =  f"{Path(output_name).stem}_BK{self._time}.csv"
         
-    def genarate_backup(self, full_dir: str, backup_dir: str) -> None:
-        ## set backup file.
-        backup_file =  f"{Path(full_dir).stem}_BK{self._time}.csv"
-        full_backup = join(backup_dir, backup_file)
-        if glob.glob(full_dir, recursive=True):
-            shutil.copy2(full_dir, full_backup)
+        backup_dir = join(Folder.BACKUP, module, self._date)
+        if not os.path.exists(backup_dir):
+            try:
+                os.makedirs(backup_dir)
+            except OSError:
+                pass
+        ## set path output / backup.
+        full_output = join(output_dir, output_name)
+        full_backup = join(backup_dir, backup_name)
+        
+        if glob.glob(full_output, recursive=True):
+            ## move file to backup.
+            shutil.copy2(full_output, full_backup)
                 
 class CallFunction(Convert2File, CollectLog, CollectParams):
     pass
