@@ -43,8 +43,7 @@ class CollectParams(ABC):
         pass
 
 class CollectBackup:
-    def __init__(self, bk) -> None:
-        
+    def __init__(self, bk) -> None: 
         ## get config.
         self.module = bk.module
         output_dir = CONFIG[self.module]["output_dir"]
