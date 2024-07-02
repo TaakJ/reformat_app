@@ -43,31 +43,37 @@ class CollectParams(ABC):
 
 class CollectBackup:
     def __init__(self, bk) -> None:
-        self.genarate_backup(bk)
         
-    def genarate_backup(self, bk):
+        ## get output from config.
+        output_dir = CONFIG[bk.module]["output_dir"]
+        output_file = CONFIG[bk.module]["output_file"]
+        self.full_output = join(output_dir, output_file)
         
-        date = bk.date.date().strftime("%Y%m%d")
-        backup_dir = join(Folder.BACKUP, date)
+        self._date = bk.date.date().strftime("%Y%m%d")
+        self._time = time.strftime("%H")
+        
+        if self._time == 00:
+            self.genarate_backup()
+        else:
+            self.zip_backup()
+        
+    def genarate_backup(self):
+        
+        backup_dir = join(Folder.BACKUP, self._date)
         if not os.path.exists(backup_dir):
             try:
                 os.makedirs(backup_dir)
             except OSError:
                 pass
             
-        ## get output from config.
-        output_dir = CONFIG[bk.module]["output_dir"]
-        output_file = CONFIG[bk.module]["output_file"]
-        full_output = join(output_dir, output_file)
-        
-        ## set backup file.
-        _time = time.strftime("%H")
-        backup_file =  f"{Path(output_file).stem}_bk_h{_time}.csv"
+        backup_file =  f"{Path(self.full_output).stem}_bk_h{self._time}.csv"
         full_backup = join(backup_dir, backup_file)
         
-        if glob.glob(full_output, recursive=True):
-            shutil.copy2(full_output, full_backup)
+        if glob.glob(self.full_output, recursive=True):
+            shutil.copy2(self.full_output, full_backup)
 
+    def zip_backup(self):
+        print("ok")
     
 class CallFunction(Convert2File, CollectLog, CollectParams):
     pass
