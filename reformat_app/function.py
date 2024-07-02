@@ -53,12 +53,12 @@ class CollectBackup:
         self._time = time.strftime("%H%M")
         self.zip_backup()
 
-    def zip_backup(self):
+    def zip_backup(self) -> None:
         for module in self.source:
             root_dir = join(Folder.BACKUP, module)
             try:
                 for date_dir in [_dir for _dir in os.listdir(root_dir) if not _dir.endswith(".zip")]:
-                    if date_dir >= self._date:
+                    if date_dir > self._date:
                         zip_dir  = join(root_dir, date_dir)
                         zip_name = join(root_dir, f"{date_dir}.zip")
                         ## zip file.
@@ -67,11 +67,13 @@ class CollectBackup:
                                 zf.write(file, file.relative_to(zip_dir))
                         ## remove dir after zip file.
                         shutil.rmtree(zip_dir)
-                        
+                self.genarate_backup(module)
+                
             except FileNotFoundError:
                 self.genarate_backup(module)
             
     def genarate_backup(self, module: str) -> None:
+        ## set path output / backup.
         output_dir  = CONFIG[module]["output_dir"]
         output_name = CONFIG[module]["output_file"]
         backup_name =  f"{Path(output_name).stem}_BK{self._time}.csv"
@@ -82,7 +84,6 @@ class CollectBackup:
                 os.makedirs(backup_dir)
             except OSError:
                 pass
-        ## set path output / backup.
         full_output = join(output_dir, output_name)
         full_backup = join(backup_dir, backup_name)
         
