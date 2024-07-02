@@ -2,6 +2,7 @@ from abc import ABC, abstractmethod
 import os
 import glob
 import shutil
+import zipfile
 import time
 import logging
 from pathlib import Path
@@ -59,6 +60,7 @@ class CollectBackup:
         
     def genarate_backup(self):
         
+        ## set backup date folder.
         backup_dir = join(Folder.BACKUP, self._date)
         if not os.path.exists(backup_dir):
             try:
@@ -69,11 +71,21 @@ class CollectBackup:
         backup_file =  f"{Path(self.full_output).stem}_bk_h{self._time}.csv"
         full_backup = join(backup_dir, backup_file)
         
+        ## backup file.
         if glob.glob(self.full_output, recursive=True):
             shutil.copy2(self.full_output, full_backup)
 
     def zip_backup(self):
-        print("ok")
+        for root_dir in Path(Folder.BACKUP).iterdir():
+            
+            sub_dir = Path(root_dir).stem
+            ## check path with date.
+            if sub_dir >= self._date:
+                
+                ## zip file.    
+                with zipfile.ZipFile(f"{sub_dir}.zip", "w", zipfile.ZIP_DEFLATED) as zf:
+                    for file in root_dir.rglob("*"):
+                        zf.write(file, file.relative_to(root_dir.parent))
     
 class CallFunction(Convert2File, CollectLog, CollectParams):
     pass
