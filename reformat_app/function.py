@@ -45,47 +45,48 @@ class CollectParams(ABC):
 class CollectBackup:
     def __init__(self, bk) -> None:
         
-        ## get output from config.
-        output_dir = CONFIG[bk.module]["output_dir"]
-        output_file = CONFIG[bk.module]["output_file"]
+        ## get config.
+        self.module = bk.module
+        output_dir = CONFIG[self.module]["output_dir"]
+        output_file = CONFIG[self.module]["output_file"]
         self.full_output = join(output_dir, output_file)
         
         self._date = bk.date.date().strftime("%Y%m%d")
-        self._time = time.strftime("%H")
+        self._hour = time.strftime("%H")
+        self._minute = time.strftime("%M")
         
-        if self._time == 00:
-            self.genarate_backup()
-        else:
+        self.backup_dir = join(Folder.BACKUP, self._date)
+        if not os.path.exists(self.backup_dir):
             self.zip_backup()
+        else:
+            self.genarate_backup()
         
     def genarate_backup(self):
-        
         ## set backup date folder.
-        backup_dir = join(Folder.BACKUP, self._date)
-        if not os.path.exists(backup_dir):
+        module_dir = join(self.backup_dir, self.module)
+        if not os.path.exists(module_dir):
             try:
-                os.makedirs(backup_dir)
+                os.makedirs(module_dir)
             except OSError:
                 pass
             
-        backup_file =  f"{Path(self.full_output).stem}_bk_h{self._time}.csv"
-        full_backup = join(backup_dir, backup_file)
-        
+        backup_file =  f"{Path(self.full_output).stem}_BK_{self._hour}_{self._minute}.csv"
+        full_backup = join(module_dir, backup_file)
         ## backup file.
         if glob.glob(self.full_output, recursive=True):
             shutil.copy2(self.full_output, full_backup)
 
     def zip_backup(self):
         for root_dir in Path(Folder.BACKUP).iterdir():
-            
             sub_dir = Path(root_dir).stem
-            ## check path with date.
-            if sub_dir >= self._date:
-                
-                ## zip file.    
-                with zipfile.ZipFile(f"{sub_dir}.zip", "w", zipfile.ZIP_DEFLATED) as zf:
+            if sub_dir < self._date:
+                ## zip file.   
+                zip_name = join(Folder.BACKUP, f"{sub_dir}.zip")
+                with zipfile.ZipFile(zip_name, "w", zipfile.ZIP_DEFLATED) as zf:
                     for file in root_dir.rglob("*"):
-                        zf.write(file, file.relative_to(root_dir.parent))
-    
+                        zf.write(file, file.relative_to(root_dir))
+                ## remove 
+                shutil.rmtree(sub_dir)
+                
 class CallFunction(Convert2File, CollectLog, CollectParams):
     pass

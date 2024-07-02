@@ -23,8 +23,8 @@ class ModuleDOC(CallFunction):
         self.output_dir = CONFIG[module]["output_dir"]
         self.output_file = CONFIG[module]["output_file"]
         
-        ## backup tar.gz
-        # CollectBackup()
+        ## backup file
+        CollectBackup(self)
     
     async def Run(self, module: str) -> dict:
 

@@ -1,7 +1,6 @@
 from os.path import join
 from datetime import datetime
 import pandas as pd
-import re
 import logging
 from .function import CallFunction
 from .exception import CustomException
@@ -23,8 +22,8 @@ class ModuleBOS(CallFunction):
         self.output_dir = CONFIG[module]["output_dir"]
         self.output_file = CONFIG[module]["output_file"]
         
-        ## backup tar.gz
-        # CollectBackup()
+        ## backup file
+        CollectBackup(self)
 
     async def Run(self, module: str) -> dict:
         self.paramsSetter(module)
@@ -33,10 +32,9 @@ class ModuleBOS(CallFunction):
         result = {"module": self.module, "task": "Completed"}
         
         try:
-            await self.check_source_file()
-            await self.retrieve_data_from_source_file()
-            print("BOS")
-            print(self.logging)
+            ''
+            # await self.check_source_file()
+            # await self.retrieve_data_from_source_file()
             # await self.mock_data()
             # if self.store_tmp is True:
             #     await self.write_data_to_tmp_file()

@@ -1,7 +1,6 @@
 from os.path import join
 from datetime import datetime
 import pandas as pd
-import re
 import logging
 from .function import CallFunction
 from .exception import CustomException
@@ -23,8 +22,8 @@ class ModuleIIC(CallFunction):
         self.output_dir = CONFIG[module]["output_dir"]
         self.output_file = CONFIG[module]["output_file"]
         
-        ## backup tar.gz
-        #CollectBackup()
+        ## backup file
+        CollectBackup(self)
 
     async def Run(self, module: str) -> dict:
 
