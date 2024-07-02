@@ -382,7 +382,7 @@ class Convert2File:
             with open(full_target, "r", newline="") as reader:
                 csv_reader = csv.reader(reader, 
                                         skipinitialspace=True,
-                                        delimiter=',',
+                                        delimiter='|',
                                         quotechar='"')
             
                 header = next(csv_reader)
@@ -456,7 +456,7 @@ class Convert2File:
             with open(target_name, "r", newline="") as reader:
                 csvin = csv.DictReader(reader, 
                                     skipinitialspace=True,
-                                    delimiter=',',
+                                    delimiter='|',
                                     quotechar='"')
                 rows = {idx: values for idx, values in enumerate(csvin, 2)}
                 
@@ -474,7 +474,7 @@ class Convert2File:
             with open(target_name, "w", newline="") as writer:
                 csvout = csv.DictWriter(writer, 
                                         csvin.fieldnames,
-                                        delimiter=',',
+                                        delimiter='|',
                                         quotechar='"')
                 csvout.writeheader()
                 for idx in rows:

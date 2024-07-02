@@ -1,13 +1,14 @@
 from abc import ABC, abstractmethod
-import re
 import os
-import tarfile
+import glob
+import shutil
 import time
 import logging
+from pathlib import Path
 from datetime import datetime
 from os.path import join
 from .module import Convert2File
-from .setup import CONFIG, PARAMS, Folder
+from .setup import CONFIG, Folder
 
 class CollectLog(ABC):
     def __init__(self):
@@ -47,34 +48,26 @@ class CollectBackup:
     def genarate_backup(self, bk):
         
         date = bk.date.date().strftime("%Y%m%d")
-        # _folder = join(bk.module, date)
-        
-        full_backup = join(Folder.BACKUP, date)
-        if not os.path.exists(full_backup):
+        backup_dir = join(Folder.BACKUP, date)
+        if not os.path.exists(backup_dir):
             try:
-                os.makedirs(full_backup)
+                os.makedirs(backup_dir)
             except OSError:
                 pass
+            
+        ## get output from config.
+        output_dir = CONFIG[bk.module]["output_dir"]
+        output_file = CONFIG[bk.module]["output_file"]
+        full_output = join(output_dir, output_file)
         
-        # import os
-        # import tarfile
-        # import time
-        # root="c:\\"
-        # source=os.path.join(root,"Documents and Settings","rgolwalkar","Desktop","Desktop","Dr Py","Final_Py")
-        # destination=os.path.join(root,"Documents and Settings","rgolwalkar","Desktop","Desktop","PyDevResourse")
-        # targetBackup = destination + time.strftime('%Y%m%d%H%M%S') + 'tar.gz'    
-        # tar = tarfile.open(targetBackup, "w:gz")
-        # tar.add(source)
-        # tar.close()
+        ## set backup file.
+        _time = time.strftime("%H")
+        backup_file =  f"{Path(output_file).stem}_bk_h{_time}.csv"
+        full_backup = join(backup_dir, backup_file)
         
-        _time = time.strftime("%H%M%S")
-        print(_time)
-        
-        ## output_dir
-        full_output = bk.output_dir
-        print(full_output)
-        print(full_backup)
-        
+        if glob.glob(full_output, recursive=True):
+            shutil.copy2(full_output, full_backup)
+
     
 class CallFunction(Convert2File, CollectLog, CollectParams):
     pass
