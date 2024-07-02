@@ -7,6 +7,7 @@ import time
 import logging
 from pathlib import Path
 from datetime import datetime
+from datetime import timedelta
 from os.path import join
 from .module import Convert2File
 from .setup import CONFIG, Folder
@@ -44,21 +45,22 @@ class CollectParams(ABC):
 
 class CollectBackup:
     def __init__(self, bk) -> None: 
-        ## get config.
-        self.module = bk.module
-        output_dir = CONFIG[self.module]["output_dir"]
-        output_file = CONFIG[self.module]["output_file"]
-        self.full_output = join(output_dir, output_file)
+        ''
+        # ## get config.
+        # self.module = bk.module
+        # output_dir = CONFIG[self.module]["output_dir"]
+        # output_file = CONFIG[self.module]["output_file"]
+        # self.full_output = join(output_dir, output_file)
         
-        self._date = bk.date.date().strftime("%Y%m%d")
-        self._hour = time.strftime("%H")
-        self._minute = time.strftime("%M")
+        # self._date = bk.date.date().strftime("%Y%m%d")
+        # self._time = time.strftime("%H%M")
         
-        self.backup_dir = join(Folder.BACKUP, self._date)
-        if not os.path.exists(self.backup_dir):
-            self.zip_backup()
-        else:
-            self.genarate_backup()
+        # past_date_before_2yrs = ini_time_for_now - timedelta(days = 730)
+        # self.backup_dir = join(Folder.BACKUP, self._date)
+        # if not os.path.exists(self.backup_dir):
+        #     self.zip_backup()
+        # else:
+        #     self.genarate_backup()
         
     def genarate_backup(self):
         ## set backup date folder.
@@ -69,7 +71,7 @@ class CollectBackup:
             except OSError:
                 pass
             
-        backup_file =  f"{Path(self.full_output).stem}_BK_{self._hour}_{self._minute}.csv"
+        backup_file =  f"{Path(self.full_output).stem}_BK{self._time}.csv"
         full_backup = join(module_dir, backup_file)
         ## backup file.
         if glob.glob(self.full_output, recursive=True):

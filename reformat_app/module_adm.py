@@ -6,7 +6,6 @@ import logging
 from .function import CallFunction
 from .exception import CustomException
 from .setup import PARAMS, CONFIG, setup_errorlog
-from .function import CollectBackup
 
 class ModuleADM(CallFunction):
 
@@ -22,9 +21,6 @@ class ModuleADM(CallFunction):
         self.input_dir = [join(CONFIG[module]["input_dir"], CONFIG[module]["input_file"])]
         self.output_dir = CONFIG[module]["output_dir"]
         self.output_file = CONFIG[module]["output_file"]
-        
-        ## backup file
-        CollectBackup(self)
     
     async def Run(self, module: str) -> dict:
         self.paramsSetter(module)
