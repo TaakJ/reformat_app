@@ -10,7 +10,7 @@ from datetime import datetime
 from datetime import timedelta
 from os.path import join
 from .module import Convert2File
-from .setup import CONFIG, Folder
+from .setup import PARAMS,CONFIG, Folder
 
 class CollectLog(ABC):
     def __init__(self):
@@ -44,50 +44,61 @@ class CollectParams(ABC):
         pass
 
 class CollectBackup:
-    def __init__(self, bk) -> None: 
-        ''
-        # ## get config.
-        # self.module = bk.module
-        # output_dir = CONFIG[self.module]["output_dir"]
-        # output_file = CONFIG[self.module]["output_file"]
-        # self.full_output = join(output_dir, output_file)
+    def __init__(self) -> None: 
+        # setup params
+        for key, value in PARAMS.items():
+            setattr(self, key, value)
         
-        # self._date = bk.date.date().strftime("%Y%m%d")
-        # self._time = time.strftime("%H%M")
+        self._date = self.batch_date.strftime("%Y%m%d")
+        self._time = time.strftime("%H")
         
-        # past_date_before_2yrs = ini_time_for_now - timedelta(days = 730)
+        # past_date_before_2yrs = ini_time_for_now - timedelta(days = 2)
         # self.backup_dir = join(Folder.BACKUP, self._date)
         # if not os.path.exists(self.backup_dir):
         #     self.zip_backup()
         # else:
         #     self.genarate_backup()
         
-    def genarate_backup(self):
-        ## set backup date folder.
-        module_dir = join(self.backup_dir, self.module)
-        if not os.path.exists(module_dir):
-            try:
-                os.makedirs(module_dir)
-            except OSError:
-                pass
-            
-        backup_file =  f"{Path(self.full_output).stem}_BK{self._time}.csv"
-        full_backup = join(module_dir, backup_file)
-        ## backup file.
-        if glob.glob(self.full_output, recursive=True):
-            shutil.copy2(self.full_output, full_backup)
+        self.zip_backup()
 
     def zip_backup(self):
-        for root_dir in Path(Folder.BACKUP).iterdir():
-            sub_dir = Path(root_dir).stem
-            if sub_dir < self._date:
-                ## zip file.   
-                zip_name = join(Folder.BACKUP, f"{sub_dir}.zip")
-                with zipfile.ZipFile(zip_name, "w", zipfile.ZIP_DEFLATED) as zf:
-                    for file in root_dir.rglob("*"):
-                        zf.write(file, file.relative_to(root_dir))
-                ## remove 
-                shutil.rmtree(sub_dir)
+        for module in self.source:
+            ## set full path for backup file.
+            dirname = CONFIG[module]["output_dir"]
+            file = CONFIG[module]["output_file"]
+            full_dir = join(dirname, file)
+            
+            backup_dir = join(Folder.BACKUP, module, self._date)
+            if not os.path.exists(backup_dir):
+                try:
+                    os.makedirs(backup_dir)
+                except OSError:
+                    pass
+            
+            root_dir = os.path.dirname(backup_dir)
+            for date_dir in os.listdir(root_dir):
+                if date_dir < self._date:
+                    print("OK")
+                else:
+                    self.genarate_backup(full_dir, backup_dir)
+                
+        # for root_dir in Path(Folder.BACKUP).iterdir():
+        #     sub_dir = Path(root_dir).stem
+        #     if sub_dir < self._date:
+        #         ## zip file.   
+        #         zip_name = join(Folder.BACKUP, f"{sub_dir}.zip")
+        #         with zipfile.ZipFile(zip_name, "w", zipfile.ZIP_DEFLATED) as zf:
+        #             for file in root_dir.rglob("*"):
+        #                 zf.write(file, file.relative_to(root_dir))
+        #         ## remove 
+        #         shutil.rmtree(sub_dir)
+        
+    def genarate_backup(self, full_dir: str, backup_dir: str) -> None:
+        ## set backup file.
+        backup_file =  f"{Path(full_dir).stem}_BK{self._time}.csv"
+        full_backup = join(backup_dir, backup_file)
+        if glob.glob(full_dir, recursive=True):
+            shutil.copy2(full_dir, full_backup)
                 
 class CallFunction(Convert2File, CollectLog, CollectParams):
     pass
