@@ -87,8 +87,8 @@ class CollectBackup:
         full_output = join(output_dir, output_name)
         full_backup = join(backup_dir, backup_name)
         
+        ## move file to backup.
         if glob.glob(full_output, recursive=True):
-            ## move file to backup.
             shutil.copy2(full_output, full_backup)
                 
 class CallFunction(Convert2File, CollectLog, CollectParams):
