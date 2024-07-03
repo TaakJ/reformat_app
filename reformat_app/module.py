@@ -393,8 +393,11 @@ class Convert2File:
         except FileNotFoundError:
             template_name = join(Folder.TEMPLATE, "Application Data Requirements.xlsx")
             target_df = pd.read_excel(template_name)
-            target_df.to_csv(full_target, index=None, header=True)
-
+            # delimiter = target_df.to_numpy()
+            # np.savetxt(full_target, delimiter, fmt='%s', delimiter='|')
+            
+            target_df.to_csv(full_target, index=None, header=True, sep='|')
+        
         state = "succeed"
         self.logging[-1].update({"state": state})
 
@@ -413,11 +416,13 @@ class Convert2File:
 
             ## filter data on batch date => DataFrame
             batch_df = target_df[target_df["CreateDate"].isin(np.array([pd.Timestamp(self.batch_date)]))].reset_index(drop=True)
+            
             ## validate data change row by row
             data_dict = self.validate_data_change(batch_df, change_df)
+            
             ## filter data not on batch date => dict
-            merge_data = (target_df[~target_df["CreateDate"].isin(np.array([pd.Timestamp(self.batch_date)]))].iloc[:, :-1].to_dict("index"))
-
+            merge_data = target_df[~target_df["CreateDate"].isin(np.array([pd.Timestamp(self.batch_date)]))].iloc[:,:-1].to_dict("index")
+            
             ## merge data from new and old data
             max_rows = max(merge_data, default=0)
             for idx, values in data_dict.items():
@@ -470,7 +475,8 @@ class Convert2File:
                             continue
                     else:
                         rows[idx].update(data[idx])
-                        
+            
+        
             with open(target_name, "w", newline="") as writer:
                 csvout = csv.DictWriter(writer, 
                                         csvin.fieldnames,
