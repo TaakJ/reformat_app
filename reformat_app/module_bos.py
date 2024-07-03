@@ -73,24 +73,6 @@ class ModuleBOS(CallFunction):
         self.logging[i].update({"state": state})
         return data
 
-    # async def mapping_column(self) -> None:
-
-    #     state = "failed"
-    #     for record in self.logging:
-    #         record.update({"function": "mapping_column", "state": state})
-    #         try:
-    #             for sheet, data in record["data"].items():
-    #                 logging.info(f'Mapping Column From Sheet: "{sheet}"')
-
-    #                 if "BOS_export_BrUser" in sheet:
-    #                     print(data)
-
-    #                 elif "BOS_export_role" in sheet:
-    #                     raise Exception("raise Exception")
-
-    #         except Exception as err:
-    #             record.update({"err": err})
-
     async def mock_data(self) -> None:
         mock_data = [
             [
@@ -108,6 +90,7 @@ class ModuleBOS(CallFunction):
                 "LastLogin",
                 "LastUpdatedDate",
                 "AdditionalAttribute",
+                "Country",
             ],
             [
                 "MOCK1",
@@ -124,6 +107,7 @@ class ModuleBOS(CallFunction):
                 self.date,
                 self.batch_date,
                 "14",
+                "TH",
             ],
             [
                 "MOCK2",
@@ -140,6 +124,7 @@ class ModuleBOS(CallFunction):
                 self.date,
                 self.batch_date,
                 "28",
+                "TH",
             ],
         ]
         df = pd.DataFrame(mock_data)

@@ -75,24 +75,6 @@ class ModuleCUM(CallFunction):
         self.logging[i].update({"state": state})
         return data
 
-    # async def mapping_column(self) -> None:
-
-    #     state = "failed"
-    #     for record in self.logging:
-    #         record.update({"function": "mapping_column", "state": state})
-    #         try:
-    #             for sheet, data in record["data"].items():
-    #                 logging.info(f'Mapping Column From Sheet: "{sheet}"')
-
-    #                 if "USER REPORT" in sheet:
-    #                     df = pd.DataFrame(data)
-    #                     df.columns = df.iloc[0].values
-    #                     df = df[1:]
-    #                     df = df.reset_index(drop=True)
-
-    #         except Exception as err:
-    #             record.update({"err": err})
-
     async def mock_data(self) -> None:
         mock_data = [
             [
@@ -110,6 +92,7 @@ class ModuleCUM(CallFunction):
                 "LastLogin",
                 "LastUpdatedDate",
                 "AdditionalAttribute",
+                "Country",
             ],
             [
                 "MOCK1",
@@ -126,6 +109,7 @@ class ModuleCUM(CallFunction):
                 self.date,
                 self.batch_date,
                 "14",
+                "TH",
             ],
             [
                 "MOCK2",
@@ -142,6 +126,7 @@ class ModuleCUM(CallFunction):
                 self.date,
                 self.batch_date,
                 "28",
+                "TH",
             ],
         ]
         df = pd.DataFrame(mock_data)

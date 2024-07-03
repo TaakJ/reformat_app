@@ -106,6 +106,7 @@ class ModuleLDS(CallFunction):
                 "LastLogin",
                 "LastUpdatedDate",
                 "AdditionalAttribute",
+                "Country",
             ],
             [
                 "MOCK1",
@@ -122,6 +123,7 @@ class ModuleLDS(CallFunction):
                 self.date,
                 self.batch_date,
                 "14",
+                "TH",
             ],
             [
                 "MOCK2",
@@ -138,6 +140,7 @@ class ModuleLDS(CallFunction):
                 self.date,
                 self.batch_date,
                 "28",
+                "TH",
             ],
         ]
         df = pd.DataFrame(mock_data)

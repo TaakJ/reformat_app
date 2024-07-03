@@ -379,7 +379,7 @@ class Convert2File:
 
         try:
             data = []
-            with open(full_target, "r", newline="") as reader:
+            with open(full_target, "r", newline="\n") as reader:
                 csv_reader = csv.reader(reader, 
                                         skipinitialspace=True,
                                         delimiter=',',
@@ -455,7 +455,7 @@ class Convert2File:
         self.logging[-1].update({"function": "write_csv",
                                 "state": state})
         try:
-            with open(target_name, "r", newline="") as reader:
+            with open(target_name, "r", newline="\n") as reader:
                 csvin = csv.DictReader(reader, 
                                     skipinitialspace=True,
                                     delimiter=',',
@@ -473,7 +473,7 @@ class Convert2File:
                     else:
                         rows[idx].update(data[idx])
             
-            with open(target_name, "w", newline="") as writer:
+            with open(target_name, "w", newline="\n") as writer:
                 csvout = csv.DictWriter(writer, 
                                         csvin.fieldnames,
                                         delimiter=',',

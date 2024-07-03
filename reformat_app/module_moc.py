@@ -93,6 +93,7 @@ class ModuleMOC(CallFunction):
                 "LastLogin",
                 "LastUpdatedDate",
                 "AdditionalAttribute",
+                "Country",
             ],
             [
                 "MOCK1",
@@ -109,6 +110,7 @@ class ModuleMOC(CallFunction):
                 self.date,
                 self.batch_date,
                 "14",
+                "TH",
             ],
             [
                 "MOCK2",
@@ -125,6 +127,7 @@ class ModuleMOC(CallFunction):
                 self.date,
                 self.batch_date,
                 "28",
+                "TH",
             ],
         ]
         df = pd.DataFrame(mock_data)
