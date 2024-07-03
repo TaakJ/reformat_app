@@ -56,6 +56,7 @@ class CollectBackup:
     def zip_backup(self) -> None:
         for module in self.source:
             root_dir = join(Folder.BACKUP, module)
+            
             print(root_dir)
             # overwrite
             print(self.write_mode)
