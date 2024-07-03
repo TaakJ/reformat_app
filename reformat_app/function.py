@@ -64,19 +64,20 @@ class CollectBackup:
                             ## zip file.
                             zip_dir  = join(root_dir, date_dir)
                             zip_name = join(root_dir, f"{date_dir}.zip")
+                            
                             with zipfile.ZipFile(zip_name, "w", zipfile.ZIP_DEFLATED) as zf:
                                 for file in Path(zip_dir).rglob("*"):
                                     zf.write(file, file.relative_to(zip_dir))
-                                    
+                            ## remove dir after zip file.         
                             os.remove(zip_dir)
                     else:
-                        ## remove dir after zip file.
-                        _date = self.batch_date - timedelta(days=2)
+                        _date = self.batch_date - timedelta(days=1)
                         zip_name = f'{_date.strftime("%Y%m%d")}.zip'
-                        if zip_name == date_dir:
+                        if date_dir < zip_name:
+                            ## remove old zip file
                             zip_dir = join(root_dir, zip_name)
                             os.remove(zip_dir)
-                        
+
                 self.genarate_backup(module)
                 
             except FileNotFoundError:
