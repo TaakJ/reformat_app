@@ -382,7 +382,7 @@ class Convert2File:
             with open(full_target, "r", newline="") as reader:
                 csv_reader = csv.reader(reader, 
                                         skipinitialspace=True,
-                                        delimiter='|',
+                                        delimiter=',',
                                         quotechar='"')
             
                 header = next(csv_reader)
@@ -393,10 +393,7 @@ class Convert2File:
         except FileNotFoundError:
             template_name = join(Folder.TEMPLATE, "Application Data Requirements.xlsx")
             target_df = pd.read_excel(template_name)
-            # delimiter = target_df.to_numpy()
-            # np.savetxt(full_target, delimiter, fmt='%s', delimiter='|')
-            
-            target_df.to_csv(full_target, index=None, header=True, sep='|')
+            target_df.to_csv(full_target, index=None, header=True, sep=',')
         
         state = "succeed"
         self.logging[-1].update({"state": state})
@@ -461,7 +458,7 @@ class Convert2File:
             with open(target_name, "r", newline="") as reader:
                 csvin = csv.DictReader(reader, 
                                     skipinitialspace=True,
-                                    delimiter='|',
+                                    delimiter=',',
                                     quotechar='"')
                 rows = {idx: values for idx, values in enumerate(csvin, 2)}
                 
@@ -479,7 +476,7 @@ class Convert2File:
             with open(target_name, "w", newline="") as writer:
                 csvout = csv.DictWriter(writer, 
                                         csvin.fieldnames,
-                                        delimiter='|',
+                                        delimiter=',',
                                         quotechar='"')
                 csvout.writeheader()
                 for idx in rows:
