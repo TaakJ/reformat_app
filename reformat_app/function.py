@@ -56,32 +56,35 @@ class CollectBackup:
     def zip_backup(self) -> None:
         for module in self.source:
             root_dir = join(Folder.BACKUP, module)
-            try:
-                for date_dir in os.listdir(root_dir):
-                    if not date_dir.endswith(".zip"):
+            print(root_dir)
+            # overwrite
+            print(self.write_mode)
+            # try:
+            #     for date_dir in os.listdir(root_dir):
+            #         if not date_dir.endswith(".zip"):
                         
-                        if date_dir < self._date:
-                            ## zip file.
-                            zip_dir  = join(root_dir, date_dir)
-                            zip_name = join(root_dir, f"{date_dir}.zip")
+            #             if date_dir < self._date:
+            #                 ## zip file.
+            #                 zip_dir  = join(root_dir, date_dir)
+            #                 zip_name = join(root_dir, f"{date_dir}.zip")
                             
-                            with zipfile.ZipFile(zip_name, "w", zipfile.ZIP_DEFLATED) as zf:
-                                for file in Path(zip_dir).rglob("*"):
-                                    zf.write(file, file.relative_to(zip_dir))
-                            ## remove dir after zip file.         
-                            os.remove(zip_dir)
-                    else:
-                        _date = self.batch_date - timedelta(days=1)
-                        zip_name = f'{_date.strftime("%Y%m%d")}.zip'
-                        if date_dir < zip_name:
-                            ## remove old zip file
-                            zip_dir = join(root_dir, zip_name)
-                            os.remove(zip_dir)
+            #                 with zipfile.ZipFile(zip_name, "w", zipfile.ZIP_DEFLATED) as zf:
+            #                     for file in Path(zip_dir).rglob("*"):
+            #                         zf.write(file, file.relative_to(zip_dir))
+            #                 ## remove dir after zip file.         
+            #                 os.remove(zip_dir)
+            #         else:
+            #             _date = self.batch_date - timedelta(days=1)
+            #             zip_name = f'{_date.strftime("%Y%m%d")}.zip'
+            #             if date_dir < zip_name:
+            #                 ## remove old zip file
+            #                 zip_dir = join(root_dir, zip_name)
+            #                 os.remove(zip_dir)
                             
-                self.genarate_backup(module)
+            #     self.genarate_backup(module)
                 
-            except FileNotFoundError:
-                self.genarate_backup(module)
+            # except FileNotFoundError:
+            #     self.genarate_backup(module)
             
     def genarate_backup(self, module: str) -> None:
         ## set path output / backup.
