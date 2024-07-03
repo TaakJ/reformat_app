@@ -44,7 +44,8 @@ class Convert2File:
 
         state = "failed"
         for i, record in enumerate(self.logging):
-            record.update({"function": "retrieve_data_from_source_file", "state": state})
+            record.update({"function": "retrieve_data_from_source_file", 
+                            "state": state})
 
             input_dir = record["input_dir"]
             types = Path(input_dir).suffix
@@ -99,7 +100,8 @@ class Convert2File:
     def initial_data_type(self, df: pd.DataFrame) -> pd.DataFrame:
 
         state = "failed"
-        self.logging[-1].update({"function": "initial_data_type", "state": state})
+        self.logging[-1].update({"function": "initial_data_type",
+                                "state": state})
         try:
             df = df.astype({
                     "ApplicationCode": object,
@@ -139,7 +141,8 @@ class Convert2File:
         self.remove_rows = []
 
         state = "failed"
-        self.logging[-1].update({"function": "validate_data_change", "state": state})
+        self.logging[-1].update({"function": "validate_data_change",
+                                "state": state})
 
         def format_record(record):
             return "\n".join("{!r} => {!r},".format(columns, values) for columns, values in record.items())
@@ -340,8 +343,8 @@ class Convert2File:
 
                         ## set target name for read csv.
                         state = "failed"
-                        record.update({"function": "write_data_to_target_file", 
-                                    "state": state})
+                        record.update({"function": "write_data_to_target_file",
+                                        "state": state})
                         
                         if self.write_mode == "overwrite" or self.manual:
                             full_target = join(self.output_dir, self.output_file)
@@ -383,7 +386,8 @@ class Convert2File:
                 csv_reader = csv.reader(reader, 
                                         skipinitialspace=True,
                                         delimiter=',',
-                                        quotechar='"')
+                                        quotechar='"',
+                                        quoting=csv.QUOTE_MINIMAL)
             
                 header = next(csv_reader)
                 for row in csv_reader:
@@ -405,7 +409,8 @@ class Convert2File:
         logging.info("Optimize Data Before Write to Target")
 
         state = "failed"
-        self.logging[-1].update({"function": "optimize_data", "state": state})
+        self.logging[-1].update({"function": "optimize_data",
+                                "state": state})
 
         data = {}
         try:
@@ -454,12 +459,14 @@ class Convert2File:
         state = "failed"
         self.logging[-1].update({"function": "write_csv",
                                 "state": state})
+        
         try:
             with open(target_name, "r", newline="\n") as reader:
                 csvin = csv.DictReader(reader, 
                                     skipinitialspace=True,
                                     delimiter=',',
-                                    quotechar='"')
+                                    quotechar='"',
+                                    quoting=csv.QUOTE_MINIMAL) 
                 rows = {idx: values for idx, values in enumerate(csvin, 2)}
                 
                 for idx, value in data.items():
@@ -477,8 +484,10 @@ class Convert2File:
                 csvout = csv.DictWriter(writer, 
                                         csvin.fieldnames,
                                         delimiter=',',
-                                        quotechar='"')
+                                        quotechar='"',
+                                        quoting=csv.QUOTE_MINIMAL)
                 csvout.writeheader()
+                
                 for idx in rows:
                     if idx not in self.remove_rows:
                         rows[idx].update({
