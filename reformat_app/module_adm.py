@@ -51,13 +51,14 @@ class ModuleADM(CallFunction):
 
         return result
     
-    def collect_data(self, i: int, format_file: any):
+    def collect_data(self, i: int, format_file: any) -> dict:
         
         state = "failed"
         module = self.logging[i]["module"]
         logging.info(f"Collect Data for {module}")
         
-        self.logging[i].update({"function": "collect_data", "state": state})
+        self.logging[i].update({"function": "collect_data",
+                                "state": state})
 
         data = []
         for line in format_file:
