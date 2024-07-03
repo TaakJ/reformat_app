@@ -370,7 +370,7 @@ class Convert2File:
 
     def read_csv(self, full_target: str) -> pd.DataFrame:
 
-        logging.info(f'Read Target files: "{full_target}"')
+        logging.info(f'Read Target file: "{full_target}"')
 
         state = "failed"
         self.logging[-1].update({"input_dir": full_target, 
@@ -452,7 +452,7 @@ class Convert2File:
 
     def write_csv(self, target_name: str, data: dict) -> str:
 
-        logging.info(f'Write mode: "{self.write_mode}" in Target files: "{target_name}"')
+        logging.info(f'Write mode: "{self.write_mode}" in Target file: "{target_name}"')
 
         state = "failed"
         self.logging[-1].update({"function": "write_csv",
@@ -476,7 +476,6 @@ class Convert2File:
                     else:
                         rows[idx].update(data[idx])
             
-        
             with open(target_name, "w", newline="") as writer:
                 csvout = csv.DictWriter(writer, 
                                         csvin.fieldnames,
