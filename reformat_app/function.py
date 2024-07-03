@@ -90,6 +90,9 @@ class CollectBackup:
         ## move file to backup.
         if glob.glob(full_output, recursive=True):
             shutil.copy2(full_output, full_backup)
+            
+    def remove_backup(self):
+        print("OK")
                 
 class CallFunction(Convert2File, CollectLog, CollectParams):
     pass
