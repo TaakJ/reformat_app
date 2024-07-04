@@ -51,6 +51,9 @@ class CollectBackup:
         self._date = self.batch_date.strftime("%Y%m%d")
         self._time = time.strftime("%H%M")
         
+        print(PARAMS)
+        self.remove_date_dir()
+        
         for module in self.source:
             self.root_dir = join(Folder.BACKUP, module)
             state = self.create_date_dir()
@@ -72,7 +75,22 @@ class CollectBackup:
             except OSError:
                 pass
         state = "succeed"
+        
         return state
+    
+    def remove_date_dir(self):
+        print("OK")
+    
+    def zip_backup(self, date_dir):
+        if date_dir < self._date:
+            zip_dir  = join(self.root_dir, date_dir)
+            zip_name = join(self.root_dir, f"{date_dir}.zip")
+            
+            with zipfile.ZipFile( join(self.root_dir, zip_name), "w", zipfile.ZIP_DEFLATED) as zf:
+                for file in Path(zip_dir).rglob("*"):
+                    zf.write(file, file.relative_to(zip_dir))
+                    
+            shutil.rmtree(zip_dir)
             
     def genarate_backup_file(self, module):
         output_dir  = CONFIG[module]["output_dir"]
@@ -92,17 +110,6 @@ class CollectBackup:
             
         except FileNotFoundError:
             pass
-            
-    def zip_backup(self, date_dir):
-        if date_dir < self._date:
-            zip_dir  = join(self.root_dir, date_dir)
-            zip_name = join(self.root_dir, f"{date_dir}.zip")
-            
-            with zipfile.ZipFile( join(self.root_dir, zip_name), "w", zipfile.ZIP_DEFLATED) as zf:
-                for file in Path(zip_dir).rglob("*"):
-                    zf.write(file, file.relative_to(zip_dir))
-                    
-            shutil.rmtree(zip_dir)
                 
 class CallFunction(Convert2File, CollectLog, CollectParams):
     pass
