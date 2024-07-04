@@ -25,12 +25,12 @@ class ModuleMOC(CallFunction):
         output_file = CONFIG[module]["output_file"]
         
         if self.write_mode == "overwrite" or self.manual:
-            "continue"
+            full_target = output_file
         else:
             suffix = f"{self.batch_date.strftime('%Y%m%d')}"
-            output_file = f"{Path(output_file).stem}_{suffix}.csv"
+            full_target = f"{Path(output_file).stem}_{suffix}.csv"
             
-        self.full_target = join(output_dir, output_file)
+        self.full_target = join(output_dir, full_target)
 
     async def Run(self, module: str) -> dict:
 

@@ -25,6 +25,14 @@ class ModuleLMT(CallFunction):
         output_file = CONFIG[module]["output_file"]
         
         if self.write_mode == "overwrite" or self.manual:
+            full_target = output_file
+        else:
+            suffix = f"{self.batch_date.strftime('%Y%m%d')}"
+            full_target = f"{Path(output_file).stem}_{suffix}.csv"
+            
+        self.full_target = join(output_dir, full_target)
+        
+        if self.write_mode == "overwrite" or self.manual:
             "continue"
         else:
             suffix = f"{self.batch_date.strftime('%Y%m%d')}"

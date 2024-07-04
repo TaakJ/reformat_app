@@ -19,15 +19,18 @@ class ModuleBOS(CallFunction):
         
         for key, value in PARAMS.items():
             setattr(self, key, value)
-            
+        
         self.input_dir = [join(CONFIG[module]["input_dir"], CONFIG[module]["input_file"])]
         output_dir = CONFIG[module]["output_dir"]
         output_file = CONFIG[module]["output_file"]
         
-        suffix = f"{self.batch_date.strftime('%Y%m%d')}"
-        output_file = f"{Path(output_file).stem}_{suffix}.csv"
-        
-        self.full_target = join(output_dir, output_file)
+        if self.write_mode == "overwrite" or self.manual:
+            full_target = output_file
+        else:
+            suffix = f"{self.batch_date.strftime('%Y%m%d')}"
+            full_target = f"{Path(output_file).stem}_{suffix}.csv"
+            
+        self.full_target = join(output_dir, full_target)
 
     async def Run(self, module: str) -> dict:
         self.paramsSetter(module)
