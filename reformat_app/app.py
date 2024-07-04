@@ -64,7 +64,7 @@ class setup_app(QWidget):
     def ui(self):
 
         self.all_module = PARAMS["source"]
-        self.filename = {module: f'Manual_{CONFIG[module]["output_file"]}' for module in self.all_module}
+        self.filename = {module: f'MANUAL_{CONFIG[module]["output_file"]}' for module in self.all_module}
         self.module = self.all_module
 
         grid = QGridLayout()
@@ -138,7 +138,7 @@ class setup_app(QWidget):
         # hbox2.addWidget(self.clear_tmp)
 
         vbox1 = QVBoxLayout()
-        self.mode_label = QLabel("e.g. Manual_{module}.csv")
+        self.mode_label = QLabel("e.g. MANUAL_{module}.csv")
         vbox1.addWidget(self.mode_label)
 
         vbox = QVBoxLayout()
@@ -281,10 +281,10 @@ class setup_app(QWidget):
 
     def task_select_mode(self):
         if self.radio1.isChecked():
-            self.mode_label.setText("e.g. Manual_{module}.csv")
+            self.mode_label.setText("e.g. MANUAL_{module}.csv")
             self.mode = "overwrite"
         else:
-            self.mode_label.setText("e.g. Manual_{module}_YYYYYMMDD.csv")
+            self.mode_label.setText("e.g. MANUAL_{module}_YYYYYMMDD.csv")
             self.mode = "new"
 
     def task_open_dialog(self,event):
