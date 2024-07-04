@@ -21,7 +21,14 @@ class ModuleADM(CallFunction):
         self.input_dir = [join(CONFIG[module]["input_dir"], CONFIG[module]["input_file"])]
         self.output_dir = CONFIG[module]["output_dir"]
         self.output_file = CONFIG[module]["output_file"]
-    
+        
+        # if self.write_mode == "overwrite" or self.manual:
+        #     full_target = join(self.output_dir, self.output_file)
+        # else:
+        #     suffix = f"{self.batch_date.strftime('%Y%m%d')}"
+        #     self.output_file = f"{Path(self.output_file).stem}_{suffix}.csv"
+        #     full_target = join(self.output_dir, self.output_file)
+
     async def Run(self, module: str) -> dict:
         self.paramsSetter(module)
         

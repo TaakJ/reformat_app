@@ -45,67 +45,64 @@ class CollectParams(ABC):
 
 class CollectBackup:
     def __init__(self) -> None: 
-        # setup params
         for key, value in PARAMS.items():
             setattr(self, key, value)
         
         self._date = self.batch_date.strftime("%Y%m%d")
         self._time = time.strftime("%H%M")
-        self.zip_backup()
-
-    def zip_backup(self) -> None:
-        for module in self.source:
-            root_dir = join(Folder.BACKUP, module)
-            
-            print(root_dir)
-            # overwrite
-            print(self.write_mode)
-            # try:
-            #     for date_dir in os.listdir(root_dir):
-            #         if not date_dir.endswith(".zip"):
-                        
-            #             if date_dir < self._date:
-            #                 ## zip file.
-            #                 zip_dir  = join(root_dir, date_dir)
-            #                 zip_name = join(root_dir, f"{date_dir}.zip")
-                            
-            #                 with zipfile.ZipFile(zip_name, "w", zipfile.ZIP_DEFLATED) as zf:
-            #                     for file in Path(zip_dir).rglob("*"):
-            #                         zf.write(file, file.relative_to(zip_dir))
-            #                 ## remove dir after zip file.         
-            #                 os.remove(zip_dir)
-            #         else:
-            #             _date = self.batch_date - timedelta(days=1)
-            #             zip_name = f'{_date.strftime("%Y%m%d")}.zip'
-            #             if date_dir < zip_name:
-            #                 ## remove old zip file
-            #                 zip_dir = join(root_dir, zip_name)
-            #                 os.remove(zip_dir)
-                            
-            #     self.genarate_backup(module)
-                
-            # except FileNotFoundError:
-            #     self.genarate_backup(module)
-            
-    def genarate_backup(self, module: str) -> None:
-        ## set path output / backup.
-        output_dir  = CONFIG[module]["output_dir"]
-        output_name = CONFIG[module]["output_file"]
-        backup_name =  f"{Path(output_name).stem}_BK{self._time}.csv"
         
-        backup_dir = join(Folder.BACKUP, module, self._date)
-        if not os.path.exists(backup_dir):
+        for module in self.source:
+            self.root_dir = join(Folder.BACKUP, module)
+            state = self.create_date_dir()
+            
+            if state == "succeed":
+                for date_dir in os.listdir(self.root_dir):
+                    if not date_dir.endswith(".zip"):
+                        self.zip_backup(date_dir)
+            
+                self.genarate_backup_file(module)
+                
+    def create_date_dir(self) -> str:
+        state = "failed"
+        date_dir = join(self.root_dir, self._date)
+        
+        if not os.path.exists(date_dir):
             try:
-                os.makedirs(backup_dir)
+                os.makedirs(date_dir)
             except OSError:
                 pass
+        state = "succeed"
+        return state
             
-        full_output = join(output_dir, output_name)
-        full_backup = join(backup_dir, backup_name)
+    def genarate_backup_file(self, module):
+        output_dir  = CONFIG[module]["output_dir"]
+        output_file = CONFIG[module]["output_file"]
         
-        ## move file to backup.
-        if glob.glob(full_output, recursive=True):
+        if self.write_mode != "overwrite" or self.manual:
+            output_file = f"{Path(output_file).stem}_{self._date}.csv"
+            
+        backup_dir  = join(self.root_dir, self._date)
+        backup_file = f"BK_{Path(output_file).stem}_T{self._time}.csv"
+        
+        try:
+            full_output = join(output_dir, output_file)
+            full_backup = join(backup_dir, backup_file)
+            ## move outpur file to backup file
             shutil.copy2(full_output, full_backup)
+            
+        except FileNotFoundError:
+            pass
+            
+    def zip_backup(self, date_dir):
+        if date_dir < self._date:
+            zip_dir  = join(self.root_dir, date_dir)
+            zip_name = join(self.root_dir, f"{date_dir}.zip")
+            
+            with zipfile.ZipFile( join(self.root_dir, zip_name), "w", zipfile.ZIP_DEFLATED) as zf:
+                for file in Path(zip_dir).rglob("*"):
+                    zf.write(file, file.relative_to(zip_dir))
+                    
+            shutil.rmtree(zip_dir)
                 
 class CallFunction(Convert2File, CollectLog, CollectParams):
     pass
