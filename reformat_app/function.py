@@ -98,6 +98,7 @@ class CollectBackup:
             output_file = f"{Path(output_file).stem}_{self._date}.csv"
         
         full_output = join(output_dir, output_file)
+        print(full_output)
         logging.info(f'Backup file from "{full_output}"')
         
         state = "skipped"
