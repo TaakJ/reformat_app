@@ -7,7 +7,6 @@ import time
 import logging
 from pathlib import Path
 from datetime import datetime
-from datetime import timedelta
 from os.path import join
 from .module import Convert2File
 from .setup import PARAMS,CONFIG, Folder
@@ -52,16 +51,16 @@ class CollectBackup:
         self._time = time.strftime("%H%M")
         
         for module in self.source:
-            self.remove_date_dir(module)
-        #     self.root_dir = join(Folder.BACKUP, module)
-        #     state = self.create_date_dir()
+            self.root_dir = join(Folder.BACKUP, module)
+            state = self.create_date_dir()
             
-        #     if state == "succeed":
-        #         for date_dir in os.listdir(self.root_dir):
-        #             if not date_dir.endswith(".zip"):
-        #                 self.zip_backup(date_dir)
+            if state == "succeed":
+                for date_dir in [date_dir for date_dir in os.listdir(self.root_dir) if not date_dir.endswith(".zip")]:
+                    self.zip_backup(date_dir)
+                self.genarate_backup_file(module)
             
-        #         self.genarate_backup_file(module)
+            if self.clear:
+                self.remove_utility(module)
                 
     def create_date_dir(self) -> str:
         state = "failed"
@@ -73,30 +72,38 @@ class CollectBackup:
             except OSError:
                 pass
         state = "succeed"
+        
         return state
     
-    def remove_date_dir(self, module):
+    def remove_utility(self, module):
+        ## remove log dir
+        try:
+            for date_dir in os.listdir(Folder.LOG):
+                if date_dir < self._date:
+                    log_dir = join(Folder.LOG, date_dir)
+                    shutil.rmtree(log_dir)
+        except OSError:
+            pass
+                
+        ## remove tmp file 
+        try:
+            tmp_dir = join(Folder.TMP, module)
+            for file in os.listdir(tmp_dir):
+                tmp_file = join(tmp_dir, file)
+                os.remove(tmp_file)
+        except OSError:
+            pass
         
-        if self.clear:
-            ## remove log dir 
-            try:
-                for date_dir in os.listdir(Folder.LOG):
-                    if date_dir < self._date:
-                        log_dir = join(Folder.LOG, date_dir)
-                        shutil.rmtree(log_dir)
-                        
-            except OSError:
-                pass
-                    
-            ## remove tmp file 
-            try:
-                tmp_dir = join(Folder.TMP, module)
-                for file in os.listdir(tmp_dir):
-                    tmp_file = join(tmp_dir, file)
-                    os.remove(tmp_file)
-                    
-            except OSError:
-                pass
+        ## remove backup file. 
+        try:
+            backup_dir = join(Folder.BACKUP, module)
+            print(backup_dir)
+            # for file in os.listdir(tmp_dir):
+            #     tmp_file = join(tmp_dir, file)
+            #     os.remove(tmp_file)
+                
+        except OSError:
+            pass
             
     def zip_backup(self, date_dir):
         if date_dir < self._date:
@@ -125,7 +132,7 @@ class CollectBackup:
             ## move outpur file to backup file
             shutil.copy2(full_output, full_backup)
             
-        except FileNotFoundError:
+        except OSError:
             pass
                 
 class CallFunction(Convert2File, CollectLog, CollectParams):
