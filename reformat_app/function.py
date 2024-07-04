@@ -94,20 +94,22 @@ class CollectBackup:
         output_dir  = CONFIG[module]["output_dir"]
         output_file = CONFIG[module]["output_file"]
         
-        if self.write_mode != "overwrite" or self.manual:
-            output_file = f"{Path(output_file).stem}_{self._date}.csv"
+        if self.write_mode == "overwrite" or self.manual:
+            filename = output_file
+        else:
+            suffix = f"{self.batch_date.strftime('%Y%m%d')}"
+            filename = f"{Path(output_file).stem}_{suffix}.csv"
         
-        full_output = join(output_dir, output_file)
-        print(full_output)
-        logging.info(f'Backup file from "{full_output}"')
+        full_target = join(output_dir, filename)
+        logging.info(f'Backup file from "{full_target}"')
         
         state = "skipped"
-        if glob.glob(full_output, recursive=True):
+        if glob.glob(full_target, recursive=True):
             backup_dir  = join(self.root_dir, self._date)
-            backup_file = f"BK_{Path(output_file).stem}_T{self._time}.csv"
+            backup_file = f"BK_{Path(filename).stem}_T{self._time}.csv"
             full_backup = join(backup_dir, backup_file)
             
-            shutil.copy2(full_output, full_backup)
+            shutil.copy2(full_target, full_backup)
             
             state = "succeed"
             logging.info(f'Backup file to "{full_backup}" status: "{state}"')
