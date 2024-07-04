@@ -97,11 +97,10 @@ class CollectBackup:
         ## remove backup file. 
         try:
             backup_dir = join(Folder.BACKUP, module)
-            print(backup_dir)
-            # for file in os.listdir(tmp_dir):
-            #     tmp_file = join(tmp_dir, file)
-            #     os.remove(tmp_file)
-                
+            for date_dir in os.listdir(backup_dir):
+                if date_dir < self._date:
+                    zip_dir = join(backup_dir, date_dir)
+                    os.remove(zip_dir)
         except OSError:
             pass
             
@@ -131,7 +130,6 @@ class CollectBackup:
             full_backup = join(backup_dir, backup_file)
             ## move outpur file to backup file
             shutil.copy2(full_output, full_backup)
-            
         except OSError:
             pass
                 
