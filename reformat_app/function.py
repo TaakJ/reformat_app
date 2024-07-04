@@ -48,22 +48,20 @@ class CollectBackup:
         for key, value in PARAMS.items():
             setattr(self, key, value)
         
-        self._date = self.batch_date.strftime("%Y%m%d")
+        self._date = datetime.now().date().strftime("%Y%m%d")
         self._time = time.strftime("%H%M")
         
-        print(PARAMS)
-        self.remove_date_dir()
-        
         for module in self.source:
-            self.root_dir = join(Folder.BACKUP, module)
-            state = self.create_date_dir()
+            self.remove_date_dir(module)
+        #     self.root_dir = join(Folder.BACKUP, module)
+        #     state = self.create_date_dir()
             
-            if state == "succeed":
-                for date_dir in os.listdir(self.root_dir):
-                    if not date_dir.endswith(".zip"):
-                        self.zip_backup(date_dir)
+        #     if state == "succeed":
+        #         for date_dir in os.listdir(self.root_dir):
+        #             if not date_dir.endswith(".zip"):
+        #                 self.zip_backup(date_dir)
             
-                self.genarate_backup_file(module)
+        #         self.genarate_backup_file(module)
                 
     def create_date_dir(self) -> str:
         state = "failed"
@@ -75,12 +73,24 @@ class CollectBackup:
             except OSError:
                 pass
         state = "succeed"
-        
         return state
     
-    def remove_date_dir(self):
-        print("OK")
-    
+    def remove_date_dir(self, module):
+        
+        if self.clear:
+            ## remove log dir 
+            for date_dir in os.listdir(Folder.LOG):
+                if date_dir < self._date:
+                    log_dir = join(Folder.LOG, date_dir)
+                    shutil.rmtree(log_dir)
+                else:
+                    continue
+                
+            ## remove tmp dir 
+            tmp_dir = join(Folder.TMP, module)
+            for tmp_file in os.listdir(tmp_dir):
+                print(tmp_file)
+            
     def zip_backup(self, date_dir):
         if date_dir < self._date:
             zip_dir  = join(self.root_dir, date_dir)

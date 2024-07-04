@@ -139,6 +139,14 @@ class SetupParser:
                 ArgumentParams.ISFLAG: True,
                 ArgumentParams.DEFAULT: "overwrite",
             },
+            {
+                ArgumentParams.SHORT_NAME: "-c",
+                ArgumentParams.NAME: "--clear",
+                ArgumentParams.DESCRIPTION: "-c: clear",
+                ArgumentParams.REQUIRED: False,
+                ArgumentParams.ISFLAG: True,
+                ArgumentParams.DEFAULT: False,
+            },
         ]
 
     def set_arguments(self) -> None:
