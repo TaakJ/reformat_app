@@ -79,17 +79,24 @@ class CollectBackup:
         
         if self.clear:
             ## remove log dir 
-            for date_dir in os.listdir(Folder.LOG):
-                if date_dir < self._date:
-                    log_dir = join(Folder.LOG, date_dir)
-                    shutil.rmtree(log_dir)
-                else:
-                    continue
-                
-            ## remove tmp dir 
-            tmp_dir = join(Folder.TMP, module)
-            for tmp_file in os.listdir(tmp_dir):
-                print(tmp_file)
+            try:
+                for date_dir in os.listdir(Folder.LOG):
+                    if date_dir < self._date:
+                        log_dir = join(Folder.LOG, date_dir)
+                        shutil.rmtree(log_dir)
+                        
+            except OSError:
+                pass
+                    
+            ## remove tmp file 
+            try:
+                tmp_dir = join(Folder.TMP, module)
+                for file in os.listdir(tmp_dir):
+                    tmp_file = join(tmp_dir, file)
+                    os.remove(tmp_file)
+                    
+            except OSError:
+                pass
             
     def zip_backup(self, date_dir):
         if date_dir < self._date:
