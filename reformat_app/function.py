@@ -47,10 +47,10 @@ class CollectBackup:
         for key, value in PARAMS.items():
             setattr(self, key, value)
         
+        logging.info("Start Backup file")
+        
         self._date = datetime.now().date().strftime("%Y%m%d")
         self._time = time.strftime("%H%M")
-        
-        logging.info("Start Backup file")
         
         for module in self.source:
             self.root_dir = join(Folder.BACKUP, module)
@@ -90,7 +90,6 @@ class CollectBackup:
             state = "succeed"
             logging.info(f'Zip file name: "{zip_name}" from "{zip_dir}" status: "{state}"')
             
-            
     def genarate_backup_file(self, module):
         output_dir  = CONFIG[module]["output_dir"]
         output_file = CONFIG[module]["output_file"]
@@ -108,8 +107,8 @@ class CollectBackup:
             full_backup = join(backup_dir, backup_file)
             
             shutil.copy2(full_output, full_backup)
-            state = "succeed"
             
+            state = "succeed"
             logging.info(f'Backup file to "{full_backup}" status: "{state}"')
         else:
             logging.info(f'Backup file from "{module}" status: "{state}"')
