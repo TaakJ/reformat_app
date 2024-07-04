@@ -340,23 +340,14 @@ class Convert2File:
                             data = record["data"]
                             change_df = pd.DataFrame(data)
                         change_df = self.initial_data_type(change_df)
-
-                        ## set target name for read csv.
+                        
+                        ## read / write csv.
                         state = "failed"
                         record.update({"function": "write_data_to_target_file",
                                         "state": state})
-                        
-                        if self.write_mode == "overwrite" or self.manual:
-                            full_target = join(self.output_dir, self.output_file)
-                        else:
-                            suffix = f"{self.batch_date.strftime('%Y%m%d')}"
-                            self.output_file = f"{Path(self.output_file).stem}_{suffix}.csv"
-                            full_target = join(self.output_dir, self.output_file)
-
-                        ## read / write csv.
-                        target_df = self.read_csv(full_target)
+                        target_df = self.read_csv(self.full_target)
                         data = self.optimize_data(target_df, change_df)
-                        state = self.write_csv(full_target, data)
+                        state = self.write_csv(self.full_target, data)
 
                     except Exception as err:
                         raise Exception(err)

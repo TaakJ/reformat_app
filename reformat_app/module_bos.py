@@ -1,6 +1,8 @@
+from pathlib import Path
 from os.path import join
 from datetime import datetime
 import pandas as pd
+import re
 import logging
 from .function import CallFunction
 from .exception import CustomException
@@ -8,18 +10,24 @@ from .setup import PARAMS, CONFIG, setup_errorlog
 
 class ModuleBOS(CallFunction):
 
-    def logSetter(self, log: list):
+    def logSetter(self, log: list) -> None:
         self._log = log
         
     def paramsSetter(self, module: str) -> None:
-        ## setup params
-        for key, value in PARAMS.items():
-            setattr(self, key, value)
         self.module = module
         self.date = datetime.now()
+        
+        for key, value in PARAMS.items():
+            setattr(self, key, value)
+            
         self.input_dir = [join(CONFIG[module]["input_dir"], CONFIG[module]["input_file"])]
-        self.output_dir = CONFIG[module]["output_dir"]
-        self.output_file = CONFIG[module]["output_file"]
+        output_dir = CONFIG[module]["output_dir"]
+        output_file = CONFIG[module]["output_file"]
+        
+        suffix = f"{self.batch_date.strftime('%Y%m%d')}"
+        output_file = f"{Path(output_file).stem}_{suffix}.csv"
+        
+        self.full_target = join(output_dir, output_file)
 
     async def Run(self, module: str) -> dict:
         self.paramsSetter(module)
@@ -28,12 +36,13 @@ class ModuleBOS(CallFunction):
         result = {"module": self.module, "task": "Completed"}
         
         try:
-            await self.check_source_file()
-            await self.retrieve_data_from_source_file()
-            await self.mock_data()
-            if self.store_tmp is True:
-                await self.write_data_to_tmp_file()
-            await self.write_data_to_target_file()
+            ''
+            # await self.check_source_file()
+            # await self.retrieve_data_from_source_file()
+            # await self.mock_data()
+            # if self.store_tmp is True:
+            #     await self.write_data_to_tmp_file()
+            # await self.write_data_to_target_file()
 
         except CustomException as err:
             logging.error('See Error Details in "_error.log"')

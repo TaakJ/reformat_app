@@ -164,8 +164,10 @@ class ClearUp:
                     
                         state = "succeed"
                         logging.info(f'Clear Zip file "{zip_dir}" status: "{state}"')
+                    else:
+                        logging.info(f'Clear Zip file from "{module}" status: "{state}"')
             except OSError:
-                logging.info(f'Clear Zip file from "{module}" status: "{state}"')
+                pass
             
         
 class CallFunction(Convert2File, CollectLog, CollectParams):
