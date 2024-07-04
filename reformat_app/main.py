@@ -9,13 +9,15 @@ from .module_lds import ModuleLDS
 from .module_lmt import ModuleLMT
 from .module_moc import ModuleMOC
 from .setup import PARAMS, setup_folder, setup_log
-from .function import CollectBackup
+from .function import CollectBackup, ClearUtility
 
 class RunModule:
     def __init__(self) -> None:
         setup_folder()
         setup_log()
-        CollectBackup()
+        # CollectBackup()
+        
+        ClearUtility()
 
         # self.loop = asyncio.new_event_loop()
         # asyncio.set_event_loop(self.loop)

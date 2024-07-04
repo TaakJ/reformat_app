@@ -50,7 +50,7 @@ class CollectBackup:
         self._date = datetime.now().date().strftime("%Y%m%d")
         self._time = time.strftime("%H%M")
         
-        logging.info("Start Backup Output file")
+        logging.info("Start Backup file")
         
         for module in self.source:
             self.root_dir = join(Folder.BACKUP, module)
@@ -63,7 +63,7 @@ class CollectBackup:
                 
                 self.genarate_backup_file(module)
                 
-        logging.info("Stop Backup Output file\n")
+        logging.info("Stop Backup file\n")
                 
     def create_date_dir(self) -> str:
         state = "failed"
@@ -113,6 +113,10 @@ class CollectBackup:
             logging.info(f'Backup file to "{full_backup}" status: "{state}"')
         else:
             logging.info(f'Backup file from "{module}" status: "{state}"')
-                
+
+class ClearUtility:
+    def __init__(self) -> None:
+        print("OK")
+
 class CallFunction(Convert2File, CollectLog, CollectParams):
     pass
