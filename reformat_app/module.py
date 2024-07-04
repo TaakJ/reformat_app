@@ -153,10 +153,13 @@ class Convert2File:
         try:
             ## merge index.
             merge_index = np.union1d(df.index, change_df.index)
+            
             ## as starter dataframe for compare.
             df = df.reindex(index=merge_index, columns=df.columns).iloc[:, :-1]
+            
             ## change data / new data.
             change_df = change_df.reindex(index=merge_index, columns=change_df.columns).iloc[:, :-1]
+            
             ## compare data.
             df["count"] = pd.DataFrame(np.where(df.ne(change_df), True, df), index=df.index, columns=df.columns).apply(lambda x: (x == True).sum(), axis=1)
 
