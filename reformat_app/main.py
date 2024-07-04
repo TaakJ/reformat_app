@@ -9,7 +9,7 @@ from .module_lds import ModuleLDS
 from .module_lmt import ModuleLMT
 from .module_moc import ModuleMOC
 from .setup import PARAMS, setup_folder, setup_log
-from .function import CollectBackup, ClearUtility
+from .function import CollectBackup, ClearUp
 
 class RunModule:
     def __init__(self) -> None:
@@ -17,8 +17,8 @@ class RunModule:
         setup_log()
         # CollectBackup()
         
-        ClearUtility()
-
+        ClearUp()
+        
         # self.loop = asyncio.new_event_loop()
         # asyncio.set_event_loop(self.loop)
         # self.results = self.loop.run_until_complete(self.mapping_module())

@@ -113,9 +113,60 @@ class CollectBackup:
         else:
             logging.info(f'Backup file from "{module}" status: "{state}"')
 
-class ClearUtility:
+class ClearUp:
     def __init__(self) -> None:
-        print("OK")
-
+        for key, value in PARAMS.items():
+            setattr(self, key, value)
+        
+        self._date = datetime.now().date().strftime("%Y%m%d")
+        
+        logging.info("Start Clear file")
+        
+        if self.clear:
+            self.clear_log()
+            self.clear_tmp()
+            self.clear_backup()
+            
+        logging.info("Stop Clear file\n")
+            
+    def clear_log(self):
+        state = "skipped"
+        for date_dir in os.listdir(Folder.LOG):
+            if date_dir < self._date:
+                log_dir = join(Folder.LOG, date_dir)
+                shutil.rmtree(log_dir)
+            else:
+                logging.info(f'Clear Log file on date "{self._date}" status: "{state}"')
+                
+    def clear_tmp(self):
+        for module in self.source:
+            try:
+                state = "skipped"
+                tmp_dir = join(Folder.TMP, module)
+                for file in os.listdir(tmp_dir):
+                    tmp_file = join(tmp_dir, file)
+                    os.remove(tmp_file)
+                
+                    state = "succeed"
+                    logging.info(f'Clear Tmp file "{tmp_file}" status: "{state}"')
+            except OSError:
+                logging.info(f'Clear Tmp file from "{module}" status: "{state}"')
+                
+    def clear_backup(self):
+        for module in self.source:
+            try:
+                state = "skipped"
+                backup_dir = join(Folder.BACKUP, module)
+                for date_dir in os.listdir(backup_dir):
+                    if date_dir < self._date:
+                        zip_dir = join(backup_dir, date_dir)
+                        os.remove(zip_dir)
+                    
+                        state = "succeed"
+                        logging.info(f'Clear Zip file "{zip_dir}" status: "{state}"')
+            except OSError:
+                logging.info(f'Clear Zip file from "{module}" status: "{state}"')
+            
+        
 class CallFunction(Convert2File, CollectLog, CollectParams):
     pass
