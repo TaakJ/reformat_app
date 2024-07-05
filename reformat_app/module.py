@@ -354,6 +354,7 @@ class Convert2File:
 
                 if record["module"] == "Target_file":
                     try:
+                        ## read tmp file or dataframe
                         if self.store_tmp is True:
                             full_tmp = record["input_dir"]
                             sheet_name = record["sheet_name"]
@@ -362,15 +363,15 @@ class Convert2File:
                             data = record["data"]
                             change_df = pd.DataFrame(data)
                         change_df = self.initial_data_type(change_df)
-
-                        # ## read csv file
-                        # target_df = self.read_csv()
+            
+                        ## read csv file
+                        target_df = self.read_csv()
                         
-                        # ## optimize data
-                        # data = self.optimize_data(target_df, change_df)
+                        ## optimize data
+                        data = self.optimize_data(target_df, change_df)
                         
-                        # ## write csv file
-                        # state = self.write_csv(self.full_target, data)
+                        ## write csv file
+                        state = self.write_csv(self.full_target, data)
 
                     except Exception as err:
                         raise Exception(err)
