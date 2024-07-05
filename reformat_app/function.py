@@ -47,8 +47,6 @@ class CollectBackup:
         for key, value in PARAMS.items():
             setattr(self, key, value)
         
-        logging.info("Start Backup file")
-        
         self._date = datetime.now().date().strftime("%Y%m%d")
         self._time = time.strftime("%H%M")
         
@@ -63,8 +61,6 @@ class CollectBackup:
                 
                 self.genarate_backup_file(module)
                 
-        logging.info("Stop Backup file\n")
-                
     def create_date_dir(self) -> str:
         state = "failed"
         date_dir = join(self.root_dir, self._date)
@@ -75,6 +71,7 @@ class CollectBackup:
             except OSError:
                 pass
         state = "succeed"
+        
         return state
             
     def zip_backup(self, date_dir):
@@ -123,23 +120,20 @@ class ClearUp:
         
         self._date = datetime.now().date().strftime("%Y%m%d")
         
-        logging.info("Start Clear file")
-        
         if self.clear:
             self.clear_log()
             self.clear_tmp()
             self.clear_backup()
             
-        logging.info("Stop Clear file\n")
-            
     def clear_log(self):
-        state = "skipped"
+        
         for date_dir in os.listdir(Folder.LOG):
             if date_dir < self._date:
                 log_dir = join(Folder.LOG, date_dir)
                 shutil.rmtree(log_dir)
-            else:
-                logging.info(f'Clear Log file on date "{self._date}" status: "{state}"')
+                
+                state = "succeed"
+                logging.info(f'Clear Log file: "{log_dir}" status: "{state}"')
                 
     def clear_tmp(self):
         for module in self.source:
@@ -152,9 +146,7 @@ class ClearUp:
                         os.remove(tmp_file)
                     
                         state = "succeed"
-                        logging.info(f'Clear Tmp file "{tmp_file}" status: "{state}"')
-                    else:
-                        logging.info(f'Clear Tmp file from "{module}" status: "{state}"')
+                        logging.info(f'Clear Tmp file: "{tmp_file}" status: "{state}"')
             except OSError:
                 pass
                 
@@ -169,9 +161,7 @@ class ClearUp:
                         os.remove(zip_dir)
                     
                         state = "succeed"
-                        logging.info(f'Clear Zip file "{zip_dir}" status: "{state}"')
-                    else:
-                        logging.info(f'Clear Zip file from "{module}" status: "{state}"')
+                        logging.info(f'Clear Zip file: "{zip_dir}" status: "{state}"')
             except OSError:
                 pass
             
