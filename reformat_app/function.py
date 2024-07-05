@@ -172,6 +172,5 @@ class ClearUp:
             except OSError:
                 pass
             
-        
 class CallFunction(Convert2File, CollectLog, CollectParams):
     pass
