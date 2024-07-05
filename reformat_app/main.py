@@ -15,8 +15,8 @@ class RunModule:
     def __init__(self) -> None:
         setup_folder()
         setup_log()
-        CollectBackup()
-        ClearUp()
+        # CollectBackup()
+        # ClearUp()
         
         self.loop = asyncio.new_event_loop()
         asyncio.set_event_loop(self.loop)
