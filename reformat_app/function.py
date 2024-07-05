@@ -50,18 +50,16 @@ class CollectBackup:
         self._date = datetime.now().date().strftime("%Y%m%d")
         self._time = time.strftime("%H%M")
         
-        # for module in self.source:
-        #     self.root_dir = join(Folder.BACKUP, module)
-        #     state = self.create_date_dir()
+        for module in self.source:
+            self.root_dir = join(Folder.BACKUP, module)
+            state = self.create_date_dir()
             
-        #     if state == "succeed":
-        #         for date_dir in os.listdir(self.root_dir):
-        #             if not date_dir.endswith(".zip"):
-        #                 self.zip_backup(date_dir)
+            if state == "succeed":
+                for date_dir in os.listdir(self.root_dir):
+                    if not date_dir.endswith(".zip"):
+                        self.zip_backup(date_dir)
                 
-        #         self.genarate_backup_file(module)
-                
-        logging.info("\n")
+                self.genarate_backup_file(module)
         
     def create_date_dir(self) -> str:
         state = "failed"
