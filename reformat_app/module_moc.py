@@ -20,16 +20,17 @@ class ModuleMOC(CallFunction):
         for key, value in PARAMS.items():
             setattr(self, key, value)
         
+        ## setup input dir / input file 
         self.input_dir = [join(CONFIG[module]["input_dir"], CONFIG[module]["input_file"])]
+        
+        ## setup output dir / output file 
         output_dir = CONFIG[module]["output_dir"]
         output_file = CONFIG[module]["output_file"]
-        
         if self.write_mode == "overwrite" or self.manual:
             filename = output_file
         else:
             suffix = f"{self.batch_date.strftime('%Y%m%d')}"
             filename = f"{Path(output_file).stem}_{suffix}.csv"
-            
         self.full_target = join(output_dir, filename)
 
     async def Run(self, module: str) -> dict:
