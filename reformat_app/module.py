@@ -225,21 +225,27 @@ class Convert2File:
                         tmp_name =  f"TMP_{Path(self.full_target).stem}.xlsx"
                         full_tmp = join(tmp_dir, tmp_name)
                         
-                        sheet, tmp_df = self.create_workbook(full_tmp)
+                        sheet = self.create_workbook(full_tmp)
+                        
+                        ## set dataframe from tmp file
                         record.update({"input_dir": full_tmp,
-                                    "function": "write_data_to_tmp_file"})
+                                    "function": "write_data_to_tmp_file"
+                                    })
+                        data = sheet.values
+                        columns = next(data)[0:]
+                        tmp_df = pd.DataFrame(data, columns=columns)
+                        tmp_df = self.initial_data_type(tmp_df)
                         
                         ## validate data change row by row
                         data_dict = self.validate_data_change(tmp_df, change_df)
-                        print(sheet)
-                        # print(tmp_df)
-                        # print(data_dict)
 
-                        # state = self.write_worksheet(sheet, data_dict)
+                        ## write tmp file
+                        state = self.write_worksheet(sheet, data_dict)
                         # workbook.move_sheet(workbook.active, offset=-sheet_num)
                         # workbook.save(full_tmp)
 
                     except Exception as err:
+                        print(err)
                         raise Exception(err)
 
                     # record.update({"sheet_name": sheet_name, "state": state})
@@ -251,10 +257,9 @@ class Convert2File:
             if "err" in record:
                 raise CustomException(err=self.logging)
     
-    
     def create_workbook(self, full_tmp):
         
-        logging.info(f'Create Workbook: "{full_tmp}"')
+        logging.info(f'Create Tmp file: "{full_tmp}"')
         
         state = "failed"
         self.logging[-1].update({"function": "create_workbook", "state": state})
@@ -264,11 +269,12 @@ class Convert2File:
             sheet_num = len(get_sheet)
             sheet_name = f"RUN_TIME_{sheet_num - 1}"
             
-            try:
-                sheet = workbook[sheet_name]
-            except:
-                sheet = workbook.worksheets[0]
-        
+            if sheet_name in get_sheet:
+                sheet_name = f"RUN_TIME_{sheet_num}"
+                sheet = workbook.create_chartsheet(sheet_name)
+            else:
+                sheet = workbook.get_sheet_by_name("Field Name")
+                
         except FileNotFoundError:
             ## move from template file to tmp file
             template_name = "Application Data Requirements.xlsx"
@@ -276,36 +282,26 @@ class Convert2File:
             try:
                 if not glob.glob(full_tmp, recursive=True):
                     shutil.copy2(full_template, full_tmp)
-                    state = "succeed"
             except:
                 raise
+            
             workbook = openpyxl.load_workbook(full_tmp)
-            sheet = workbook.worksheets[0]
+            sheet = workbook.get_sheet_by_name("Field Name")
             sheet_name = "RUN_TIME_1"
-        
-        if state != "succeed":
-            sheet_name = f"RUN_TIME_{sheet_num}"
-            sheet = workbook.create_sheet(sheet_name)
-        
+            
         sheet.title = sheet_name
         workbook.active = sheet
-        logging.info(f'Generate Sheet_name: "{sheet_name}" in Tmp file')
-        
-        ## set dataframe from tmp file
-        data = sheet.values
-        columns = next(data)[0:]
-        tmp_df = pd.DataFrame(data, columns=columns)
-        tmp_df = self.initial_data_type(tmp_df)
+        logging.info(f'Create {sheet} in Tmp file')
         
         state = "succeed"
         self.logging[-1].update({"state": state})
         
-        return sheet, tmp_df
+        return sheet
     
     def write_worksheet(self, sheet: any, change_data: dict) -> str:
 
         full_tmp =  self.logging[-1]["input_dir"]
-        logging.info(f'Write to Worksheet: "{full_tmp}"')
+        logging.info(f'Write to {sheet}')
 
         state = "failed"
         self.logging[-1].update({"function": "write_worksheet", "state": state})
@@ -320,24 +316,22 @@ class Convert2File:
             ## write rows.
             while rows <= max_row:
                 for idx, col in enumerate(change_data[rows].keys(), 1):
-
+                    
+                    if col in ["CreateDate","LastLogin","LastUpdatedDate"]:
+                        change_data[rows][col] = change_data[rows][col].strftime("%Y%m%d%H%M%S")
+                    sheet.cell(row=rows, column=idx).value = change_data[rows][col]
+                    
                     if col == "remark":
                         if rows in self.remove_rows:
                             ## Remove rows.
-                            show = f'{change_data[rows][col]} Rows: "{rows}" in Tmp file'
-                            sheet.cell(row=rows, column=idx).value = change_data[rows][col]
+                            write_row = f'{change_data[rows][col]} Rows: "{rows}" in Tmp file'
                         elif rows in self.change_rows.keys():
                             ## Update / Insert rows.
-                            show = f'{change_data[rows][col]} Rows: "{rows}" in Tmp file\nRecord Change: {self.change_rows[rows]}'
-                            sheet.cell(row=rows, column=idx).value = change_data[rows][col]
+                            write_row = f'{change_data[rows][col]} Rows: "{rows}" in Tmp file\nRecord Change: {self.change_rows[rows]}'
                         else:
                             ## No change rows.
-                            show = f'No Change Rows: "{rows}" in Tmp file'
-                            sheet.cell(row=rows, column=idx).value = change_data[rows][col]
-                            
-                        logging.info(show)
-                    else:
-                        sheet.cell(row=rows, column=idx).value = change_data[rows][col]
+                            write_row = f'No Change Rows: "{rows}" in Tmp file'
+                        logging.info(write_row)
                 rows += 1
 
         except KeyError as err:
@@ -345,6 +339,7 @@ class Convert2File:
 
         state = "succeed"
         self.logging[-1].update({"state": state})
+        
         return state
 
     async def write_data_to_target_file(self) -> None:
