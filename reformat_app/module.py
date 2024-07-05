@@ -347,6 +347,8 @@ class Convert2File:
     async def write_data_to_target_file(self) -> None:
 
         logging.info("Write Data to Target file")
+        
+        state = "failed"
         for record in self.logging:
             try:
 
@@ -361,12 +363,14 @@ class Convert2File:
                             change_df = pd.DataFrame(data)
                         change_df = self.initial_data_type(change_df)
 
-                        ## read / write csv.
-                        state = "failed"
-                        record.update({"function": "write_data_to_target_file", "state": state})
-                        target_df = self.read_csv(self.full_target)
-                        data = self.optimize_data(target_df, change_df)
-                        state = self.write_csv(self.full_target, data)
+                        # ## read csv file
+                        # target_df = self.read_csv()
+                        
+                        # ## optimize data
+                        # data = self.optimize_data(target_df, change_df)
+                        
+                        # ## write csv file
+                        # state = self.write_csv(self.full_target, data)
 
                     except Exception as err:
                         raise Exception(err)
@@ -380,16 +384,16 @@ class Convert2File:
         if "err" in record:
             raise CustomException(err=self.logging)
 
-    def read_csv(self, full_target: str) -> pd.DataFrame:
+    def read_csv(self) -> pd.DataFrame:
 
-        logging.info(f'Read Target file: "{full_target}"')
+        logging.info(f'Read Target file: "{self.full_target}"')
 
         state = "failed"
-        self.logging[-1].update({"input_dir": full_target, "function": "read_csv", "state": state})
+        self.logging[-1].update({"input_dir": self.full_target, "function": "read_csv", "state": state})
 
         try:
             data = []
-            with open(full_target, "r", newline="\n") as reader:
+            with open(self.full_target, "r", newline="\n") as reader:
                 csv_reader = csv.reader(reader,
                                         skipinitialspace=True,
                                         delimiter=",",
@@ -402,9 +406,10 @@ class Convert2File:
             target_df = pd.DataFrame(data, columns=header)
 
         except FileNotFoundError:
+            ## move from template file to target file
             template_name = join(Folder.TEMPLATE, "Application Data Requirements.xlsx")
             target_df = pd.read_excel(template_name)
-            target_df.to_csv(full_target, index=None, header=True, sep=",")
+            target_df.to_csv(self.full_target, index=None, header=True, sep=",")
 
         state = "succeed"
         self.logging[-1].update({"state": state})
