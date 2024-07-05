@@ -34,7 +34,6 @@ class ModuleDOC(CallFunction):
         self.full_target = join(output_dir, filename)
         
     async def Run(self, module: str) -> dict:
-
         self.paramsSetter(module)
         
         logging.info(f'Module: "{self.module}", Manual: "{self.manual}", Batch Date: "{self.batch_date}", Store Tmp: "{self.store_tmp}", Write Mode: "{self.write_mode}"')

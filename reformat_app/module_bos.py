@@ -2,7 +2,6 @@ from pathlib import Path
 from os.path import join
 from datetime import datetime
 import pandas as pd
-import re
 import logging
 from .function import CallFunction
 from .exception import CustomException
