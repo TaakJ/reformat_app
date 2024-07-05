@@ -126,7 +126,6 @@ class ClearUp:
             self.clear_backup()
             
     def clear_log(self):
-        
         for date_dir in os.listdir(Folder.LOG):
             if date_dir < self._date:
                 log_dir = join(Folder.LOG, date_dir)
