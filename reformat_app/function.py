@@ -146,14 +146,17 @@ class ClearUp:
             try:
                 state = "skipped"
                 tmp_dir = join(Folder.TMP, module)
-                for file in os.listdir(tmp_dir):
-                    tmp_file = join(tmp_dir, file)
-                    os.remove(tmp_file)
-                
-                    state = "succeed"
-                    logging.info(f'Clear Tmp file "{tmp_file}" status: "{state}"')
+                for date_dir in os.listdir(tmp_dir):
+                    if date_dir < self._date:
+                        tmp_file = join(tmp_dir, date_dir)
+                        os.remove(tmp_file)
+                    
+                        state = "succeed"
+                        logging.info(f'Clear Tmp file "{tmp_file}" status: "{state}"')
+                    else:
+                        logging.info(f'Clear Tmp file from "{module}" status: "{state}"')
             except OSError:
-                logging.info(f'Clear Tmp file from "{module}" status: "{state}"')
+                pass
                 
     def clear_backup(self):
         for module in self.source:
