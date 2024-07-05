@@ -14,7 +14,6 @@ import csv
 from .exception import CustomException
 from .setup import Folder
 
-
 class Convert2File:
 
     async def check_source_file(self) -> None:
@@ -290,7 +289,6 @@ class Convert2File:
             self.sheet = self.workbook.get_sheet_by_name("Field Name")
             self.sheet_name = "RUN_TIME_1"
             self.sheet_num = 1
-            self.sheet.title = self.sheet_name
 
         state = "succeed"
         self.logging[-1].update({"state": state})
@@ -338,12 +336,14 @@ class Convert2File:
 
         ## save file
         full_tmp = self.logging[-1]["input_dir"]
-        self.workbook.active = self.sheet_num
+        self.sheet.title = self.sheet_name
+        self.workbook.active = self.sheet
         self.workbook.move_sheet(self.workbook.active, offset=-self.sheet_num)
         self.workbook.save(full_tmp)
 
         state = "succeed"
         self.logging[-1].update({"state": state})
+        
         return state
 
     async def write_data_to_target_file(self) -> None:
