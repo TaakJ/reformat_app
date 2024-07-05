@@ -322,7 +322,7 @@ class Convert2File:
                             write_row = (f'{change_data[rows][col]} Rows: "{rows}" in Tmp file')
                         elif rows in self.change_rows.keys():
                             ## Update / Insert row
-                            write_row = f'{change_data[rows][col]} Rows: "{rows}" in Tmp file\nRecord Change: {self.change_rows[rows]}'
+                            write_row = f'{change_data[rows][col]} Rows: "{rows}" in Tmp file\nUpdating records: {self.change_rows[rows]}'
                         else:
                             ## No change row
                             write_row = f'No Change Rows: "{rows}" in Tmp file'
@@ -431,7 +431,7 @@ class Convert2File:
             ## filter data on batch date => DataFrame
             batch_df = target_df[target_df["CreateDate"].isin(np.array([pd.Timestamp(self.batch_date)]))].reset_index(drop=True)
 
-            ## validate data change row by row
+            ## Validate data change row by row
             data_dict = self.validate_data_change(batch_df, change_df)
 
             ## filter data not on batch date => dict
@@ -483,7 +483,7 @@ class Convert2File:
                 for idx, value in data.items():
                     if value.get("remark") is not None:
                         if idx in self.change_rows.keys():
-                            logging.info(f'"{value["remark"]}" Rows: "{idx}" in Target file\nRecord Change:"{self.change_rows[idx]}"')
+                            logging.info(f'"{value["remark"]}" Rows: "{idx}" in Target file\nUpdating records:"{self.change_rows[idx]}"')
                             value.popitem()
                             rows.update({idx: value})
                         elif idx in self.remove_rows:

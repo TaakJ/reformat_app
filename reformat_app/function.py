@@ -50,17 +50,19 @@ class CollectBackup:
         self._date = datetime.now().date().strftime("%Y%m%d")
         self._time = time.strftime("%H%M")
         
-        for module in self.source:
-            self.root_dir = join(Folder.BACKUP, module)
-            state = self.create_date_dir()
+        # for module in self.source:
+        #     self.root_dir = join(Folder.BACKUP, module)
+        #     state = self.create_date_dir()
             
-            if state == "succeed":
-                for date_dir in os.listdir(self.root_dir):
-                    if not date_dir.endswith(".zip"):
-                        self.zip_backup(date_dir)
+        #     if state == "succeed":
+        #         for date_dir in os.listdir(self.root_dir):
+        #             if not date_dir.endswith(".zip"):
+        #                 self.zip_backup(date_dir)
                 
-                self.genarate_backup_file(module)
+        #         self.genarate_backup_file(module)
                 
+        logging.info("\n")
+        
     def create_date_dir(self) -> str:
         state = "failed"
         date_dir = join(self.root_dir, self._date)
@@ -71,7 +73,6 @@ class CollectBackup:
             except OSError:
                 pass
         state = "succeed"
-        
         return state
             
     def zip_backup(self, date_dir):
@@ -81,9 +82,10 @@ class CollectBackup:
             
             with zipfile.ZipFile( join(self.root_dir, zip_name), "w", zipfile.ZIP_DEFLATED) as zf:
                 for file in Path(zip_dir).rglob("*"):
-                    zf.write(file, file.relative_to(zip_dir))
-            shutil.rmtree(zip_dir)
+                    if file.exists():
+                        zf.write(file, file.relative_to(zip_dir))
             
+            shutil.rmtree(zip_dir)
             state = "succeed"
             logging.info(f'Zip file name: "{zip_name}" from "{zip_dir}" status: "{state}"')
             
