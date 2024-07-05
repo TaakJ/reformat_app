@@ -1,4 +1,5 @@
 import asyncio
+import logging
 from .module_adm import ModuleADM
 from .module_bos import ModuleBOS
 from .module_cum import ModuleCUM
@@ -15,8 +16,10 @@ class RunModule:
     def __init__(self) -> None:
         setup_folder()
         setup_log()
-        # CollectBackup()
-        # ClearUp()
+        CollectBackup()
+        ClearUp()
+        
+        logging.info("Run Each Module\n")
         
         self.loop = asyncio.new_event_loop()
         asyncio.set_event_loop(self.loop)
