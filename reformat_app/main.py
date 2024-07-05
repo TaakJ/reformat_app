@@ -25,7 +25,6 @@ class RunModule:
     async def mapping_module(self):
         coros = []
         for module in PARAMS["source"]:
-
             if module == "ADM":
                 tasks = ModuleADM().Run(module)
                 coros.append(asyncio.create_task(tasks))
