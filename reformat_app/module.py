@@ -304,7 +304,7 @@ class Convert2File:
         
         rows = 2
         max_row = max(change_data, default=0)
-        self.logging[-1].update({"function": "write_worksheet","sheet_name": self.sheet_name,"state": state})
+        self.logging[-1].update({"function": "write_worksheet", "sheet_name": self.sheet_name, "state": state})
         try:
             # write column
             for idx, col in enumerate(change_data[rows].keys(), 1):
