@@ -142,7 +142,7 @@ class ClearUp:
                 for date_dir in os.listdir(tmp_dir):
                     if date_dir < self._date:
                         tmp_file = join(tmp_dir, date_dir)
-                        os.remove(tmp_file)
+                        shutil.rmtree(tmp_file)
                     
                         state = "succeed"
                         logging.info(f'Clear Tmp file: "{tmp_file}" status: "{state}"')
