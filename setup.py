@@ -18,10 +18,10 @@ setup(
     install_requires=install_requires,
     long_description=long_description,
     long_description_content_type='text/markdown',
-    entry_points={
-        "console_scripts":[
-            "reformat-app = reformat_app:main",
-        ]
-    },
+    # entry_points={
+    #     "console_scripts":[
+    #         "reformat-app = reformat_app:main",
+    #     ]
+    # },
     python_requires=">=3.9",
 )
