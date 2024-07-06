@@ -18,11 +18,11 @@ class ArgumentParams:
 
 class Folder:
     _CURRENT_DIR        = os.getcwd()
-    TEMPLATE            = join(_CURRENT_DIR,"Template/")
-    TMP                 = join(_CURRENT_DIR,"Tmp/")
-    LOG                 = join(_CURRENT_DIR,"Log/")
-    CONFIG              = join(_CURRENT_DIR,"Config/")
-    BACKUP              = join(_CURRENT_DIR,"Backup/")
+    TEMPLATE            = join(_CURRENT_DIR,"template/")
+    TMP                 = join(_CURRENT_DIR,"tmp/")
+    LOG                 = join(_CURRENT_DIR,"log/")
+    CONFIG              = join(_CURRENT_DIR,"config/")
+    BACKUP              = join(_CURRENT_DIR,"backup/")
     _CONFIG_DIR         = join(CONFIG,"config.yaml")
     _LOGGER_CONFIG_DIR  = join(CONFIG,"logging_config.yaml")
 
