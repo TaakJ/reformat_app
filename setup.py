@@ -11,5 +11,10 @@ setup(
         "Operating System :: OS Independent",
     ],
     install_requires=[r.strip() for r in open("requirements.txt").readlines()],
+    entry_points={
+        "console_scripts":[
+            "reformat-app = reformat_app:main",
+        ]
+    },
     python_requires=">=3.9",
 )
