@@ -13,13 +13,13 @@ from .setup import PARAMS, setup_folder, setup_log
 from .function import CollectBackup, ClearUp
 
 class RunModule:
+    
     def __init__(self) -> None:
         setup_folder()
         setup_log()
-        CollectBackup()
-        ClearUp()
         
-        logging.info("Run Each Module\n")
+        ## dedup module
+        self.list_module = list(set(PARAMS["source"])) 
         
         self.loop = asyncio.new_event_loop()
         asyncio.set_event_loop(self.loop)
@@ -27,14 +27,16 @@ class RunModule:
         
     async def mapping_module(self):
         coros = []
-        for module in PARAMS["source"]:
-            if module == "ADM":
-                tasks = ModuleADM().Run(module)
-                coros.append(asyncio.create_task(tasks))
+        for module in self.list_module:
+            if module == "ADM":                                
+                tasks = ModuleADM(module)
+                run = asyncio.create_task(tasks.run())
+                coros.append(run)
 
             elif module == "BOS":
-                tasks = ModuleBOS().Run(module)
-                coros.append(asyncio.create_task(tasks))
+                tasks = ModuleBOS(module)
+                run = asyncio.create_task(tasks.run())
+                coros.append(run)
 
             elif module == "CUM":
                 tasks = ModuleCUM().Run(module)
