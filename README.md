@@ -1,14 +1,14 @@
-# REFORMAT_APP
+# **README.md**
 
 **FOLLOWING STEP SETUP**
 
-1. **Install:**
+1). **Install:**
 
 ```
 pip install reformat-app
 ```
 
-2. **Create Folder:**
+2). **Create Folder:**
 
 ```
 1. Create folder name: reformat_app
@@ -18,7 +18,7 @@ pip install reformat-app
 5. Copy file: Application Data Requirements.xlsx to sub-folder: template
 ```
 
-3. **Generate code python:**
+3). **Generate code python:**
 
 ```
 from reformat_app import main
@@ -29,7 +29,7 @@ except Exception as err:
     print(err)
 ```
 
-4. **Run code python:**
+4). **Run code python:**
 
 ```
 python main.py
