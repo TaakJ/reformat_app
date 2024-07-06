@@ -19,7 +19,7 @@ class RunModule:
         setup_log()
         
         ## dedup module
-        self.list_module = list(set(PARAMS["source"])) 
+        self.list_module = list(dict.fromkeys(PARAMS["source"]))
         
         self.loop = asyncio.new_event_loop()
         asyncio.set_event_loop(self.loop)

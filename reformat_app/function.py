@@ -11,7 +11,6 @@ from os.path import join
 from .module import Convert2File
 from .setup import PARAMS, CONFIG, Folder
 
-
 class CollectLog(ABC):
     def __init__(self) -> None:
         self._log = []
@@ -26,7 +25,6 @@ class CollectLog(ABC):
 
     @abstractmethod
     def logSetter(self, log: list): ...
-
 
 class CollectParams(ABC):
     
@@ -71,9 +69,7 @@ class CollectParams(ABC):
         pass
 
 class CollectBackup:
-
     def backup(self):
-
         self.root_dir = join(Folder.BACKUP, self.module)
         self._date = self.date.strftime("%Y%m%d")
         self._time = time.strftime("%H%M")

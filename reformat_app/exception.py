@@ -15,6 +15,6 @@ class CustomException(Exception):
 
     def generate_error(self) -> any:
         for i in range(len(self.err)):
-            if self.err[i].get("err") is not None:
-                err_msg = f'Module::"{self.err[i]["module"]}", Path::"{self.err[i]["input_dir"]}", Function::"{self.err[i]["function"]}", Errors::"{self.err[i]["err"]}"'
-                yield err_msg
+            # if self.err[i].get("err") is not None:
+            err_msg = f'Module::"{self.err[i]["module"]}", Path::"{self.err[i]["input_dir"]}", Function::"{self.err[i]["function"]}", Errors::{self.err[i].get("err")}'
+            yield err_msg
