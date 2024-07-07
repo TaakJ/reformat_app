@@ -31,13 +31,13 @@ class RunModule:
         for module in self.list_module:
             
             if module == "ADM":                                
-                tasks = ModuleADM(module)
+                tasks = ModuleADM()
                 run = asyncio.create_task(tasks.step_run())
                 coros.append(run)
 
             elif module == "BOS":
-                tasks = ModuleBOS(module)
-                run = asyncio.create_task(tasks.step_run())
+                tasks = ModuleBOS()
+                run = asyncio.create_task(tasks.step_run(module))
                 coros.append(run)
 
             elif module == "CUM":

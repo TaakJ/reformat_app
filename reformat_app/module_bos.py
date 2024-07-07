@@ -5,25 +5,55 @@ import pandas as pd
 import logging
 from .function import CallFunction
 from .exception import CustomException
-from .setup import setup_errorlog
+from .setup import setup_errorlog, PARAMS, CONFIG
 
 class ModuleBOS(CallFunction):
 
-    def __init__(self, module:str) -> dict:
-        ...
-        # self.input_dir += ["D:\IGAGD\ADM\download\ADM.txt"]
-        
     def logSetter(self, log: list) -> None:
         self._log = log
         
-    async def step_run(self) -> dict:
-        
-        logging.info(f'Module: "{self.module}", Manual: "{self.manual}", Batch Date: "{self.batch_date}", Store Tmp: "{self.store_tmp}", Write Mode: "{self.write_mode}"')
-        
-        result = {"module": self.module, "task": "Completed"}
+    def paramsSetter(self, module) -> None:        
+        _log = []
+        state = "failed"
+        record = {"module": self.module, "function": "paramsSetter", "status": state}
         try:
-            await self.check_source_file()
-            await self.retrieve_data_from_source_file()
+            ## setup input dir / input file 
+            self.input_dir = [join(CONFIG[module]["input_dir"], CONFIG[module]["input_file"])]
+            
+            ## setup output dir / output file 
+            output_dir = CONFIG[module]["output_dir"]
+            output_file = CONFIG[module]["output_file"]
+            if self.write_mode == "overwrite" or self.manual:
+                ...
+            else:
+                suffix = f"{self.batch_date.strftime('%Y%m%d')}"
+                output_file = f"{Path(output_file).stem}_{suffix}.csv"
+            self.full_target = join(output_dir, output_file)
+            
+            state = "succeed"
+            record.update({"status": state})
+            
+        except KeyError as err:
+            err =  f"Not found module: {err} in config file"
+            record.update({"err": err})
+        
+        _log.append(record)
+        self.logSetter(_log)
+        
+        if "err" in record:
+            raise CustomException(err=self.logging)
+            
+    async def step_run(self, module) -> dict:
+        
+        # logging.info(f'Module: "{module}", Manual: "{self.manual}", Batch Date: "{self.batch_date}", Store Tmp: "{self.store_tmp}", Write Mode: "{self.write_mode}"')
+        
+        result = {"module": module, "task": "Completed"}
+        try:
+            ''
+            # self.paramsSetter(module)
+            # self.backup()
+            # await self.check_source_file()
+            # await self.retrieve_data_from_source_file()
             # await self.mock_data()
             # if self.store_tmp is True:
             #     await self.write_data_to_tmp_file()
@@ -42,7 +72,7 @@ class ModuleBOS(CallFunction):
             result.update({"task": "Uncompleted"})
 
         logging.info("Stop Run Module\n")
-        return result
+        return {}
     
     def collect_data(self, i: int, format_file: any) -> dict:
 

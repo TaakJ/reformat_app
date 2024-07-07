@@ -16,12 +16,12 @@ class CustomException(Exception):
     def generate_error(self) -> any:
         for i in range(len(self.err)):
             module      = self.err[i]["module"]
-            full_input  = self.err[i].get("full_input")
+            input_dir  = self.err[i].get("input_dir")
             full_target = self.err[i].get("full_target")
             status      = self.err[i]["status"]
             func        = self.err[i]["function"]
             err         = self.err[i].get("err")
 
             if err is not None:
-                err_msg = f'Module::"{module}", Path::"{full_input}", Function::"{func}", Status::"{status}", Errors::"{err}"'
+                err_msg = f'Module::"{module}", Input_Dir::"{input_dir}", Output_Dir::"{full_target}", Function::"{func}", Status::"{status}", Errors::"{err}"'
                 yield err_msg

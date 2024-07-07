@@ -12,6 +12,7 @@ from .module import Convert2File
 from .setup import PARAMS, CONFIG, Folder
 from .exception import CustomException
 
+
 class CollectLog(ABC):
     def __init__(self) -> None:
         self._log = []
@@ -28,73 +29,49 @@ class CollectLog(ABC):
     def logSetter(self, log: list): ...
 
 class CollectParams(ABC):
-    
-    _instance = {}
-    def __new__(cls, module: str):
-        if (params:= cls._instance.get(module)) is not None:
-            return params
-        params = super().__new__(cls)
-        cls._instance[module] = params
-        ## call function
-        params.setter_params(module)
-        return params
-        
-    def setter_params(self, module):
-        for key, value in PARAMS.items():
-            setattr(self, key, value)
-        
-        self.module = module
-        self.date = datetime.now()
-        
-        _log = []
-        state = "failed"
-        record = {"module": self.module, "function": "param_setter", "status": state}
-        try:
-            ## setup input dir / input file 
-            self.input_dir = [join(CONFIG[module]["input_dir"], CONFIG[module]["input_file"])]
-            
-            ## setup output dir / output file 
-            output_dir = CONFIG[module]["output_dir"]
-            output_file = CONFIG[module]["output_file"]
-            if self.write_mode == "overwrite" or self.manual:
-                ...
-            else:
-                suffix = f"{self.batch_date.strftime('%Y%m%d')}"
-                output_file = f"{Path(output_file).stem}_{suffix}.csv"
-            self.full_target = join(output_dir, output_file)
-            
-            state = "succeed"
-            record.update({"status": state})
-            
-        except Exception as err:
-            record.update({"err": err})
-        
-        _log.append(record)
-        self.logSetter(_log)
-        
+
+    def __new__(cls, *args, **kwargs):
+        print("CREATE PARAMETER")
+        return super().__new__(cls, *args, **kwargs)
+
+    def __init__(self):
+        print("OK")
+        print(self.__class__)
+
     def get_extract_data(self, i: int, format_file: any) -> dict:
+
         logging.info("Extract Data Each Module")
+
         data = self.collect_data(i, format_file)
         return data
+
+    @abstractmethod
+    def paramsSetter(self, module):
+        pass
 
     @abstractmethod
     def collect_data(self, i: int, format_file: any):
         pass
 
-class CollectBackup:
-    def backup(self):
-        self.root_dir = join(Folder.BACKUP, self.module)
-        self._date = self.date.strftime("%Y%m%d")
-        self._time = time.strftime("%H%M")
-        
-        ## start backup
-        state = self.create_date_dir()
-        if state == "succeed":
-            for date_dir in os.listdir(self.root_dir):
-                if not date_dir.endswith(".zip"):
-                    self.zip_backup(date_dir)
 
-            self.genarate_backup_file()
+class CollectBackup:
+
+    def backup(self):
+
+        print(self.manual)
+
+        # self.root_dir = join(Folder.BACKUP, self.module)
+        # self._date = self.date.strftime("%Y%m%d")
+        # self._time = time.strftime("%H%M")
+
+        # ## start backup
+        # state = self.create_date_dir()
+        # if state == "succeed":
+        #     for date_dir in os.listdir(self.root_dir):
+        #         if not date_dir.endswith(".zip"):
+        #             self.zip_backup(date_dir)
+
+        #     self.genarate_backup_file()
 
     def create_date_dir(self) -> str:
         state = "failed"
@@ -113,15 +90,14 @@ class CollectBackup:
             zip_dir = join(self.root_dir, date_dir)
             zip_name = join(self.root_dir, f"{date_dir}.zip")
 
-            with zipfile.ZipFile(
-                join(self.root_dir, zip_name), "w", zipfile.ZIP_DEFLATED) as zf:
+            with zipfile.ZipFile(join(self.root_dir, zip_name), "w", zipfile.ZIP_DEFLATED) as zf:
                 for file in Path(zip_dir).rglob("*"):
                     if file.exists():
                         zf.write(file, file.relative_to(zip_dir))
 
             shutil.rmtree(zip_dir)
             state = "succeed"
-            logging.info(f'Zip file name: "{zip_name}" from "{zip_dir}" status: "{state}"')
+            logging.info(f'Zip file name: "{zip_name}" from "{zip_dir}" status: "{state}"' )
 
     def genarate_backup_file(self):
         logging.info(f'Backup file from "{self.full_target}"')
@@ -137,15 +113,16 @@ class CollectBackup:
             state = "succeed"
             logging.info(f'Backup file to "{full_backup}" status: "{state}"')
 
+
 class ClearUp:
-    
+
     # loaded = {}
     # def __new__(cls, module: str):
     #     if (params:= cls.loaded.get(module)) is not None:
     #         return params
     #     params = super().__new__(cls)
     #     cls.loaded[module] = params
-        
+
     #     ## call function
     #     params.param_setter(module)
     #     return params
