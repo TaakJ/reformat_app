@@ -18,9 +18,6 @@ class ModuleLDS(CallFunction):
         self.store_tmp  = params.store_tmp
         self.write_mode = params.write_mode
         self.clear      = params.clear
-
-    def logSetter(self, log: list) -> None:
-        self._log = log
         
     async def step_run(self) -> dict:
         
@@ -50,6 +47,9 @@ class ModuleLDS(CallFunction):
 
         logging.info("Stop Run Module\n")
         return result
+    
+    def logSetter(self, log: list) -> None:
+        self._log = log
     
     def collect_params(self) -> None:        
         _log = []

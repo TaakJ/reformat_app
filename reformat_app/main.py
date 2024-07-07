@@ -18,6 +18,7 @@ class RunModule:
         for key, value in PARAMS.items():
             setattr(self, key, value)
         self.date = datetime.now()
+        
         setup_folder()
         setup_log()
         

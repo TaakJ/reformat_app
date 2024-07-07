@@ -19,13 +19,10 @@ class ModuleADM(CallFunction):
         self.write_mode = params.write_mode
         self.clear      = params.clear
         
-    def logSetter(self, log: list) -> None:
-        self._log = log
-        
     async def step_run(self) -> dict:
         
         logging.info(f'Module: "{self.module}", Manual: "{self.manual}", Batch Date: "{self.batch_date}", Store Tmp: "{self.store_tmp}", Write Mode: "{self.write_mode}"')
-        # self.backup()
+        self.backup()
         result = {"module": self.module, "task": "Completed"}
         try:
             self.collect_params()
@@ -45,11 +42,13 @@ class ModuleADM(CallFunction):
                     logger.error(next(err))
                 except StopIteration:
                     break
-
             result.update({"task": "Uncompleted"})
-
+            
         logging.info("Stop Run Module\n")
         return result
+    
+    def logSetter(self, log: list) -> None:
+        self._log = log
     
     def collect_params(self) -> None:
         _log = []

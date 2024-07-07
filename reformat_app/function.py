@@ -29,12 +29,6 @@ class CollectLog(ABC):
     def logSetter(self, log: list): ...
 
 class CollectParams(ABC):
-
-    def __init__(self, module):
-        print("Initialzing the module")
-        self.module = module
-        print(self.module)
-        
     def get_extract_data(self, i: int, format_file: any) -> dict:
         logging.info("Extract Data Each Module")
         data = self.collect_data(i, format_file)
