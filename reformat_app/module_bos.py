@@ -9,25 +9,24 @@ from .setup import setup_errorlog
 
 class ModuleBOS(CallFunction):
 
-    def __init__(self, module) -> None:
+    def __init__(self, module:str) -> dict:
         ...
         
     def logSetter(self, log: list) -> None:
         self._log = log
         
-    async def run(self) -> dict:
+    async def step_run(self) -> dict:
+        
         logging.info(f'Module: "{self.module}", Manual: "{self.manual}", Batch Date: "{self.batch_date}", Store Tmp: "{self.store_tmp}", Write Mode: "{self.write_mode}"')
-        
-        self.backup()
-        
         result = {"module": self.module, "task": "Completed"}
+        
         try:
             await self.check_source_file()
-            await self.retrieve_data_from_source_file()
-            await self.mock_data()
-            if self.store_tmp is True:
-                await self.write_data_to_tmp_file()
-            await self.write_data_to_target_file()
+            # await self.retrieve_data_from_source_file()
+            # await self.mock_data()
+            # if self.store_tmp is True:
+            #     await self.write_data_to_tmp_file()
+            # await self.write_data_to_target_file()
 
         except CustomException as err:
             logging.error('See Error Details in "_error.log"')
@@ -67,7 +66,7 @@ class ModuleBOS(CallFunction):
         self.logging[i].update({"state": state})
         return data
 
-    async def mock_data(self) -> None:
+    def mock_data(self) -> None:
         mock_data = [
             [
                 "ApplicationCode",

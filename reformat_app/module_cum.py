@@ -5,46 +5,28 @@ import pandas as pd
 import logging
 from .function import CallFunction
 from .exception import CustomException
-from .setup import PARAMS, CONFIG, setup_errorlog
+from .setup import setup_errorlog
 
 class ModuleCUM(CallFunction):
+    
+    def __init__(self, module:str) -> dict:
+        ...
 
     def logSetter(self, log: list) -> None:
         self._log = log
-        
-    def paramsSetter(self, module: str) -> None:
-        self.module = module
-        self.date = datetime.now()
-        
-        for key, value in PARAMS.items():
-            setattr(self, key, value)
-        
-        ## setup input dir / input file 
-        self.input_dir = [join(CONFIG[module]["input_dir"], CONFIG[module]["input_file"])]
-        
-        ## setup output dir / output file 
-        output_dir = CONFIG[module]["output_dir"]
-        output_file = CONFIG[module]["output_file"]
-        if self.write_mode == "overwrite" or self.manual:
-            filename = output_file
-        else:
-            suffix = f"{self.batch_date.strftime('%Y%m%d')}"
-            filename = f"{Path(output_file).stem}_{suffix}.csv"
-        self.full_target = join(output_dir, filename)
 
-    async def Run(self, module: str) -> dict:
-        self.paramsSetter(module)
+    async def step_run(self) -> dict:
         
         logging.info(f'Module: "{self.module}", Manual: "{self.manual}", Batch Date: "{self.batch_date}", Store Tmp: "{self.store_tmp}", Write Mode: "{self.write_mode}"')
         result = {"module": self.module, "task": "Completed"}
         
         try:
             await self.check_source_file()
-            await self.retrieve_data_from_source_file()
-            await self.mock_data()
-            if self.store_tmp is True:
-                await self.write_data_to_tmp_file()
-            await self.write_data_to_target_file()
+            # await self.retrieve_data_from_source_file()
+            # await self.mock_data()
+            # if self.store_tmp is True:
+            #     await self.write_data_to_tmp_file()
+            # await self.write_data_to_target_file()
 
         except CustomException as err:
             logging.error('See Error Details in "_error.log"')

@@ -10,30 +10,32 @@ from .setup import setup_errorlog
 
 class ModuleADM(CallFunction):
     
-    def __init__(self, module) -> None:
+    def __init__(self, module:str) -> dict:
         ...
         
     def logSetter(self, log: list) -> None:
         self._log = log
         
-    async def run(self):
-        logging.info(f'Module: "{self.module}", Manual: "{self.manual}", Batch Date: "{self.batch_date}", Store Tmp: "{self.store_tmp}", Write Mode: "{self.write_mode}"')
-        
-        self.backup()
-        
-        result = {"module": self.module, "task": "Completed"}
+    async def step_run(self) -> dict:
         try:
-            await self.check_source_file()
-            # raise CustomException(err=self.logging)
-            await self.retrieve_data_from_source_file()
-            await self.mock_data()
-            if self.store_tmp is True:
-                await self.write_data_to_tmp_file()
-            await self.write_data_to_target_file()
+            
+            try:
+                logging.info(f'Module: "{self.module}", Manual: "{self.manual}", Batch Date: "{self.batch_date}", Store Tmp: "{self.store_tmp}", Write Mode: "{self.write_mode}"')
+                result = {"module": self.module, "task": "Completed"}
+        
+                await self.check_source_file()
+                # await self.retrieve_data_from_source_file()
+                # await self.mock_data()
+                # if self.store_tmp is True:
+                #     await self.write_data_to_tmp_file()
+                # await self.write_data_to_target_file()
+                
+            except Exception as err:
+                print(err)
 
         except CustomException as err:
             logging.error('See Error Details in "_error.log"')
-            
+
             logger = setup_errorlog(log_name=__name__)
             while True:
                 try:
@@ -42,13 +44,12 @@ class ModuleADM(CallFunction):
                     break
 
             result.update({"task": "Uncompleted"})
-            
+
         logging.info("Stop Run Module\n")
-        
         return result
     
-    def collect_data(self, i: int, format_file: any) -> dict:
         
+    def collect_data(self, i: int, format_file: any) -> dict:
         state = "failed"
         module = self.logging[i]["module"]
         logging.info(f'Collect Data for "{module}"')
@@ -66,7 +67,7 @@ class ModuleADM(CallFunction):
         self.logging[i].update({"state": state})
         return {module: data}
 
-    async def mock_data(self) -> None:
+    def mock_data(self) -> None:
         mock_data = [
             [
                 "ApplicationCode",
