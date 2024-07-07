@@ -2,7 +2,6 @@ from pathlib import Path
 from os.path import join
 import re
 import pandas as pd
-from datetime import datetime
 import logging
 from .function import CallFunction
 from .exception import CustomException
@@ -57,9 +56,11 @@ class ModuleADM(CallFunction):
         self._log = log
     
     def collect_params(self) -> None:
-        _log = []
+        
         state = "failed"
         record = {"module": self.module, "function": "collect_params", "status": state}
+        
+        _log = []
         try:
             ## setup input dir / input file 
             self.input_dir = [join(CONFIG[self.module]["input_dir"], CONFIG[self.module]["input_file"])]
