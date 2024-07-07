@@ -25,6 +25,7 @@ class ModuleDOC(CallFunction):
         
         result = {"module": self.module, "task": "Completed"}
         try:
+            ## set params from confog file
             self.collect_params()
             ## backup
             self.backup()
