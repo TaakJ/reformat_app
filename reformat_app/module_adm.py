@@ -27,6 +27,12 @@ class ModuleADM(CallFunction):
             ## set params from confog file
             self.collect_params()
             
+            ## clear
+            if self.clear:
+                self.clear_log()
+                self.clear_backup()
+                self.clear_tmp()
+            
             ## backup
             # self.backup()
             

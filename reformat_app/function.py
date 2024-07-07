@@ -98,20 +98,11 @@ class CollectBackup:
 
 class ClearUp:
 
-    # loaded = {}
-    # def __new__(cls, module: str):
-    #     if (params:= cls.loaded.get(module)) is not None:
-    #         return params
-    #     params = super().__new__(cls)
-    #     cls.loaded[module] = params
-
-    #     ## call function
-    #     params.param_setter(module)
-    #     return params
-
     def clear_log(self):
+        _date = self.date.strftime("%Y%m%d")
+        
         for date_dir in os.listdir(Folder.LOG):
-            if date_dir < self._date:
+            if date_dir < _date:
                 log_dir = join(Folder.LOG, date_dir)
                 shutil.rmtree(log_dir)
 
@@ -119,10 +110,11 @@ class ClearUp:
                 logging.info(f'Clear Log file: "{log_dir}" status: "{state}"')
 
     def clear_tmp(self):
+        _date = self.date.strftime("%Y%m%d")
         try:
             tmp_dir = join(Folder.TMP, self.module)
             for date_dir in os.listdir(tmp_dir):
-                if date_dir < self._date:
+                if date_dir < _date:
                     tmp_file = join(tmp_dir, date_dir)
                     shutil.rmtree(tmp_file)
 
@@ -132,10 +124,11 @@ class ClearUp:
             pass
 
     def clear_backup(self):
+        _date = self.date.strftime("%Y%m%d")
         try:
             backup_dir = join(Folder.BACKUP, self.module)
             for date_dir in os.listdir(backup_dir):
-                if date_dir < self._date:
+                if date_dir < _date:
                     zip_dir = join(backup_dir, date_dir)
                     os.remove(zip_dir)
 
@@ -143,7 +136,6 @@ class ClearUp:
                     logging.info(f'Clear Zip file: "{zip_dir}" status: "{state}"')
         except OSError:
             pass
-
 
 class CallFunction(Convert2File, CollectLog, CollectParams, CollectBackup, ClearUp):
     pass
