@@ -17,43 +17,39 @@ from .setup import Folder
 class Convert2File:
 
     async def check_source_file(self) -> None:
+        
+        logging.info("Check Source file")
 
-        state = "failed"
         _log = []
-        for record in self.logging:
-            if state != record["status"]:
-                
-                logging.info("Check Source file")
-                
-                state = "not_found"
-                for input_dir in self.input_dir:
-                    if glob.glob(input_dir, recursive=True):
-                        state = "found"
-                        
-                    record = {
-                        "module": self.module,
-                        "input_dir": input_dir,
-                        "status": state,
-                        "function": "check_source_file",
-                        }
-                    _log.append(record)
-            else:
-                raise CustomException(err=self.logging)
+        for input_dir in self.input_dir:
+
+            status = "not_found"
+            if glob.glob(input_dir, recursive=True):
+                status = "found"
+
+            record = {"module": self.module,
+                    "input_dir": input_dir,
+                    "full_target": self.full_target,
+                    "function": "check_source_file",
+                    "status": status,
+                    }
+            _log.append(record)
+            logging.info(f'Source file: "{input_dir}", Status: "{status}"')
+            
         self.logging = _log
         
     async def retrieve_data_from_source_file(self) -> None:
 
         logging.info("Retrieve Data from Source file")
 
-        state = "failed"
         for i, record in enumerate(self.logging):
-            record.update({"function": "retrieve_data_from_source_file", "state": state})
+            record.update({"function": "retrieve_data_from_source_file"})
 
             input_dir = record["input_dir"]
             types = Path(input_dir).suffix
-            status = record["status"]
+            status_file = record["status"]
             try:
-                if status == "found":
+                if status_file == "found":
                     if [".xlsx", ".xls"].__contains__(types):
                         logging.info(f'Read Excel file: "{input_dir}"')
                         data = self.read_excel_file(i)
@@ -61,13 +57,12 @@ class Convert2File:
                         logging.info(f'Read Text file: "{input_dir}"')
                         data = self.read_text_file(i)
                 else:
-                    raise FileNotFoundError(f"status_file: {status}")
+                    raise FileNotFoundError(f'File Not Found: "{input_dir}"')
 
-                state = "succeed"
-                record.update({"data": data, "state": state})
+                status = "succeed"
+                record.update({"data": data, "status": status})
 
             except Exception as err:
-                
                 record.update({"err": err})
 
             if "err" in record:
@@ -86,6 +81,7 @@ class Convert2File:
 
         except Exception as err:
             raise Exception(err)
+        
         return data
 
     def read_excel_file(self, i: int) -> any:
@@ -98,15 +94,15 @@ class Convert2File:
 
         except Exception as err:
             raise Exception(err)
+        
         return data
 
     def initial_data_type(self, df: pd.DataFrame) -> pd.DataFrame:
 
-        state = "failed"
-        self.logging[-1].update({"function": "initial_data_type", "state": state})
+        status = "failed"
+        self.logging[-1].update({"function": "initial_data_type", "status": status})
         try:
-            df = df.astype(
-                {
+            df = df.astype({
                     "ApplicationCode": object,
                     "AccountOwner": object,
                     "AccountName": object,
@@ -120,9 +116,7 @@ class Convert2File:
                     "CreateDate": "datetime64[ms]",
                     "LastLogin": "datetime64[ms]",
                     "LastUpdatedDate": "datetime64[ms]",
-                    "AdditionalAttribute": object,
-                }
-            )
+                    "AdditionalAttribute": object})
             df[["CreateDate", "LastLogin", "LastUpdatedDate"]] = df[["CreateDate", "LastLogin", "LastUpdatedDate"]].apply(pd.to_datetime, format="%Y%m%d%H%M%S")
 
             if "remark" in df.columns:
@@ -133,19 +127,19 @@ class Convert2File:
         except Exception as err:
             raise Exception(err)
 
-        state = "succeed"
-        self.logging[-1].update({"state": state})
+        status = "succeed"
+        self.logging[-1].update({"status": status})
+        
         return df
 
     def validate_data_change(self, df: pd.DataFrame, change_df: pd.DataFrame) -> dict:
 
         logging.info("Validate Data Change")
-
         self.change_rows = {}
         self.remove_rows = []
-
-        state = "failed"
-        self.logging[-1].update({"function": "validate_data_change", "state": state})
+        
+        status = "failed"
+        self.logging[-1].update({"function": "validate_data_change", "status": status})
 
         ## set format record
         def format_record(record):
@@ -206,8 +200,8 @@ class Convert2File:
         except Exception as err:
             raise Exception(err)
 
-        state = "succeed"
-        self.logging[-1].update({"state": state})
+        status = "succeed"
+        self.logging[-1].update({"status": status})
 
         return data_dict
 
@@ -215,7 +209,7 @@ class Convert2File:
 
         logging.info("Write Data to Tmp file")
 
-        state = "failed"
+        status = "failed"
         for record in self.logging:
             try:
                 if record["module"] == "Target_file":
@@ -244,13 +238,13 @@ class Convert2File:
                         data_dict = self.validate_data_change(tmp_df, change_df)
 
                         ## write tmp file
-                        state = self.write_worksheet(data_dict)
+                        status = self.write_worksheet(data_dict)
 
                     except Exception as err:
                         raise Exception(err)
 
-                    record.update({"function": "write_data_to_tmp_file", "state": state})
-                    logging.info(f'Write Data to Tmp file status: "{state}"')
+                    record.update({"function": "write_data_to_tmp_file", "status": status})
+                    logging.info(f'Write Data to Tmp file status: "{status}"')
 
             except Exception as err:
                 record.update({"err": err})
@@ -263,8 +257,8 @@ class Convert2File:
         full_tmp = self.logging[-1]["input_dir"]
         logging.info(f'Create Tmp file: "{full_tmp}"')
 
-        state = "failed"
-        self.logging[-1].update({"function": "create_workbook", "state": state})
+        status = "failed"
+        self.logging[-1].update({"function": "create_workbook", "status": status})
 
         try:
             self.create = False
@@ -294,12 +288,12 @@ class Convert2File:
             self.sheet_name = "RUN_TIME_1"
             self.sheet_num = 1
 
-        state = "succeed"
-        self.logging[-1].update({"state": state})
+        status = "succeed"
+        self.logging[-1].update({"status": status})
 
     def write_worksheet(self, change_data: dict) -> str:
 
-        state = "failed"
+        status = "failed"
         if self.create:
             self.sheet_name = f"RUN_TIME_{self.sheet_num}"
             self.sheet = self.workbook.create_sheet(self.sheet_name)
@@ -308,7 +302,7 @@ class Convert2File:
         
         rows = 2
         max_row = max(change_data, default=0)
-        self.logging[-1].update({"function": "write_worksheet", "sheet_name": self.sheet_name, "state": state})
+        self.logging[-1].update({"function": "write_worksheet", "sheet_name": self.sheet_name, "status": status})
         try:
             # write column
             for idx, col in enumerate(change_data[rows].keys(), 1):
@@ -345,16 +339,16 @@ class Convert2File:
         self.workbook.move_sheet(self.workbook.active, offset=-self.sheet_num)
         self.workbook.save(full_tmp)
 
-        state = "succeed"
-        self.logging[-1].update({"state": state})
+        status = "succeed"
+        self.logging[-1].update({"status": status})
         
-        return state
+        return status
 
     async def write_data_to_target_file(self) -> None:
 
         logging.info("Write Data to Target file")
         
-        state = "failed"
+        status = "failed"
         for record in self.logging:
             try:
 
@@ -377,13 +371,13 @@ class Convert2File:
                         data = self.optimize_data(target_df, change_df)
                         
                         ## write csv file
-                        state = self.write_csv(self.full_target, data)
+                        status = self.write_csv(self.full_target, data)
 
                     except Exception as err:
                         raise Exception(err)
 
-                    record.update({"function": "write_data_to_target_file", "state": state})
-                    logging.info(f'Write to Target file status: "{state}"')
+                    record.update({"function": "write_data_to_target_file", "state": status})
+                    logging.info(f'Write to Target file status: "{status}"')
 
             except Exception as err:
                 record.update({"err": err})
@@ -395,8 +389,8 @@ class Convert2File:
 
         logging.info(f'Read Target file: "{self.full_target}"')
 
-        state = "failed"
-        self.logging[-1].update({"input_dir": self.full_target, "function": "read_csv", "state": state})
+        status = "failed"
+        self.logging[-1].update({"input_dir": self.full_target, "function": "read_csv", "status": status})
 
         try:
             data = []
@@ -418,8 +412,8 @@ class Convert2File:
             target_df = pd.read_excel(template_name)
             target_df.to_csv(self.full_target, index=None, header=True, sep=",")
 
-        state = "succeed"
-        self.logging[-1].update({"state": state})
+        status = "succeed"
+        self.logging[-1].update({"status": status})
 
         return target_df
 
@@ -427,8 +421,8 @@ class Convert2File:
 
         logging.info("Optimize Data Before Write to Target")
 
-        state = "failed"
-        self.logging[-1].update({"function": "optimize_data", "state": state})
+        status = "failed"
+        self.logging[-1].update({"function": "optimize_data", "status": status})
 
         data = {}
         try:
@@ -465,8 +459,8 @@ class Convert2File:
         except Exception as err:
             raise Exception(err)
 
-        state = "succeed"
-        self.logging[-1].update({"state": state})
+        status = "succeed"
+        self.logging[-1].update({"status": status})
 
         return data
 
@@ -474,8 +468,8 @@ class Convert2File:
 
         logging.info(f'Write mode: "{self.write_mode}" in Target file: "{target_name}"')
 
-        state = "failed"
-        self.logging[-1].update({"function": "write_csv", "state": state})
+        status = "failed"
+        self.logging[-1].update({"function": "write_csv", "status": status})
 
         try:
             with open(target_name, "r", newline="\n") as reader:
@@ -516,7 +510,7 @@ class Convert2File:
         except Exception as err:
             raise Exception(err)
 
-        state = "succeed"
-        self.logging[-1].update({"state": state})
+        status = "succeed"
+        self.logging[-1].update({"status": status})
 
-        return state
+        return status

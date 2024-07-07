@@ -27,14 +27,17 @@ class ModuleADM(CallFunction):
         try:
             ## set params from confog file
             self.collect_params()
+            
             ## backup
-            self.backup()
-            # await self.check_source_file()
-            # await self.retrieve_data_from_source_file()
-            # await self.mock_data()
-            # if self.store_tmp is True:
-            #     await self.write_data_to_tmp_file()
-            # await self.write_data_to_target_file()
+            # self.backup()
+            
+            ## run_process
+            await self.check_source_file()
+            await self.retrieve_data_from_source_file()
+            await self.mock_data()
+            if self.store_tmp is True:
+                await self.write_data_to_tmp_file()
+            await self.write_data_to_target_file()
 
         except CustomException as err:
             logging.error('See Error Details in "_error.log"')
@@ -102,7 +105,7 @@ class ModuleADM(CallFunction):
         self.logging[i].update({"state": state})
         return {module: data}
 
-    def mock_data(self) -> None:
+    async def mock_data(self) -> None:
         mock_data = [
             [
                 "ApplicationCode",

@@ -41,37 +41,37 @@ class RunModule:
                 coros.append(run)
 
             elif module == "CUM":
-                tasks = ModuleCUM(module)
+                tasks = ModuleCUM(self)
                 run = asyncio.create_task(tasks.step_run())
                 coros.append(run)
 
             elif module == "DOC":
-                tasks = ModuleDOC(module)
+                tasks = ModuleDOC(self)
                 run = asyncio.create_task(tasks.step_run())
                 coros.append(run)
 
             elif module == "ICA":
-                tasks = ModuleICA(module)
+                tasks = ModuleICA(self)
                 run = asyncio.create_task(tasks.step_run())
                 coros.append(run)
 
             elif module == "IIC":
-                tasks = ModuleIIC(module)
+                tasks = ModuleIIC(self)
                 run = asyncio.create_task(tasks.step_run())
                 coros.append(run)
 
             elif module == "LDS":
-                tasks = ModuleLDS(module)
+                tasks = ModuleLDS(self)
                 run = asyncio.create_task(tasks.step_run())
                 coros.append(run)
 
             elif module == "LMT":
-                tasks = ModuleLMT(module)
+                tasks = ModuleLMT(self)
                 run = asyncio.create_task(tasks.step_run())
                 coros.append(run)
 
             elif module == "MOC":
-                ttasks = ModuleMOC(module)
+                ttasks = ModuleMOC(self)
                 run = asyncio.create_task(tasks.step_run())
                 coros.append(run)
 

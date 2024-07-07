@@ -6,12 +6,9 @@ import zipfile
 import time
 import logging
 from pathlib import Path
-from datetime import datetime
 from os.path import join
 from .module import Convert2File
 from .setup import Folder
-from .exception import CustomException
-
 
 class CollectLog(ABC):
     def __init__(self) -> None:
