@@ -32,47 +32,47 @@ class RunModule:
             
             if module == "ADM":                                
                 tasks = ModuleADM(module)
-                run = asyncio.create_task(tasks.run())
+                run = asyncio.create_task(tasks.step_run())
                 coros.append(run)
 
             elif module == "BOS":
                 tasks = ModuleBOS(module)
-                run = asyncio.create_task(tasks.run())
+                run = asyncio.create_task(tasks.step_run())
                 coros.append(run)
 
             elif module == "CUM":
                 tasks = ModuleCUM(module)
-                run = asyncio.create_task(tasks.run())
+                run = asyncio.create_task(tasks.step_run())
                 coros.append(run)
 
             elif module == "DOC":
                 tasks = ModuleDOC(module)
-                run = asyncio.create_task(tasks.run())
+                run = asyncio.create_task(tasks.step_run())
                 coros.append(run)
 
             elif module == "ICA":
                 tasks = ModuleICA(module)
-                run = asyncio.create_task(tasks.run())
+                run = asyncio.create_task(tasks.step_run())
                 coros.append(run)
 
             elif module == "IIC":
                 tasks = ModuleIIC(module)
-                run = asyncio.create_task(tasks.run())
+                run = asyncio.create_task(tasks.step_run())
                 coros.append(run)
 
             elif module == "LDS":
                 tasks = ModuleLDS(module)
-                run = asyncio.create_task(tasks.run())
+                run = asyncio.create_task(tasks.step_run())
                 coros.append(run)
 
             elif module == "LMT":
                 tasks = ModuleLMT(module)
-                run = asyncio.create_task(tasks.run())
+                run = asyncio.create_task(tasks.step_run())
                 coros.append(run)
 
             elif module == "MOC":
                 ttasks = ModuleMOC(module)
-                run = asyncio.create_task(tasks.run())
+                run = asyncio.create_task(tasks.step_run())
                 coros.append(run)
 
         return await asyncio.wait(coros)

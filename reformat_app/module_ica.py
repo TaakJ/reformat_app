@@ -15,19 +15,18 @@ class ModuleICA(CallFunction):
     def logSetter(self, log: list) -> None:
         self._log = log
         
-    async def step_run(self, module: str) -> dict:
-        self.paramsSetter(module)
+    async def step_run(self) -> dict:
         
         logging.info(f'Module: "{self.module}", Manual: "{self.manual}", Batch Date: "{self.batch_date}", Store Tmp: "{self.store_tmp}", Write Mode: "{self.write_mode}"')
         result = {"module": self.module, "task": "Completed"}
         
         try:
             await self.check_source_file()
-            await self.retrieve_data_from_source_file()
-            await self.mock_data()
-            if self.store_tmp is True:
-                await self.write_data_to_tmp_file()
-            await self.write_data_to_target_file()
+            # await self.retrieve_data_from_source_file()
+            # await self.mock_data()
+            # if self.store_tmp is True:
+            #     await self.write_data_to_tmp_file()
+            # await self.write_data_to_target_file()
 
         except CustomException as err:
             logging.error('See Error Details in "_error.log"')
