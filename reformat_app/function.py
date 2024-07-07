@@ -9,7 +9,7 @@ from pathlib import Path
 from datetime import datetime
 from os.path import join
 from .module import Convert2File
-from .setup import PARAMS, CONFIG, Folder
+from .setup import Folder
 from .exception import CustomException
 
 
@@ -30,29 +30,23 @@ class CollectLog(ABC):
 
 class CollectParams(ABC):
 
-    def __new__(cls, *args, **kwargs):
-        print("CREATE PARAMETER")
-        return super().__new__(cls, *args, **kwargs)
-
-    def __init__(self):
-        print("OK")
-        print(self.__class__)
-
+    def __init__(self, module):
+        print("Initialzing the module")
+        self.module = module
+        print(self.module)
+        
     def get_extract_data(self, i: int, format_file: any) -> dict:
-
         logging.info("Extract Data Each Module")
-
         data = self.collect_data(i, format_file)
         return data
 
     @abstractmethod
-    def paramsSetter(self, module):
+    def collect_params(self):
         pass
 
     @abstractmethod
     def collect_data(self, i: int, format_file: any):
         pass
-
 
 class CollectBackup:
 

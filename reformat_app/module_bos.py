@@ -1,28 +1,68 @@
 from pathlib import Path
 from os.path import join
-from datetime import datetime
+import re
 import pandas as pd
+from datetime import datetime
 import logging
 from .function import CallFunction
 from .exception import CustomException
-from .setup import setup_errorlog, PARAMS, CONFIG
+from .setup import setup_errorlog, CONFIG
 
 class ModuleBOS(CallFunction):
-
+    
+    def __init__(self, params) -> None:
+        self.module     = "BOS"
+        self.date       = params.date
+        self.manual     = params.manual
+        self.batch_date = params.batch_date
+        self.store_tmp  = params.store_tmp
+        self.write_mode = params.write_mode
+        self.clear      = params.clear
+        
     def logSetter(self, log: list) -> None:
         self._log = log
+            
+    async def step_run(self) -> dict:
         
-    def paramsSetter(self, module) -> None:        
+        logging.info(f'Module: "{self.module}", Manual: "{self.manual}", Batch Date: "{self.batch_date}", Store Tmp: "{self.store_tmp}", Write Mode: "{self.write_mode}"')
+        # self.backup()
+        result = {"module": self.module, "task": "Completed"}
+        
+        try:
+            self.collect_params()
+            # await self.check_source_file()
+            # await self.retrieve_data_from_source_file()
+            # await self.mock_data()
+            # if self.store_tmp is True:
+            #     await self.write_data_to_tmp_file()
+            # await self.write_data_to_target_file()
+
+        except CustomException as err:
+            logging.error('See Error Details in "_error.log"')
+
+            logger = setup_errorlog(log_name=__name__)
+            while True:
+                try:
+                    logger.error(next(err))
+                except StopIteration:
+                    break
+                
+            result.update({"task": "Uncompleted"})
+            
+        logging.info("Stop Run Module\n")
+        return {}
+    
+    def collect_params(self) -> None:        
         _log = []
         state = "failed"
         record = {"module": self.module, "function": "paramsSetter", "status": state}
         try:
             ## setup input dir / input file 
-            self.input_dir = [join(CONFIG[module]["input_dir"], CONFIG[module]["input_file"])]
+            self.input_dir = [join(CONFIG[self.module]["input_dir"], CONFIG[self.module]["input_file"])]
             
             ## setup output dir / output file 
-            output_dir = CONFIG[module]["output_dir"]
-            output_file = CONFIG[module]["output_file"]
+            output_dir = CONFIG[self.module]["output_dir"]
+            output_file = CONFIG[self.module]["output_file"]
             if self.write_mode == "overwrite" or self.manual:
                 ...
             else:
@@ -42,37 +82,6 @@ class ModuleBOS(CallFunction):
         
         if "err" in record:
             raise CustomException(err=self.logging)
-            
-    async def step_run(self, module) -> dict:
-        
-        # logging.info(f'Module: "{module}", Manual: "{self.manual}", Batch Date: "{self.batch_date}", Store Tmp: "{self.store_tmp}", Write Mode: "{self.write_mode}"')
-        
-        result = {"module": module, "task": "Completed"}
-        try:
-            ''
-            # self.paramsSetter(module)
-            # self.backup()
-            # await self.check_source_file()
-            # await self.retrieve_data_from_source_file()
-            # await self.mock_data()
-            # if self.store_tmp is True:
-            #     await self.write_data_to_tmp_file()
-            # await self.write_data_to_target_file()
-
-        except CustomException as err:
-            logging.error('See Error Details in "_error.log"')
-
-            logger = setup_errorlog(log_name=__name__)
-            while True:
-                try:
-                    logger.error(next(err))
-                except StopIteration:
-                    break
-
-            result.update({"task": "Uncompleted"})
-
-        logging.info("Stop Run Module\n")
-        return {}
     
     def collect_data(self, i: int, format_file: any) -> dict:
 

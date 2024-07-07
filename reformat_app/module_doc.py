@@ -1,17 +1,23 @@
 from pathlib import Path
 from os.path import join
-from datetime import datetime
-import pandas as pd
 import re
+import pandas as pd
+from datetime import datetime
 import logging
 from .function import CallFunction
 from .exception import CustomException
-from .setup import setup_errorlog
+from .setup import setup_errorlog, CONFIG
 
 class ModuleDOC(CallFunction):
     
-    def __init__(self, module:str) -> dict:
-        ...
+    def __init__(self, params: any):
+        self.module     = "DOC"
+        self.date       = params.date
+        self.manual     = params.manual
+        self.batch_date = params.batch_date
+        self.store_tmp  = params.store_tmp
+        self.write_mode = params.write_mode
+        self.clear      = params.clear
 
     def logSetter(self, log: list) -> None:
         self._log = log
@@ -19,10 +25,11 @@ class ModuleDOC(CallFunction):
     async def step_run(self) -> dict:
         
         logging.info(f'Module: "{self.module}", Manual: "{self.manual}", Batch Date: "{self.batch_date}", Store Tmp: "{self.store_tmp}", Write Mode: "{self.write_mode}"')
+        # self.backup()
         result = {"module": self.module, "task": "Completed"}
-        
         try:
-            await self.check_source_file()
+            self.collect_params()
+            # await self.check_source_file()
             # await self.retrieve_data_from_source_file()
             # await self.mock_data()
             # if self.store_tmp is True:
@@ -43,6 +50,37 @@ class ModuleDOC(CallFunction):
 
         logging.info("Stop Run Module\n")
         return result
+    
+    def collect_params(self) -> None:        
+        _log = []
+        state = "failed"
+        record = {"module": self.module, "function": "paramsSetter", "status": state}
+        try:
+            ## setup input dir / input file 
+            self.input_dir = [join(CONFIG[self.module]["input_dir"], CONFIG[self.module]["input_file"])]
+            
+            ## setup output dir / output file 
+            output_dir = CONFIG[self.module]["output_dir"]
+            output_file = CONFIG[self.module]["output_file"]
+            if self.write_mode == "overwrite" or self.manual:
+                ...
+            else:
+                suffix = f"{self.batch_date.strftime('%Y%m%d')}"
+                output_file = f"{Path(output_file).stem}_{suffix}.csv"
+            self.full_target = join(output_dir, output_file)
+            
+            state = "succeed"
+            record.update({"status": state})
+            
+        except KeyError as err:
+            err =  f"Not found module: {err} in config file"
+            record.update({"err": err})
+        
+        _log.append(record)
+        self.logSetter(_log)
+        
+        if "err" in record:
+            raise CustomException(err=self.logging)
 
     def collect_data(self, i: int, format_file: any) -> dict:
 

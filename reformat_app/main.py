@@ -11,33 +11,32 @@ from .module_lds import ModuleLDS
 from .module_lmt import ModuleLMT
 from .module_moc import ModuleMOC
 from .setup import PARAMS, setup_folder, setup_log
-from .function import CollectBackup, ClearUp
+from datetime import datetime
 
 class RunModule:
-    
     def __init__(self) -> None:
+        for key, value in PARAMS.items():
+            setattr(self, key, value)
+        self.date = datetime.now()
         setup_folder()
         setup_log()
         
-        # dedup module
-        self.list_module = list(dict.fromkeys(PARAMS["source"]))
-            
         self.loop = asyncio.new_event_loop()
         asyncio.set_event_loop(self.loop)
         self.results = self.loop.run_until_complete(self.mapping_module())
         
     async def mapping_module(self):
         coros = []
-        for module in self.list_module:
+        for module in self.source:
             
             if module == "ADM":                                
-                tasks = ModuleADM()
+                tasks = ModuleADM(self)
                 run = asyncio.create_task(tasks.step_run())
                 coros.append(run)
 
             elif module == "BOS":
-                tasks = ModuleBOS()
-                run = asyncio.create_task(tasks.step_run(module))
+                tasks = ModuleBOS(self)
+                run = asyncio.create_task(tasks.step_run())
                 coros.append(run)
 
             elif module == "CUM":
@@ -76,10 +75,6 @@ class RunModule:
                 coros.append(run)
 
         return await asyncio.wait(coros)
-        
-        
-    
-        
 
 class StartApp(RunModule):
     pass
