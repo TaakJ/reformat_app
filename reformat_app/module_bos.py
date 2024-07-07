@@ -11,6 +11,7 @@ class ModuleBOS(CallFunction):
 
     def __init__(self, module:str) -> dict:
         ...
+        # self.input_dir += ["D:\IGAGD\ADM\download\ADM.txt"]
         
     def logSetter(self, log: list) -> None:
         self._log = log
@@ -18,11 +19,11 @@ class ModuleBOS(CallFunction):
     async def step_run(self) -> dict:
         
         logging.info(f'Module: "{self.module}", Manual: "{self.manual}", Batch Date: "{self.batch_date}", Store Tmp: "{self.store_tmp}", Write Mode: "{self.write_mode}"')
-        result = {"module": self.module, "task": "Completed"}
         
+        result = {"module": self.module, "task": "Completed"}
         try:
             await self.check_source_file()
-            # await self.retrieve_data_from_source_file()
+            await self.retrieve_data_from_source_file()
             # await self.mock_data()
             # if self.store_tmp is True:
             #     await self.write_data_to_tmp_file()

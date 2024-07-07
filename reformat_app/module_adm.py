@@ -12,41 +12,39 @@ class ModuleADM(CallFunction):
     
     def __init__(self, module:str) -> dict:
         ...
-        
+            
     def logSetter(self, log: list) -> None:
         self._log = log
         
     async def step_run(self) -> dict:
-        try:
-            try:
-                self.x
-                logging.info(f'Module: "{self.module}", Manual: "{self.manual}", Batch Date: "{self.batch_date}", Store Tmp: "{self.store_tmp}", Write Mode: "{self.write_mode}"')
-                result = {"module": self.module, "task": "Completed"}
         
-                await self.check_source_file()
-                # await self.retrieve_data_from_source_file()
-                # await self.mock_data()
-                # if self.store_tmp is True:
-                #     await self.write_data_to_tmp_file()
-                # await self.write_data_to_target_file()
-                
-            except Exception as err:
-                print(err)
+        logging.info(f'Module: "{self.module}", Manual: "{self.manual}", Batch Date: "{self.batch_date}", Store Tmp: "{self.store_tmp}", Write Mode: "{self.write_mode}"')
+        
+        result = {"module": self.module, "task": "Completed"}
+        try:
+            await self.check_source_file()
+            await self.retrieve_data_from_source_file()
+            # await self.mock_data()
+            # if self.store_tmp is True:
+            #     await self.write_data_to_tmp_file()
+            # await self.write_data_to_target_file()
 
         except CustomException as err:
-            logging.error('See Error Details in "_error.log"')
+            print("OK")
+            print(err)
+            # logging.error('See Error Details in "_error.log"')
 
-            logger = setup_errorlog(log_name=__name__)
-            while True:
-                try:
-                    logger.error(next(err))
-                except StopIteration:
-                    break
+            # logger = setup_errorlog(log_name=__name__)
+            # while True:
+            #     try:
+            #         logger.error(next(err))
+            #     except StopIteration:
+            #         break
 
-            result.update({"task": "Uncompleted"})
+            # result.update({"task": "Uncompleted"})
 
         logging.info("Stop Run Module\n")
-        return result
+        return {}
     
         
     def collect_data(self, i: int, format_file: any) -> dict:

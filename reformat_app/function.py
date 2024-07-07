@@ -10,6 +10,7 @@ from datetime import datetime
 from os.path import join
 from .module import Convert2File
 from .setup import PARAMS, CONFIG, Folder
+from .exception import CustomException
 
 class CollectLog(ABC):
     def __init__(self) -> None:
@@ -30,34 +31,46 @@ class CollectParams(ABC):
     
     _instance = {}
     def __new__(cls, module: str):
-        if (call_module:= cls._instance.get(module)) is not None:
-            return call_module
-        call_module = super().__new__(cls)
-        cls._instance[module] = call_module
+        if (params:= cls._instance.get(module)) is not None:
+            return params
+        params = super().__new__(cls)
+        cls._instance[module] = params
         ## call function
-        call_module.param_setter(module)
-        return call_module
+        params.setter_params(module)
+        return params
         
-    def param_setter(self, module):
+    def setter_params(self, module):
         for key, value in PARAMS.items():
             setattr(self, key, value)
-            
+        
         self.module = module
         self.date = datetime.now()
         
-        ## setup input dir / input file 
-        self.input_dir = [join(CONFIG[module]["input_dir"], CONFIG[module]["input_file"])]
+        _log = []
+        state = "failed"
+        record = {"module": self.module, "function": "param_setter", "status": state}
+        try:
+            ## setup input dir / input file 
+            self.input_dir = [join(CONFIG[module]["input_dir"], CONFIG[module]["input_file"])]
+            
+            ## setup output dir / output file 
+            output_dir = CONFIG[module]["output_dir"]
+            output_file = CONFIG[module]["output_file"]
+            if self.write_mode == "overwrite" or self.manual:
+                ...
+            else:
+                suffix = f"{self.batch_date.strftime('%Y%m%d')}"
+                output_file = f"{Path(output_file).stem}_{suffix}.csv"
+            self.full_target = join(output_dir, output_file)
+            
+            state = "succeed"
+            record.update({"status": state})
+            
+        except Exception as err:
+            record.update({"err": err})
         
-        output_dir = CONFIG[module]["output_dir"]
-        output_file = CONFIG[module]["output_file"]
-        if self.write_mode == "overwrite" or self.manual:
-            ...
-        else:
-            suffix = f"{self.batch_date.strftime('%Y%m%d')}"
-            output_file = f"{Path(output_file).stem}_{suffix}.csv"
-        
-        ## setup output dir / output file 
-        self.full_target = join(output_dir, output_file)
+        _log.append(record)
+        self.logSetter(_log)
         
     def get_extract_data(self, i: int, format_file: any) -> dict:
         logging.info("Extract Data Each Module")
