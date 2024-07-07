@@ -31,8 +31,7 @@ class Convert2File:
                     "input_dir": input_dir,
                     "full_target": self.full_target,
                     "function": "check_source_file",
-                    "status": status,
-                    }
+                    "status": status}
             _log.append(record)
             logging.info(f'Source file: "{input_dir}", Status: "{status}"')
             
