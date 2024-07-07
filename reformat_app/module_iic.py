@@ -58,9 +58,13 @@ class ModuleIIC(CallFunction):
         self._log = log
     
     def collect_params(self) -> None:        
+        
+        status = "failed"
+        record = {"module": self.module, "function": "collect_params", "status": status}
+        
+        logging.info(f'Set Params from config file for "{self.module}"')
+        
         _log = []
-        state = "failed"
-        record = {"module": self.module, "function": "collect_params", "status": state}
         try:
             ## setup input dir / input file 
             self.input_dir = [join(CONFIG[self.module]["input_dir"], CONFIG[self.module]["input_file"])]
@@ -75,8 +79,8 @@ class ModuleIIC(CallFunction):
                 output_file = f"{Path(output_file).stem}_{suffix}.csv"
             self.full_target = join(output_dir, output_file)
             
-            state = "succeed"
-            record.update({"status": state})
+            status = "succeed"
+            record.update({"status": status})
             
         except KeyError as err:
             err =  f"Not found module: {err} in config file"
@@ -90,11 +94,11 @@ class ModuleIIC(CallFunction):
     
     def collect_data(self, i: int, format_file: any) -> dict:
 
-        state = "failed"
+        status = "failed"
         module = self.logging[i]["module"]
         logging.info(f'Collect Data for "{module}"')
         
-        self.logging[i].update({"function": "collect_data","state": state})
+        self.logging[i].update({"function": "collect_data","status": status})
         sheet_list = [sheet for sheet in format_file.sheet_names() if sheet != "StyleSheet"]
 
         data = {}
@@ -108,8 +112,8 @@ class ModuleIIC(CallFunction):
                     else:
                         data[sheets].append(by_sheets)
 
-        state = "succeed"
-        self.logging[i].update({"state": state})
+        status = "succeed"
+        self.logging[i].update({"status": status})
         return data
 
     async def mock_data(self) -> None:

@@ -57,8 +57,10 @@ class ModuleADM(CallFunction):
     
     def collect_params(self) -> None:
         
-        state = "failed"
-        record = {"module": self.module, "function": "collect_params", "status": state}
+        status = "failed"
+        record = {"module": self.module, "function": "collect_params", "status": status}
+        
+        logging.info(f'Set Params from config file for "{self.module}"')
         
         _log = []
         try:
@@ -75,8 +77,8 @@ class ModuleADM(CallFunction):
                 output_file = f"{Path(output_file).stem}_{suffix}.csv"
             self.full_target = join(output_dir, output_file)
             
-            state = "succeed"
-            record.update({"status": state})
+            status = "succeed"
+            record.update({"status": status})
             
         except KeyError as err:
             err =  f"Not found module: {err} in config file"
@@ -89,11 +91,12 @@ class ModuleADM(CallFunction):
             raise CustomException(err=self.logging)
         
     def collect_data(self, i: int, format_file: any) -> dict:
-        state = "failed"
+        
+        status = "failed"
         module = self.logging[i]["module"]
         logging.info(f'Collect Data for "{module}"')
         
-        self.logging[i].update({"function": "collect_data","state": state})
+        self.logging[i].update({"function": "collect_data","status": status})
 
         data = []
         for line in format_file:
@@ -102,8 +105,9 @@ class ModuleADM(CallFunction):
             if find_word != []:
                 data += [re.sub(r"\W\s+","||","".join(find_word).strip()).split("||")]
 
-        state = "succeed"
-        self.logging[i].update({"state": state})
+        status = "succeed"
+        self.logging[i].update({"status": status})
+        
         return {module: data}
 
     async def mock_data(self) -> None:
