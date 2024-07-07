@@ -45,21 +45,18 @@ class CollectParams(ABC):
 class CollectBackup:
 
     def backup(self):
+        self.root_dir = join(Folder.BACKUP, self.module)
+        self._date = self.date.strftime("%Y%m%d")
+        self._time = time.strftime("%H%M")
 
-        print(self.manual)
+        ## start backup
+        state = self.create_date_dir()
+        if state == "succeed":
+            for date_dir in os.listdir(self.root_dir):
+                if not date_dir.endswith(".zip"):
+                    self.zip_backup(date_dir)
 
-        # self.root_dir = join(Folder.BACKUP, self.module)
-        # self._date = self.date.strftime("%Y%m%d")
-        # self._time = time.strftime("%H%M")
-
-        # ## start backup
-        # state = self.create_date_dir()
-        # if state == "succeed":
-        #     for date_dir in os.listdir(self.root_dir):
-        #         if not date_dir.endswith(".zip"):
-        #             self.zip_backup(date_dir)
-
-        #     self.genarate_backup_file()
+            self.genarate_backup_file()
 
     def create_date_dir(self) -> str:
         state = "failed"
