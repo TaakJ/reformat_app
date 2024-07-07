@@ -53,7 +53,7 @@ class ModuleADM(CallFunction):
     def collect_params(self) -> None:
         _log = []
         state = "failed"
-        record = {"module": self.module, "function": "paramsSetter", "status": state}
+        record = {"module": self.module, "function": "collect_params", "status": state}
         try:
             ## setup input dir / input file 
             self.input_dir = [join(CONFIG[self.module]["input_dir"], CONFIG[self.module]["input_file"])]
