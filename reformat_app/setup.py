@@ -89,7 +89,7 @@ def setup_errorlog(
     errorlog.setLevel(logging.INFO)
     return errorlog
 
-def clear_log(date):
+def clear_log(date) -> None:
     bk_date = date.strftime("%Y%m%d")
     
     for date_dir in os.listdir(Folder.LOG):
@@ -101,7 +101,7 @@ def clear_log(date):
             logging.info(f'Clear Log file: "{log_dir}" status: "{state}"')
 
 class SetupParser:
-    def __init__(self):
+    def __init__(self) -> None:
         self.parser = argparse.ArgumentParser()
         self.set_arguments()
         self.parsed_params = self.parser.parse_args()

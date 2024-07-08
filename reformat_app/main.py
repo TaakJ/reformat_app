@@ -20,9 +20,9 @@ class RunModule:
         self.date = datetime.now()
         self.bk_date = self.date - timedelta(self.clear)
         
-        clear_log(self.bk_date)
         setup_folder()
         setup_log()
+        clear_log(self.bk_date)
         
         self.loop = asyncio.new_event_loop()
         asyncio.set_event_loop(self.loop)
