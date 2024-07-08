@@ -20,6 +20,7 @@ class RunModule:
         self.date = datetime.now()
         self.bk_date = self.date - timedelta(self.clear)
         
+        ## initial setup 
         setup_folder()
         setup_log()
         clear_log(self.bk_date)
