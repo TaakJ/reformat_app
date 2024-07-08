@@ -12,13 +12,8 @@ from .setup import setup_errorlog, CONFIG
 class ModuleBOS(CallFunction):
 
     def __init__(self, params) -> None:
-        self.module = "BOS"
-        self.date = params.date
-        self.manual = params.manual
-        self.batch_date = params.batch_date
-        self.store_tmp = params.store_tmp
-        self.write_mode = params.write_mode
-        self.clear = params.clear
+        for key, value in vars(params).items():
+            setattr(self, key, value)
 
     async def step_run(self) -> dict:
 
@@ -27,24 +22,16 @@ class ModuleBOS(CallFunction):
         result = {"module": self.module, "task": "Completed"}
         try:
             ## set params from confog file
+            print(self.module)
             self.collect_params()
 
-            ## clear
-            if self.clear:
-                self.clear_log()
-                self.clear_backup()
-                self.clear_tmp()
-
-            ## backup
-            # self.backup()
-
             ## run_process
-            await self.check_source_file()
-            await self.retrieve_data_from_source_file()
-            await self.mock_data()
-            if self.store_tmp is True:
-                await self.write_data_to_tmp_file()
-            await self.write_data_to_target_file()
+            # await self.check_source_file()
+            # await self.retrieve_data_from_source_file()
+            # await self.mock_data()
+            # if self.store_tmp is True:
+            #     await self.write_data_to_tmp_file()
+            # await self.write_data_to_target_file()
 
         except CustomException as err:
             logging.error('See Error Details in "_error.log"')

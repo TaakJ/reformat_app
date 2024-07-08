@@ -31,6 +31,7 @@ class RunModule:
     async def mapping_module(self):
         coros = []
         for module in self.source:
+            setattr(self, "module", module)
             
             if module == "ADM":                                
                 tasks = ModuleADM(self)

@@ -12,14 +12,8 @@ from .setup import setup_errorlog, CONFIG
 class ModuleADM(CallFunction):
     
     def __init__(self, params: any):
-        self.module     = "ADM"
-        self.date       = params.date
-        self.manual     = params.manual
-        self.batch_date = params.batch_date
-        self.store_tmp  = params.store_tmp
-        self.write_mode = params.write_mode
-        self.clear      = params.clear
-        self.bk_date    = params.bk_date
+        for key, value in vars(params).items():
+            setattr(self, key, value)
         
     async def step_run(self) -> dict:
         
@@ -28,10 +22,10 @@ class ModuleADM(CallFunction):
         result = {"module": self.module, "task": "Completed"}
         try:
             ## set params from confog file
-            self.collect_params()
+            print(self.module)
             
-            self.clear_backup()
-            self.clear_tmp()
+            # self.clear_backup()
+            # self.clear_tmp()
             
             # ## run_process
             # await self.check_source_file()
