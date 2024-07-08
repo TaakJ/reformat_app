@@ -1,3 +1,4 @@
+from datetime import timedelta
 from pathlib import Path
 from os.path import join
 import re
@@ -18,6 +19,7 @@ class ModuleADM(CallFunction):
         self.store_tmp  = params.store_tmp
         self.write_mode = params.write_mode
         self.clear      = params.clear
+        self.bk_date    = params.bk_date
         
     async def step_run(self) -> dict:
         
@@ -28,13 +30,16 @@ class ModuleADM(CallFunction):
             ## set params from confog file
             self.collect_params()
             
-            ## run_process
-            await self.check_source_file()
-            await self.retrieve_data_from_source_file()
-            await self.mock_data()
-            if self.store_tmp is True:
-                await self.write_data_to_tmp_file()
-            await self.write_data_to_target_file()
+            self.clear_backup()
+            self.clear_tmp()
+            
+            # ## run_process
+            # await self.check_source_file()
+            # await self.retrieve_data_from_source_file()
+            # await self.mock_data()
+            # if self.store_tmp is True:
+            #     await self.write_data_to_tmp_file()
+            # await self.write_data_to_target_file()
 
         except CustomException as err:
             logging.error('See Error Details in "_error.log"')

@@ -3,6 +3,7 @@ import os
 import glob
 import shutil
 import zipfile
+from datetime import timedelta
 import time
 import logging
 from pathlib import Path
@@ -38,8 +39,8 @@ class CollectParams(ABC):
     @abstractmethod
     def collect_data(self, i: int, format_file: any):
         pass
-
-class CollectBackup:
+    
+class BackupAndClear:
 
     def backup(self):
         self.root_dir = join(Folder.BACKUP, self.module)
@@ -94,48 +95,38 @@ class CollectBackup:
 
             state = "succeed"
             logging.info(f'Backup file to "{full_backup}" status: "{state}"')
-
-
-class ClearUp:
-
-    def clear_log(self):
-        _date = self.date.strftime("%Y%m%d")
-        
-        for date_dir in os.listdir(Folder.LOG):
-            if date_dir < _date:
-                log_dir = join(Folder.LOG, date_dir)
-                shutil.rmtree(log_dir)
-
-                state = "succeed"
-                logging.info(f'Clear Log file: "{log_dir}" status: "{state}"')
-
+                
     def clear_tmp(self):
-        _date = self.date.strftime("%Y%m%d")
         try:
             tmp_dir = join(Folder.TMP, self.module)
+            bk_date = self.bk_date.strftime("%Y%m%d")
+            
             for date_dir in os.listdir(tmp_dir):
-                if date_dir < _date:
+                if date_dir <= bk_date:
                     tmp_file = join(tmp_dir, date_dir)
                     shutil.rmtree(tmp_file)
-
+                    
                     state = "succeed"
                     logging.info(f'Clear Tmp file: "{tmp_file}" status: "{state}"')
+                    
         except OSError:
             pass
-
+        
     def clear_backup(self):
-        _date = self.date.strftime("%Y%m%d")
         try:
             backup_dir = join(Folder.BACKUP, self.module)
+            bk_date = self.bk_date.strftime("%Y%m%d")
+            
             for date_dir in os.listdir(backup_dir):
-                if date_dir < _date:
+                if date_dir <= bk_date:
                     zip_dir = join(backup_dir, date_dir)
                     os.remove(zip_dir)
-
+                    
                     state = "succeed"
                     logging.info(f'Clear Zip file: "{zip_dir}" status: "{state}"')
+                    
         except OSError:
             pass
 
-class CallFunction(Convert2File, CollectLog, CollectParams, CollectBackup, ClearUp):
+class CallFunction(Convert2File, CollectLog, CollectParams, BackupAndClear):
     pass

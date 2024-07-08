@@ -4,6 +4,7 @@ import logging.config
 import yaml
 import os
 from os.path import join
+import shutil
 from datetime import datetime
 
 class ArgumentParams:
@@ -88,6 +89,17 @@ def setup_errorlog(
     errorlog.setLevel(logging.INFO)
     return errorlog
 
+def clear_log(date):
+    bk_date = date.strftime("%Y%m%d")
+    
+    for date_dir in os.listdir(Folder.LOG):
+        if date_dir <= bk_date:
+            log_dir = join(Folder.LOG, date_dir)
+            shutil.rmtree(log_dir)
+            
+            state = "succeed"
+            logging.info(f'Clear Log file: "{log_dir}" status: "{state}"')
+
 class SetupParser:
     def __init__(self):
         self.parser = argparse.ArgumentParser()
@@ -144,8 +156,8 @@ class SetupParser:
                 ArgumentParams.NAME: "--clear",
                 ArgumentParams.DESCRIPTION: "-c: clear",
                 ArgumentParams.REQUIRED: False,
-                ArgumentParams.ISFLAG: True,
-                ArgumentParams.DEFAULT: False,
+                ArgumentParams.DEFAULT: 7,
+                ArgumentParams.CHOICES: range(1,31)
             },
         ]
 

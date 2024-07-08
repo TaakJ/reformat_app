@@ -1,6 +1,5 @@
 from concurrent.futures import ThreadPoolExecutor
 import asyncio
-import logging
 from .module_adm import ModuleADM
 from .module_bos import ModuleBOS
 from .module_cum import ModuleCUM
@@ -10,15 +9,18 @@ from .module_iic import ModuleIIC
 from .module_lds import ModuleLDS
 from .module_lmt import ModuleLMT
 from .module_moc import ModuleMOC
-from .setup import PARAMS, setup_folder, setup_log
-from datetime import datetime
+from .setup import PARAMS, setup_folder, setup_log, clear_log
+from datetime import datetime, timedelta
 
 class RunModule:
     def __init__(self) -> None:
         for key, value in PARAMS.items():
             setattr(self, key, value)
+            
         self.date = datetime.now()
+        self.bk_date = self.date - timedelta(self.clear)
         
+        clear_log(self.bk_date)
         setup_folder()
         setup_log()
         
