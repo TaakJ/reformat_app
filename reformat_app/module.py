@@ -14,7 +14,6 @@ import csv
 from .exception import CustomException
 from .setup import Folder
 
-
 class Convert2File:
 
     async def check_source_file(self) -> None:
@@ -104,8 +103,7 @@ class Convert2File:
         status = "failed"
         self.logging[-1].update({"function": "initial_data_type", "status": status})
         try:
-            df = df.astype(
-                {
+            df = df.astype({
                     "ApplicationCode": object,
                     "AccountOwner": object,
                     "AccountName": object,
@@ -119,9 +117,7 @@ class Convert2File:
                     "CreateDate": "datetime64[ms]",
                     "LastLogin": "datetime64[ms]",
                     "LastUpdatedDate": "datetime64[ms]",
-                    "AdditionalAttribute": object,
-                }
-            )
+                    "AdditionalAttribute": object})
             df[["CreateDate", "LastLogin", "LastUpdatedDate"]] = df[["CreateDate", "LastLogin", "LastUpdatedDate"]].apply(pd.to_datetime, format="%Y%m%d%H%M%S")
 
             if "remark" in df.columns:
@@ -148,9 +144,7 @@ class Convert2File:
 
         ## set format record
         def format_record(record):
-            return "\n".join(
-                "{!r} => {!r},".format(columns, values)
-                for columns, values in record.items())
+            return "\n".join("{!r} => {!r},".format(columns, values) for columns, values in record.items())
 
         if len(df.index) > len(change_df.index):
             self.remove_rows = [idx for idx in list(df.index) if idx not in list(change_df.index)]

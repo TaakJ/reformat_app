@@ -77,21 +77,18 @@ class ModuleLMT(CallFunction):
             input_dir = CONFIG[self.module]["input_dir"]
             input_file = CONFIG[self.module]["input_file"]
                         
-            ## ** add module ** ##
-            add_dir = "" ## x, y
-            add_dir = add_dir.split(", ")
-            concat = lambda x, y: x + add_dir if y != [''] else x
-            self.full_input = reduce(concat, [[join(input_dir, input_file)], add_dir])         
+            specify_dir = "" ## x, y
+            specify_dir = specify_dir.split(", ")
+            add_dir = lambda x, y: x + specify_dir if y != [''] else x
+            self.full_input = reduce(add_dir, [[join(input_dir, input_file)], specify_dir])
             
             ## setup output dir / output file 
             output_dir = CONFIG[self.module]["output_dir"]
             output_file = CONFIG[self.module]["output_file"]
-            if self.write_mode == "overwrite" or self.manual:
-                ...
-            else:
-                suffix = f"{self.batch_date.strftime('%Y%m%d')}"
-                output_file = f"{Path(output_file).stem}_{suffix}.csv"
-            self.full_target = join(output_dir, output_file)
+            
+            suffix = f"{self.batch_date.strftime('%Y%m%d')}"
+            change_name =  lambda x: x if (self.write_mode == "overwrite" or self.manual) else f"{Path(x).stem}_{suffix}.csv"
+            self.full_target = join(output_dir, change_name(output_file))
 
             status = "succeed"
             record.update({"status": status})
