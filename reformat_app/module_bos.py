@@ -2,40 +2,42 @@ from pathlib import Path
 from os.path import join
 import re
 import pandas as pd
+from functools import reduce
 import logging
 from .function import CallFunction
 from .exception import CustomException
 from .setup import setup_errorlog, CONFIG
 
+
 class ModuleBOS(CallFunction):
-    
+
     def __init__(self, params) -> None:
-        self.module     = "BOS"
-        self.date       = params.date
-        self.manual     = params.manual
+        self.module = "BOS"
+        self.date = params.date
+        self.manual = params.manual
         self.batch_date = params.batch_date
-        self.store_tmp  = params.store_tmp
+        self.store_tmp = params.store_tmp
         self.write_mode = params.write_mode
-        self.clear      = params.clear
-            
+        self.clear = params.clear
+
     async def step_run(self) -> dict:
-        
+
         logging.info(f'Module: "{self.module}", Manual: "{self.manual}", Batch Date: "{self.batch_date}", Store Tmp: "{self.store_tmp}", Write Mode: "{self.write_mode}"')
-        
+
         result = {"module": self.module, "task": "Completed"}
         try:
             ## set params from confog file
             self.collect_params()
-            
+
             ## clear
             if self.clear:
                 self.clear_log()
                 self.clear_backup()
                 self.clear_tmp()
-            
+
             ## backup
             # self.backup()
-            
+
             ## run_process
             await self.check_source_file()
             await self.retrieve_data_from_source_file()
@@ -53,26 +55,33 @@ class ModuleBOS(CallFunction):
                     logger.error(next(err))
                 except StopIteration:
                     break
-                
+
             result.update({"task": "Uncompleted"})
-            
+
         logging.info("Stop Run Module\n")
         return result
-    
+
     def logSetter(self, log: list) -> None:
         self._log = log
-    
+
     def collect_params(self) -> None:
-        
+
         status = "failed"
         record = {"module": self.module, "function": "collect_params", "status": status}
-        
+
         logging.info(f'Set Params from config file for "{self.module}"')
-        
+
         _log = []
         try:
-            ## setup input dir / input file 
-            self.input_dir = [join(CONFIG[self.module]["input_dir"], CONFIG[self.module]["input_file"])]
+            ## setup input dir / input file
+            input_dir = CONFIG[self.module]["input_dir"]
+            input_file = CONFIG[self.module]["input_file"]
+                        
+            ## ** add module ** ##
+            add_dir = "" ## x, y
+            add_dir = add_dir.split(", ")
+            concat = lambda x, y: x + add_dir if y != [''] else x
+            self.full_input = reduce(concat, [[join(input_dir, input_file)], add_dir])     
             
             ## setup output dir / output file 
             output_dir = CONFIG[self.module]["output_dir"]
@@ -83,27 +92,27 @@ class ModuleBOS(CallFunction):
                 suffix = f"{self.batch_date.strftime('%Y%m%d')}"
                 output_file = f"{Path(output_file).stem}_{suffix}.csv"
             self.full_target = join(output_dir, output_file)
-            
+
             status = "succeed"
             record.update({"status": status})
-            
+
         except KeyError as err:
-            err =  f"Not found module: {err} in config file"
+            err = f"Not found module: {err} in config file"
             record.update({"err": err})
-        
+
         _log.append(record)
         self.logSetter(_log)
-        
+
         if "err" in record:
             raise CustomException(err=self.logging)
-    
+
     def collect_data(self, i: int, format_file: any) -> dict:
 
         status = "failed"
         module = self.logging[i]["module"]
         logging.info(f'Collect Data for "{module}"')
-        
-        self.logging[i].update({"function": "collect_data","status": status})
+
+        self.logging[i].update({"function": "collect_data", "status": status})
         sheet_list = [sheet for sheet in format_file.sheet_names()]
 
         data = {}
@@ -118,7 +127,7 @@ class ModuleBOS(CallFunction):
 
         status = "succeed"
         self.logging[i].update({"status": status})
-        
+
         return data
 
     async def mock_data(self) -> None:

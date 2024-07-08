@@ -14,29 +14,32 @@ import csv
 from .exception import CustomException
 from .setup import Folder
 
+
 class Convert2File:
 
     async def check_source_file(self) -> None:
-        
+
         logging.info("Check Source file")
 
         _log = []
-        for input_dir in self.input_dir:
+        for input_dir in self.full_input:
 
             status = "not_found"
             if glob.glob(input_dir, recursive=True):
                 status = "found"
 
-            record = {"module": self.module,
-                    "input_dir": input_dir,
-                    "full_target": self.full_target,
-                    "function": "check_source_file",
-                    "status": status}
+            record = {
+                "module": self.module,
+                "input_dir": input_dir,
+                "full_target": self.full_target,
+                "function": "check_source_file",
+                "status": status,
+            }
             _log.append(record)
             logging.info(f'Source file: "{input_dir}", Status: "{status}"')
-            
+
         self.logging = _log
-        
+
     async def retrieve_data_from_source_file(self) -> None:
 
         logging.info("Retrieve Data from Source file")
@@ -80,7 +83,7 @@ class Convert2File:
 
         except Exception as err:
             raise Exception(err)
-        
+
         return data
 
     def read_excel_file(self, i: int) -> any:
@@ -93,7 +96,7 @@ class Convert2File:
 
         except Exception as err:
             raise Exception(err)
-        
+
         return data
 
     def initial_data_type(self, df: pd.DataFrame) -> pd.DataFrame:
@@ -101,7 +104,8 @@ class Convert2File:
         status = "failed"
         self.logging[-1].update({"function": "initial_data_type", "status": status})
         try:
-            df = df.astype({
+            df = df.astype(
+                {
                     "ApplicationCode": object,
                     "AccountOwner": object,
                     "AccountName": object,
@@ -115,7 +119,9 @@ class Convert2File:
                     "CreateDate": "datetime64[ms]",
                     "LastLogin": "datetime64[ms]",
                     "LastUpdatedDate": "datetime64[ms]",
-                    "AdditionalAttribute": object})
+                    "AdditionalAttribute": object,
+                }
+            )
             df[["CreateDate", "LastLogin", "LastUpdatedDate"]] = df[["CreateDate", "LastLogin", "LastUpdatedDate"]].apply(pd.to_datetime, format="%Y%m%d%H%M%S")
 
             if "remark" in df.columns:
@@ -128,7 +134,7 @@ class Convert2File:
 
         status = "succeed"
         self.logging[-1].update({"status": status})
-        
+
         return df
 
     def validate_data_change(self, df: pd.DataFrame, change_df: pd.DataFrame) -> dict:
@@ -136,13 +142,15 @@ class Convert2File:
         logging.info("Validate Data Change")
         self.change_rows = {}
         self.remove_rows = []
-        
+
         status = "failed"
         self.logging[-1].update({"function": "validate_data_change", "status": status})
 
         ## set format record
         def format_record(record):
-            return "\n".join("{!r} => {!r},".format(columns, values) for columns, values in record.items())
+            return "\n".join(
+                "{!r} => {!r},".format(columns, values)
+                for columns, values in record.items())
 
         if len(df.index) > len(change_df.index):
             self.remove_rows = [idx for idx in list(df.index) if idx not in list(change_df.index)]
@@ -298,10 +306,10 @@ class Convert2File:
             self.sheet = self.workbook.create_sheet(self.sheet_name)
 
         logging.info(f"Write to {self.sheet}")
-        
+
         rows = 2
         max_row = max(change_data, default=0)
-        self.logging[-1].update({"function": "write_worksheet", "sheet_name": self.sheet_name, "status": status})
+        self.logging[-1].update({"function": "write_worksheet","sheet_name": self.sheet_name,"status": status,})
         try:
             # write column
             for idx, col in enumerate(change_data[rows].keys(), 1):
@@ -311,8 +319,7 @@ class Convert2File:
             while rows <= max_row:
                 for idx, col in enumerate(change_data[rows].keys(), 1):
 
-                    if col in ["CreateDate", "LastLogin", "LastUpdatedDate"]:
-                        change_data[rows][col] = change_data[rows][col].strftime("%Y%m%d%H%M%S")
+                    if col in ["CreateDate", "LastLogin", "LastUpdatedDate"]:change_data[rows][col] = change_data[rows][col].strftime("%Y%m%d%H%M%S")
                     self.sheet.cell(row=rows, column=idx).value = change_data[rows][col]
 
                     if col == "remark":
@@ -340,13 +347,13 @@ class Convert2File:
 
         status = "succeed"
         self.logging[-1].update({"status": status})
-        
+
         return status
 
     async def write_data_to_target_file(self) -> None:
 
         logging.info("Write Data to Target file")
-        
+
         status = "failed"
         for record in self.logging:
             try:
@@ -362,13 +369,13 @@ class Convert2File:
                             data = record["data"]
                             change_df = pd.DataFrame(data)
                         change_df = self.initial_data_type(change_df)
-            
+
                         ## read csv file
                         target_df = self.read_csv()
-                        
+
                         ## optimize data
                         data = self.optimize_data(target_df, change_df)
-                        
+
                         ## write csv file
                         status = self.write_csv(self.full_target, data)
 
@@ -394,11 +401,13 @@ class Convert2File:
         try:
             data = []
             with open(self.full_target, "r", newline="\n") as reader:
-                csv_reader = csv.reader(reader,
-                                        skipinitialspace=True,
-                                        delimiter=",",
-                                        quotechar='"',
-                                        quoting=csv.QUOTE_NONE)
+                csv_reader = csv.reader(
+                    reader,
+                    skipinitialspace=True,
+                    delimiter=",",
+                    quotechar='"',
+                    quoting=csv.QUOTE_NONE,
+                )
 
                 header = next(csv_reader)
                 for row in csv_reader:
@@ -434,7 +443,7 @@ class Convert2File:
             data_dict = self.validate_data_change(batch_df, change_df)
 
             ## filter data not on batch date => dict
-            merge_data = (target_df[~target_df["CreateDate"].isin(np.array([pd.Timestamp(self.batch_date)]))].iloc[:, :-1].to_dict("index"))
+            merge_data = target_df[~target_df["CreateDate"].isin(np.array([pd.Timestamp(self.batch_date)]))].iloc[:, :-1].to_dict("index")
 
             ## merge data from new and old data
             max_rows = max(merge_data, default=0)
@@ -472,11 +481,12 @@ class Convert2File:
 
         try:
             with open(target_name, "r", newline="\n") as reader:
-                csvin = csv.DictReader(reader,
-                                    skipinitialspace=True,
-                                    delimiter=",",
-                                    quotechar='"',
-                                    quoting=csv.QUOTE_NONE)
+                csvin = csv.DictReader(
+                    reader,
+                    skipinitialspace=True,
+                    delimiter=",",
+                    quotechar='"',
+                    quoting=csv.QUOTE_NONE,)
                 rows = {idx: values for idx, values in enumerate(csvin, 2)}
 
                 for idx, value in data.items():
@@ -491,11 +501,13 @@ class Convert2File:
                         rows[idx].update(data[idx])
 
             with open(target_name, "w", newline="\n") as writer:
-                csvout = csv.DictWriter(writer,
-                                        csvin.fieldnames,
-                                        delimiter=",",
-                                        quotechar='"',
-                                        quoting=csv.QUOTE_NONE)
+                csvout = csv.DictWriter(
+                    writer,
+                    csvin.fieldnames,
+                    delimiter=",",
+                    quotechar='"',
+                    quoting=csv.QUOTE_NONE,
+                )
                 csvout.writeheader()
 
                 for idx in rows:

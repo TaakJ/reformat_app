@@ -31,6 +31,7 @@ from qt_material import apply_stylesheet
 from .setup import Folder, PARAMS, CONFIG
 from .main import StartApp
 
+
 class Jobber(QObject):
     set_total_progress = pyqtSignal(int)
     set_current_progress = pyqtSignal(int)
@@ -43,11 +44,12 @@ class Jobber(QObject):
     def run(self):
         func = StartApp()
         self.results = func.results
-        for i in range(1,11):
+        for i in range(1, 11):
             self.set_current_progress.emit(int(i * 10))
             sleep(0.1)
 
         self.finished.emit()
+
 
 class setup_app(QWidget):
     def __init__(self, app):
@@ -64,19 +66,22 @@ class setup_app(QWidget):
     def ui(self):
 
         self.all_module = PARAMS["source"]
-        self.filename = {module: f'MANUAL_{CONFIG[module]["output_file"]}' for module in self.all_module}
+        self.filename = {
+            module: f'MANUAL_{CONFIG[module]["output_file"]}'
+            for module in self.all_module
+        }
         self.module = self.all_module
 
         grid = QGridLayout()
-        grid.addWidget(self.layout1(),0,0)
-        grid.addWidget(self.layout2(),0,1)
-        grid.addWidget(self.layout3(),1,0,1,2)
-        grid.addWidget(self.layout4(),2,0)
-        grid.addWidget(self.layout5(),2,1)
+        grid.addWidget(self.layout1(), 0, 0)
+        grid.addWidget(self.layout2(), 0, 1)
+        grid.addWidget(self.layout3(), 1, 0, 1, 2)
+        grid.addWidget(self.layout4(), 2, 0)
+        grid.addWidget(self.layout5(), 2, 1)
         self.setLayout(grid)
 
         self.setWindowTitle("App")
-        self.setGeometry(700,200,620,400)
+        self.setGeometry(700, 200, 620, 400)
         self.show()
 
     def layout1(self):
@@ -160,10 +165,10 @@ class setup_app(QWidget):
         defualt_output_dir = CONFIG[self.get_value]["output_dir"]
 
         input_lable = QLabel("Incoming Path :")
-        self.input_dir = QLineEdit()
-        self.input_dir.setText(defualt_input_dir)
-        self.input_dir.setEnabled(False)
-        self.input_dir.setReadOnly(True)
+        self.full_input = QLineEdit()
+        self.full_input.setText(defualt_input_dir)
+        self.full_input.setEnabled(False)
+        self.full_input.setReadOnly(True)
         self.input_btn = QPushButton("Download")
         self.input_btn.setEnabled(False)
 
@@ -176,13 +181,13 @@ class setup_app(QWidget):
         self.output_btn.setEnabled(False)
 
         layout = QGridLayout()
-        layout.addWidget(input_lable,0,0)
-        layout.addWidget(self.input_dir,0,1)
-        layout.addWidget(self.input_btn,0,2)
+        layout.addWidget(input_lable, 0, 0)
+        layout.addWidget(self.full_input, 0, 1)
+        layout.addWidget(self.input_btn, 0, 2)
 
-        layout.addWidget(output_lable,2,0)
-        layout.addWidget(self.output_dir,2,1)
-        layout.addWidget(self.output_btn,2,2)
+        layout.addWidget(output_lable, 2, 0)
+        layout.addWidget(self.output_dir, 2, 1)
+        layout.addWidget(self.output_btn, 2, 2)
         self.groupbox3.setLayout(layout)
 
         self.input_btn.clicked.connect(lambda: self.task_open_dialog(1))
@@ -197,7 +202,7 @@ class setup_app(QWidget):
         vbox1 = QVBoxLayout()
         self.progress = QProgressBar()
         self.progress.setStyleSheet(
-                                    """QProgressBar {
+            """QProgressBar {
                                         color: #000;
                                         border: 2px solid grey;
                                         border-radius: 5px;
@@ -210,7 +215,7 @@ class setup_app(QWidget):
         )
         self.label = QLabel("Press the button to start job.")
         self.run_btn = QPushButton("START")
-        self.run_btn.setFixedSize(110,40)
+        self.run_btn.setFixedSize(110, 40)
         vbox1.addWidget(self.progress)
         vbox1.addWidget(self.label)
         vbox1.addWidget(self.run_btn)
@@ -234,11 +239,11 @@ class setup_app(QWidget):
 
         hbox = QHBoxLayout()
         self._success_log = QPushButton("success")
-        self._success_log.setFixedSize(110,40)
+        self._success_log.setFixedSize(110, 40)
         self._success_log.setHidden(True)
         self._error_log = QPushButton("error")
         self._error_log.setHidden(True)
-        self._error_log.setFixedSize(110,40)
+        self._error_log.setFixedSize(110, 40)
         hbox.addWidget(self._success_log)
         hbox.addWidget(self._error_log)
         hbox.addStretch(1)
@@ -258,7 +263,7 @@ class setup_app(QWidget):
     def task_all_checked(self):
         if self._all.isChecked():
             self.combobox.setDisabled(True)
-            self.input_dir.setEnabled(False)
+            self.full_input.setEnabled(False)
             self.output_dir.setEnabled(False)
             self.input_btn.setEnabled(False)
             self.output_btn.setEnabled(False)
@@ -266,7 +271,7 @@ class setup_app(QWidget):
             self.module = self.all_module
         else:
             self.combobox.setDisabled(False)
-            self.input_dir.setEnabled(True)
+            self.full_input.setEnabled(True)
             self.output_dir.setEnabled(True)
             self.input_btn.setEnabled(True)
             self.output_btn.setEnabled(True)
@@ -276,7 +281,7 @@ class setup_app(QWidget):
     def task_select_module(self):
         self.get_value = self.combobox.currentText()
         self.module = [self.get_value]
-        self.input_dir.setText(CONFIG[self.get_value]["input_dir"])
+        self.full_input.setText(CONFIG[self.get_value]["input_dir"])
         self.output_dir.setText(CONFIG[self.get_value]["output_dir"])
 
     def task_select_mode(self):
@@ -287,10 +292,10 @@ class setup_app(QWidget):
             self.mode_label.setText("e.g. MANUAL_{module}_YYYYYMMDD.csv")
             self.mode = "new"
 
-    def task_open_dialog(self,event):
+    def task_open_dialog(self, event):
         if event == 1:
             key_dir = "input_dir"
-            default_dir = self.input_dir
+            default_dir = self.full_input
         else:
             key_dir = "output_dir"
             default_dir = self.output_dir
@@ -309,13 +314,13 @@ class setup_app(QWidget):
             CONFIG[self.get_value][key_dir] = join(Path(dir_name))
             default_dir.setText(dir_name)
 
-    def task_open_log(self,event):
+    def task_open_log(self, event):
         date = datetime.now().strftime("%Y%m%d")
-        log_dir = join(Folder.LOG,date)
+        log_dir = join(Folder.LOG, date)
         if event == 1:
-            open_log = join(log_dir,"_success.log")
+            open_log = join(log_dir, "_success.log")
         else:
-            open_log = join(log_dir,"_error.log")
+            open_log = join(log_dir, "_error.log")
         webbrowser.open(open_log)
 
     def task_run_job(self):
@@ -337,7 +342,9 @@ class setup_app(QWidget):
         for module in self.module:
             if module in self.filename.keys() and self.mode == "new":
                 suffix = PARAMS["batch_date"].strftime("%Y%m%d")
-                CONFIG[module]["output_file"] = f"{Path(self.filename[module]).stem}_{suffix}.csv"
+                CONFIG[module][
+                    "output_file"
+                ] = f"{Path(self.filename[module]).stem}_{suffix}.csv"
             else:
                 CONFIG[module]["output_file"] = self.filename[module]
 
@@ -356,21 +363,28 @@ class setup_app(QWidget):
 
         tasks.set_total_progress.connect(self.progress.setMaximum)
         tasks.set_current_progress.connect(self.progress.setValue)
-        tasks.finished.connect(lambda x=tasks.results: self.task_job_finished(tasks.results))
+        tasks.finished.connect(
+            lambda x=tasks.results: self.task_job_finished(tasks.results)
+        )
 
         return thread
 
-    def task_job_finished(self,results):
+    def task_job_finished(self, results):
         self.progress.setValue(self.progress.maximum())
-        self.time_label.setText(f"Last Updated: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
+        self.time_label.setText(
+            f"Last Updated: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}"
+        )
         self.time_label.setHidden(False)
         self._success_log.setHidden(False)
 
-        if "Uncompleted" in [completed_task.result()["task"] for completed_task in results[0]]:
+        if "Uncompleted" in [
+            completed_task.result()["task"] for completed_task in results[0]
+        ]:
             self.label.setText("Job has errored. Please see log file!")
             self._error_log.setHidden(False)
         else:
             self.label.setText("Job has been succeed.")
+
 
 def main():
     app = QApplication(sys.argv)

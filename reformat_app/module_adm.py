@@ -2,6 +2,7 @@ from pathlib import Path
 from os.path import join
 import re
 import pandas as pd
+from functools import reduce
 import logging
 from .function import CallFunction
 from .exception import CustomException
@@ -27,22 +28,16 @@ class ModuleADM(CallFunction):
             ## set params from confog file
             self.collect_params()
             
-            ## clear
-            if self.clear:
-                self.clear_log()
-                self.clear_backup()
-                self.clear_tmp()
-            
             ## backup
             # self.backup()
             
             ## run_process
-            await self.check_source_file()
-            await self.retrieve_data_from_source_file()
-            await self.mock_data()
-            if self.store_tmp is True:
-                await self.write_data_to_tmp_file()
-            await self.write_data_to_target_file()
+            # await self.check_source_file()
+            # await self.retrieve_data_from_source_file()
+            # await self.mock_data()
+            # if self.store_tmp is True:
+            #     await self.write_data_to_tmp_file()
+            # await self.write_data_to_target_file()
 
         except CustomException as err:
             logging.error('See Error Details in "_error.log"')
@@ -70,18 +65,28 @@ class ModuleADM(CallFunction):
         
         _log = []
         try:
-            ## setup input dir / input file 
-            self.input_dir = [join(CONFIG[self.module]["input_dir"], CONFIG[self.module]["input_file"])]
+            ## setup input dir / input file
+            input_dir = CONFIG[self.module]["input_dir"]
+            input_file = CONFIG[self.module]["input_file"]
+                        
+            ## ** add module ** ##
+            add_dir = "" ## x, y
+            add_dir = add_dir.split(", ")
+            concat = lambda x, y: x + add_dir if y != [''] else x
+            self.full_input = reduce(concat, [[join(input_dir, input_file)], add_dir])
             
             ## setup output dir / output file 
             output_dir = CONFIG[self.module]["output_dir"]
             output_file = CONFIG[self.module]["output_file"]
+            
+            suffix = f"{self.batch_date.strftime('%Y%m%d')}"
             if self.write_mode == "overwrite" or self.manual:
                 ...
             else:
                 suffix = f"{self.batch_date.strftime('%Y%m%d')}"
                 output_file = f"{Path(output_file).stem}_{suffix}.csv"
             self.full_target = join(output_dir, output_file)
+            
             
             status = "succeed"
             record.update({"status": status})

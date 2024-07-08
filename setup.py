@@ -19,9 +19,9 @@ setup(
     packages=find_packages(),
     python_requires=">=3.9",
     install_requires=[r.strip() for r in open("requirements.txt").readlines()],
-    # entry_points={
-    #     "console_scripts":[
-    #         "reformat-app = reformat_app:main",
-    #     ]
-    # },
+    entry_points={
+        "console_scripts":[
+            "reformat-app = reformat_app:main",
+        ]
+    },
 )
