@@ -66,10 +66,7 @@ class setup_app(QWidget):
     def ui(self):
 
         self.all_module = PARAMS["source"]
-        self.filename = {
-            module: f'MANUAL_{CONFIG[module]["output_file"]}'
-            for module in self.all_module
-        }
+        self.filename = {module: f'MANUAL_{CONFIG[module]["output_file"]}' for module in self.all_module}
         self.module = self.all_module
 
         grid = QGridLayout()
@@ -125,31 +122,31 @@ class setup_app(QWidget):
         self.groupbox2 = QGroupBox("Specify Output file")
 
         hbox1 = QHBoxLayout()
-        self.radio1 = QRadioButton("Overwrite")
+        self.radio1 = QRadioButton("Create new")
         self.radio1.setChecked(True)
-        radio2 = QRadioButton("Create new")
-        self.mode = "overwrite"
-        hbox1.addWidget(self.radio1)
+        radio2 = QRadioButton("Overwrite")
+        self.mode = "new"
         hbox1.addWidget(radio2)
+        hbox1.addWidget(self.radio1)
 
         hbox2 = QHBoxLayout()
-        self.tmp_checked = QCheckBox("Generate Tmp file")
+        self.tmp_checked = QCheckBox("Create Tmp file")
         self.tmp_checked.setCheckable(True)
         self.tmp_checked.setChecked(True)
-        # self.clear_tmp = QCheckBox("Clear Tmp file")
-        # self.clear_tmp.setCheckable(True)
-        # self.clear_tmp.setChecked(False)
         hbox2.addWidget(self.tmp_checked)
-        # hbox2.addWidget(self.clear_tmp)
 
-        vbox1 = QVBoxLayout()
-        self.mode_label = QLabel("e.g. MANUAL_{module}.csv")
-        vbox1.addWidget(self.mode_label)
+        hbox3 = QHBoxLayout()
+        self.clear_file = QLineEdit()
+        self.clear_file.setFixedSize(55, 30)
+        self.clear_file.setText(str(7))
+        hbox3.addWidget(QLabel("Clear file after:  "))
+        hbox3.addWidget(self.clear_file)
+        hbox3.addWidget(QLabel(" day"))
 
         vbox = QVBoxLayout()
         vbox.addLayout(hbox1)
         vbox.addLayout(hbox2)
-        vbox.addLayout(vbox1)
+        vbox.addLayout(hbox3)
 
         self.groupbox2.setLayout(vbox)
         self.radio1.clicked.connect(self.task_select_mode)
@@ -201,8 +198,7 @@ class setup_app(QWidget):
 
         vbox1 = QVBoxLayout()
         self.progress = QProgressBar()
-        self.progress.setStyleSheet(
-            """QProgressBar {
+        self.progress.setStyleSheet("""QProgressBar {
                                         color: #000;
                                         border: 2px solid grey;
                                         border-radius: 5px;
@@ -211,8 +207,7 @@ class setup_app(QWidget):
                                         background-color: #a5c6ff;
                                         width: 10px;
                                         margin: 0.5px;}
-                                        """
-        )
+                                        """)
         self.label = QLabel("Press the button to start job.")
         self.run_btn = QPushButton("START")
         self.run_btn.setFixedSize(110, 40)
@@ -286,11 +281,9 @@ class setup_app(QWidget):
 
     def task_select_mode(self):
         if self.radio1.isChecked():
-            self.mode_label.setText("e.g. MANUAL_{module}.csv")
-            self.mode = "overwrite"
-        else:
-            self.mode_label.setText("e.g. MANUAL_{module}_YYYYYMMDD.csv")
             self.mode = "new"
+        else:
+            self.mode = "overwrite"
 
     def task_open_dialog(self, event):
         if event == 1:
@@ -308,8 +301,7 @@ class setup_app(QWidget):
             parent=self,
             caption="Select a directory",
             directory=select_dir,
-            options=QFileDialog.Option.ShowDirsOnly,
-        )
+            options=QFileDialog.Option.ShowDirsOnly)
         if dir_name:
             CONFIG[self.get_value][key_dir] = join(Path(dir_name))
             default_dir.setText(dir_name)
@@ -329,22 +321,19 @@ class setup_app(QWidget):
         self.time_label.setHidden(True)
         self._success_log.setHidden(True)
         self._error_log.setHidden(True)
-
-        PARAMS.update(
-            {
+        
+        PARAMS.update({
                 "source": self.module,
                 "batch_date": self.calendar.calendarWidget().selectedDate().toPyDate(),
                 "store_tmp": self.tmp_checked.isChecked(),
                 "write_mode": self.mode,
-            }
-        )
+                "clear": int(self.clear_file.text())
+            })
 
         for module in self.module:
             if module in self.filename.keys() and self.mode == "new":
                 suffix = PARAMS["batch_date"].strftime("%Y%m%d")
-                CONFIG[module][
-                    "output_file"
-                ] = f"{Path(self.filename[module]).stem}_{suffix}.csv"
+                CONFIG[module]["output_file"] = f"{Path(self.filename[module]).stem}_{suffix}.csv"
             else:
                 CONFIG[module]["output_file"] = self.filename[module]
 
@@ -363,39 +352,32 @@ class setup_app(QWidget):
 
         tasks.set_total_progress.connect(self.progress.setMaximum)
         tasks.set_current_progress.connect(self.progress.setValue)
-        tasks.finished.connect(
-            lambda x=tasks.results: self.task_job_finished(tasks.results)
-        )
+        tasks.finished.connect(lambda x=tasks.results: self.task_job_finished(tasks.results))
 
         return thread
 
     def task_job_finished(self, results):
         self.progress.setValue(self.progress.maximum())
-        self.time_label.setText(
-            f"Last Updated: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}"
-        )
+        self.time_label.setText(f"Last Updated: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
         self.time_label.setHidden(False)
         self._success_log.setHidden(False)
 
-        if "Uncompleted" in [
-            completed_task.result()["task"] for completed_task in results[0]
-        ]:
+        if "Uncompleted" in [completed_task.result()["task"] for completed_task in results[0]]:
             self.label.setText("Job has errored. Please see log file!")
             self._error_log.setHidden(False)
         else:
             self.label.setText("Job has been succeed.")
 
-
 def main():
     app = QApplication(sys.argv)
     apply_stylesheet(
         app,
+        invert_secondary=True,
         theme="light_blue.xml",
         extra={
             "font_family": "monoespace",
             "density_scale": "0",
             "pyside6": True,
             "linux": True,
-        },
-    )
+        },)
     setup_app(app)
