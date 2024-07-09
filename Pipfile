@@ -38,6 +38,7 @@ xlrd = "==1.2.0"
 xlsxwriter = "==3.1.9"
 schedule = "*"
 setuptools = "==66.1.1"
+pyqt6-fluent-widgets = "*"
 
 [dev-packages]
 

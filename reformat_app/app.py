@@ -373,7 +373,7 @@ def main():
     apply_stylesheet(
         app,
         invert_secondary=True,
-        theme="dark_blue.xml",
+        theme="light_blue.xml",
         extra={
             "font_family": "monoespace",
             #"density_scale": "0",
