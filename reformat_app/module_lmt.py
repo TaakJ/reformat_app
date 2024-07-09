@@ -74,12 +74,12 @@ class ModuleLMT(CallFunction):
             ## setup input dir / input file            
             specify_dir = "" ## x, y
             specify_dir = specify_dir.split(", ")
-            add_dir = lambda x, y: x + specify_dir if y != [''] else x
+            add_dir = lambda d, f: d + specify_dir if f != [''] else d
             self.full_input = reduce(add_dir, [[join(input_dir, input_file)], specify_dir])
             
             ## setup output dir / output file             
             suffix = f"{self.batch_date.strftime('%Y%m%d')}"
-            change_name =  lambda x: x if (self.write_mode == "overwrite" or self.manual) else f"{Path(x).stem}_{suffix}.csv"
+            change_name =  lambda f: f if (self.write_mode == "overwrite" or self.manual) else f"{Path(f).stem}_{suffix}.csv"
             self.full_target = join(output_dir, change_name(output_file))
             
             status = "succeed"
