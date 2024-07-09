@@ -23,5 +23,5 @@ class CustomException(Exception):
             err         = self.err[i].get("err")
 
             if err is not None:
-                err_msg = f'Module::"{module}", Input_Dir::"{full_input}", Output_Dir::"{full_target}", Function::"{func}", Status::"{status}", Errors::"{err}"'
+                err_msg = f'Module: {module}; File: {full_target}; Function: {func}; ERROR: {err}'
                 yield err_msg

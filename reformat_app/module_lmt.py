@@ -1,13 +1,11 @@
 from pathlib import Path
 from os.path import join
-import re
 import pandas as pd
 from functools import reduce
 import logging
 from .function import CallFunction
 from .exception import CustomException
 from .setup import setup_errorlog, CONFIG
-
 
 class ModuleLMT(CallFunction):
 

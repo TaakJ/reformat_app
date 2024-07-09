@@ -16,7 +16,7 @@ handlers:
     level: INFO
     formatter: verbose
     backupCount: 0
-    mode: a+
+    mode: w
     filename: 
 root: 
   level: INFO
