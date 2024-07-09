@@ -85,18 +85,14 @@ def setup_errorlog(log_format="%(asctime)s.%(msecs)03d | %(module)s | %(levelnam
     errorlog.setLevel(logging.INFO)
     return errorlog
 
-def clear_log() -> None:
-    date = datetime.today().strftime("%Y%m%d")
+def clear_log(date) -> None:
     for date_dir in os.listdir(Folder.LOG):
-        print(date_dir)
-    
-    # for date_dir in os.listdir(Folder.LOG):
-    #     if date_dir <= bk_date:
-    #         log_dir = join(Folder.LOG, date_dir)
-    #         shutil.rmtree(log_dir)
+        if date_dir <= date.strftime("%Y%m%d"):
+            log_dir = join(Folder.LOG, date_dir)
+            shutil.rmtree(log_dir)
             
-    #         state = "succeed"
-    #         logging.info(f'Clear Log file: "{log_dir}" status: "{state}"')
+            state = "succeed"
+            logging.info(f'Clear Log file: "{log_dir}" status: "{state}"')
 
 class SetupParser:
     def __init__(self) -> None:
