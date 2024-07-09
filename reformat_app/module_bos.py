@@ -72,9 +72,9 @@ class ModuleBOS(CallFunction):
             output_file = CONFIG[self.module]["output_file"]
             
             ## setup input dir / input file            
-            specify_dir = "" ## x, y
-            specify_dir = specify_dir.split(", ")
-            add_dir = lambda d, f: d + specify_dir if f != [''] else d
+            specify_dir = ""
+            specify_dir = specify_dir.split(",")
+            add_dir = lambda d, f: d + specify_dir if f != [""] else d
             self.full_input = reduce(add_dir, [[join(input_dir, input_file)], specify_dir])
             
             ## setup output dir / output file             
