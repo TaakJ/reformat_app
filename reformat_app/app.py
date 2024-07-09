@@ -373,10 +373,10 @@ def main():
     apply_stylesheet(
         app,
         invert_secondary=True,
-        theme="light_blue.xml",
+        theme="dark_blue.xml",
         extra={
             "font_family": "monoespace",
-            "density_scale": "0",
+            #"density_scale": "0",
             "pyside6": True,
             "linux": True,
         },)
