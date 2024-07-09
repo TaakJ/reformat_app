@@ -66,11 +66,7 @@ def setup_log() -> None:
     else:
         raise FileNotFoundError(f"Yaml file file_path: '{Folder._LOGGER_CONFIG_DIR}' doesn't exist.")
 
-def setup_errorlog(
-    log_format="%(asctime)s.%(msecs)03d | %(module)s | %(levelname)s | %(funcName)s::%(lineno)d | %(message)s",
-    log_name="",
-    file="_error.log") -> any:
-
+def setup_errorlog(log_format="%(asctime)s.%(msecs)03d | %(module)s | %(levelname)s | %(funcName)s::%(lineno)d | %(message)s", log_name="", file="_error.log") -> any:
     date = datetime.today().strftime("%Y%m%d")
     filename = Folder.LOG + join(date,file)
     if not os.path.exists(os.path.dirname(filename)):
@@ -89,16 +85,18 @@ def setup_errorlog(
     errorlog.setLevel(logging.INFO)
     return errorlog
 
-def clear_log(date) -> None:
-    bk_date = date.strftime("%Y%m%d")
-    
+def clear_log() -> None:
+    date = datetime.today().strftime("%Y%m%d")
     for date_dir in os.listdir(Folder.LOG):
-        if date_dir <= bk_date:
-            log_dir = join(Folder.LOG, date_dir)
-            shutil.rmtree(log_dir)
+        print(date_dir)
+    
+    # for date_dir in os.listdir(Folder.LOG):
+    #     if date_dir <= bk_date:
+    #         log_dir = join(Folder.LOG, date_dir)
+    #         shutil.rmtree(log_dir)
             
-            state = "succeed"
-            logging.info(f'Clear Log file: "{log_dir}" status: "{state}"')
+    #         state = "succeed"
+    #         logging.info(f'Clear Log file: "{log_dir}" status: "{state}"')
 
 class SetupParser:
     def __init__(self) -> None:

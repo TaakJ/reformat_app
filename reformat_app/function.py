@@ -4,7 +4,6 @@ import glob
 import shutil
 import zipfile
 from datetime import timedelta
-import time
 import logging
 from pathlib import Path
 from os.path import join
