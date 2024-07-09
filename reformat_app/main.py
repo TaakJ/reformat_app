@@ -77,7 +77,7 @@ class RunModule:
                 coros.append(run)
 
             elif module == "MOC":
-                ttasks = ModuleMOC(self)
+                tasks = ModuleMOC(self)
                 run = asyncio.create_task(tasks.step_run())
                 coros.append(run)
 
