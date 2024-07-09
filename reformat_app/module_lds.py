@@ -12,7 +12,7 @@ from .setup import setup_errorlog, CONFIG
 class ModuleLDS(CallFunction):
 
     def __init__(self, params: any):
-       for key, value in vars(params).items():
+        for key, value in vars(params).items():
             setattr(self, key, value)
 
     async def step_run(self) -> dict:

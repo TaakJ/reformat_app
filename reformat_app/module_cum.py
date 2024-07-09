@@ -8,7 +8,6 @@ from .function import CallFunction
 from .exception import CustomException
 from .setup import setup_errorlog, CONFIG
 
-
 class ModuleCUM(CallFunction):
 
     def __init__(self, params: any):
