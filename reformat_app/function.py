@@ -41,60 +41,61 @@ class CollectParams(ABC):
         pass
     
 class BackupAndClear:
-
+    
     def backup(self):
-        self.root_dir = join(Folder.BACKUP, self.module)
-        self._date = self.date.strftime("%Y%m%d")
-        self._time = time.strftime("%H%M")
-
-        ## start backup
-        state = self.create_date_dir()
-        if state == "succeed":
-            for date_dir in os.listdir(self.root_dir):
-                if not date_dir.endswith(".zip"):
-                    self.zip_backup(date_dir)
-
-            self.genarate_backup_file()
-
-    def create_date_dir(self) -> str:
-        state = "failed"
-        date_dir = join(self.root_dir, self._date)
-
-        if not os.path.exists(date_dir):
+        
+        self.backup_dir = join(Folder.BACKUP, self.module)
+        
+        if not os.path.exists(self.backup_dir):
             try:
-                os.makedirs(date_dir)
+                os.makedirs(self.backup_dir)
             except OSError:
                 pass
-        state = "succeed"
-        return state
+            
+        for date_dir in os.listdir(self.backup_dir):
+            if not date_dir.endswith(".zip"):
+                self.backup_zip_file(date_dir)
+        
+        self.genarate_backup_file()
+        
+    def backup_zip_file(self, date_dir):
+        
+        now = self.date - timedelta(days=1)
+        
+        if date_dir <= now.strftime("%Y%m%d"):
+            date_dir = join(self.backup_dir, date_dir)
+            zip_name = join(self.backup_dir, f'{date_dir}.zip')
+            
+            with zipfile.ZipFile(zip_name, "w", zipfile.ZIP_DEFLATED) as zf:
+                for file in [file for file in Path(date_dir).rglob("*") if file.exists()]:
+                    zf.write(file, file.relative_to(self.backup_dir))
 
-    def zip_backup(self, date_dir):
-        if date_dir < self._date:
-            zip_dir = join(self.root_dir, date_dir)
-            zip_name = join(self.root_dir, f"{date_dir}.zip")
-
-            with zipfile.ZipFile(join(self.root_dir, zip_name), "w", zipfile.ZIP_DEFLATED) as zf:
-                for file in Path(zip_dir).rglob("*"):
-                    if file.exists():
-                        zf.write(file, file.relative_to(zip_dir))
-
-            shutil.rmtree(zip_dir)
+            shutil.rmtree(date_dir)
+            
             state = "succeed"
-            logging.info(f'Zip file name: "{zip_name}" from "{zip_dir}" status: "{state}"' )
-
+            logging.info(f'Zip file "{zip_name}" status: "{state}"' )
+    
     def genarate_backup_file(self):
-        logging.info(f'Backup file from "{self.full_target}"')
-
+        
         if glob.glob(self.full_target, recursive=True):
-            backup_dir = join(self.root_dir, self._date)
-            backup_file = f"BK_{Path(self.full_target).stem}_T{self._time}.csv"
-            full_backup = join(backup_dir, backup_file)
-
-            ## move output file to backup file
-            shutil.copy2(self.full_target, full_backup)
-
-            state = "succeed"
-            logging.info(f'Backup file to "{full_backup}" status: "{state}"')
+            date_dir = join(self.backup_dir, self.date.strftime("%Y%m%d"))
+            if not os.path.exists(date_dir):
+                try:
+                    os.makedirs(date_dir)
+                except OSError:
+                    pass
+            
+            backup_file = f"BK_{Path(self.full_target).stem}_T{self.time}.csv"
+            full_backup = join(date_dir, backup_file)
+            
+            status = "failed"
+            try:
+                shutil.copy2(self.full_target, full_backup)
+                status = "succeed"
+            except OSError:
+                pass
+            
+            logging.info(f'Backup file from "{self.full_target}" to "{full_backup}" status: "{status}"')
                 
     def clear_tmp(self):
         try:

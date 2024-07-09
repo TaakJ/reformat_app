@@ -11,6 +11,7 @@ from .module_lmt import ModuleLMT
 from .module_moc import ModuleMOC
 from .setup import PARAMS, setup_folder, setup_log, clear_log
 from datetime import datetime, timedelta
+import time
 
 class RunModule:
     def __init__(self) -> None:
@@ -18,7 +19,8 @@ class RunModule:
             setattr(self, key, value)
             
         self.date = datetime.now()
-        self.bk_date = self.date - timedelta(self.clear)
+        self.bk_date = self.date - timedelta(days=self.clear)
+        self.time = time.strftime("%H%M")
         
         ## initial setup 
         setup_folder()

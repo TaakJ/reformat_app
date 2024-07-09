@@ -21,17 +21,23 @@ class ModuleBOS(CallFunction):
 
         result = {"module": self.module, "task": "Completed"}
         try:
-            ## set params from confog file
-            print(self.module)
+            # set params from confog file
             self.collect_params()
-
+            
+            ## clear temp file and backup file 
+            self.clear_backup()
+            self.clear_tmp()
+            
+            ## backup file
+            self.backup()
+            
             ## run_process
-            # await self.check_source_file()
-            # await self.retrieve_data_from_source_file()
-            # await self.mock_data()
-            # if self.store_tmp is True:
-            #     await self.write_data_to_tmp_file()
-            # await self.write_data_to_target_file()
+            await self.check_source_file()
+            await self.retrieve_data_from_source_file()
+            await self.mock_data()
+            if self.store_tmp is True:
+                await self.write_data_to_tmp_file()
+            await self.write_data_to_target_file()
 
         except CustomException as err:
             logging.error('See Error Details in "_error.log"')
@@ -60,22 +66,24 @@ class ModuleBOS(CallFunction):
 
         _log = []
         try:
-            ## setup input dir / input file
-            input_dir = CONFIG[self.module]["input_dir"]
-            input_file = CONFIG[self.module]["input_file"]
-                        
+            input_dir   = CONFIG[self.module]["input_dir"]
+            input_file  = CONFIG[self.module]["input_file"]
+            output_dir  = CONFIG[self.module]["output_dir"]
+            output_file = CONFIG[self.module]["output_file"]
+            
+            ## setup input dir / input file            
             specify_dir = "" ## x, y
             specify_dir = specify_dir.split(", ")
             add_dir = lambda x, y: x + specify_dir if y != [''] else x
             self.full_input = reduce(add_dir, [[join(input_dir, input_file)], specify_dir])
             
-            ## setup output dir / output file 
-            output_dir = CONFIG[self.module]["output_dir"]
-            output_file = CONFIG[self.module]["output_file"]
-            
+            ## setup output dir / output file             
             suffix = f"{self.batch_date.strftime('%Y%m%d')}"
             change_name =  lambda x: x if (self.write_mode == "overwrite" or self.manual) else f"{Path(x).stem}_{suffix}.csv"
             self.full_target = join(output_dir, change_name(output_file))
+            
+            status = "succeed"
+            record.update({"status": status})
 
             status = "succeed"
             record.update({"status": status})
