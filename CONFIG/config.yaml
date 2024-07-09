@@ -31,12 +31,12 @@ IIC:
 LDS:
     input_dir: D:\IGAGD\LDS\download
     output_dir: D:\IGAGD\LDS\upload
-    input_file: LDS-P_UserDetail.txt
+    input_file: LDS - P_UserDetail.txt
     output_file: LDSIGAWINT.csv
 LMT:
     input_dir: D:\IGAGD\LMT\download
     output_dir: D:\IGAGD\LMT\upload
-    input_file: Lead-Management.xlsx
+    input_file: Lead Management.xlsx
     output_file: LMTIGAWINT.csv
 MOC:
     input_dir: D:\IGAGD\MOC\download
