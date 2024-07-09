@@ -22,7 +22,6 @@ class Convert2File:
 
         _log = []
         for input_dir in self.full_input:
-
             status = "not_found"
             if glob.glob(input_dir, recursive=True):
                 status = "found"
