@@ -27,7 +27,7 @@ class CollectLog(ABC):
 
 class CollectParams(ABC):
     def get_extract_data(self, i: int, format_file: any) -> dict:
-        logging.info("Extract Data Each Module")
+        logging.info("Get Extract Data From File")
         data = self.collect_data(i, format_file)
         return data
 

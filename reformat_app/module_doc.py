@@ -32,7 +32,7 @@ class ModuleDOC(CallFunction):
             
             ## run_process
             await self.check_source_file()
-            await self.retrieve_data_from_source_file()
+            await self.separate_data_from_file()
             await self.mock_data()
             if self.store_tmp is True:
                 await self.write_data_to_tmp_file()

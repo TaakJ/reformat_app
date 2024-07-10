@@ -32,12 +32,12 @@ class Convert2File:
         
         self.logging = _log
 
-    async def retrieve_data_from_source_file(self) -> None:
+    async def separate_data_from_file(self) -> None:
 
-        logging.info("Retrieve Data from Source file")
+        logging.info("Separate Data From File")
 
         for i, record in enumerate(self.logging):
-            record.update({"function": "retrieve_data_from_source_file"})
+            record.update({"function": "separate_data_from_file"})
 
             input_dir = record["input_dir"]
             types = Path(input_dir).suffix
