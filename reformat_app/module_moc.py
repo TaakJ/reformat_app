@@ -49,7 +49,7 @@ class ModuleMOC(CallFunction):
 
             result.update({"task": "Uncompleted"})
 
-        logging.info(f"Stop Run Module '{self.module}'\n")
+        logging.info(f'Stop Run Module "{self.module}"\n')
         
         return result
 
