@@ -31,7 +31,7 @@ class ModuleMOC(CallFunction):
             
             ## run_process
             await self.check_source_file()
-            await self.separate_data_from_file()
+            await self.separate_data_file()
             await self.mock_data()
             if self.store_tmp is True:
                 await self.genarate_tmp_file()

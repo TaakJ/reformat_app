@@ -32,7 +32,7 @@ class Convert2File:
         
         self.logging = _log
 
-    async def separate_data_from_file(self) -> None:
+    async def separate_data_file(self) -> None:
 
         logging.info("Separate Data From file")
 
