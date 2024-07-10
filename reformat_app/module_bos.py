@@ -1,6 +1,5 @@
 from pathlib import Path
 from os.path import join
-import re
 import pandas as pd
 from functools import reduce
 import logging
