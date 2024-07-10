@@ -43,7 +43,7 @@ class ModuleICA(CallFunction):
             logger = setup_errorlog(log_name=__name__)
             while True:
                 try:
-                    logger.error(next(err))
+                    logger.exception(next(err))
                 except StopIteration:
                     break
 

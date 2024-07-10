@@ -39,17 +39,18 @@ class ModuleADM(CallFunction):
             await self.genarate_target_file()
 
         except CustomException as err:
-            logging.error('See Error Details in "_error.log"')
+            logging.error('See Error Details in "log_error.log"')
 
             logger = setup_errorlog(log_name=__name__)
+            
             while True:
                 try:
-                    logger.error(next(err))
+                    logger.exception(next(err))
                 except StopIteration:
                     break
             result.update({"task": "Uncompleted"})
             
-        logging.info(f'Stop Run Module "{self.module}"\n')
+        logging.info(f'Stop Run Module "{self.module}"\r\n')
         
         return result
     
@@ -65,6 +66,8 @@ class ModuleADM(CallFunction):
         
         _log = []
         try:
+            
+            self.x
             input_dir   = CONFIG[self.module]["input_dir"]
             input_file  = CONFIG[self.module]["input_file"]
             output_dir  = CONFIG[self.module]["output_dir"]
@@ -84,8 +87,7 @@ class ModuleADM(CallFunction):
             status = "succeed"
             record.update({"status": status})
             
-        except KeyError as err:
-            err =  f"Not found module: {err} in config file"
+        except Exception as err:
             record.update({"err": err})
         
         _log.append(record)

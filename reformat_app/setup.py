@@ -6,6 +6,7 @@ import os
 from os.path import join
 import shutil
 from datetime import datetime
+import time
 
 class ArgumentParams:
     SHORT_NAME = "short_name"
@@ -45,8 +46,9 @@ def setup_config() -> dict:
 
 def setup_log() -> None:
     config_yaml = None
-    date = datetime.today().strftime("%Y%m%d")
-    file = "_success.log"
+    date = datetime.now().strftime("%Y%m%d")
+    _time = time.strftime("%H%M")
+    file = f"log_status_T{_time}.log"
 
     filename = Folder.LOG + join(date,file)
     if not os.path.exists(os.path.dirname(filename)):
@@ -66,7 +68,7 @@ def setup_log() -> None:
     else:
         raise FileNotFoundError(f"Yaml file file_path: '{Folder._LOGGER_CONFIG_DIR}' doesn't exist.")
 
-def setup_errorlog(log_format="%(asctime)s.%(msecs)03d | %(module)s | %(levelname)s | %(funcName)s::%(lineno)d | %(message)s", log_name="", file="_error.log") -> any:
+def setup_errorlog(log_format="%(asctime)s.%(msecs)03d | %(module)10s | %(levelname)s | %(funcName)20s::%(lineno)3d | %(message)s", log_name="", file="log_error.log") -> any:
     date = datetime.today().strftime("%Y%m%d")
     filename = Folder.LOG + join(date,file)
     if not os.path.exists(os.path.dirname(filename)):
