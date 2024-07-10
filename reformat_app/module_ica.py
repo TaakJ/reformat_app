@@ -15,7 +15,7 @@ class ModuleICA(CallFunction):
 
     async def step_run(self) -> dict:
 
-        logging.info(f"Module: '{self.module}'; Manual: '{self.manual}'; Batch Date: '{self.batch_date}'; Store Tmp: '{self.store_tmp}';, Write Mode: '{self.write_mode}'")
+        logging.info(f'Module:"{self.module}"; Manual: "{self.manual}"; Batch Date: "{self.batch_date}"; Store Tmp: "{self.store_tmp}"; Write Mode: "{self.write_mode}";')
 
         result = {"module": self.module, "task": "Completed"}
         try:
