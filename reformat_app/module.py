@@ -34,7 +34,7 @@ class Convert2File:
 
     async def separate_data_from_file(self) -> None:
 
-        logging.info("Separate Data From File")
+        logging.info("Separate Data From file")
 
         for i, record in enumerate(self.logging):
             record.update({"function": "separate_data_from_file"})
@@ -126,14 +126,14 @@ class Convert2File:
 
         return df
 
-    def validate_data_change(self, df: pd.DataFrame, change_df: pd.DataFrame) -> dict:
+    def data_change_capture(self, df: pd.DataFrame, change_df: pd.DataFrame) -> dict:
 
-        logging.info("Validate Data Change")
+        logging.info("Data Change Capture")
         self.change_rows = {}
         self.remove_rows = []
 
         status = "failed"
-        self.logging[-1].update({"function": "validate_data_change", "status": status})
+        self.logging[-1].update({"function": "data_change_capture", "status": status})
 
         ## set format record
         def format_record(record):
@@ -229,7 +229,7 @@ class Convert2File:
                         tmp_df = self.initial_data_type(tmp_df)
 
                         ## validate data change row by row
-                        data_dict = self.validate_data_change(tmp_df, change_df)
+                        data_dict = self.data_change_capture(tmp_df, change_df)
 
                         ## write tmp file
                         status = self.write_worksheet(data_dict)
@@ -268,7 +268,6 @@ class Convert2File:
                 self.sheet = self.workbook.get_sheet_by_name("Field Name")
 
         except FileNotFoundError:
-            ## move from template file to tmp file
             template_name = "Application Data Requirements.xlsx"
             full_template = join(Folder.TEMPLATE, template_name)
             try:
@@ -393,8 +392,7 @@ class Convert2File:
                     skipinitialspace=True,
                     delimiter=",",
                     quotechar='"',
-                    quoting=csv.QUOTE_NONE,
-                )
+                    quoting=csv.QUOTE_NONE,)
 
                 header = next(csv_reader)
                 for row in csv_reader:
@@ -427,7 +425,7 @@ class Convert2File:
             batch_df = target_df[target_df["CreateDate"].isin(np.array([pd.Timestamp(self.batch_date)]))].reset_index(drop=True)
 
             ## Validate data change row by row
-            data_dict = self.validate_data_change(batch_df, change_df)
+            data_dict = self.data_change_capture(batch_df, change_df)
 
             ## filter data not on batch date => dict
             merge_data = target_df[~target_df["CreateDate"].isin(np.array([pd.Timestamp(self.batch_date)]))].iloc[:, :-1].to_dict("index")
