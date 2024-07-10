@@ -31,7 +31,6 @@ from qt_material import apply_stylesheet
 from .setup import Folder, PARAMS, CONFIG
 from .main import StartApp
 
-
 class Jobber(QObject):
     set_total_progress = pyqtSignal(int)
     set_current_progress = pyqtSignal(int)
@@ -49,7 +48,6 @@ class Jobber(QObject):
             sleep(0.1)
 
         self.finished.emit()
-
 
 class setup_app(QWidget):
     def __init__(self, app):
@@ -376,7 +374,7 @@ def main():
         theme="light_blue.xml",
         extra={
             "font_family": "monoespace",
-            #"density_scale": "0",
+            "density_scale": "0",
             "pyside6": True,
             "linux": True,
         },)
