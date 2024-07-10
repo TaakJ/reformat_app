@@ -199,9 +199,9 @@ class Convert2File:
 
         return data_dict
 
-    async def write_data_to_tmp_file(self) -> None:
+    async def genarate_tmp_file(self) -> None:
 
-        logging.info("Write Data to Tmp file")
+        logging.info("Genarate Data to Tmp file")
 
         status = "failed"
         for record in self.logging:
@@ -237,7 +237,7 @@ class Convert2File:
                     except Exception as err:
                         raise Exception(err)
 
-                    record.update({"function": "write_data_to_tmp_file", "status": status})
+                    record.update({"function": "genarate_tmp_file", "status": status})
                     logging.info(f'Write Data to Tmp file status: {status}')
 
             except Exception as err:
@@ -337,9 +337,9 @@ class Convert2File:
 
         return status
 
-    async def write_data_to_target_file(self) -> None:
+    async def genarate_target_file(self) -> None:
 
-        logging.info("Write Data to Target file")
+        logging.info("Genarate Data to Target file")
 
         status = "failed"
         for record in self.logging:
@@ -369,8 +369,8 @@ class Convert2File:
                     except Exception as err:
                         raise Exception(err)
 
-                    record.update({"function": "write_data_to_target_file", "state": status})
-                    logging.info(f'Write to Target file status: {status}')
+                    record.update({"function": "genarate_target_file", "state": status})
+                    logging.info(f'Genarate to Target file status: {status}')
 
             except Exception as err:
                 record.update({"err": err})
