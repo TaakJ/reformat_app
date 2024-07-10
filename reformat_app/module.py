@@ -14,6 +14,7 @@ import csv
 from .exception import CustomException
 from .setup import Folder
 
+
 class Convert2File:
 
     async def check_source_file(self) -> None:
@@ -26,10 +27,16 @@ class Convert2File:
             if glob.glob(input_dir, recursive=True):
                 status = "found"
 
-            record = {"module": self.module,"input_dir": input_dir,"full_target": self.full_target,"function": "check_source_file","status": status}
+            record = {
+                "module": self.module,
+                "input_dir": input_dir,
+                "full_target": self.full_target,
+                "function": "check_source_file",
+                "status": status,
+            }
             _log.append(record)
-            logging.info(f'Source file: {input_dir}, Status: {status}')
-        
+            logging.info(f"Source file: {input_dir}, Status: {status}")
+
         self.logging = _log
 
     async def separate_data_file(self) -> None:
@@ -45,13 +52,13 @@ class Convert2File:
             try:
                 if status_file == "found":
                     if [".xlsx", ".xls"].__contains__(types):
-                        logging.info(f'Read Excel file: {input_dir}')
+                        logging.info(f"Read Excel file: {input_dir}")
                         data = self.read_excel_file(i)
                     else:
-                        logging.info(f'Read Text file: {input_dir}')
+                        logging.info(f"Read Text file: {input_dir}")
                         data = self.read_text_file(i)
                 else:
-                    raise FileNotFoundError(f'File Not Found: {input_dir}')
+                    raise FileNotFoundError(f"File Not Found: {input_dir}")
 
                 status = "succeed"
                 record.update({"data": data, "status": status})
@@ -96,7 +103,8 @@ class Convert2File:
         status = "failed"
         self.logging[-1].update({"function": "initial_data_type", "status": status})
         try:
-            df = df.astype({
+            df = df.astype(
+                {
                     "ApplicationCode": object,
                     "AccountOwner": object,
                     "AccountName": object,
@@ -110,8 +118,12 @@ class Convert2File:
                     "CreateDate": "datetime64[ms]",
                     "LastLogin": "datetime64[ms]",
                     "LastUpdatedDate": "datetime64[ms]",
-                    "AdditionalAttribute": object})
-            df[["CreateDate", "LastLogin", "LastUpdatedDate"]] = df[["CreateDate", "LastLogin", "LastUpdatedDate"]].apply(pd.to_datetime, format="%Y%m%d%H%M%S")
+                    "AdditionalAttribute": object,
+                }
+            )
+            df[["CreateDate", "LastLogin", "LastUpdatedDate"]] = df[
+                ["CreateDate", "LastLogin", "LastUpdatedDate"]
+            ].apply(pd.to_datetime, format="%Y%m%d%H%M%S")
 
             if "remark" in df.columns:
                 df = df.loc[df["remark"] != "Remove"]
@@ -137,10 +149,15 @@ class Convert2File:
 
         ## set format record
         def format_record(record):
-            return "\n".join("{!r} => {!r};".format(columns, values) for columns, values in record.items())
+            return "\n".join(
+                "{!r} => {!r};".format(columns, values)
+                for columns, values in record.items()
+            )
 
         if len(df.index) > len(change_df.index):
-            self.remove_rows = [idx for idx in list(df.index) if idx not in list(change_df.index)]
+            self.remove_rows = [
+                idx for idx in list(df.index) if idx not in list(change_df.index)
+            ]
 
         try:
             ## merge index.
@@ -150,10 +167,14 @@ class Convert2File:
             df = df.reindex(index=merge_index, columns=df.columns).iloc[:, :-1]
 
             ## change data / new data
-            change_df = change_df.reindex(index=merge_index, columns=change_df.columns).iloc[:, :-1]
+            change_df = change_df.reindex(
+                index=merge_index, columns=change_df.columns
+            ).iloc[:, :-1]
 
             ## compare data
-            df["count"] = pd.DataFrame(np.where(df.ne(change_df), True, df), index=df.index, columns=df.columns).apply(lambda x: (x == True).sum(), axis=1)
+            df["count"] = pd.DataFrame(
+                np.where(df.ne(change_df), True, df), index=df.index, columns=df.columns
+            ).apply(lambda x: (x == True).sum(), axis=1)
 
             i = 0
             for idx, row in enumerate(merge_index, 2):
@@ -200,7 +221,9 @@ class Convert2File:
         return data_dict
 
     async def genarate_tmp_file(self) -> None:
-
+        
+        self.clear_tmp()
+        
         logging.info("Genarate Data to Tmp file")
 
         status = "failed"
@@ -213,7 +236,9 @@ class Convert2File:
                         change_df = self.initial_data_type(change_df)
 
                         ## read tmp file
-                        tmp_dir = join(Folder.TMP, self.module, self.date.strftime("%Y%m%d"))
+                        tmp_dir = join(
+                            Folder.TMP, self.module, self.date.strftime("%Y%m%d")
+                        )
                         os.makedirs(tmp_dir, exist_ok=True)
                         tmp_name = f"TMP_{Path(self.full_target).stem}.xlsx"
                         full_tmp = join(tmp_dir, tmp_name)
@@ -238,7 +263,7 @@ class Convert2File:
                         raise Exception(err)
 
                     record.update({"function": "genarate_tmp_file", "status": status})
-                    logging.info(f'Write Data to Tmp file status: {status}')
+                    logging.info(f"Write Data to Tmp file status: {status}")
 
             except Exception as err:
                 record.update({"err": err})
@@ -249,7 +274,7 @@ class Convert2File:
     def create_workbook(self) -> None:
 
         full_tmp = self.logging[-1]["input_dir"]
-        logging.info(f'Create Tmp file: {full_tmp}')
+        logging.info(f"Create Tmp file: {full_tmp}")
 
         status = "failed"
         self.logging[-1].update({"function": "create_workbook", "status": status})
@@ -291,11 +316,17 @@ class Convert2File:
             self.sheet_name = f"RUN_TIME_{self.sheet_num}"
             self.sheet = self.workbook.create_sheet(self.sheet_name)
 
-        logging.info(f'Write to Sheet: {self.sheet_name}')
+        logging.info(f"Write to Sheet: {self.sheet_name}")
 
         rows = 2
         max_row = max(change_data, default=0)
-        self.logging[-1].update({"function": "write_worksheet", "sheet_name": self.sheet_name,"status": status,})
+        self.logging[-1].update(
+            {
+                "function": "write_worksheet",
+                "sheet_name": self.sheet_name,
+                "status": status,
+            }
+        )
         try:
             # write column
             for idx, col in enumerate(change_data[rows].keys(), 1):
@@ -305,19 +336,24 @@ class Convert2File:
             while rows <= max_row:
                 for idx, col in enumerate(change_data[rows].keys(), 1):
 
-                    if col in ["CreateDate", "LastLogin", "LastUpdatedDate"]:change_data[rows][col] = change_data[rows][col].strftime("%Y%m%d%H%M%S")
+                    if col in ["CreateDate", "LastLogin", "LastUpdatedDate"]:
+                        change_data[rows][col] = change_data[rows][col].strftime(
+                            "%Y%m%d%H%M%S"
+                        )
                     self.sheet.cell(row=rows, column=idx).value = change_data[rows][col]
 
                     if col == "remark":
                         if rows in self.remove_rows:
                             ## Remove row
-                            write_row = (f'{change_data[rows][col]} Rows: ({rows}) in Tmp file')
+                            write_row = (
+                                f"{change_data[rows][col]} Rows: ({rows}) in Tmp file"
+                            )
                         elif rows in self.change_rows.keys():
                             ## Update / Insert row
-                            write_row = f'{change_data[rows][col]} Rows: ({rows}) in Tmp file Updating records: {self.change_rows[rows]}'
+                            write_row = f"{change_data[rows][col]} Rows: ({rows}) in Tmp file Updating records: {self.change_rows[rows]}"
                         else:
                             ## No change row
-                            write_row = f'No Change Rows: ({rows}) in Tmp file'
+                            write_row = f"No Change Rows: ({rows}) in Tmp file"
                         logging.info(write_row)
                 rows += 1
 
@@ -350,7 +386,9 @@ class Convert2File:
                         if self.store_tmp is True:
                             full_tmp = record["input_dir"]
                             sheet_name = record["sheet_name"]
-                            change_df = pd.read_excel(full_tmp, sheet_name=sheet_name, dtype=object)
+                            change_df = pd.read_excel(
+                                full_tmp, sheet_name=sheet_name, dtype=object
+                            )
                         else:
                             data = record["data"]
                             change_df = pd.DataFrame(data)
@@ -369,7 +407,7 @@ class Convert2File:
                         raise Exception(err)
 
                     record.update({"function": "genarate_target_file", "state": status})
-                    logging.info(f'Genarate to Target file status: {status}')
+                    logging.info(f"Genarate to Target file status: {status}")
 
             except Exception as err:
                 record.update({"err": err})
@@ -379,10 +417,12 @@ class Convert2File:
 
     def read_csv(self) -> pd.DataFrame:
 
-        logging.info(f'Read Target file: {self.full_target}')
+        logging.info(f"Read Target file: {self.full_target}")
 
         status = "failed"
-        self.logging[-1].update({"input_dir": self.full_target, "function": "read_csv", "status": status})
+        self.logging[-1].update(
+            {"input_dir": self.full_target, "function": "read_csv", "status": status}
+        )
 
         try:
             data = []
@@ -392,7 +432,8 @@ class Convert2File:
                     skipinitialspace=True,
                     delimiter=",",
                     quotechar='"',
-                    quoting=csv.QUOTE_NONE,)
+                    quoting=csv.QUOTE_NONE,
+                )
 
                 header = next(csv_reader)
                 for row in csv_reader:
@@ -422,13 +463,23 @@ class Convert2File:
             target_df = self.initial_data_type(target_df)
 
             ## filter data on batch date => DataFrame
-            batch_df = target_df[target_df["CreateDate"].isin(np.array([pd.Timestamp(self.batch_date)]))].reset_index(drop=True)
+            batch_df = target_df[
+                target_df["CreateDate"].isin(np.array([pd.Timestamp(self.batch_date)]))
+            ].reset_index(drop=True)
 
             ## Validate data change row by row
             data_dict = self.data_change_capture(batch_df, change_df)
 
             ## filter data not on batch date => dict
-            merge_data = target_df[~target_df["CreateDate"].isin(np.array([pd.Timestamp(self.batch_date)]))].iloc[:, :-1].to_dict("index")
+            merge_data = (
+                target_df[
+                    ~target_df["CreateDate"].isin(
+                        np.array([pd.Timestamp(self.batch_date)])
+                    )
+                ]
+                .iloc[:, :-1]
+                .to_dict("index")
+            )
 
             ## merge data from new and old data
             max_rows = max(merge_data, default=0)
@@ -439,7 +490,9 @@ class Convert2File:
 
             ## sorted order data on batch date
             i = 0
-            for idx, values in enumerate(sorted(merge_data.values(), key=lambda d: d["CreateDate"]), 2):
+            for idx, values in enumerate(
+                sorted(merge_data.values(), key=lambda d: d["CreateDate"]), 2
+            ):
                 if "mark_row" in values.keys():
                     if values["mark_row"] in self.change_rows:
                         self.change_rows[idx] = self.change_rows.pop(values["mark_row"])
@@ -459,7 +512,7 @@ class Convert2File:
 
     def write_csv(self, target_name: str, data: dict) -> str:
 
-        logging.info(f'Write mode: {self.write_mode} in Target file: {target_name}')
+        logging.info(f"Write mode: {self.write_mode} in Target file: {target_name}")
 
         status = "failed"
         self.logging[-1].update({"function": "write_csv", "status": status})
@@ -471,13 +524,16 @@ class Convert2File:
                     skipinitialspace=True,
                     delimiter=",",
                     quotechar='"',
-                    quoting=csv.QUOTE_NONE,)
+                    quoting=csv.QUOTE_NONE,
+                )
                 rows = {idx: values for idx, values in enumerate(csvin, 2)}
 
                 for idx, value in data.items():
                     if value.get("remark") is not None:
                         if idx in self.change_rows.keys():
-                            logging.info(f'{value["remark"]} Rows: ({idx}) in Target file Updating records: {self.change_rows[idx]}')
+                            logging.info(
+                                f'{value["remark"]} Rows: ({idx}) in Target file Updating records: {self.change_rows[idx]}'
+                            )
                             value.popitem()
                             rows.update({idx: value})
                         elif idx in self.remove_rows:
@@ -497,9 +553,19 @@ class Convert2File:
 
                 for idx in rows:
                     if idx not in self.remove_rows:
-                        rows[idx].update({"CreateDate": rows[idx]["CreateDate"].strftime("%Y%m%d%H%M%S"),
-                                        "LastLogin": rows[idx]["LastLogin"].strftime("%Y%m%d%H%M%S"),
-                                        "LastUpdatedDate": rows[idx]["LastUpdatedDate"].strftime("%Y%m%d%H%M%S"),})
+                        rows[idx].update(
+                            {
+                                "CreateDate": rows[idx]["CreateDate"].strftime(
+                                    "%Y%m%d%H%M%S"
+                                ),
+                                "LastLogin": rows[idx]["LastLogin"].strftime(
+                                    "%Y%m%d%H%M%S"
+                                ),
+                                "LastUpdatedDate": rows[idx][
+                                    "LastUpdatedDate"
+                                ].strftime("%Y%m%d%H%M%S"),
+                            }
+                        )
                         csvout.writerow(rows[idx])
             writer.closed
 

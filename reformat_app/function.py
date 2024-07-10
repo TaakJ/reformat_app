@@ -43,8 +43,9 @@ class BackupAndClear:
     
     def backup(self):
         
-        self.backup_dir = join(Folder.BACKUP, self.module)
+        self.clear_backup()
         
+        self.backup_dir = join(Folder.BACKUP, self.module)
         if not os.path.exists(self.backup_dir):
             try:
                 os.makedirs(self.backup_dir)

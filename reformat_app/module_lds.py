@@ -23,10 +23,6 @@ class ModuleLDS(CallFunction):
             ## set params from confog file
             self.collect_params()
             
-            ## clear temp file and backup file 
-            self.clear_backup()
-            self.clear_tmp()
-            
             ## backup file
             self.backup()
             
@@ -39,8 +35,7 @@ class ModuleLDS(CallFunction):
             await self.genarate_target_file()
 
         except CustomException as err:
-            logging.error('See Error Details in "_error.log"')
-
+            logging.error('See Error Details: log_error.log')
             logger = setup_errorlog(log_name=__name__)
             while True:
                 try:
@@ -50,7 +45,7 @@ class ModuleLDS(CallFunction):
 
             result.update({"task": "Uncompleted"})
 
-        logging.info(f'Stop Run Module "{self.module}"\n')
+        logging.info(f'Stop Run Module "{self.module}"\r\n')
         
         return result
 
