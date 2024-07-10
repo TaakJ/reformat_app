@@ -59,8 +59,6 @@ class BackupAndClear:
         
     def backup_zip_file(self, date_dir):
         
-        # now = self.date - timedelta(days=1)
-        
         if date_dir < self.date.strftime("%Y%m%d"):
             date_dir = join(self.backup_dir, date_dir)
             zip_name = join(self.backup_dir, f'{date_dir}.zip')
