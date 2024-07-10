@@ -249,7 +249,7 @@ class Convert2File:
     def create_workbook(self) -> None:
 
         full_tmp = self.logging[-1]["input_dir"]
-        logging.info(f'Create Tmp file: "{full_tmp}"')
+        logging.info(f'Create Tmp file: {full_tmp}')
 
         status = "failed"
         self.logging[-1].update({"function": "create_workbook", "status": status})
@@ -291,7 +291,7 @@ class Convert2File:
             self.sheet_name = f"RUN_TIME_{self.sheet_num}"
             self.sheet = self.workbook.create_sheet(self.sheet_name)
 
-        logging.info(f"Write to {self.sheet}")
+        logging.info(f'Write to Sheet: {self.sheet_name}')
 
         rows = 2
         max_row = max(change_data, default=0)
