@@ -16,7 +16,7 @@ class ModuleBOS(CallFunction):
 
     async def step_run(self) -> dict:
 
-        logging.info(f'Module: "{self.module}", Manual: "{self.manual}", Batch Date: "{self.batch_date}", Store Tmp: "{self.store_tmp}", Write Mode: "{self.write_mode}"')
+        logging.info(f"Module: '{self.module}'; Manual: '{self.manual}'; Batch Date: '{self.batch_date}'; Store Tmp: '{self.store_tmp}';, Write Mode: '{self.write_mode}'")
 
         result = {"module": self.module, "task": "Completed"}
         try:
@@ -50,7 +50,8 @@ class ModuleBOS(CallFunction):
 
             result.update({"task": "Uncompleted"})
 
-        logging.info("Stop Run Module\n")
+        logging.info(f"Stop Run Module '{self.module}'\n")
+        
         return result
 
     def logSetter(self, log: list) -> None:
@@ -61,7 +62,7 @@ class ModuleBOS(CallFunction):
         status = "failed"
         record = {"module": self.module, "function": "collect_params", "status": status}
 
-        logging.info(f'Set Params from config file for "{self.module}"')
+        logging.info(f'Set Params from config file for module: {self.module}')
 
         _log = []
         try:
@@ -101,7 +102,7 @@ class ModuleBOS(CallFunction):
 
         status = "failed"
         module = self.logging[i]["module"]
-        logging.info(f'Collect Data for "{module}"')
+        logging.info(f'Collect Data for module: {module}')
 
         self.logging[i].update({"function": "collect_data", "status": status})
         sheet_list = [sheet for sheet in format_file.sheet_names()]

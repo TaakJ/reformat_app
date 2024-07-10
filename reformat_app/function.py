@@ -72,7 +72,7 @@ class BackupAndClear:
             shutil.rmtree(date_dir)
             
             state = "succeed"
-            logging.info(f'Zip file "{zip_name}" status: "{state}"' )
+            logging.info(f'Zip file {zip_name} status: {state}' )
     
     def genarate_backup_file(self):
         
@@ -94,20 +94,19 @@ class BackupAndClear:
             except OSError:
                 pass
             
-            logging.info(f'Backup file from "{self.full_target}" to "{full_backup}" status: "{status}"')
+            logging.info(f'Backup file from {self.full_target} to {full_backup} status: {status}')
                 
     def clear_tmp(self):
         try:
             tmp_dir = join(Folder.TMP, self.module)
-            bk_date = self.bk_date.strftime("%Y%m%d")
             
             for date_dir in os.listdir(tmp_dir):
-                if date_dir <= bk_date:
+                if date_dir < self.date.strftime("%Y%m%d"):
                     tmp_file = join(tmp_dir, date_dir)
                     shutil.rmtree(tmp_file)
                     
                     state = "succeed"
-                    logging.info(f'Clear Tmp file: "{tmp_file}" status: "{state}"')
+                    logging.info(f'Clear Tmp file: {tmp_file} status: {state}')
                     
         except OSError:
             pass
@@ -123,7 +122,7 @@ class BackupAndClear:
                     os.remove(zip_dir)
                     
                     state = "succeed"
-                    logging.info(f'Clear Zip file: "{zip_dir}" status: "{state}"')
+                    logging.info(f'Clear Zip file: {zip_dir} status: {state}')
                     
         except OSError:
             pass

@@ -28,7 +28,8 @@ class Convert2File:
 
             record = {"module": self.module,"input_dir": input_dir,"full_target": self.full_target,"function": "check_source_file","status": status}
             _log.append(record)
-            logging.info(f'Source file: "{input_dir}", Status: "{status}"')
+            logging.info(f'Source file: {input_dir}, Status: {status}')
+        
         self.logging = _log
 
     async def retrieve_data_from_source_file(self) -> None:
@@ -44,13 +45,13 @@ class Convert2File:
             try:
                 if status_file == "found":
                     if [".xlsx", ".xls"].__contains__(types):
-                        logging.info(f'Read Excel file: "{input_dir}"')
+                        logging.info(f'Read Excel file: {input_dir}')
                         data = self.read_excel_file(i)
                     else:
-                        logging.info(f'Read Text file: "{input_dir}"')
+                        logging.info(f'Read Text file: {input_dir}')
                         data = self.read_text_file(i)
                 else:
-                    raise FileNotFoundError(f'File Not Found: "{input_dir}"')
+                    raise FileNotFoundError(f'File Not Found: {input_dir}')
 
                 status = "succeed"
                 record.update({"data": data, "status": status})
@@ -136,7 +137,7 @@ class Convert2File:
 
         ## set format record
         def format_record(record):
-            return "\n".join("{!r} => {!r},".format(columns, values) for columns, values in record.items())
+            return "\n".join("{!r} => {!r};".format(columns, values) for columns, values in record.items())
 
         if len(df.index) > len(change_df.index):
             self.remove_rows = [idx for idx in list(df.index) if idx not in list(change_df.index)]
@@ -237,7 +238,7 @@ class Convert2File:
                         raise Exception(err)
 
                     record.update({"function": "write_data_to_tmp_file", "status": status})
-                    logging.info(f'Write Data to Tmp file status: "{status}"')
+                    logging.info(f'Write Data to Tmp file status: {status}')
 
             except Exception as err:
                 record.update({"err": err})
@@ -295,7 +296,7 @@ class Convert2File:
 
         rows = 2
         max_row = max(change_data, default=0)
-        self.logging[-1].update({"function": "write_worksheet","sheet_name": self.sheet_name,"status": status,})
+        self.logging[-1].update({"function": "write_worksheet", "sheet_name": self.sheet_name,"status": status,})
         try:
             # write column
             for idx, col in enumerate(change_data[rows].keys(), 1):
@@ -311,13 +312,13 @@ class Convert2File:
                     if col == "remark":
                         if rows in self.remove_rows:
                             ## Remove row
-                            write_row = (f'{change_data[rows][col]} Rows: "{rows}" in Tmp file')
+                            write_row = (f'{change_data[rows][col]} Rows: ({rows}) in Tmp file')
                         elif rows in self.change_rows.keys():
                             ## Update / Insert row
-                            write_row = f'{change_data[rows][col]} Rows: "{rows}" in Tmp file\nUpdating records: {self.change_rows[rows]}'
+                            write_row = f'{change_data[rows][col]} Rows: ({rows}) in Tmp file Updating records: {self.change_rows[rows]}'
                         else:
                             ## No change row
-                            write_row = f'No Change Rows: "{rows}" in Tmp file'
+                            write_row = f'No Change Rows: ({rows}) in Tmp file'
                         logging.info(write_row)
                 rows += 1
 
@@ -369,7 +370,7 @@ class Convert2File:
                         raise Exception(err)
 
                     record.update({"function": "write_data_to_target_file", "state": status})
-                    logging.info(f'Write to Target file status: "{status}"')
+                    logging.info(f'Write to Target file status: {status}')
 
             except Exception as err:
                 record.update({"err": err})
@@ -379,7 +380,7 @@ class Convert2File:
 
     def read_csv(self) -> pd.DataFrame:
 
-        logging.info(f'Read Target file: "{self.full_target}"')
+        logging.info(f'Read Target file: {self.full_target}')
 
         status = "failed"
         self.logging[-1].update({"input_dir": self.full_target, "function": "read_csv", "status": status})
@@ -460,7 +461,7 @@ class Convert2File:
 
     def write_csv(self, target_name: str, data: dict) -> str:
 
-        logging.info(f'Write mode: "{self.write_mode}" in Target file: "{target_name}"')
+        logging.info(f'Write mode: {self.write_mode} in Target file: {target_name}')
 
         status = "failed"
         self.logging[-1].update({"function": "write_csv", "status": status})
@@ -478,7 +479,7 @@ class Convert2File:
                 for idx, value in data.items():
                     if value.get("remark") is not None:
                         if idx in self.change_rows.keys():
-                            logging.info(f'"{value["remark"]}" Rows: "{idx}" in Target file\nUpdating records:"{self.change_rows[idx]}"')
+                            logging.info(f'{value["remark"]} Rows: ({idx}) in Target file Updating records: {self.change_rows[idx]}')
                             value.popitem()
                             rows.update({idx: value})
                         elif idx in self.remove_rows:

@@ -92,7 +92,7 @@ def clear_log(date) -> None:
             shutil.rmtree(log_dir)
             
             state = "succeed"
-            logging.info(f'Clear Log file: "{log_dir}" status: "{state}"')
+            logging.info(f'Clear Log file: {log_dir} status: {state}')
 
 class SetupParser:
     def __init__(self) -> None:
