@@ -3,7 +3,6 @@ import os
 import glob
 import shutil
 import zipfile
-from datetime import timedelta
 import logging
 from pathlib import Path
 from os.path import join
@@ -116,7 +115,7 @@ class BackupAndClear:
             bk_date = self.bk_date.strftime("%Y%m%d")
             
             for date_dir in os.listdir(backup_dir):
-                if date_dir <= bk_date:
+                if date_dir <= f'{bk_date}.zip':
                     zip_dir = join(backup_dir, date_dir)
                     os.remove(zip_dir)
                     

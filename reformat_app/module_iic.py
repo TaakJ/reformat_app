@@ -15,7 +15,7 @@ class ModuleIIC(CallFunction):
 
     async def step_run(self) -> dict:
 
-        logging.info(f'Module:"{self.module}"; Manual: "{self.manual}"; Batch Date: "{self.batch_date}"; Store Tmp: "{self.store_tmp}"; Write Mode: "{self.write_mode}";')
+        logging.info(f'Module:"{self.module}"; Manual: "{self.manual}"; Run Date: "{self.batch_date}"; Store Tmp: "{self.store_tmp}"; Write Mode: "{self.write_mode}";')
 
         result = {"module": self.module, "task": "Completed"}
         try:
@@ -57,7 +57,7 @@ class ModuleIIC(CallFunction):
         status = "failed"
         record = {"module": self.module, "function": "collect_params", "status": status}
 
-        logging.info(f'Set Params from config file for module: {self.module}')
+        logging.info(f'Set parameter from config file for module: {self.module}')
 
         _log = []
         try:

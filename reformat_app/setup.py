@@ -152,8 +152,7 @@ class SetupParser:
                 ArgumentParams.NAME: "--clear",
                 ArgumentParams.DESCRIPTION: "-c: clear",
                 ArgumentParams.REQUIRED: False,
-                ArgumentParams.DEFAULT: 7,
-                ArgumentParams.CHOICES: range(1,31)
+                ArgumentParams.DEFAULT: 2,
             },
         ]
 

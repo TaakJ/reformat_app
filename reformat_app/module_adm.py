@@ -16,7 +16,7 @@ class ModuleADM(CallFunction):
         
     async def step_run(self) -> dict:
         
-        logging.info(f'Module:"{self.module}"; Manual: "{self.manual}"; Batch Date: "{self.batch_date}"; Store Tmp: "{self.store_tmp}"; Write Mode: "{self.write_mode}";')
+        logging.info(f'Module:"{self.module}"; Manual: "{self.manual}"; Run Date: "{self.batch_date}"; Store Tmp: "{self.store_tmp}"; Write Mode: "{self.write_mode}";')
         
         result = {"module": self.module, "task": "Completed"}
         try:
@@ -58,12 +58,10 @@ class ModuleADM(CallFunction):
         status = "failed"
         record = {"module": self.module, "function": "collect_params", "status": status}
         
-        logging.info(f'Set Params from config file for module: {self.module}')
+        logging.info(f'Set parameter from config file for module: {self.module}')
         
         _log = []
         try:
-            
-            self.x
             input_dir   = CONFIG[self.module]["input_dir"]
             input_file  = CONFIG[self.module]["input_file"]
             output_dir  = CONFIG[self.module]["output_dir"]
