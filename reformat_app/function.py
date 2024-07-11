@@ -1,13 +1,16 @@
 from abc import ABC, abstractmethod
 import os
+import re
 import glob
 import shutil
 import zipfile
 import logging
 from pathlib import Path
 from os.path import join
+from functools import reduce
 from .module import Convert2File
-from .setup import Folder
+from .setup import Folder, CONFIG
+from .exception import CustomException
 
 class CollectLog(ABC):
     def __init__(self) -> None:
@@ -22,18 +25,69 @@ class CollectLog(ABC):
         self.logSetter(log)
 
     @abstractmethod
-    def logSetter(self, log: list): ...
-
-class CollectParams(ABC):
-    def get_extract_data(self, i: int, format_file: any) -> dict:
-        logging.info("Get Extract Data From File")
-        data = self.collect_data(i, format_file)
-        return data
-
-    @abstractmethod
-    def collect_params(self):
+    def logSetter(self, log: list):
         pass
 
+class CollectParams(ABC):
+    
+    def __init__(self) -> None:
+        self._full_input = ""
+        
+    @property
+    def full_input(self) -> list:
+        return self._full_input
+    
+    @full_input.setter
+    def full_input(self, file: list) -> list:
+        
+        add_file = []
+        for new_file in [f.strip() for f in re.split(r',', self._full_input) if f.strip() != ""]:
+            if new_file not in add_file:
+                add_file.append(new_file)
+            else:
+                continue
+            
+        self._full_input = file + add_file
+        return self._full_input
+    
+    def collect_params(self) -> None:
+        
+        logging.info(f'Set parameter from config file for module: {self.module}')
+        
+        status = "failed"
+        record = {"module": self.module, "function": "collect_params", "status": status} 
+        try:
+            ## setup input dir / input file
+            input_dir   = CONFIG[self.module]["input_dir"]
+            input_file  = CONFIG[self.module]["input_file"]
+            # self.input_file = join(input_dir, input_file)
+            self.full_input = [join(input_dir, input_file)]
+            
+            ## setup output dir / output file             
+            output_dir  = CONFIG[self.module]["output_dir"]
+            output_file = CONFIG[self.module]["output_file"]
+            suffix = f"{self.batch_date.strftime('%Y%m%d')}"
+            file = lambda file: file if (self.write_mode == "overwrite" or self.manual) else f"{Path(file).stem}_{suffix}.csv"
+            self.full_target = join(output_dir, file(output_file))
+            
+            status = "succeed"
+            record.update({"status": status})
+            
+        except Exception as err:
+            record.update({"err": err})
+        
+        self.logSetter([record])
+        
+        if "err" in record:
+            raise CustomException(err=self.logging)
+        
+    def get_extract_data(self, i: int, format_file: any) -> dict:
+        
+        logging.info("Get Extract Data From File")
+        
+        data = self.collect_data(i, format_file)
+        return data
+    
     @abstractmethod
     def collect_data(self, i: int, format_file: any):
         pass

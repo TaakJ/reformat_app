@@ -27,12 +27,7 @@ class Convert2File:
             if glob.glob(input_dir, recursive=True):
                 status = "found"
 
-            record = {
-                "module": self.module,
-                "input_dir": input_dir,
-                "full_target": self.full_target,
-                "function": "check_source_file",
-                "status": status}
+            record = {"module": self.module,"input_dir": input_dir,"full_target": self.full_target,"function": "check_source_file","status": status}
             
             _log.append(record)
             logging.info(f"Source file: {input_dir}, Status: {status}")

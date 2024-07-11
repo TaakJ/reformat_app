@@ -19,19 +19,20 @@ class ModuleMOC(CallFunction):
 
         result = {"module": self.module, "task": "Completed"}
         try:
-            # set params from confog file
+            ## set params from confog file
+            self._full_input = ""
             self.collect_params()
             
             ## backup file
-            self.backup()
+            # self.backup()
             
             ## run_process
-            await self.check_source_file()
-            await self.separate_data_file()
-            await self.mock_data()
-            if self.store_tmp is True:
-                await self.genarate_tmp_file()
-            await self.genarate_target_file()
+            # await self.check_source_file()
+            # await self.separate_data_file()
+            # await self.mock_data()
+            # if self.store_tmp is True:
+            #     await self.genarate_tmp_file()
+            # await self.genarate_target_file()
 
         except CustomException as err:
             logging.error('See Error Details: log_error.log')
@@ -51,44 +52,6 @@ class ModuleMOC(CallFunction):
 
     def logSetter(self, log: list) -> None:
         self._log = log
-
-    def collect_params(self) -> None:
-
-        status = "failed"
-        record = {"module": self.module, "function": "collect_params", "status": status}
-
-        logging.info(f'Set parameter from config file for module: {self.module}')
-
-        _log = []
-        try:
-            input_dir   = CONFIG[self.module]["input_dir"]
-            input_file  = CONFIG[self.module]["input_file"]
-            output_dir  = CONFIG[self.module]["output_dir"]
-            output_file = CONFIG[self.module]["output_file"]
-            
-            ## setup input dir / input file            
-            specify_dir = ""
-            specify_dir = specify_dir.split(",")
-            add_dir = lambda d, f: d + specify_dir if f != [""] else d
-            self.full_input = reduce(add_dir, [[join(input_dir, input_file)], specify_dir])
-            
-            ## setup output dir / output file             
-            suffix = f"{self.batch_date.strftime('%Y%m%d')}"
-            change_name =  lambda f: f if (self.write_mode == "overwrite" or self.manual) else f"{Path(f).stem}_{suffix}.csv"
-            self.full_target = join(output_dir, change_name(output_file))
-            
-            status = "succeed"
-            record.update({"status": status})
-
-        except KeyError as err:
-            err = f"Not found module: {err} in config file"
-            record.update({"err": err})
-
-        _log.append(record)
-        self.logSetter(_log)
-
-        if "err" in record:
-            raise CustomException(err=self.logging)
 
     def collect_data(self, i: int, format_file: any) -> dict:
 
