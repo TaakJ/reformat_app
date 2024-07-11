@@ -1,17 +1,50 @@
+import os
+from os.path import join
+from pathlib import Path
+import logging
+from datetime import datetime
+import time
+from .setup import Folder
+
 class CustomException(Exception):
     def __init__(self,*args: tuple,**kwargs: dict,):
         self.__dict__.update(kwargs)
 
         for key, value in self.__dict__.items():
             setattr(self,key,value)
-
+        
+        self.date = datetime.now().strftime("%Y%m%d")
+        # self._time = time.strftime("%H%M")
         self.err_msg = self.generate_error()
-
+        
     def __iter__(self):
         return self
 
     def __next__(self):
         return next(self.err_msg)
+
+    def setup_errorlog(self,
+        log_format="%(asctime)s.%(msecs)03d | %(module)10s | %(levelname)8s | %(funcName)20s | %(message)s",
+        log_name="", 
+        file="log_error.log") -> any:
+        
+        filename = Folder.LOG + join(self.date, file)
+        if not os.path.exists(os.path.dirname(filename)):
+            try:
+                os.makedirs(os.path.dirname(filename))
+            except OSError:
+                pass
+        
+        errorlog = logging.getLogger(log_name)
+        file_handler = logging.FileHandler(filename, mode="a")
+        formatter = logging.Formatter(fmt=log_format,datefmt="%Y/%m/%d %H:%M:%S")
+        file_handler.setFormatter(formatter)
+        file_handler.setLevel(logging.ERROR)
+        
+        errorlog.addHandler(file_handler)
+        errorlog.setLevel(logging.INFO)
+        
+        return errorlog
 
     def generate_error(self) -> any:
         for i in range(len(self.err)):

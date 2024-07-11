@@ -38,13 +38,13 @@ class ModuleADM(CallFunction):
         except CustomException as err:
             logging.error('See Error Details: log_error.log')
             
-            logger = setup_errorlog(log_name=__name__+"."+self.__class__.__name__)
-            
+            logger = err.setup_errorlog(log_name=__name__)
             while True:
                 try:
                     logger.exception(next(err))
                 except StopIteration:
                     break
+            
             result.update({"task": "Uncompleted"})
             
         logging.info(f'Stop Run Module "{self.module}"\r\n')
