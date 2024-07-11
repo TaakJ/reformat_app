@@ -14,7 +14,7 @@ class CustomException(Exception):
             setattr(self,key,value)
         
         self.date = datetime.now().strftime("%Y%m%d")
-        # self._time = time.strftime("%H%M")
+        self._time = time.strftime("%H%M%S")
         self.err_msg = self.generate_error()
         
     def __iter__(self):
@@ -28,7 +28,9 @@ class CustomException(Exception):
         log_name="", 
         file="log_error.log") -> any:
         
+        log_name = log_name + "." + self._time
         filename = Folder.LOG + join(self.date, file)
+        
         if not os.path.exists(os.path.dirname(filename)):
             try:
                 os.makedirs(os.path.dirname(filename))
