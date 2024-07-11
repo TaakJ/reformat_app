@@ -59,12 +59,13 @@ class CollectParams(ABC):
             ## setup input dir / input file
             input_dir   = CONFIG[self.module]["input_dir"]
             input_file  = CONFIG[self.module]["input_file"]
-            # self.input_file = join(input_dir, input_file)
+            
             self.full_input = [join(input_dir, input_file)]
             
             ## setup output dir / output file             
             output_dir  = CONFIG[self.module]["output_dir"]
             output_file = CONFIG[self.module]["output_file"]
+            
             suffix = f"{self.batch_date.strftime('%Y%m%d')}"
             file = lambda file: file if (self.write_mode == "overwrite" or self.manual) else f"{Path(file).stem}_{suffix}.csv"
             self.full_target = join(output_dir, file(output_file))

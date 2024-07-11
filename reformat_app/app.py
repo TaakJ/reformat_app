@@ -306,11 +306,14 @@ class setup_app(QWidget):
 
     def task_open_log(self, event):
         date = datetime.now().strftime("%Y%m%d")
+        print(Folder.LOG)
+        
         log_dir = join(Folder.LOG, date)
         if event == 1:
             open_log = join(log_dir, "_success.log")
         else:
-            open_log = join(log_dir, "_error.log")
+            open_log = join(log_dir, "log_error.log")
+        
         webbrowser.open(open_log)
 
     def task_run_job(self):
@@ -327,19 +330,17 @@ class setup_app(QWidget):
                 "write_mode": self.mode,
                 #"clear": int(self.clear_file.text())
             })
-        
-        print(PARAMS)
 
-        # for module in self.module:
-        #     if module in self.filename.keys() and self.mode == "new":
-        #         suffix = PARAMS["batch_date"].strftime("%Y%m%d")
-        #         CONFIG[module]["output_file"] = f"{Path(self.filename[module]).stem}_{suffix}.csv"
-        #     else:
-        #         CONFIG[module]["output_file"] = self.filename[module]
+        for module in self.module:
+            if module in self.filename.keys() and self.mode == "new":
+                suffix = PARAMS["batch_date"].strftime("%Y%m%d")
+                CONFIG[module]["output_file"] = f"{Path(self.filename[module]).stem}_{suffix}.csv"
+            else:
+                CONFIG[module]["output_file"] = self.filename[module]
 
-        # if not self.__thread.isRunning():
-        #     self.__thread = self.__get_thread()
-        #     self.__thread.start()
+        if not self.__thread.isRunning():
+            self.__thread = self.__get_thread()
+            self.__thread.start()
 
     def __get_thread(self):
         thread = QThread()
@@ -361,7 +362,7 @@ class setup_app(QWidget):
         self.time_label.setText(f"Last Updated: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
         self.time_label.setHidden(False)
         self._success_log.setHidden(False)
-
+        
         if "Uncompleted" in [completed_task.result()["task"] for completed_task in results[0]]:
             self.label.setText("Job has errored. Please see log file!")
             self._error_log.setHidden(False)

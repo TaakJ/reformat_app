@@ -5,7 +5,7 @@ import yaml
 import os
 from os.path import join
 import shutil
-from datetime import datetime
+from datetime import datetime, timedelta
 import time
 
 class ArgumentParams:
@@ -88,11 +88,10 @@ def setup_errorlog(log_format="%(asctime)s.%(msecs)03d | %(module)10s | %(leveln
     return errorlog
 
 def clear_log() -> None:
-    
-    date = datetime.now().strftime("%Y%m%d")
+    bk_date = datetime.now() - timedelta(days=7) 
     
     for date_dir in os.listdir(Folder.LOG):
-        if date_dir < date:
+        if date_dir <= bk_date.strftime("%Y%m%d"):
             log_dir = join(Folder.LOG, date_dir)
             shutil.rmtree(log_dir)
             
