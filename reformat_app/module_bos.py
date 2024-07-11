@@ -24,7 +24,7 @@ class ModuleBOS(CallFunction):
             self.collect_params()
             
             ## backup file
-            self.backup()
+            # self.backup()
             
             ## run_process
             await self.check_source_file()
@@ -36,9 +36,9 @@ class ModuleBOS(CallFunction):
 
         except CustomException as err:
             logging.error('See Error Details: log_error.log')
-
-            logger = setup_errorlog(log_name="BOS")
-            # logger = setup_errorlog()
+            
+            logger = setup_errorlog(log_name=__name__+"."+self.__class__.__name__)
+            
             while True:
                 try:
                     logger.exception(next(err))
@@ -50,9 +50,6 @@ class ModuleBOS(CallFunction):
         logging.info(f'Stop Run Module "{self.module}"\r\n')
         
         return result
-
-    def logSetter(self, log: list) -> None:
-        self._log = log
 
     def collect_data(self, i: int, format_file: any) -> dict:
 

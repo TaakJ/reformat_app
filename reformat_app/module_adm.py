@@ -25,7 +25,7 @@ class ModuleADM(CallFunction):
             self.collect_params()
             
             ## backup file
-            self.backup()
+            # self.backup()
             
             ## run_process
             await self.check_source_file()
@@ -37,8 +37,9 @@ class ModuleADM(CallFunction):
 
         except CustomException as err:
             logging.error('See Error Details: log_error.log')
-
-            logger = setup_errorlog(log_name="ADM")
+            
+            logger = setup_errorlog(log_name=__name__+"."+self.__class__.__name__)
+            
             while True:
                 try:
                     logger.exception(next(err))

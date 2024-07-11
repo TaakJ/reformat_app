@@ -9,6 +9,9 @@ class ModuleICA(CallFunction):
     def __init__(self, params: any):
         for key, value in vars(params).items():
             setattr(self, key, value)
+            
+    def logSetter(self, log: list) -> None:
+        self._log = log
 
     async def step_run(self) -> dict:
 
@@ -46,9 +49,6 @@ class ModuleICA(CallFunction):
         logging.info(f'Stop Run Module "{self.module}"\r\n')
         
         return result
-
-    def logSetter(self, log: list) -> None:
-        self._log = log
 
     def collect_data(self, i: int, format_file: any) -> dict:
 

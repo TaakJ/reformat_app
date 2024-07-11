@@ -78,9 +78,7 @@ def setup_errorlog(
     # import time
     # _time = time.strftime("%H%M")
     # file = f"{Path(file).stem}_T{_time}.log" 
-    
     filename = Folder.LOG + join(date, file)
-    
     if not os.path.exists(os.path.dirname(filename)):
         try:
             os.makedirs(os.path.dirname(filename))
@@ -191,5 +189,5 @@ class SetupParser:
 
 class Utility:
     global PARAMS, CONFIG
-    PARAMS = vars(SetupParser().parsed_params)
-    CONFIG = setup_config()
+    PARAMS       = vars(SetupParser().parsed_params)
+    CONFIG       = setup_config()
