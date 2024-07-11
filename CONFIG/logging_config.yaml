@@ -15,7 +15,6 @@ handlers:
     class: logging.handlers.RotatingFileHandler
     level: INFO
     formatter: verbose
-    backupCount: 0
     mode: w+
     filename: 
 root: 
