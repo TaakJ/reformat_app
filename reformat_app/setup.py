@@ -95,7 +95,7 @@ def setup_errorlog(
     file_handler.setLevel(logging.ERROR)
     
     errorlog.addHandler(file_handler)
-    errorlog.setLevel(logging.DEBUG)
+    errorlog.setLevel(logging.INFO)
     
     return errorlog
 
