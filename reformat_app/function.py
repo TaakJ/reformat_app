@@ -7,7 +7,6 @@ import zipfile
 import logging
 from pathlib import Path
 from os.path import join
-from functools import reduce
 from .module import Convert2File
 from .setup import Folder, CONFIG
 from .exception import CustomException

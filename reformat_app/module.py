@@ -14,43 +14,44 @@ import csv
 from .exception import CustomException
 from .setup import Folder
 
-
 class Convert2File:
 
     async def check_source_file(self) -> None:
-
+        
         logging.info("Check Source file")
-
-        _log = []
+        
+        # for record in self.logging:
         for input_dir in self.full_input:
             status = "not_found"
             if glob.glob(input_dir, recursive=True):
                 status = "found"
-
-            record = {"module": self.module,"input_dir": input_dir,"full_target": self.full_target,"function": "check_source_file","status": status}
+                    
+            record = {"module": self.module,
+                    "input_dir": input_dir,
+                    "full_target": self.full_target,
+                    "function": "check_source_file",
+                    "status": status}
+            self.logging += [record]
             
-            _log.append(record)
-            logging.info(f"Source file: {input_dir}, Status: {status}")
-
-        self.logging = _log
-
+        self.logging.pop(0)
+        
     async def separate_data_file(self) -> None:
 
-        logging.info("Separate Data From file")
+        logging.info("Separate Data from file")
 
         for i, record in enumerate(self.logging):
             record.update({"function": "separate_data_from_file"})
-
+            
             input_dir = record["input_dir"]
             types = Path(input_dir).suffix
             status_file = record["status"]
             try:
                 if status_file == "found":
                     if [".xlsx", ".xls"].__contains__(types):
-                        logging.info(f"Read Excel file: {input_dir}")
+                        logging.info(f"Read format excel file: {input_dir}")
                         data = self.read_excel_file(i)
                     else:
-                        logging.info(f"Read Text file: {input_dir}")
+                        logging.info(f"Read format text file: {input_dir}")
                         data = self.read_text_file(i)
                 else:
                     raise FileNotFoundError(f"File Not Found: {input_dir}")
@@ -60,7 +61,7 @@ class Convert2File:
 
             except Exception as err:
                 record.update({"err": err})
-
+                
             if "err" in record:
                 raise CustomException(err=self.logging)
 

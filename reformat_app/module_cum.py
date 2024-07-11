@@ -1,11 +1,8 @@
-from pathlib import Path
-from os.path import join
 import pandas as pd
-from functools import reduce
 import logging
 from .function import CallFunction
 from .exception import CustomException
-from .setup import setup_errorlog, CONFIG
+from .setup import setup_errorlog
 
 class ModuleCUM(CallFunction):
 
@@ -24,15 +21,15 @@ class ModuleCUM(CallFunction):
             self.collect_params()
             
             ## backup file
-            # self.backup()
+            self.backup()
             
             ## run_process
-            # await self.check_source_file()
-            # await self.separate_data_file()
-            # await self.mock_data()
-            # if self.store_tmp is True:
-            #     await self.genarate_tmp_file()
-            # await self.genarate_target_file()
+            await self.check_source_file()
+            await self.separate_data_file()
+            await self.mock_data()
+            if self.store_tmp is True:
+                await self.genarate_tmp_file()
+            await self.genarate_target_file()
 
         except CustomException as err:
             logging.error('See Error Details: log_error.log')
@@ -66,9 +63,8 @@ class ModuleCUM(CallFunction):
         for sheets in sheet_list:
             cells = format_file.sheet_by_name(sheets)
             for row in range(0, cells.nrows):
-                by_sheets = [cells.cell(row, col).value for col in range(cells.ncols)][
-                    1:
-                ]
+                by_sheets = [cells.cell(row, col).value for col in range(cells.ncols)][1:]
+                
                 if not all(empty == "" for empty in by_sheets):
                     if sheets not in data:
                         data[sheets] = [by_sheets]
