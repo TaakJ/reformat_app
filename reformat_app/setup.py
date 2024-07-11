@@ -47,7 +47,7 @@ def setup_config() -> dict:
 def setup_log() -> None:
     config_yaml = None
     date = datetime.now().strftime("%Y%m%d")
-    _time = time.strftime("%H")
+    _time = time.strftime("%H%M")
     file = f"log_status_T{_time}.log"
 
     filename = Folder.LOG + join(date, file)
@@ -73,12 +73,11 @@ def setup_errorlog(
     log_name="", 
     file="log_error.log") -> any:
     
-    from pathlib import Path
-    import time
-    
     date = datetime.now().strftime("%Y%m%d")
-    _time = time.strftime("%H%M%S")
-    file = f"{Path(file).stem}_T{_time}.log" 
+    # from pathlib import Path
+    # import time
+    # _time = time.strftime("%H%M")
+    # file = f"{Path(file).stem}_T{_time}.log" 
     
     filename = Folder.LOG + join(date, file)
     

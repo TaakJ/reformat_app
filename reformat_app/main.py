@@ -1,4 +1,3 @@
-from concurrent.futures import ThreadPoolExecutor
 import asyncio
 from .module_adm import ModuleADM
 from .module_bos import ModuleBOS
@@ -23,9 +22,9 @@ class RunModule:
         self.time = time.strftime("%H")
         
         ## initial setup / clear file
-        clear_log()
         setup_folder()
         setup_log()
+        clear_log()
         
         self.loop = asyncio.new_event_loop()
         asyncio.set_event_loop(self.loop)

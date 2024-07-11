@@ -9,6 +9,9 @@ class ModuleBOS(CallFunction):
     def __init__(self, params) -> None:
         for key, value in vars(params).items():
             setattr(self, key, value)
+            
+    def logSetter(self, log: list) -> None:
+        self._log = log
 
     async def step_run(self) -> dict:
 
@@ -17,7 +20,7 @@ class ModuleBOS(CallFunction):
         result = {"module": self.module, "task": "Completed"}
         try:
             ## set params from confog file
-            self._full_input = ""
+            self._full_input = "x"
             self.collect_params()
             
             ## backup file
@@ -34,7 +37,8 @@ class ModuleBOS(CallFunction):
         except CustomException as err:
             logging.error('See Error Details: log_error.log')
 
-            logger = setup_errorlog(log_name=__name__)
+            logger = setup_errorlog(log_name="BOS")
+            # logger = setup_errorlog()
             while True:
                 try:
                     logger.exception(next(err))
