@@ -93,22 +93,7 @@ class BackupAndClear:
                 pass
             
             logging.info(f'Backup file from {self.full_target} to {full_backup} status: {status}')
-                
-    def clear_tmp(self):
-        try:
-            tmp_dir = join(Folder.TMP, self.module)
             
-            for date_dir in os.listdir(tmp_dir):
-                if date_dir < self.date.strftime("%Y%m%d"):
-                    tmp_file = join(tmp_dir, date_dir)
-                    shutil.rmtree(tmp_file)
-                    
-                    state = "succeed"
-                    logging.info(f'Clear Tmp file: {tmp_file} status: {state}')
-                    
-        except OSError:
-            pass
-        
     def clear_backup(self):
         try:
             backup_dir = join(Folder.BACKUP, self.module)
@@ -121,6 +106,21 @@ class BackupAndClear:
                     
                     state = "succeed"
                     logging.info(f'Clear Zip file: {zip_dir} status: {state}')
+                    
+        except OSError:
+            pass
+                
+    def clear_tmp(self):
+        try:
+            tmp_dir = join(Folder.TMP, self.module)
+            
+            for date_dir in os.listdir(tmp_dir):
+                if date_dir < self.date.strftime("%Y%m%d"):
+                    tmp_file = join(tmp_dir, date_dir)
+                    shutil.rmtree(tmp_file)
+                    
+                    state = "succeed"
+                    logging.info(f'Clear Tmp file: {tmp_file} status: {state}')
                     
         except OSError:
             pass
