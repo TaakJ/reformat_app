@@ -21,7 +21,9 @@ class CustomException(Exception):
             status      = self.err[i]["status"]
             func        = self.err[i]["function"]
             err         = self.err[i].get("err")
-
+            print(status)
+            print(err)
+            
             if err is not None:
                 err_msg = f'Module: "{module}"; File: "{full_input}"; Function: "{func}"; ERROR: {err}'
                 yield err_msg

@@ -69,9 +69,8 @@ def setup_log() -> None:
         raise FileNotFoundError(f"Yaml file file_path: '{Folder._LOGGER_CONFIG_DIR}' doesn't exist.")
 
 def setup_errorlog(log_format="%(asctime)s.%(msecs)03d | %(module)10s | %(levelname)8s | %(funcName)20s | %(message)s", log_name="", file="log_error.log") -> any:
-    date = datetime.today().strftime("%Y%m%d")
-    filename = Folder.LOG + join(date,file)
-    print(filename)
+    date = datetime.now().strftime("%Y%m%d")
+    filename = Folder.LOG + join(date, file)
     if not os.path.exists(os.path.dirname(filename)):
         try:
             os.makedirs(os.path.dirname(filename))
@@ -79,13 +78,13 @@ def setup_errorlog(log_format="%(asctime)s.%(msecs)03d | %(module)10s | %(leveln
             pass
 
     errorlog = logging.getLogger(log_name)
-    file_handler = logging.FileHandler(filename,mode="a+")
+    file_handler = logging.FileHandler(filename,mode="a")
     formatter = logging.Formatter(fmt=log_format,datefmt="%Y/%m/%d %H:%M:%S")
     file_handler.setFormatter(formatter)
-    file_handler.setLevel(logging.INFO)
+    file_handler.setLevel(logging.ERROR)
     errorlog.addHandler(file_handler)
-
-    errorlog.setLevel(logging.ERROR)
+    errorlog.setLevel(logging.INFO)
+    
     return errorlog
 
 def clear_log() -> None:
