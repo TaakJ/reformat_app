@@ -250,8 +250,8 @@ class setup_app(QWidget):
 
         self.groupbox5.setLayout(vbox)
 
-        self._success_log.clicked.connect(lambda: self.task_open_log(1))
-        self._error_log.clicked.connect(lambda: self.task_open_log(2))
+        self.status_log.clicked.connect(lambda: self.task_open_log(1))
+        self.error_log.clicked.connect(lambda: self.task_open_log(2))
 
         return self.groupbox5
 
@@ -322,8 +322,8 @@ class setup_app(QWidget):
         self.progress.reset()
         self.label.setText("Job is running...")
         self.time_label.setHidden(True)
-        self._success_log.setHidden(True)
-        self._error_log.setHidden(True)
+        self.status_log.setHidden(True)
+        self.error_log.setHidden(True)
         
         PARAMS.update({
                 "source": self.module,
@@ -363,11 +363,11 @@ class setup_app(QWidget):
         self.progress.setValue(self.progress.maximum())
         self.time_label.setText(f"Last Updated: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
         self.time_label.setHidden(False)
-        self._success_log.setHidden(False)
+        self.status_log.setHidden(False)
         
         if "Uncompleted" in [completed_task.result()["task"] for completed_task in results[0]]:
             self.label.setText("Job has errored. Please see log file!")
-            self._error_log.setHidden(False)
+            self.error_log.setHidden(False)
         else:
             self.label.setText("Job has been succeed.")
 

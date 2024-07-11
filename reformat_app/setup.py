@@ -47,7 +47,7 @@ def setup_config() -> dict:
 def setup_log() -> None:
     config_yaml = None
     date = datetime.now().strftime("%Y%m%d")
-    _time = time.strftime("%H%M")
+    _time = time.strftime("%H")
     file = f"log_status_T{_time}.log"
 
     filename = Folder.LOG + join(date, file)
@@ -71,6 +71,7 @@ def setup_log() -> None:
 def setup_errorlog(log_format="%(asctime)s.%(msecs)03d | %(module)10s | %(levelname)8s | %(funcName)20s | %(message)s", log_name="", file="log_error.log") -> any:
     date = datetime.now().strftime("%Y%m%d")
     filename = Folder.LOG + join(date, file)
+    
     if not os.path.exists(os.path.dirname(filename)):
         try:
             os.makedirs(os.path.dirname(filename))

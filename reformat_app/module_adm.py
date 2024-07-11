@@ -41,7 +41,6 @@ class ModuleADM(CallFunction):
             logger = setup_errorlog(log_name=__name__)
             while True:
                 try:
-                    print(err)
                     logger.exception(next(err))
                 except StopIteration:
                     break
