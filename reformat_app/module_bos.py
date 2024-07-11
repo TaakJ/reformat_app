@@ -2,7 +2,6 @@ import pandas as pd
 import logging
 from .function import CallFunction
 from .exception import CustomException
-from .setup import setup_errorlog
 
 class ModuleBOS(CallFunction):
 

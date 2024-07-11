@@ -2,7 +2,6 @@ import pandas as pd
 import logging
 from .function import CallFunction
 from .exception import CustomException
-from .setup import setup_errorlog
 
 class ModuleIIC(CallFunction):
 
@@ -37,7 +36,7 @@ class ModuleIIC(CallFunction):
         except CustomException as err:
             logging.error('See Error Details: log_error.log')
 
-            logger = setup_errorlog(log_name=__name__)
+            logger = err.setup_errorlog(log_name=__name__)
             while True:
                 try:
                     logger.exception(next(err))
