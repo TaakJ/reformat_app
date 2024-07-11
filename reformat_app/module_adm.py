@@ -41,12 +41,13 @@ class ModuleADM(CallFunction):
             logger = setup_errorlog(log_name=__name__)
             while True:
                 try:
-                    logger.exception(next(err))
+                    
+                    logger.error(next(err))
                 except StopIteration:
                     break
             result.update({"task": "Uncompleted"})
             
-        logging.info(f'Stop Run Module "{self.module}"\r\n')
+        logging.info(f'Stop Run Module "{self.module}"\n')
         
         return result
     

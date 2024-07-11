@@ -17,7 +17,7 @@ class CustomException(Exception):
         for i in range(len(self.err)):
             module      = self.err[i]["module"]
             full_input  = self.err[i].get("input_dir")
-            # full_target = self.err[i].get("full_target")
+            full_target = self.err[i].get("full_target")
             status      = self.err[i]["status"]
             func        = self.err[i]["function"]
             err         = self.err[i].get("err")

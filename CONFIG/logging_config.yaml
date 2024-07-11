@@ -9,17 +9,17 @@ handlers:
   console:
     class : logging.StreamHandler
     formatter: verbose
-    level   : INFO
+    level   : DEBUG
     stream  : ext://sys.stdout
   file:
     class: logging.handlers.RotatingFileHandler
-    level: INFO
+    level: DEBUG
     formatter: verbose
     backupCount: 0
     mode: w
     filename: 
 root: 
-  level: INFO
+  level: DEBUG
   handlers:
-    #- console
+    - console
     - file
