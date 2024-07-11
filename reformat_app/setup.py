@@ -85,7 +85,7 @@ def setup_errorlog(log_format="%(asctime)s.%(msecs)03d | %(module)10s | %(leveln
     file_handler.setLevel(logging.ERROR)
     errorlog.addHandler(file_handler)
     errorlog.setLevel(logging.INFO)
-    
+    print(errorlog)
     return errorlog
 
 def clear_log() -> None:
