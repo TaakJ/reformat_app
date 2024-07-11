@@ -19,13 +19,13 @@ class RunModule:
             setattr(self, key, value)
             
         self.date = datetime.now()
-        self.bk_date = self.date - timedelta(days=self.clear)
+        self.bk_date = self.date - timedelta(days=2)
         self.time = time.strftime("%H")
         
         ## initial setup / clear file
+        clear_log()
         setup_folder()
         setup_log()
-        # clear_log(self.bk_date)
         
         self.loop = asyncio.new_event_loop()
         asyncio.set_event_loop(self.loop)

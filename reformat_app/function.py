@@ -119,7 +119,6 @@ class BackupAndClear:
             with zipfile.ZipFile(zip_name, "w", zipfile.ZIP_DEFLATED) as zf:
                 for file in [file for file in Path(date_dir).rglob("*") if file.exists()]:
                     zf.write(file, file.relative_to(self.backup_dir))
-
             shutil.rmtree(date_dir)
             
             state = "succeed"
@@ -150,10 +149,9 @@ class BackupAndClear:
     def clear_backup(self):
         try:
             backup_dir = join(Folder.BACKUP, self.module)
-            bk_date = self.bk_date.strftime("%Y%m%d")
             
             for date_dir in os.listdir(backup_dir):
-                if date_dir <= f'{bk_date}.zip':
+                if date_dir <= f'{self.bk_date.strftime("%Y%m%d")}.zip':
                     zip_dir = join(backup_dir, date_dir)
                     os.remove(zip_dir)
                     

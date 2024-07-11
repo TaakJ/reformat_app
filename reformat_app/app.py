@@ -133,18 +133,18 @@ class setup_app(QWidget):
         self.tmp_checked.setChecked(True)
         hbox2.addWidget(self.tmp_checked)
 
-        hbox3 = QHBoxLayout()
-        self.clear_file = QLineEdit()
-        self.clear_file.setFixedSize(55, 30)
-        self.clear_file.setText(str(7))
-        hbox3.addWidget(QLabel("Clear file after:  "))
-        hbox3.addWidget(self.clear_file)
-        hbox3.addWidget(QLabel(" day"))
+        # hbox3 = QHBoxLayout()
+        # self.clear_file = QLineEdit()
+        # self.clear_file.setFixedSize(55, 30)
+        # self.clear_file.setText(str(7))
+        # hbox3.addWidget(QLabel("Clear file after:  "))
+        # hbox3.addWidget(self.clear_file)
+        # hbox3.addWidget(QLabel(" day"))
 
         vbox = QVBoxLayout()
         vbox.addLayout(hbox1)
         vbox.addLayout(hbox2)
-        vbox.addLayout(hbox3)
+        # vbox.addLayout(hbox3)
 
         self.groupbox2.setLayout(vbox)
         self.radio1.clicked.connect(self.task_select_mode)
@@ -325,19 +325,21 @@ class setup_app(QWidget):
                 "batch_date": self.calendar.calendarWidget().selectedDate().toPyDate(),
                 "store_tmp": self.tmp_checked.isChecked(),
                 "write_mode": self.mode,
-                "clear": int(self.clear_file.text())
+                #"clear": int(self.clear_file.text())
             })
+        
+        print(PARAMS)
 
-        for module in self.module:
-            if module in self.filename.keys() and self.mode == "new":
-                suffix = PARAMS["batch_date"].strftime("%Y%m%d")
-                CONFIG[module]["output_file"] = f"{Path(self.filename[module]).stem}_{suffix}.csv"
-            else:
-                CONFIG[module]["output_file"] = self.filename[module]
+        # for module in self.module:
+        #     if module in self.filename.keys() and self.mode == "new":
+        #         suffix = PARAMS["batch_date"].strftime("%Y%m%d")
+        #         CONFIG[module]["output_file"] = f"{Path(self.filename[module]).stem}_{suffix}.csv"
+        #     else:
+        #         CONFIG[module]["output_file"] = self.filename[module]
 
-        if not self.__thread.isRunning():
-            self.__thread = self.__get_thread()
-            self.__thread.start()
+        # if not self.__thread.isRunning():
+        #     self.__thread = self.__get_thread()
+        #     self.__thread.start()
 
     def __get_thread(self):
         thread = QThread()

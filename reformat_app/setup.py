@@ -87,9 +87,12 @@ def setup_errorlog(log_format="%(asctime)s.%(msecs)03d | %(module)10s | %(leveln
     errorlog.setLevel(logging.INFO)
     return errorlog
 
-def clear_log(date) -> None:
+def clear_log() -> None:
+    
+    date = datetime.now().strftime("%Y%m%d")
+    
     for date_dir in os.listdir(Folder.LOG):
-        if date_dir <= date.strftime("%Y%m%d"):
+        if date_dir < date:
             log_dir = join(Folder.LOG, date_dir)
             shutil.rmtree(log_dir)
             
@@ -147,13 +150,13 @@ class SetupParser:
                 ArgumentParams.ISFLAG: True,
                 ArgumentParams.DEFAULT: "overwrite",
             },
-            {
-                ArgumentParams.SHORT_NAME: "-c",
-                ArgumentParams.NAME: "--clear",
-                ArgumentParams.DESCRIPTION: "-c: clear",
-                ArgumentParams.REQUIRED: False,
-                ArgumentParams.DEFAULT: 2,
-            },
+            # {
+            #     ArgumentParams.SHORT_NAME: "-c",
+            #     ArgumentParams.NAME: "--clear",
+            #     ArgumentParams.DESCRIPTION: "-c: clear",
+            #     ArgumentParams.REQUIRED: False,
+            #     ArgumentParams.DEFAULT: 2,
+            # },
         ]
 
     def set_arguments(self) -> None:
