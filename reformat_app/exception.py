@@ -17,11 +17,11 @@ class CustomException(Exception):
         for i in range(len(self.err)):
             module      = self.err[i]["module"]
             full_input  = self.err[i].get("input_dir")
-            full_target = self.err[i].get("full_target")
+            # full_target = self.err[i].get("full_target")
             status      = self.err[i]["status"]
             func        = self.err[i]["function"]
             err         = self.err[i].get("err")
 
             if err is not None:
-                err_msg = f'Module: "{module}"; File: "{full_target}"; Function: "{func}"; ERROR: {err}'
+                err_msg = f'Module: "{module}"; File: "{full_input}"; Function: "{func}"; ERROR: {err}'
                 yield err_msg

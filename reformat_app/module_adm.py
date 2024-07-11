@@ -36,7 +36,7 @@ class ModuleADM(CallFunction):
             logging.error('See Error Details: log_error.log')
 
             logger = setup_errorlog(log_name=__name__)
-            
+            print(logger)
             while True:
                 try:
                     logger.exception(next(err))
