@@ -233,7 +233,7 @@ class setup_app(QWidget):
         vbox1.addWidget(self.time_label)
 
         hbox = QHBoxLayout()
-        self.status_log = QPushButton("success")
+        self.status_log = QPushButton("status")
         self.status_log.setFixedSize(110, 40)
         self.status_log.setHidden(True)
         self.error_log = QPushButton("error")
