@@ -1,3 +1,5 @@
+import glob
+import os
 import sys
 from pathlib import Path
 from os.path import join
@@ -305,16 +307,16 @@ class setup_app(QWidget):
             default_dir.setText(dir_name)
 
     def task_open_log(self, event):
+        
         date = datetime.now().strftime("%Y%m%d")
-        print(Folder.LOG)
-        
         log_dir = join(Folder.LOG, date)
-        if event == 1:
-            open_log = join(log_dir, "_success.log")
-        else:
-            open_log = join(log_dir, "log_error.log")
         
-        webbrowser.open(open_log)
+        if event == 1:
+            list_of_files = glob.glob(f'{log_dir}/log_status_*') 
+            log_file = max(list_of_files, key=os.path.getctime)
+        else:
+            log_file = join(log_dir, "log_error.log")
+        webbrowser.open(log_file)
 
     def task_run_job(self):
         self.progress.reset()
