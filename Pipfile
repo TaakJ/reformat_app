@@ -38,7 +38,10 @@ xlrd = "==1.2.0"
 xlsxwriter = "==3.1.9"
 schedule = "*"
 setuptools = "==66.1.1"
-pyqt6-fluent-widgets = "*"
+pyqt6-fluent-widgets = "==1.5.8"
+darkdetect = "==0.8.0"
+pyqt6-frameless-window = "==0.3.9"
+pywin32 = "==306"
 
 [dev-packages]
 
