@@ -1,7 +1,7 @@
 from setuptools import setup, find_packages
 
 setup(
-    name="reformat_app",
+    name="uob_reformat",
     version="0.0.1",
     description="build package reformat uob app",
     long_description=open('README.md').read() + '\n\n' + open('CHANGELOG.txt').read(),
@@ -18,10 +18,10 @@ setup(
     keywords='',
     packages=find_packages(),
     python_requires=">=3.9",
-    install_requires=[r.strip() for r in open("requirements.txt").readlines()],
+    # install_requires=[r.strip() for r in open("requirements.txt").readlines()],
     entry_points={
         "console_scripts":[
-            "reformat-app = reformat_app:main",
+            "uob-reformat = uob_reformat:main",
         ]
     },
 )

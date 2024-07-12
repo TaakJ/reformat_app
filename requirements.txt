@@ -7,6 +7,7 @@ click-didyoumean==0.3.0
 click-plugins==1.1.1
 click-repl==0.3.0
 colorama==0.4.6
+darkdetect==0.8.0
 et-xmlfile==1.1.0
 Jinja2==3.1.3
 kombu==5.3.5
@@ -16,12 +17,16 @@ openpyxl==3.1.2
 pandas==2.2.0
 prompt-toolkit==3.0.43
 PyQt6==6.7.0
+PyQt6-Fluent-Widgets==1.5.8
+PyQt6-Frameless-Window==0.3.9
 PyQt6-Qt6==6.7.0
 PyQt6-sip==13.6.0
 python-dateutil==2.8.2
 pytz==2024.1
+pywin32==306
 PyYAML==6.0.1
 qt-material==2.14
+reformat-app @ file:///D:/Document/Coding/Project/reformat_app/dist/reformat_app-0.0.1-py3-none-any.whl#sha256=e2665658de4e49d10fe22d7ad1ccae4c14d6a92bf4fe301e1fd1aa6943076c41
 schedule==1.2.2
 shiboken6==6.7.0
 six==1.16.0
