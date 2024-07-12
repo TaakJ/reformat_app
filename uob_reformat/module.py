@@ -20,7 +20,6 @@ class Convert2File:
         
         logging.info("Check Source file")
         
-        # for record in self.logging:
         for input_dir in self.full_input:
             status = "not_found"
             if glob.glob(input_dir, recursive=True):
