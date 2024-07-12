@@ -1,3 +1,3 @@
-from reformat_app.app import main
+from uob_reformat.app import main
 
 main()
