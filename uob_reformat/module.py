@@ -403,7 +403,7 @@ class Convert2File:
                     skipinitialspace=True,
                     delimiter=",",
                     quotechar='"',
-                    quoting=csv.QUOTE_NONE,
+                    quoting=csv.QUOTE_ALL,
                 )
 
                 header = next(csv_reader)
@@ -483,7 +483,7 @@ class Convert2File:
                     skipinitialspace=True,
                     delimiter=",",
                     quotechar='"',
-                    quoting=csv.QUOTE_NONE,
+                    quoting=csv.QUOTE_ALL,
                 )
                 rows = {idx: values for idx, values in enumerate(csvin, 2)}
 
@@ -504,7 +504,7 @@ class Convert2File:
                     csvin.fieldnames,
                     delimiter=",",
                     quotechar='"',
-                    quoting=csv.QUOTE_NONE,
+                    quoting=csv.QUOTE_ALL,
                 )
                 csvout.writeheader()
 
