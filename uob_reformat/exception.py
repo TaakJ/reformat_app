@@ -30,7 +30,6 @@ class CustomException(Exception):
         
         log_name = log_name + "." + self.time
         filename = Folder.LOG + join(self.date, file)
-        
         if not os.path.exists(os.path.dirname(filename)):
             try:
                 os.makedirs(os.path.dirname(filename))
