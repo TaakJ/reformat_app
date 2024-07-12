@@ -34,5 +34,6 @@ typing_extensions==4.9.0
 tzdata==2024.1
 vine==5.1.0
 wcwidth==0.2.13
+wheel==0.43.0
 xlrd==1.2.0
 XlsxWriter==3.1.9
