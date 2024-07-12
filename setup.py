@@ -21,7 +21,7 @@ setup(
     # install_requires=[r.strip() for r in open("requirements.txt").readlines()],
     entry_points={
         "console_scripts":[
-            "uob-reformat = uob_reformat:main",
+            "uob_reformat = uob_reformat:main",
         ]
     },
 )
