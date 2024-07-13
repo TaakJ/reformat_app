@@ -533,7 +533,7 @@ class Convert2File:
             
             with open(target_name, mode="a", newline="\n") as writer:
                 writer.write('"{}","{}"'.format("TotalCount", len(rows)))
-                logging.info(f'Total count: ({idx}) row')
+                logging.info(f'Total count: ({len(rows)}) row')
                 writer.close()
             
         except Exception as err:
