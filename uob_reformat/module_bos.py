@@ -19,7 +19,7 @@ class ModuleBOS(CallFunction):
         result = {"module": self.module, "task": "Completed"}
         try:
             ## set params from confog file
-            self._full_input = ""
+            self._full_input = "x"
             self.collect_params()
             
             ## backup file
