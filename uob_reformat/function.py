@@ -7,6 +7,7 @@ import zipfile
 import logging
 from pathlib import Path
 from os.path import join
+from itertools import chain
 from .module import Convert2File
 from .setup import Folder, CONFIG
 from .exception import CustomException
@@ -46,7 +47,7 @@ class CollectParams(ABC):
             else:
                 continue
             
-        self._full_input = file + add_file
+        self._full_input =  list(chain(file, add_file))
         return self._full_input
     
     def collect_params(self) -> None:
