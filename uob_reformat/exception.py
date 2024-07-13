@@ -24,15 +24,6 @@ class CustomException(Exception):
     def __next__(self):
         return next(self.err_msg)
     
-    def log_newline(self, how_many_lines=1) -> None:
-        self.removeHandler(self.file_handler)
-        self.addHandler(self.blank_handler)
-        for i in range(how_many_lines):
-            self.info('')
-            
-        self.removeHandler(self.blank_handler)
-        self.addHandler(self.file_handler)
-    
     def setup_errorlog(self,
         log_format="%(asctime)s.%(msecs)03d | %(module)10s | %(levelname)8s | %(funcName)20s | %(message)s",
         log_name="", 
@@ -51,18 +42,11 @@ class CustomException(Exception):
         formatter = logging.Formatter(fmt=log_format,datefmt="%Y/%m/%d %H:%M:%S")
         file_handler.setFormatter(formatter)
         
-        blank_handler = logging.FileHandler(filename, mode="a")
-        blank_handler.setLevel(logging.DEBUG)
-        blank_handler.setFormatter(logging.Formatter(fmt=''))
-        
         logger = logging.getLogger(log_name)
         logger.setLevel(logging.INFO)
         logger.addHandler(file_handler)
             
         logger.file_handler = file_handler
-        logger.blank_handler = blank_handler
-        logger.newline = types.MethodType(self.log_newline, logger)
-        
         return logger
 
     def generate_error(self) -> any:
