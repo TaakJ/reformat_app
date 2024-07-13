@@ -47,7 +47,7 @@ def setup_config() -> dict:
 def setup_log() -> None:
     config_yaml = None
     date = datetime.now().strftime("%Y%m%d")
-    _time = time.strftime("%H%M")
+    _time = time.strftime("%H%M%S")
     file = f"log_status_T{_time}.log"
 
     filename = Folder.LOG + join(date, file)
