@@ -93,7 +93,7 @@ class ModuleIIC(CallFunction):
                 "Country",
             ],
             [
-                "MOCK1",
+                "IIC",
                 "2",
                 "3",
                 "4",
@@ -110,7 +110,7 @@ class ModuleIIC(CallFunction):
                 "TH",
             ],
             [
-                "MOCK2",
+                "IIC",
                 "16",
                 "17",
                 "18",

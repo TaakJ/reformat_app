@@ -107,7 +107,7 @@ class ModuleDOC(CallFunction):
                 "Country",
             ],
             [
-                "MOCK1",
+                "DOC",
                 "2",
                 "3",
                 "4",
@@ -124,7 +124,7 @@ class ModuleDOC(CallFunction):
                 "TH",
             ],
             [
-                "MOCK2",
+                "DOC",
                 "16",
                 "17",
                 "18",

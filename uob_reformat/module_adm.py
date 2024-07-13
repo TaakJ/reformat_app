@@ -90,7 +90,7 @@ class ModuleADM(CallFunction):
                 "Country",
             ],
             [
-                "MOCK1",
+                "ADM",
                 "2",
                 "3",
                 "4",
@@ -107,7 +107,7 @@ class ModuleADM(CallFunction):
                 "TH",
             ],
             [
-                "MOCK2",
+                "ADM",
                 "16",
                 "17",
                 "18",

@@ -94,7 +94,7 @@ class ModuleCUM(CallFunction):
                 "Country",
             ],
             [
-                "MOCK1",
+                "CUM",
                 "2",
                 "3",
                 "4",

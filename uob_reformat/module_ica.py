@@ -92,7 +92,7 @@ class ModuleICA(CallFunction):
                 "Country",
             ],
             [
-                "MOCK1",
+                "ICA",
                 "2",
                 "3",
                 "4",
@@ -109,7 +109,7 @@ class ModuleICA(CallFunction):
                 "TH",
             ],
             [
-                "MOCK2",
+                "ICA",
                 "16",
                 "17",
                 "18",

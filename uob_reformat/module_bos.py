@@ -93,7 +93,7 @@ class ModuleBOS(CallFunction):
                 "Country",
             ],
             [
-                "MOCK1",
+                "BOS",
                 "2",
                 "3",
                 "4",
@@ -110,7 +110,7 @@ class ModuleBOS(CallFunction):
                 "TH",
             ],
             [
-                "MOCK2",
+                "BOS",
                 "16",
                 "17",
                 "18",

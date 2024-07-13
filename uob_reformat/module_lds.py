@@ -107,7 +107,7 @@ class ModuleLDS(CallFunction):
                 "Country",
             ],
             [
-                "MOCK1",
+                "LDS",
                 "2",
                 "3",
                 "4",
@@ -124,7 +124,7 @@ class ModuleLDS(CallFunction):
                 "TH",
             ],
             [
-                "MOCK2",
+                "LDS",
                 "16",
                 "17",
                 "18",

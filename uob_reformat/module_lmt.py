@@ -92,7 +92,7 @@ class ModuleLMT(CallFunction):
                 "Country",
             ],
             [
-                "MOCK1",
+                "LMT",
                 "2",
                 "3",
                 "4",
@@ -109,7 +109,7 @@ class ModuleLMT(CallFunction):
                 "TH",
             ],
             [
-                "MOCK2",
+                "LMT",
                 "16",
                 "17",
                 "18",

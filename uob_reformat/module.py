@@ -510,7 +510,9 @@ class Convert2File:
                             continue
                     else:
                         rows[idx].update(data[idx])
-            
+                    
+                rows[max(rows) + 1] = {"ApplicationCode":  "TotalCount", "AccountOwner": len(rows)}
+                
             with open(target_name, "w", newline="\n") as writer:
                 csvout = csv.DictWriter(
                     writer,
@@ -521,16 +523,17 @@ class Convert2File:
                 )
                 csvout.writeheader()
             
-                for i, idx in enumerate(rows,1):
+                for idx in rows:
                     if idx not in self.remove_rows:
-                        rows[idx].update({"CreateDate": rows[idx]["CreateDate"].strftime("%Y%m%d%H%M%S"),
-                                        "LastLogin": rows[idx]["LastLogin"].strftime("%Y%m%d%H%M%S"),
-                                        "LastUpdatedDate": rows[idx]["LastUpdatedDate"].strftime("%Y%m%d%H%M%S"),})
+                        rows[idx].update({
+                            "CreateDate": rows[idx]["CreateDate"].strftime("%Y%m%d%H%M%S"),
+                            "LastLogin": rows[idx]["LastLogin"].strftime("%Y%m%d%H%M%S"),
+                            "LastUpdatedDate": rows[idx]["LastUpdatedDate"].strftime("%Y%m%d%H%M%S"),
+                            })
                         csvout.writerow(rows[idx])
-                print(i)
-                # csvout.writerow({"TotalCount": max_row})
-                writer.closed
-
+                writer.close()
+                
+            
         except Exception as err:
             raise Exception(err)
 
