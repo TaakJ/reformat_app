@@ -510,9 +510,7 @@ class Convert2File:
                             continue
                     else:
                         rows[idx].update(data[idx])
-                    
-                rows[max(rows) + 1] = {"ApplicationCode":  "TotalCount", "AccountOwner": len(rows)}
-                
+            
             with open(target_name, "w", newline="\n") as writer:
                 csvout = csv.DictWriter(
                     writer,
@@ -532,7 +530,11 @@ class Convert2File:
                             })
                         csvout.writerow(rows[idx])
                 writer.close()
-                
+            
+            with open(target_name, mode="a", newline="\n") as writer:
+                writer.write('"{}","{}"'.format("TotalCount", len(rows)))
+                logging.info(f'Total count: ({idx}) row')
+                writer.close()
             
         except Exception as err:
             raise Exception(err)
