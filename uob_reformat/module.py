@@ -9,6 +9,7 @@ import numpy as np
 import openpyxl
 import chardet
 from io import StringIO
+from itertools import tee, chain
 import xlrd
 import csv
 from .exception import CustomException
@@ -405,10 +406,15 @@ class Convert2File:
                     quotechar='"',
                     quoting=csv.QUOTE_ALL,
                 )
-
+                
                 header = next(csv_reader)
-                for row in csv_reader:
-                    data.append(row)
+                
+                ## skip last row (total row)
+                last_row, row = tee(csv_reader)
+                next(chain(last_row, range(1)))
+                for _ in last_row:
+                    data.append(next(row))
+                    
             target_df = pd.DataFrame(data, columns=header)
 
         except FileNotFoundError:
@@ -485,8 +491,15 @@ class Convert2File:
                     quotechar='"',
                     quoting=csv.QUOTE_ALL,
                 )
-                rows = {idx: values for idx, values in enumerate(csvin, 2)}
-
+                
+                ## skip last row (total row)
+                last_row, row = tee(csvin)
+                next(chain(last_row, range(1)))
+            
+                rows = {}
+                for idx , _ in enumerate(last_row, 2):
+                    rows.update({idx: next(row)})
+                
                 for idx, value in data.items():
                     if value.get("remark") is not None:
                         if idx in self.change_rows.keys():
@@ -497,24 +510,26 @@ class Convert2File:
                             continue
                     else:
                         rows[idx].update(data[idx])
-
-            with open(target_name, "w", newline="\n") as writer:
-                csvout = csv.DictWriter(
-                    writer,
-                    csvin.fieldnames,
-                    delimiter=",",
-                    quotechar='"',
-                    quoting=csv.QUOTE_ALL,
-                )
-                csvout.writeheader()
-
-                for idx in rows:
-                    if idx not in self.remove_rows:
-                        rows[idx].update({"CreateDate": rows[idx]["CreateDate"].strftime("%Y%m%d%H%M%S"),
-                                        "LastLogin": rows[idx]["LastLogin"].strftime("%Y%m%d%H%M%S"),
-                                        "LastUpdatedDate": rows[idx]["LastUpdatedDate"].strftime("%Y%m%d%H%M%S"),})
-                        csvout.writerow(rows[idx])
-            writer.closed
+                        
+            # with open(target_name, "w", newline="\n") as writer:
+            #     csvout = csv.DictWriter(
+            #         writer,
+            #         csvin.fieldnames,
+            #         delimiter=",",
+            #         quotechar='"',
+            #         quoting=csv.QUOTE_ALL,
+            #     )
+            #     csvout.writeheader()
+            
+            # max_row = max(rows, default=0)
+            
+            # for idx in rows:
+            #     if idx not in self.remove_rows:
+            #         rows[idx].update({"CreateDate": rows[idx]["CreateDate"].strftime("%Y%m%d%H%M%S"),
+            #                         "LastLogin": rows[idx]["LastLogin"].strftime("%Y%m%d%H%M%S"),
+            #                         "LastUpdatedDate": rows[idx]["LastUpdatedDate"].strftime("%Y%m%d%H%M%S"),})
+            #             # csvout.writerow(rows[idx])
+            # #writer.closed
 
         except Exception as err:
             raise Exception(err)
