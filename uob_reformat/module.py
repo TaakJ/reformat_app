@@ -503,7 +503,6 @@ class Convert2File:
                 for idx, value in data.items():
                     if value.get("remark") is not None:
                         if idx in self.change_rows.keys():
-                            
                             logging.info(f'{value["remark"]} Rows: ({idx}) in Target file Updating records: {self.change_rows[idx]}')
                             value.popitem()
                             rows.update({idx: value})
