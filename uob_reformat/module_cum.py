@@ -111,7 +111,7 @@ class ModuleCUM(CallFunction):
                 "TH",
             ],
             [
-                "MOCK2",
+                "CUM",
                 "16",
                 "17",
                 "18",
