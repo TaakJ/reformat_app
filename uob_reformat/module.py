@@ -510,26 +510,26 @@ class Convert2File:
                             continue
                     else:
                         rows[idx].update(data[idx])
-                        
-            # with open(target_name, "w", newline="\n") as writer:
-            #     csvout = csv.DictWriter(
-            #         writer,
-            #         csvin.fieldnames,
-            #         delimiter=",",
-            #         quotechar='"',
-            #         quoting=csv.QUOTE_ALL,
-            #     )
-            #     csvout.writeheader()
             
-            # max_row = max(rows, default=0)
+            with open(target_name, "w", newline="\n") as writer:
+                csvout = csv.DictWriter(
+                    writer,
+                    csvin.fieldnames,
+                    delimiter=",",
+                    quotechar='"',
+                    quoting=csv.QUOTE_ALL,
+                )
+                csvout.writeheader()
             
-            # for idx in rows:
-            #     if idx not in self.remove_rows:
-            #         rows[idx].update({"CreateDate": rows[idx]["CreateDate"].strftime("%Y%m%d%H%M%S"),
-            #                         "LastLogin": rows[idx]["LastLogin"].strftime("%Y%m%d%H%M%S"),
-            #                         "LastUpdatedDate": rows[idx]["LastUpdatedDate"].strftime("%Y%m%d%H%M%S"),})
-            #             # csvout.writerow(rows[idx])
-            # #writer.closed
+                for i, idx in enumerate(rows,1):
+                    if idx not in self.remove_rows:
+                        rows[idx].update({"CreateDate": rows[idx]["CreateDate"].strftime("%Y%m%d%H%M%S"),
+                                        "LastLogin": rows[idx]["LastLogin"].strftime("%Y%m%d%H%M%S"),
+                                        "LastUpdatedDate": rows[idx]["LastUpdatedDate"].strftime("%Y%m%d%H%M%S"),})
+                        csvout.writerow(rows[idx])
+                print(i)
+                # csvout.writerow({"TotalCount": max_row})
+                writer.closed
 
         except Exception as err:
             raise Exception(err)
