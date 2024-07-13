@@ -12,7 +12,7 @@ class ModuleICA(CallFunction):
     def logSetter(self, log: list) -> None:
         self._log = log
 
-    async def step_run(self) -> dict:
+    async def run_process(self) -> dict:
 
         logging.info(f'Module:"{self.module}"; Manual: "{self.manual}"; Run Date: "{self.batch_date}"; Store Tmp: "{self.store_tmp}"; Write Mode: "{self.write_mode}";')
 
@@ -25,7 +25,7 @@ class ModuleICA(CallFunction):
             ## backup file
             # self.backup()
             
-            ## run_process
+            ## step run function
             await self.check_source_file()
             await self.separate_data_file()
             await self.mock_data()
