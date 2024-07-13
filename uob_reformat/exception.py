@@ -8,7 +8,7 @@ from .setup import Folder
 
 class CustomException(Exception):
     
-    def __init__(self,*args: tuple,**kwargs: dict,):
+    def __init__(self,*args: tuple,**kwargs: dict,) -> None:
         self.__dict__.update(kwargs)
 
         for key, value in self.__dict__.items():
@@ -24,14 +24,12 @@ class CustomException(Exception):
     def __next__(self):
         return next(self.err_msg)
     
-    def log_newline(self, how_many_lines=1):
-        # Switch handler, output a blank line
+    def log_newline(self, how_many_lines=1) -> None:
         self.removeHandler(self.file_handler)
         self.addHandler(self.blank_handler)
         for i in range(how_many_lines):
             self.info('')
-
-        # Switch back
+            
         self.removeHandler(self.blank_handler)
         self.addHandler(self.file_handler)
     
@@ -48,23 +46,19 @@ class CustomException(Exception):
             except OSError:
                 pass
         
-        ## Create file error handler
         file_handler = logging.FileHandler(filename, mode="a")
         file_handler.setLevel(logging.ERROR)
         formatter = logging.Formatter(fmt=log_format,datefmt="%Y/%m/%d %H:%M:%S")
         file_handler.setFormatter(formatter)
         
-        ## Create a "blank line" handler
         blank_handler = logging.FileHandler(filename, mode="a")
         blank_handler.setLevel(logging.DEBUG)
         blank_handler.setFormatter(logging.Formatter(fmt=''))
         
-        ## Create a logger, with the previously-defined handler
         logger = logging.getLogger(log_name)
         logger.setLevel(logging.INFO)
         logger.addHandler(file_handler)
             
-        ## Save some data and add a method to logger object
         logger.file_handler = file_handler
         logger.blank_handler = blank_handler
         logger.newline = types.MethodType(self.log_newline, logger)

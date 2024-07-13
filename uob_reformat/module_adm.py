@@ -6,7 +6,7 @@ from .exception import CustomException
 
 class ModuleADM(CallFunction):
     
-    def __init__(self, params: any):
+    def __init__(self, params: any) -> None:
         for key, value in vars(params).items():
             setattr(self, key, value)
             
@@ -41,6 +41,7 @@ class ModuleADM(CallFunction):
             while True:
                 try:
                     logger.exception(next(err))
+                    logger.newline()
                 except StopIteration:
                     break
             

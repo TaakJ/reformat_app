@@ -5,7 +5,7 @@ from .exception import CustomException
 
 class ModuleICA(CallFunction):
 
-    def __init__(self, params: any):
+    def __init__(self, params: any) -> None:
         for key, value in vars(params).items():
             setattr(self, key, value)
             

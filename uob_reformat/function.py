@@ -95,7 +95,7 @@ class CollectParams(ABC):
     
 class BackupAndClear:
     
-    def backup(self):
+    def backup(self) -> None:
         
         self.clear_backup()
         
@@ -112,7 +112,7 @@ class BackupAndClear:
         
         self.genarate_backup_file()
         
-    def backup_zip_file(self, date_dir):
+    def backup_zip_file(self, date_dir) -> None:
         
         if date_dir < self.date.strftime("%Y%m%d"):
             date_dir = join(self.backup_dir, date_dir)
@@ -126,7 +126,7 @@ class BackupAndClear:
             state = "succeed"
             logging.info(f'Zip file {zip_name} status: {state}' )
     
-    def genarate_backup_file(self):
+    def genarate_backup_file(self) -> None:
         
         if glob.glob(self.full_target, recursive=True):
             date_dir = join(self.backup_dir, self.date.strftime("%Y%m%d"))
@@ -148,7 +148,7 @@ class BackupAndClear:
             
             logging.info(f'Backup file from {self.full_target} to {full_backup} status: {status}')
             
-    def clear_backup(self):
+    def clear_backup(self) -> None:
         try:
             backup_dir = join(Folder.BACKUP, self.module)
             
@@ -163,7 +163,7 @@ class BackupAndClear:
         except OSError:
             pass
                 
-    def clear_tmp(self):
+    def clear_tmp(self) -> None:
         try:
             tmp_dir = join(Folder.TMP, self.module)
             
