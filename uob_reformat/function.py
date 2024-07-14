@@ -153,7 +153,7 @@ class BackupAndClear:
                 shutil.copy2(self.full_target, full_backup)
                 status = "succeed"
                 
-                logging.info(f'Backup file to {full_backup}')
+                logging.info(f'Backup file from {self.full_target} to {full_backup}')
             
             except Exception:
                 pass
