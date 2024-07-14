@@ -284,7 +284,7 @@ class Convert2File:
                             record.update({data[0]: change_data[1][row]})
                             df.loc[row, data[0]] = change_data[1][row]
                             df.loc[row, "remark"] = "Insert"
-
+                            
                     if record != {}:
                         self.update_rows[idx] = format_record(record)
                 else:
