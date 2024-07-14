@@ -132,83 +132,34 @@ class Convert2File:
 
         return df
     
-    def data_change_capture1(self, df, change_df):
-        print(df)
-        print()
-        print(change_df)
-
-    def data_change_capture(self, df: pd.DataFrame, change_df: pd.DataFrame) -> dict:
-
-        logging.info("Data Change Capture")
-        self.change_rows = {}
-        self.remove_rows = []
-
+    def compare_data(self, df, change_df) -> pd.DataFrame:
+        
+        logging.info("Compare data")
+        
         status = "failed"
-        self.logging[-1].update({"function": "data_change_capture", "status": status})
-
-        ## set format record
-        def format_record(record):
-            return "\n".join("{!r} => {!r};".format(columns, values) for columns, values in record.items())
-
-        if len(df.index) > len(change_df.index):
-            self.remove_rows = [idx for idx in list(df.index) if idx not in list(change_df.index)]
-
+        self.logging[-1].update({"function": "compare_data", "status": status})
+        
         try:
-            ## merge index.
+            ## Merge index.
             merge_index = np.union1d(df.index, change_df.index)
 
-            ## as starter dataframe for compare
-            df = df.reindex(index=merge_index, columns=df.columns).iloc[:, :-1]
+            ## As starter dataframe for compare
+            df = df.reindex(index=merge_index, columns=df.columns)
 
-            ## change data / new data
-            change_df = change_df.reindex(index=merge_index, columns=change_df.columns).iloc[:, :-1]
-
-            ## compare data
-            df["count"] = pd.DataFrame(np.where(df.ne(change_df), True, df), index=df.index, columns=df.columns).apply(lambda x: (x == True).sum(), axis=1)
-
-            i = 0
-            for idx, row in enumerate(merge_index, 2):
-                if row not in self.remove_rows:
-                    record = {}
-                    for data, change_data in zip(df.items(), change_df.items()):
-                        ## No Change
-                        if df.loc[row, "count"] != 15:
-                            if df.loc[row, "count"] < 1:
-                                df.loc[row, data[0]] = data[1][row]
-                                df.loc[row, "remark"] = "No_change"
-                            else:
-                                ## Update
-                                if data[1][row] != change_data[1][row]:
-                                    record.update({data[0]: change_data[1][row]})
-                                df.loc[row, data[0]] = change_data[1][row]
-                                df.loc[row, "remark"] = "Update"
-                        else:
-                            ## Insert
-                            record.update({data[0]: change_data[1][row]})
-                            df.loc[row, data[0]] = change_data[1][row]
-                            df.loc[row, "remark"] = "Insert"
-
-                    if record != {}:
-                        self.change_rows[idx] = format_record(record)
-                else:
-                    ## Remove
-                    self.remove_rows[i] = idx
-                    df.loc[row, "remark"] = "Remove"
-                    i += 1
-
-            ## set dataframe.
-            df = df.drop(["count"], axis=1)
-            rows = 2
-            df.index += rows
-            data_dict = df.to_dict(orient="index")
+            ## Change data / new data
+            change_df = change_df.reindex(index=merge_index, columns=change_df.columns)
+            
+            ## Compare data
+            df["count"] = pd.DataFrame(np.where(df.ne(change_df), True, df), index=df.index, columns=df.columns)\
+                .apply(lambda x: (x == True).sum(), axis=1)
 
         except Exception as err:
             raise Exception(err)
-
+        
         status = "succeed"
         self.logging[-1].update({"status": status})
 
-        return data_dict
+        return df
 
     async def genarate_tmp_file(self) -> None:
         
@@ -241,11 +192,11 @@ class Convert2File:
                         tmp_df = pd.DataFrame(data, columns=columns)
                         tmp_df = self.initial_data_type(tmp_df)
 
-                        ## validate data change row by row
-                        data_dict = self.data_change_capture(tmp_df, change_df)
+                        # ## validate data change row by row
+                        # data_dict = self.data_change_capture(tmp_df, change_df)
 
-                        ## write tmp file
-                        status = self.write_worksheet(data_dict)
+                        # ## write tmp file
+                        # status = self.write_worksheet(data_dict)
 
                     except Exception as err:
                         raise Exception(err)
@@ -374,7 +325,14 @@ class Convert2File:
                         change_df = self.initial_data_type(change_df)
 
                         ## read csv file
-                        target_df = self.read_csv()
+                        try:
+                            target_df = self.read_csv()
+                            
+                        except FileNotFoundError:
+                            ## move from template file to target file
+                            template_name = join(Folder.TEMPLATE, "Application Data Requirements.xlsx")
+                            target_df = pd.read_excel(template_name)
+                            target_df.to_csv(self.full_target, index=None, header=True, sep=",")
 
                         ## optimize data
                         data = self.optimize_data(target_df, change_df)
@@ -393,41 +351,33 @@ class Convert2File:
 
         if "err" in record:
             raise CustomException(err=self.logging)
-
-    def read_csv(self) -> pd.DataFrame:
-
-        logging.info(f"Read Target file: {self.full_target}")
-
+        
+    def read_csv_file(self, file: str) -> pd.DataFrame:
+        
+        logging.info(f"Read csv file: {file}")
+        
         status = "failed"
         self.logging[-1].update({"input_dir": self.full_target, "function": "read_csv", "status": status})
-
-        try:
-            data = []
-            with open(self.full_target, "r", newline="\n") as reader:
-                csv_reader = csv.reader(
-                    reader,
-                    skipinitialspace=True,
-                    delimiter=",",
-                    quotechar='"',
-                    quoting=csv.QUOTE_ALL,
-                )
+        
+        data = []
+        with open(file, "r", newline="\n") as reader:
+            csv_reader = csv.reader(
+                reader,
+                skipinitialspace=True,
+                delimiter=",",
+                quotechar='"',
+                quoting=csv.QUOTE_ALL)
+            
+            header = next(csv_reader)
                 
-                header = next(csv_reader)
-                
-                ## skip last row (total row)
-                last_row, row = tee(csv_reader)
-                next(chain(last_row, range(1)))
-                for _ in last_row:
-                    data.append(next(row))
+            ## skip last row (total row)
+            last_row, row = tee(csv_reader)
+            next(chain(last_row, range(1)))
+            for _ in last_row:
+                data.append(next(row))
                     
-            target_df = pd.DataFrame(data, columns=header)
-
-        except FileNotFoundError:
-            ## move from template file to target file
-            template_name = join(Folder.TEMPLATE, "Application Data Requirements.xlsx")
-            target_df = pd.read_excel(template_name)
-            target_df.to_csv(self.full_target, index=None, header=True, sep=",")
-
+        target_df = pd.DataFrame(data, columns=header)
+        
         status = "succeed"
         self.logging[-1].update({"status": status})
 
