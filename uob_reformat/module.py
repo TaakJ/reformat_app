@@ -127,15 +127,12 @@ class Convert2File:
 
                         ## validate data change row by row
                         cmp_df = self.compare_data(tmp_df, change_df)
-                        self.data_change_capture(cmp_df)
-                
-                        # data_dict = self.data_change_capture(tmp_df, change_df)
-
-                        # ## write tmp file
-                        # status = self.write_worksheet(data_dict)
+                        data_capture = self.data_change_capture(cmp_df)
+                        
+                        ## write tmp file
+                        status = self.write_worksheet(data_capture)
 
                     except Exception as err:
-                        print(err)
                         raise Exception(err)
 
                     record.update({"function": "genarate_tmp_file", "status": status})
@@ -147,84 +144,6 @@ class Convert2File:
             if "err" in record:
                 raise CustomException(err=self.logging)
             
-    def initial_data_type(self, df: pd.DataFrame) -> pd.DataFrame:
-
-        status = "failed"
-        self.logging[-1].update({"function": "initial_data_type", "status": status})
-        try:
-            df = df.astype({
-                    "ApplicationCode": object,
-                    "AccountOwner": object,
-                    "AccountName": object,
-                    "AccountType": object,
-                    "EntitlementName": object,
-                    "SecondEntitlementName": object,
-                    "ThirdEntitlementName": object,
-                    "AccountStatus": object,
-                    "IsPrivileged": object,
-                    "AccountDescription": object,
-                    "CreateDate": "datetime64[ms]",
-                    "LastLogin": "datetime64[ms]",
-                    "LastUpdatedDate": "datetime64[ms]",
-                    "AdditionalAttribute": object,})
-            df[["CreateDate", "LastLogin", "LastUpdatedDate"]] = df[["CreateDate", "LastLogin", "LastUpdatedDate"]]\
-                .apply(pd.to_datetime, format="%Y%m%d%H%M%S")
-
-            if "remark" in df.columns:
-                df = df.loc[df["remark"] != "Remove"]
-            else:
-                df["remark"] = "Insert"
-
-        except Exception as err:
-            raise Exception(err)
-
-        status = "succeed"
-        self.logging[-1].update({"status": status})
-
-        return df
-
-    def compare_data(self, df, change_df) -> pd.DataFrame:
-        
-        logging.info("Compare data")
-        
-        status = "failed"
-        self.logging[-1].update({"function": "compare_data", "status": status})
-        
-        try:
-            ## Merge index.
-            self.merge_index = np.union1d(df.index, change_df.index)
-
-            ## As starter dataframe for compare
-            df = df.reindex(index=self.merge_index, columns=df.columns).iloc[:, :-1]
-
-            ## Change data / new data
-            change_df = change_df.reindex(index=self.merge_index, columns=change_df.columns).iloc[:, :-1]
-            
-            ## Compare data
-            df["count"] = pd.DataFrame(np.where(df.ne(change_df), True, df), index=df.index, columns=df.columns)\
-                .apply(lambda x: (x == True).sum(), axis=1)
-            
-        except Exception as err:
-            raise Exception(err)
-        
-        status = "succeed"
-        self.logging[-1].update({"status": status})
-
-        return df
-    
-    def data_change_capture(self, df: pd.DataFrame) -> dict:
-        
-        logging.info("Data Change Capture")
-        
-        status = "failed"
-        self.logging[-1].update({"function": "data_change_capture", "status": status})
-        
-        i = 0
-        for idx, row in enumerate(self.merge_index, 2):
-            print(row)
-        
-        
-    
     def create_workbook(self) -> None:
 
         full_tmp = self.logging[-1]["input_dir"]
@@ -262,6 +181,131 @@ class Convert2File:
 
         status = "succeed"
         self.logging[-1].update({"status": status})
+            
+    def initial_data_type(self, df: pd.DataFrame) -> pd.DataFrame:
+
+        status = "failed"
+        self.logging[-1].update({"function": "initial_data_type", "status": status})
+        try:
+            df = df.astype({
+                    "ApplicationCode": object,
+                    "AccountOwner": object,
+                    "AccountName": object,
+                    "AccountType": object,
+                    "EntitlementName": object,
+                    "SecondEntitlementName": object,
+                    "ThirdEntitlementName": object,
+                    "AccountStatus": object,
+                    "IsPrivileged": object,
+                    "AccountDescription": object,
+                    "CreateDate": "datetime64[ms]",
+                    "LastLogin": "datetime64[ms]",
+                    "LastUpdatedDate": "datetime64[ms]",
+                    "AdditionalAttribute": object,})
+            df[["CreateDate", "LastLogin", "LastUpdatedDate"]] = df[["CreateDate", "LastLogin", "LastUpdatedDate"]]\
+                .apply(pd.to_datetime, format="%Y%m%d%H%M%S")
+
+            if "remark" in df.columns:
+                df = df.loc[df["remark"] != "Remove"]
+            else:
+                df["remark"] = "Insert"
+
+        except Exception as err:
+            raise Exception(err)
+
+        status = "succeed"
+        self.logging[-1].update({"status": status})
+
+        return df
+
+    def compare_data(self, df, new_df) -> pd.DataFrame:
+        
+        logging.info("Compare data")
+        
+        status = "failed"
+        self.logging[-1].update({"function": "compare_data", "status": status})
+        
+        try:
+            ## Merge index.
+            self.merge_index = np.union1d(df.index, new_df.index)
+
+            ## As starter dataframe for compare
+            df = df.reindex(index=self.merge_index, columns=df.columns).iloc[:, :-1]
+
+            ## Change data / new data
+            self.new_df = new_df.reindex(index=self.merge_index, columns=new_df.columns).iloc[:, :-1]
+            
+            ## Compare data
+            df["count"] = pd.DataFrame(np.where(df.ne(self.new_df), True, df), index=df.index, columns=df.columns)\
+                .apply(lambda x: (x == True).sum(), axis=1)
+            
+        except Exception as err:
+            raise Exception(err)
+        
+        status = "succeed"
+        self.logging[-1].update({"status": status})
+
+        return df
+    
+    def data_change_capture(self, df: pd.DataFrame) -> dict:
+        
+        logging.info("Data Change Capture")
+        
+        status = "failed"
+        self.logging[-1].update({"function": "data_change_capture", "status": status})
+        
+        ## set format record
+        def format_record(record):
+            return "\n".join("{!r} => {!r};".format(columns, values) for columns, values in record.items())
+        
+        self.update_rows = {}
+        self.remove_rows = []
+        if len(df.index) > len(self.new_df.index):
+            self.remove_rows = [idx for idx in list(df.index) if idx not in list(self.new_df.index)]
+        try:
+            i = 0
+            for idx, row in enumerate(self.merge_index, 2):
+                if row not in self.remove_rows:
+                    record = {}
+                    for data, change_data in zip(df.items(), self.new_df.items()):
+                        ## No Change
+                        if df.loc[row, "count"] != 15:
+                            if df.loc[row, "count"] < 1:
+                                df.loc[row, data[0]] = data[1][row]
+                                df.loc[row, "remark"] = "No_change"
+                            else:
+                                ## Update
+                                if data[1][row] != change_data[1][row]:
+                                    record.update({data[0]: change_data[1][row]})
+                                df.loc[row, data[0]] = change_data[1][row]
+                                df.loc[row, "remark"] = "Update"
+                        else:
+                            ## Insert
+                            record.update({data[0]: change_data[1][row]})
+                            df.loc[row, data[0]] = change_data[1][row]
+                            df.loc[row, "remark"] = "Insert"
+
+                    if record != {}:
+                        self.update_rows[idx] = format_record(record)
+                else:
+                    ## Remove
+                    self.remove_rows[i] = idx
+                    df.loc[row, "remark"] = "Remove"
+                    i += 1
+            
+            ## set dataframe.
+            df = df.drop(["count"], axis=1)
+            rows = 2
+            df.index += rows
+            data_dict = df.to_dict(orient="index")
+            
+        except Exception as err:
+            raise Exception(err)
+        
+        status = "succeed"
+        self.logging[-1].update({"status": status})
+        
+        return data_dict
 
     def write_worksheet(self, change_data: dict) -> str:
 
@@ -295,9 +339,9 @@ class Convert2File:
                         if rows in self.remove_rows:
                             ## Remove row
                             write_row = (f"{change_data[rows][col]} Rows: ({rows}) in Tmp file")
-                        elif rows in self.change_rows.keys():
+                        elif rows in self.update_rows.keys():
                             ## Update / Insert row
-                            write_row = f"{change_data[rows][col]} Rows: ({rows}) in Tmp file Updating records: {self.change_rows[rows]}"
+                            write_row = f"{change_data[rows][col]} Rows: ({rows}) in Tmp file Updating records: {self.update_rows[rows]}"
                         else:
                             ## No change row
                             write_row = f"No Change Rows: ({rows}) in Tmp file"
@@ -341,19 +385,19 @@ class Convert2File:
 
                         ## read csv file
                         try:
-                            target_df = self.read_csv()
+                            target_df = self.read_csv_file(self.full_target)
                             
                         except FileNotFoundError:
                             ## move from template file to target file
                             template_name = join(Folder.TEMPLATE, "Application Data Requirements.xlsx")
                             target_df = pd.read_excel(template_name)
                             target_df.to_csv(self.full_target, index=None, header=True, sep=",")
-
+                            
                         ## optimize data
                         data = self.optimize_data(target_df, change_df)
 
                         ## write csv file
-                        status = self.write_csv(self.full_target, data)
+                        # status = self.write_csv(self.full_target, data)
 
                     except Exception as err:
                         raise Exception(err)
@@ -398,7 +442,7 @@ class Convert2File:
 
         return target_df
 
-    def optimize_data(self, target_df: pd.DataFrame, change_df: pd.DataFrame) -> dict:
+    def optimize_data(self, target_df: pd.DataFrame, new_df: pd.DataFrame) -> dict:
 
         logging.info("Optimize Data Before Write to Target")
 
@@ -409,33 +453,33 @@ class Convert2File:
         try:
             target_df = self.initial_data_type(target_df)
 
-            ## filter data on batch date => DataFrame
-            batch_df = target_df[target_df["CreateDate"].isin(np.array([pd.Timestamp(self.batch_date)]))].reset_index(drop=True)
-
             ## Validate data change row by row
-            #data_dict = self.data_change_capture(batch_df, change_df)
-
-            ## filter data not on batch date => dict
-            merge_data = target_df[~target_df["CreateDate"].isin(np.array([pd.Timestamp(self.batch_date)]))].iloc[:, :-1].to_dict("index")
-
+            df = target_df[target_df["CreateDate"].isin(np.array([pd.Timestamp(self.batch_date)]))].reset_index(drop=True)
+            cmp_df = self.compare_data(df, new_df)
+            data_capture = self.data_change_capture(cmp_df)
+            
             ## merge data from new and old data
+            merge_data = target_df[~target_df["CreateDate"].isin(np.array([pd.Timestamp(self.batch_date)]))].iloc[:, :-1].to_dict("index")
             max_rows = max(merge_data, default=0)
-            for idx, values in data_dict.items():
-                if idx in self.change_rows or idx in self.remove_rows:
+            for idx, values in data_capture.items():
+                if idx in self.update_rows or idx in self.remove_rows:
                     values.update({"mark_row": idx})
                 merge_data = {**merge_data, **{max_rows + idx: values}}
 
+            for x,y in merge_data.items():
+                print(x)
+                print(y)
             ## sorted order data on batch date
-            i = 0
-            for idx, values in enumerate(sorted(merge_data.values(), key=lambda d: d["CreateDate"]), 2):
-                if "mark_row" in values.keys():
-                    if values["mark_row"] in self.change_rows:
-                        self.change_rows[idx] = self.change_rows.pop(values["mark_row"])
-                    else:
-                        self.remove_rows[i] = idx
-                        i += 1
-                    values.pop("mark_row")
-                data.update({idx: values})
+            # i = 0
+            # for idx, values in enumerate(sorted(merge_data.values(), key=lambda d: d["CreateDate"]), 2):
+            #     if "mark_row" in values.keys():
+            #         if values["mark_row"] in self.update_rows:
+            #             self.update_rows[idx] = self.update_rows.pop(values["mark_row"])
+            #         else:
+            #             self.remove_rows[i] = idx
+            #             i += 1
+            #         values.pop("mark_row")
+            #     data.update({idx: values})
 
         except Exception as err:
             raise Exception(err)
@@ -472,8 +516,8 @@ class Convert2File:
                 
                 for idx, value in data.items():
                     if value.get("remark") is not None:
-                        if idx in self.change_rows.keys():
-                            logging.info(f'{value["remark"]} Rows: ({idx}) in Target file Updating records: {self.change_rows[idx]}')
+                        if idx in self.update_rows.keys():
+                            logging.info(f'{value["remark"]} Rows: ({idx}) in Target file Updating records: {self.update_rows[idx]}')
                             value.popitem()
                             rows.update({idx: value})
                             
