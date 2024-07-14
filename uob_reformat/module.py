@@ -230,10 +230,10 @@ class Convert2File:
             self.merge_index = np.union1d(df.index, new_df.index)
 
             ## As starter dataframe for compare
-            df = df.reindex(index=self.merge_index, columns=df.columns).iloc[:, :-1]
+            df = df.reindex(index=self.merge_index, columns=df.columns).iloc[:,:-1]
 
             ## Change data / new data
-            self.new_df = new_df.reindex(index=self.merge_index, columns=new_df.columns).iloc[:, :-1]
+            self.new_df = new_df.reindex(index=self.merge_index, columns=new_df.columns).iloc[:,:-1]
             
             ## Compare data
             df["count"] = pd.DataFrame(np.where(df.ne(self.new_df), True, df), index=df.index, columns=df.columns)\
