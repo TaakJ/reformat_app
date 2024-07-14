@@ -41,7 +41,6 @@ class ModuleADM(CallFunction):
             while True:
                 try:
                     logger.exception(next(err))
-                    logger.newline()
                 except StopIteration:
                     break
             

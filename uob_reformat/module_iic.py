@@ -23,7 +23,7 @@ class ModuleIIC(CallFunction):
             self.collect_params()
             
             ## backup file
-            # self.backup()
+            self.backup()
             
             ## step run function
             await self.check_source_file()

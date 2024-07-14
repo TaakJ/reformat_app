@@ -19,11 +19,11 @@ class ModuleBOS(CallFunction):
         result = {"module": self.module, "task": "Completed"}
         try:
             ## set params from confog file
-            self._full_input = "x"
+            self._full_input = ""
             self.collect_params()
             
             ## backup file
-            # self.backup()
+            self.backup()
             
             ## step run function
             await self.check_source_file()

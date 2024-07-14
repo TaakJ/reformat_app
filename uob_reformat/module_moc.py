@@ -23,15 +23,15 @@ class ModuleMOC(CallFunction):
             self.collect_params()
             
             ## backup file
-            # self.backup()
+            self.backup()
             
             ## step run function
-            await self.check_source_file()
-            await self.separate_data_file()
-            await self.mock_data()
-            if self.store_tmp is True:
-                await self.genarate_tmp_file()
-            await self.genarate_target_file()
+            # await self.check_source_file()
+            # await self.separate_data_file()
+            # await self.mock_data()
+            # if self.store_tmp is True:
+            #     await self.genarate_tmp_file()
+            # await self.genarate_target_file()
 
         except CustomException as err:
             logging.error('See Error Details: log_error.log')
