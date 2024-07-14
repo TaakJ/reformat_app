@@ -5,7 +5,7 @@ import glob
 import shutil
 import zipfile
 import logging
-from datetime import datetime, timedelta
+from datetime import timedelta
 import time
 from pathlib import Path
 from os.path import join
@@ -107,11 +107,9 @@ class BackupAndClear:
         status = self.backup_zip_file()
         
         logging.info("Backup file")
-        self.logging[-1].update({"function": "backup", "status": status})
         
         self.backup_dir = join(self.root_dir, self._date)
         list_of_files = glob.glob(f'{self.backup_dir}/*')
-        
         if list_of_files != []:
             
             backup_file = max(list_of_files, key=os.path.getctime)
@@ -127,7 +125,7 @@ class BackupAndClear:
                 count = all(cmp_df[cmp_df['count']>=2]['count'])
                 
                 if count is True:
-                    logging.info("No Backup file because no change of data")
+                    logging.info("No Backup file because no have change data")
                 else:
                     status = self.genarate_backup_file()
                     
@@ -137,13 +135,10 @@ class BackupAndClear:
             status = self.genarate_backup_file()
         
         logging.info(f'Backup file status {status}')
-        self.logging[-1].update({"status": status})
     
     def genarate_backup_file(self) -> str:
         
         status = "failed"
-        self.logging[-1].update({"function": "genarate_backup_file", "status": status})
-        
         if glob.glob(self.full_target, recursive=True):
 
             if not os.path.exists(self.backup_dir):
@@ -162,8 +157,9 @@ class BackupAndClear:
             
             except Exception:
                 pass
-        
-        self.logging[-1].update({"status": status})
+        else:
+            status = "skipped"
+            
         return status
     
     def backup_zip_file(self) -> str:
@@ -172,8 +168,6 @@ class BackupAndClear:
         self._bk_date = self.bk_date.strftime("%Y%m%d")
         
         status = "failed"
-        self.logging[-1].update({"function": "backup_zip_file", "status": status})
-        
         try:
             status = "skipped"
             for date_dir in os.listdir(self.root_dir):
@@ -200,8 +194,6 @@ class BackupAndClear:
                         continue
         except OSError:
             pass
-        
-        self.logging[-1].update({"status": status})
         
         return status
                 
