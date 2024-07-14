@@ -66,7 +66,7 @@ class setup_app(QWidget):
     def ui(self):
 
         self.all_module = PARAMS["source"]
-        self.filename = {module: f'MANUAL_{CONFIG[module]["output_file"]}' for module in self.all_module}
+        self.filename = {module: f'M_{CONFIG[module]["output_file"]}' for module in self.all_module}
         self.module = self.all_module
 
         grid = QGridLayout()

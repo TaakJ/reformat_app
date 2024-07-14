@@ -5,6 +5,8 @@ import glob
 import shutil
 import zipfile
 import logging
+from datetime import datetime, timedelta
+import time
 from pathlib import Path
 from os.path import join
 from itertools import chain
@@ -97,20 +99,31 @@ class BackupAndClear:
     
     def backup(self) -> None:
         
-        self.clear_backup()
+        self.root_dir = join(Folder.BACKUP, self.module)
+        self._date  = self.date.strftime("%Y%m%d")
         
-        self.backup_dir = join(Folder.BACKUP, self.module)
-        if not os.path.exists(self.backup_dir):
-            try:
-                os.makedirs(self.backup_dir)
-            except OSError:
-                pass
+        backup_dir = join(self.root_dir, self._date)
+        
+        list_of_files = glob.glob(f'{backup_dir}/*') 
+        backup_file = max(list_of_files, key=os.path.getctime)
+        
+        
+        self.data_change_capture1(backup_file, self.full_target)
+        
+        # self.clear_backup()
+        
+        # self.backup_dir = join(Folder.BACKUP, self.module)
+        # if not os.path.exists(self.backup_dir):
+        #     try:
+        #         os.makedirs(self.backup_dir)
+        #     except OSError:
+        #         pass
             
-        for date_dir in os.listdir(self.backup_dir):
-            if not date_dir.endswith(".zip"):
-                self.backup_zip_file(date_dir)
+        # for date_dir in os.listdir(self.backup_dir):
+        #     if not date_dir.endswith(".zip"):
+        #         self.backup_zip_file(date_dir)
         
-        self.genarate_backup_file()
+        # self.genarate_backup_file()
         
     def backup_zip_file(self, date_dir) -> None:
         
@@ -149,6 +162,9 @@ class BackupAndClear:
             logging.info(f'Backup file from {self.full_target} to {full_backup} status: {status}')
             
     def clear_backup(self) -> None:
+        self.bk_date = self.date - timedelta(days=7)
+        self.time = time.strftime("%H%M%S")
+        
         try:
             backup_dir = join(Folder.BACKUP, self.module)
             

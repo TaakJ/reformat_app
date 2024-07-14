@@ -131,6 +131,11 @@ class Convert2File:
         self.logging[-1].update({"status": status})
 
         return df
+    
+    def data_change_capture1(self, df, change_df):
+        print(df)
+        print()
+        print(change_df)
 
     def data_change_capture(self, df: pd.DataFrame, change_df: pd.DataFrame) -> dict:
 

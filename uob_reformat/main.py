@@ -18,8 +18,6 @@ class RunModule:
             setattr(self, key, value)
             
         self.date = datetime.now()
-        self.bk_date = self.date - timedelta(days=7)
-        self.time = time.strftime("%H")
         
         ## initial setup / clear file
         setup_folder()
