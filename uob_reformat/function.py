@@ -122,12 +122,10 @@ class BackupAndClear:
                 
                 ## check value change
                 cmp_df = self.compare_data(bk_df, df)
-                if (cmp_df['count'] >= 0).all():
-                    print("OK")
-                    # status = self.genarate_backup_file()
+                if (cmp_df['count'] >= 2).any():
+                    status = self.genarate_backup_file()
                 else:
-                    print("NOK")
-                    # logging.info("No Backup file because no have change data")
+                    logging.info("No Backup file because no have change data")
                     
             except Exception:
                 pass
