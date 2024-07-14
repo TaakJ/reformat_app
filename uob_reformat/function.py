@@ -131,7 +131,7 @@ class BackupAndClear:
                 else:
                     status = self.genarate_backup_file()
                     
-            except FileNotFoundError:
+            except Exception:
                 pass
         else:
             status = self.genarate_backup_file()

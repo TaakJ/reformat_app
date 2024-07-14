@@ -128,6 +128,7 @@ class Convert2File:
                         ## validate data change row by row
                         cmp_df = self.compare_data(tmp_df, change_df)
                         self.data_change_capture(cmp_df)
+                
                         # data_dict = self.data_change_capture(tmp_df, change_df)
 
                         # ## write tmp file
@@ -204,7 +205,6 @@ class Convert2File:
                 .apply(lambda x: (x == True).sum(), axis=1)
             
         except Exception as err:
-            print(err)
             raise Exception(err)
         
         status = "succeed"
@@ -219,7 +219,9 @@ class Convert2File:
         status = "failed"
         self.logging[-1].update({"function": "data_change_capture", "status": status})
         
-        print(df)
+        i = 0
+        for idx, row in enumerate(self.merge_index, 2):
+            print(row)
         
         
     
