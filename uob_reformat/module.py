@@ -260,8 +260,10 @@ class Convert2File:
         
         self.update_rows = {}
         self.remove_rows = []
+        
         if len(df.index) > len(self.new_df.index):
             self.remove_rows = [idx for idx in list(df.index) if idx not in list(self.new_df.index)]
+        
         try:
             i = 0
             for idx, row in enumerate(self.merge_index, 2):
