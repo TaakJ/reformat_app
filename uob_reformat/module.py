@@ -396,12 +396,8 @@ class Convert2File:
                         ## optimize data
                         data = self.optimize_data(target_df, change_df)
                         
-                        for x,y in data.items():
-                            print(x)
-                            print()
-                            print(y)
                         ## write csv file
-                        # status = self.write_csv(self.full_target, data)
+                        status = self.write_csv(self.full_target, data)
 
                     except Exception as err:
                         raise Exception(err)
