@@ -50,6 +50,7 @@ class CollectParams(ABC):
                 continue
             
         self._full_input =  list(chain(file, add_file))
+        
         return self._full_input
     
     def collect_params(self) -> None:
