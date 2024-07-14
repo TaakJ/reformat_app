@@ -435,12 +435,12 @@ class Convert2File:
             for _ in last_row:
                 data.append(next(row))
                     
-        target_df = pd.DataFrame(data, columns=header)
+        df = pd.DataFrame(data, columns=header)
         
         status = "succeed"
         self.logging[-1].update({"status": status})
 
-        return target_df
+        return df
 
     def optimize_data(self, target_df: pd.DataFrame, new_df: pd.DataFrame) -> dict:
 
@@ -459,7 +459,7 @@ class Convert2File:
             data_capture = self.data_change_capture(cmp_df)
             
             ## merge data with data_capture and target
-            merge_data = target_df[~target_df["CreateDate"].isin(np.array([pd.Timestamp(self.batch_date)]))].iloc[:, :-1].to_dict("index")
+            merge_data = target_df[~target_df["CreateDate"].isin(np.array([pd.Timestamp(self.batch_date)]))].iloc[:,:-1].to_dict("index")
             max_row = max(merge_data, default=0)
             for idx, values in data_capture.items():
                 if idx in self.update_rows or idx in self.remove_rows:
