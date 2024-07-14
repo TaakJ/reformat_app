@@ -9,8 +9,7 @@ from .module_lds import ModuleLDS
 from .module_lmt import ModuleLMT
 from .module_moc import ModuleMOC
 from .setup import PARAMS, setup_folder, setup_log, clear_log
-from datetime import datetime, timedelta
-import time
+from datetime import datetime
 
 class RunModule:
     def __init__(self) -> None:
