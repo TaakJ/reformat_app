@@ -118,7 +118,9 @@ class BackupAndClear:
             try:
                 ## read csv file
                 bk_df = self.read_csv_file(backup_file)
+                bk_df = self.initial_data_type(bk_df)
                 df  = self.read_csv_file(self.full_target)
+                df = self.initial_data_type(df)
                 
                 ## check value change
                 cmp_df = self.compare_data(bk_df, df)
