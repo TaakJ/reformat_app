@@ -397,7 +397,7 @@ class Convert2File:
                         data = self.optimize_data(target_df, change_df)
                         
                         ## write csv file
-                        status = self.write_csv(self.full_target, data)
+                        # status = self.write_csv(self.full_target, data)
 
                     except Exception as err:
                         raise Exception(err)
@@ -458,25 +458,30 @@ class Convert2File:
             cmp_df = self.compare_data(df, new_df)
             data_capture = self.data_change_capture(cmp_df)
             
-            ## merge data from new and old data
+            ## merge data with data_capture and target
             merge_data = target_df[~target_df["CreateDate"].isin(np.array([pd.Timestamp(self.batch_date)]))].iloc[:, :-1].to_dict("index")
             max_row = max(merge_data, default=0)
             for idx, values in data_capture.items():
                 if idx in self.update_rows or idx in self.remove_rows:
                     values.update({"mark_row": idx})
                 merge_data = {**merge_data, **{max_row + idx: values}}
+            
+            
+            for idx, values in enumerate(sorted(merge_data.values(), key=lambda d: d["CreateDate"]), 2):
+                print(idx)
+                print(values)
                 
             ## sorted order data on batch date
-            i = 0
-            for idx, values in enumerate(sorted(merge_data.values(), key=lambda d: d["CreateDate"]), 2):
-                if "mark_row" in values.keys():
-                    if values["mark_row"] in self.update_rows:
-                        self.update_rows[idx] = self.update_rows.pop(values["mark_row"])
-                    else:
-                        self.remove_rows[i] = idx
-                        i += 1
-                    values.pop("mark_row")
-                data.update({idx: values})
+            # i = 0
+            # for idx, values in enumerate(sorted(merge_data.values(), key=lambda d: d["CreateDate"]), 2):
+            #     if "mark_row" in values.keys():
+            #         if values["mark_row"] in self.update_rows:
+            #             self.update_rows[idx] = self.update_rows.pop(values["mark_row"])
+            #         else:
+            #             self.remove_rows[i] = idx
+            #             i += 1
+            #         values.pop("mark_row")
+            #     data.update({idx: values})
 
         except Exception as err:
             raise Exception(err)
