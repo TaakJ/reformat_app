@@ -1,7 +1,7 @@
 ADM:
     input_dir: D:\IGAGD\ADM\download
     output_dir: D:\IGAGD\ADM\upload
-    input_file: ADM.txt
+    input_file: ADM1.txt
     output_file: ADMIGAWINT.csv
 BOS:
     input_dir: D:\IGAGD\BOS\download

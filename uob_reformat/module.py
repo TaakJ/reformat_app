@@ -22,18 +22,29 @@ class Convert2File:
         logging.info("Check Source file")
         
         for input_dir in self.full_input:
-            status = "not_found"
             if glob.glob(input_dir, recursive=True):
                 status = "found"
+                err = None
+            else:
+                status = "not_found"
+                err = f"File Not Found {input_dir}"
                     
             record = {"module": self.module,
                     "input_dir": input_dir,
                     "full_target": self.full_target,
                     "function": "check_source_file",
-                    "status": status}
+                    "status": status,}
+            
+            if err is not None:
+                record.update({"err": err})
+                
             self.logging += [record]
             
+            logging.info(f"Check Source file: {input_dir} status: {status}")
         self.logging.pop(0)
+        
+        if "err" in self.logging[0]:
+            raise CustomException(err=self.logging)
         
     async def separate_data_file(self) -> None:
 
@@ -54,7 +65,7 @@ class Convert2File:
                         logging.info(f"Read format text file: {input_dir}")
                         data = self.read_text_file(i)
                 else:
-                    raise FileNotFoundError(f"File Not Found: {input_dir}")
+                    continue
 
                 status = "succeed"
                 record.update({"data": data, "status": status})
