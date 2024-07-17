@@ -18,7 +18,7 @@ setup(
     keywords='',
     packages=find_packages(),
     python_requires=">=3.9",
-    install_requires=[r.strip() for r in open("requirements.txt").readlines()],
+    # install_requires=[r.strip() for r in open("requirements.txt").readlines()],
     entry_points={
         "console_scripts":[
             "uob_reformat = uob_reformat:main",
