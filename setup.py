@@ -7,8 +7,8 @@ setup(
     long_description=open('README.md').read() + '\n\n' + open('CHANGELOG.txt').read(),
     long_description_content_type='text/markdown',
     url='',
-    author='Thanakit Jitcharoenjai',
-    author_email='tak_control14@hotmail.com',
+    author='mfec',
+    author_email='',
     license='MIT',
     classifiers=[
         "Programming Language :: Python :: 3",
