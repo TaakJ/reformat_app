@@ -41,16 +41,16 @@ class CollectParams(ABC):
     
     @full_input.setter
     def full_input(self, file: list) -> list:
-        
         add_file = []
         for new_file in [f.strip() for f in re.split(r',', self._full_input) if f.strip() != ""]:
             if new_file not in add_file:
                 add_file.append(new_file)
             else:
                 continue
-            
-        self._full_input =  list(chain(file, add_file))
         
+        file = join(Path(file).parent, self.batch_date.strftime("%Y%m%d"), Path(file).name) 
+        
+        self._full_input =  list(chain([file], add_file))
         return self._full_input
     
     def collect_params(self) -> None:
@@ -64,7 +64,7 @@ class CollectParams(ABC):
             input_dir   = CONFIG[self.module]["input_dir"]
             input_file  = CONFIG[self.module]["input_file"]
             
-            self.full_input = [join(input_dir, input_file)]
+            self.full_input = join(input_dir, input_file)
             
             ## setup output dir / output file             
             output_dir  = CONFIG[self.module]["output_dir"]
