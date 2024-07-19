@@ -2,8 +2,8 @@
 
 set params=%*
 set default_dir=%cd%
-set app_dir=D:\Document\Coding\Project\reformat_app
-cd /d %app_dir%
+set project_dir=D:\Document\Coding\Project\reformat_app
+cd /d %project_dir%
 
 call :main
 goto exit
