@@ -41,6 +41,7 @@ class CollectParams(ABC):
     
     @full_input.setter
     def full_input(self, file: list) -> list:
+        
         add_file = []
         for new_file in [f.strip() for f in re.split(r',', self._full_input) if f.strip() != ""]:
             if new_file not in add_file:
@@ -48,9 +49,9 @@ class CollectParams(ABC):
             else:
                 continue
         
-        file = join(Path(file).parent, self.batch_date.strftime("%Y%m%d"), Path(file).name) 
-        
+        # file = join(Path(file).parent, self.batch_date.strftime("%Y%m%d"), Path(file).name) 
         self._full_input =  list(chain([file], add_file))
+        
         return self._full_input
     
     def collect_params(self) -> None:
