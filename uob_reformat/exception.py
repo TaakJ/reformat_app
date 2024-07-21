@@ -1,5 +1,4 @@
 import os
-import types
 from os.path import join
 import logging
 from datetime import datetime
