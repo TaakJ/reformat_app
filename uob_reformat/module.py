@@ -43,7 +43,7 @@ class Convert2File:
             logging.info(f"Check Source file: {input_dir} status: {status}")
         self.logging.pop(0)
         
-        if "err" in self.logging[0]:
+        if [record for record in self.logging if "err" in record]:
             raise CustomException(err=self.logging)
         
     async def separate_data_file(self) -> None:
