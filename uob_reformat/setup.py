@@ -44,6 +44,9 @@ def setup_config() -> dict:
         raise FileNotFoundError(f"Yaml config file path: '{config_dir}' doesn't exist.")
     return config_yaml
 
+def setup_params():
+    print("OK")
+
 def setup_log() -> None:
     config_yaml = None
     date = datetime.now().strftime("%Y%m%d")
@@ -68,7 +71,6 @@ def setup_log() -> None:
     else:
         raise FileNotFoundError(f"Yaml file file_path: '{Folder._LOGGER_CONFIG_DIR}' doesn't exist.")
     
-
 def clear_log() -> None:
     bk_date = datetime.now() - timedelta(days=7) 
     
