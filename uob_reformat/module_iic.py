@@ -55,7 +55,7 @@ class ModuleIIC(CallFunction):
         module = self.logging[i]["module"]
         logging.info(f'Collect Data for module: {module}')
         
-        self.logging[i].update({"function": "collect_data","status": status})
+        self.logging[i].update({"function": "collect_data", "status": status})
         
         data = []
         for line in format_file:
