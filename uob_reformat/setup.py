@@ -47,9 +47,10 @@ def setup_config() -> dict:
 def setup_log() -> None:
     config_yaml = None
     date = datetime.now().strftime("%Y%m%d")
-    _time = time.strftime("%H%M%S")
-    file = f"log_status_T{_time}.log"
-
+    # _time = time.strftime("%H%M%S")
+    # file = f"log_status_T{_time}.log"
+    file = "log_status.log"
+    
     filename = Folder.LOG + join(date, file)
     if not os.path.exists(os.path.dirname(filename)):
         try:

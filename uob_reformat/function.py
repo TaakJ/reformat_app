@@ -33,26 +33,49 @@ class CollectLog(ABC):
 class CollectParams(ABC):
     
     def __init__(self) -> None:
-        self._full_input = ""
+        self._full_input = []
+        self._full_target = []
         
     @property
     def full_input(self) -> list:
         return self._full_input
     
+    @property
+    def full_target(self) -> list:
+        return self._full_target
+    
     @full_input.setter
     def full_input(self, file: list) -> list:
         
-        add_file = []
-        for new_file in [f.strip() for f in re.split(r',', self._full_input) if f.strip() != ""]:
-            if new_file not in add_file:
-                add_file.append(new_file)
-            else:
-                continue
-        
-        # file = join(Path(file).parent, self.batch_date.strftime("%Y%m%d"), Path(file).name) 
-        self._full_input =  list(chain([file], add_file))
+        try:
+            input_dir   = CONFIG[self.module]["input_dir"]
+            input_param  = CONFIG[self.module]["input_param"]
+            add_file = [join(input_dir, input_param)]
+
+            self._full_input =  list(chain(file, add_file))
+            
+        except KeyError:
+            self._full_input =  file
         
         return self._full_input
+    
+    @full_target.setter
+    def full_target(self, file: list) -> list:
+        
+        try:
+            output_dir  = CONFIG[self.module]["output_dir"]
+            output_param = CONFIG[self.module]["output_param"]
+            
+            suffix = f"{self.batch_date.strftime('%Y%m%d')}"
+            _file = lambda file: file if (self.write_mode == "overwrite" or self.manual) else f"{Path(file).stem}_{suffix}.csv"
+            add_file = [join(output_dir, _file(output_param))]
+        
+            self._full_target =  list(chain(file, add_file))
+            
+        except KeyError:
+            self._full_target = file
+        
+        return self._full_target
     
     def collect_params(self) -> None:
         
@@ -65,15 +88,15 @@ class CollectParams(ABC):
             input_dir   = CONFIG[self.module]["input_dir"]
             input_file  = CONFIG[self.module]["input_file"]
             
-            self.full_input = join(input_dir, input_file)
+            self.full_input = [join(input_dir, input_file)]
             
             ## setup output dir / output file             
             output_dir  = CONFIG[self.module]["output_dir"]
             output_file = CONFIG[self.module]["output_file"]
             
             suffix = f"{self.batch_date.strftime('%Y%m%d')}"
-            file = lambda file: file if (self.write_mode == "overwrite" or self.manual) else f"{Path(file).stem}_{suffix}.csv"
-            self.full_target = join(output_dir, file(output_file))
+            _file = lambda file: file if (self.write_mode == "overwrite" or self.manual) else f"{Path(file).stem}_{suffix}.csv"
+            self.full_target = [join(output_dir, _file(output_file))]
             
             status = "succeed"
             record.update({"status": status})

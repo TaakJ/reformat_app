@@ -20,19 +20,17 @@ class ModuleADM(CallFunction):
         result = {"module": self.module, "task": "Completed"}
         try:
             ## set params from confog file
-            self._full_input = ""
             self.collect_params()
+            # ## backup file
+            # self.backup()
             
-            ## backup file
-            self.backup()
-            
-            ## step run function
-            await self.check_source_file()
-            await self.separate_data_file()
-            await self.mock_data()
-            if self.store_tmp is True:
-                await self.genarate_tmp_file()
-            await self.genarate_target_file()
+            # ## step run function
+            # await self.check_source_file()
+            # await self.separate_data_file()
+            # await self.mock_data()
+            # if self.store_tmp is True:
+            #     await self.genarate_tmp_file()
+            # await self.genarate_target_file()
 
         except CustomException as err:
             logging.error('See Error Details: log_error.log')
