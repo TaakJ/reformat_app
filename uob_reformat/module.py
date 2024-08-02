@@ -82,6 +82,7 @@ class Convert2File:
         input_dir = self.logging[i]["input_dir"]
         try:
             workbook = xlrd.open_workbook(input_dir)
+            
             data = self.get_extract_data(i, workbook)
 
         except Exception as err:
