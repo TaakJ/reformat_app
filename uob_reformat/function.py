@@ -164,7 +164,7 @@ class BackupAndClear:
     
     def backup_zip_file(self) -> str:
         
-        self.bk_date = self.date - timedelta(days=7)
+        self.bk_date = self.date - timedelta(days=1)
         self._bk_date = self.bk_date.strftime("%Y%m%d")
         
         status = "failed"
