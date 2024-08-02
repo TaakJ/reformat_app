@@ -45,3 +45,5 @@ MOC:
     output_dir: D:\IGAGD\MOC\upload
     input_file: MOCTH.xlsx
     output_file: MOCIGAWINT.csv
+    input_param: MOCTH_Param.csv
+    output_param: MOCPARAMLIST.csv
