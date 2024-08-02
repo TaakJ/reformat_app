@@ -62,8 +62,8 @@ class Convert2File:
                         logging.info(f"Read format excel file: {input_dir}")
                         data = self.read_excel_file(i)
                     else:
-                        logging.info(f"Read format text file: {input_dir}")
-                        data = self.read_text_file(i)
+                        logging.info(f"Read format text/csv file: {input_dir}")
+                        data = self.read_file(i)
                 else:
                     continue
 
@@ -72,26 +72,10 @@ class Convert2File:
 
             except Exception as err:
                 record.update({"err": err})
-                
+            
             if "err" in record:
                 raise CustomException(err=self.logging)
-
-    def read_text_file(self, i: int) -> any:
-
-        self.logging[i].update({"function": "read_text_file"})
-        input_dir = self.logging[i]["input_dir"]
-        try:
-            file = open(input_dir, "rb")
-            encoded = chardet.detect(file.read())["encoding"]
-            file.seek(0)
-            line = StringIO(file.read().decode(encoded))
-            data = self.get_extract_data(i, line)
-
-        except Exception as err:
-            raise Exception(err)
-
-        return data
-
+            
     def read_excel_file(self, i: int) -> any:
 
         self.logging[i].update({"function": "read_excel_file"})
@@ -99,6 +83,24 @@ class Convert2File:
         try:
             workbook = xlrd.open_workbook(input_dir)
             data = self.get_extract_data(i, workbook)
+
+        except Exception as err:
+            raise Exception(err)
+
+        return data
+
+    def read_file(self, i: int) -> any:
+
+        self.logging[i].update({"function": "read_file"})
+        
+        input_dir = self.logging[i]["input_dir"]
+        try:
+            file = open(input_dir, "rb")
+            encoded = chardet.detect(file.read())["encoding"]
+            file.seek(0)
+            line = StringIO(file.read().decode(encoded))
+            
+            data = self.get_extract_data(i, line)
 
         except Exception as err:
             raise Exception(err)
