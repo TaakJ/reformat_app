@@ -21,12 +21,13 @@ class ModuleADM(CallFunction):
         try:
             ## set params from confog file
             self.collect_params()
+            
             # ## backup file
             # self.backup()
             
             # ## step run function
-            # await self.check_source_file()
-            # await self.separate_data_file()
+            await self.check_source_file()
+            await self.separate_data_file()
             # await self.mock_data()
             # if self.store_tmp is True:
             #     await self.genarate_tmp_file()

@@ -21,6 +21,7 @@ class Convert2File:
         
         logging.info("Check Source file")
         
+        i = 0
         for input_dir in self.full_input:
             if glob.glob(input_dir, recursive=True):
                 status = "found"
@@ -31,36 +32,40 @@ class Convert2File:
                     
             record = {"module": self.module,
                     "input_dir": input_dir,
-                    "full_target": self.full_target,
+                    "full_target": self.full_target[i],
                     "function": "check_source_file",
                     "status": status,}
+            i += 1
             
             if err is not None:
-                record.update({"err": err})
-                
+                record.update({"err": err})    
             self.logging += [record]
             
-            logging.info(f"Check Source file: {input_dir} status: {status}")
+            logging.info(f"Check Source file: {input_dir}, status: {status}")
+            
         self.logging.pop(0)
-        
         if [record for record in self.logging if "err" in record]:
             raise CustomException(err=self.logging)
         
     async def separate_data_file(self) -> None:
-
+        
         logging.info("Separate Data from file")
 
+        status = "failed"
         for i, record in enumerate(self.logging):
-            record.update({"function": "separate_data_from_file"})
             
-            input_dir = record["input_dir"]
-            types = Path(input_dir).suffix
-            status_file = record["status"]
+            record.update({"function": "separate_data_from_file", "status": status})
+            
             try:
+                input_dir = record["input_dir"]
+                types = Path(input_dir).suffix
+                status_file = record["status"]
+                
                 if status_file == "found":
                     if [".xlsx", ".xls"].__contains__(types):
                         logging.info(f"Read format excel file: {input_dir}")
                         data = self.read_excel_file(i)
+                        
                     else:
                         logging.info(f"Read format text/csv file: {input_dir}")
                         data = self.read_file(i)
@@ -79,8 +84,9 @@ class Convert2File:
     def read_excel_file(self, i: int) -> any:
 
         self.logging[i].update({"function": "read_excel_file"})
-        input_dir = self.logging[i]["input_dir"]
+        
         try:
+            input_dir = self.logging[i]["input_dir"]
             workbook = xlrd.open_workbook(input_dir)
             
             data = self.get_extract_data(i, workbook)
@@ -94,19 +100,22 @@ class Convert2File:
 
         self.logging[i].update({"function": "read_file"})
         
-        input_dir = self.logging[i]["input_dir"]
         try:
-            file = open(input_dir, "rb")
-            encoded = chardet.detect(file.read())["encoding"]
-            file.seek(0)
-            line = StringIO(file.read().decode(encoded))
+            input_dir = self.logging[i]["input_dir"]
+            with open(input_dir, 'rb') as f:
+                file = f.read()
+                
+            encoding_result = chardet.detect(file)
+            encoding = encoding_result['encoding']
             
-            data = self.get_extract_data(i, line)
+            line = StringIO(file.decode(encoding))
+            
+            #data = self.get_extract_data(i, line)
 
         except Exception as err:
             raise Exception(err)
 
-        return data
+        return "data"
 
     async def genarate_tmp_file(self) -> None:
         
@@ -116,6 +125,7 @@ class Convert2File:
 
         status = "failed"
         for record in self.logging:
+            
             try:
                 if record["module"] == "Target_file":
                     try:
@@ -200,6 +210,7 @@ class Convert2File:
 
         status = "failed"
         self.logging[-1].update({"function": "initial_data_type", "status": status})
+        
         try:
             df = df.astype({
                     "ApplicationCode": object,
