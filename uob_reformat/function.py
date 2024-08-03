@@ -87,7 +87,6 @@ class CollectParams(ABC):
             ## setup input dir / input file
             input_dir   = CONFIG[self.module]["input_dir"]
             input_file  = CONFIG[self.module]["input_file"]
-            
             self.full_input = [join(input_dir, input_file)]
             
             ## setup output dir / output file             
