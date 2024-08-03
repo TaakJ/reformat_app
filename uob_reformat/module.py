@@ -291,7 +291,7 @@ class Convert2File:
         self.logging[i].update({"function": "data_change_capture", "status": status})
         
         def format_record(record):
-            return "\n".join("{!r} : {!r};".format(columns, values) for columns, values in record.items())
+            return "\n".join("{!r}: {!r};".format(columns, values) for columns, values in record.items())
         
         self.update_rows = {}
         self.remove_rows = []
