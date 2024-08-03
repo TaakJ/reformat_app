@@ -55,8 +55,7 @@ class ModuleIIC(CallFunction):
         try:
             data = []
             for line in format_file:
-                line = line.strip().replace('"','')
-                data += [re.sub(r'(?<!\w),', ",", line).split(",")]
+                data += [re.sub(r'(?<!\w),', ",", line.strip().replace('"','')).split(",")]
             
             df = pd.DataFrame(data)
             df.columns = df.iloc[0].values
