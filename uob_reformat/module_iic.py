@@ -65,16 +65,20 @@ class ModuleIIC(CallFunction):
             
             input_dir = self.logging[i]["input_dir"]
             
-            if re.search(r'_Param', input_dir) is not None:
+            if re.search(r'Param', input_dir) is not None:
+                template_name = "Param Requirements.xlsx"
                 df = self.initial_param_type(df)
+                inital_type = 2
             else:
+                template_name = "Application Data Requirements.xlsx"
                 df = self.initial_data_type(df)
+                inital_type = 1
             
         except Exception as err:
             raise Exception(err)
 
         status = "succeed"
-        self.logging[i].update({"data": df.to_dict("list"), "status": status})
+        self.logging[i].update({"data": df.to_dict("list"), "inital_type": inital_type, "template": template_name, "status": status})
         
         logging.info(f'Collect data from file: {self.logging[i]["input_dir"]}, status: {status}')
         
