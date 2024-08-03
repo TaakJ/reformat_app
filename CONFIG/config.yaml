@@ -28,8 +28,8 @@ IIC:
     output_dir: D:\IGAGD\IIC\upload
     input_file: IICTH.csv
     output_file: IICIGAWINT.csv
-    #input_param: IICTH_Param.csv
-    #output_param: IICPARAMLIST.csv
+    input_param: IICTH_Param.csv
+    output_param: IICPARAMLIST.csv
 LDS:
     input_dir: D:\IGAGD\LDS\download
     output_dir: D:\IGAGD\LDS\upload

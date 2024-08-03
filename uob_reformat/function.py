@@ -111,7 +111,7 @@ class CollectParams(ABC):
         
     def get_extract_data(self, i: int, format_file: any) -> dict:
         
-        logging.info("Get Extract Data From File")
+        logging.info("Extract file")
         
         data = self.collect_data(i, format_file)
         return data

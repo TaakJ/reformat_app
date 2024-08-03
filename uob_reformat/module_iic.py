@@ -49,24 +49,30 @@ class ModuleIIC(CallFunction):
         return result
 
     def collect_data(self, i: int, format_file: any) -> dict:
+        
+        status = "failed"
+        self.logging[i].update({"function": "collect_data", "status": status})
+        try:
+            data = []
+            for line in format_file:
+                line = line.strip().replace('"','')
+                data += [re.sub(r'(?<!\w),', ",", line).split(",")]
+            
+            df = pd.DataFrame(data)
+            df.columns = df.iloc[0].values
+            df = df[1:]
+            df = df.reset_index(drop=True)
+            
+            if i == 0:
+                df = self.initial_data_type(df)
+            else:
+                df = self.initial_param_type(df)
+            
+        except Exception as err:
+            raise Exception(err)
 
-        module = self.logging[i]["module"]
-        logging.info(f'Collect Data for module: {module}')
+        status = "succeed"
+        self.logging[i].update({"data": df.to_dict("list"), "status": status})
         
-        self.logging[i].update({"function": "collect_data"})
+        logging.info(f'Collect data from file: {self.logging[i]["input_dir"]}, status: {status}')
         
-        data = []
-        for line in format_file:
-            line = line.strip().replace('"','')
-            data += [re.sub(r'(?<!\w),', ",", line).split(",")]
-        
-        df = pd.DataFrame(data)
-        df.columns = df.iloc[0].values
-        df = df[1:]
-        df = df.reset_index(drop=True)
-        print(df)
-        # change_df = self.initial_data_type(df)
-        
-        # self.logging[i].update({"status": status})
-        
-        # return {module: data}

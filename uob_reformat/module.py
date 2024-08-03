@@ -19,7 +19,7 @@ class Convert2File:
 
     async def check_source_file(self) -> None:
         
-        logging.info("Check Source file")
+        logging.info("Check source file")
         
         i = 0
         for input_dir in self.full_input:
@@ -41,7 +41,7 @@ class Convert2File:
                 record.update({"err": err})    
             self.logging += [record]
             
-            logging.info(f"Check Source file: {input_dir}, status: {status}")
+            logging.info(f"Check source file: {input_dir}, status: {status}")
             
         self.logging.pop(0)
         if [record for record in self.logging if "err" in record]:
@@ -49,32 +49,25 @@ class Convert2File:
         
     async def separate_data_file(self) -> None:
         
-        logging.info("Separate Data from file")
+        logging.info("Separate file from module")
         
         for i, record in enumerate(self.logging):
-            
             record.update({"function": "separate_data_from_file"})
             
             try:
-                input_dir = record["input_dir"]
-                types = Path(input_dir).suffix
+                types = Path(record["input_dir"]).suffix
                 status_file = record["status"]
                 
                 if status_file == "found":
                     if [".xlsx", ".xls"].__contains__(types):
-                        logging.info(f"Read format excel file: {input_dir}")
-                        data = self.read_excel_file(i)
-                        
+                        self.read_excel_file(i)
                     else:
-                        logging.info(f"Read format text/csv file: {input_dir}")
-                        data = self.read_file(i)
+                        self.read_file(i)
                 else:
                     continue
 
-                # status = "succeed"
-                # record.update({"data": data, "status": status})
-
             except Exception as err:
+                print(err)
                 record.update({"err": err})
             
             if "err" in record:
@@ -106,23 +99,76 @@ class Convert2File:
         
         try:
             input_dir = self.logging[i]["input_dir"]
+            
+            logging.info(f"Read format text/csv file: {input_dir}")
+            
             with open(input_dir, 'rb') as f:
                 file = f.read()
                 
             encoding_result = chardet.detect(file)
             encoding = encoding_result['encoding']
-            
             line = StringIO(file.decode(encoding))
             
-            data = self.get_extract_data(i, line)
-
+            ## call function collect data in module
+            self.get_extract_data(i, line)
+            
         except Exception as err:
             raise Exception(err)
         
         status = "succeed"
         self.logging[i].update({"status": status})
+    
+    def initial_data_type(self, df: pd.DataFrame) -> pd.DataFrame:
+        
+        try:
+            df = df.apply(lambda x: x.str.strip()).replace('', "NA")
+            # df[["CreateDate", "LastLogin", "LastUpdatedDate"]] = df[["CreateDate", "LastLogin", "LastUpdatedDate"]]\
+            #     .apply(pd.to_datetime, format="%Y%m%d%H%M%S", errors='coerce')
+            
+            df = df.astype({
+                    "ApplicationCode": object,
+                    "AccountOwner": object,
+                    "AccountName": object,
+                    "AccountType": object,
+                    "EntitlementName": object,
+                    "SecondEntitlementName": object,
+                    "ThirdEntitlementName": object,
+                    "AccountStatus": object,
+                    "IsPrivileged": object,
+                    "AccountDescription": object,
+                    "CreateDate": object,
+                    "LastLogin": object,
+                    "LastUpdatedDate": object,
+                    "AdditionalAttribute": object,})
+            
+            if "remark" in df.columns:
+                df = df.loc[df["remark"] != "Remove"]
+            else:
+                df["remark"] = "Insert"
 
-        return data
+        except Exception as err:
+            raise Exception(err)
+        
+        return df
+    
+    def initial_param_type(self, df: pd.DataFrame) -> pd.DataFrame:
+        try:
+            df = df.apply(lambda x: x.str.strip()).replace('', "NA")
+            
+            df = df.astype({
+                    "Parameter Name": object,
+                    "Code value": object,
+                    "Decode value": object,})
+            
+            if "remark" in df.columns:
+                df = df.loc[df["remark"] != "Remove"]
+            else:
+                df["remark"] = "Insert"
+
+        except Exception as err:
+            raise Exception(err)
+        
+        return df
 
     async def genarate_tmp_file(self) -> None:
         
@@ -131,43 +177,43 @@ class Convert2File:
         logging.info("Genarate Data to Tmp file")
 
         status = "failed"
-        
         for record in self.logging:
             try:
-                if record["module"] == "Target_file":
-                    try:
-                        data = record["data"]
-                        change_df = pd.DataFrame(data)
-                        change_df = self.initial_data_type(change_df)
+                print(record)
+                # if record["module"] == "Target_file":
+                #     try:
+                #         data = record["data"]
+                #         change_df = pd.DataFrame(data)
+                #         change_df = self.initial_data_type(change_df)
 
-                        ## read tmp file
-                        tmp_dir = join(Folder.TMP, self.module, self.date.strftime("%Y%m%d"))
-                        os.makedirs(tmp_dir, exist_ok=True)
-                        tmp_name = f"TMP_{Path(self.full_target).stem}.xlsx"
-                        full_tmp = join(tmp_dir, tmp_name)
-                        record.update({"input_dir": full_tmp})
+                #         ## read tmp file
+                #         tmp_dir = join(Folder.TMP, self.module, self.date.strftime("%Y%m%d"))
+                #         os.makedirs(tmp_dir, exist_ok=True)
+                #         tmp_name = f"TMP_{Path(self.full_target).stem}.xlsx"
+                #         full_tmp = join(tmp_dir, tmp_name)
+                #         record.update({"input_dir": full_tmp})
 
-                        ## crate tmp file
-                        self.create_workbook()
+                #         ## crate tmp file
+                #         self.create_workbook()
 
-                        ## set dataframe from tmp file
-                        data = self.sheet.values
-                        columns = next(data)[0:]
-                        tmp_df = pd.DataFrame(data, columns=columns)
-                        tmp_df = self.initial_data_type(tmp_df)
+                #         ## set dataframe from tmp file
+                #         data = self.sheet.values
+                #         columns = next(data)[0:]
+                #         tmp_df = pd.DataFrame(data, columns=columns)
+                #         tmp_df = self.initial_data_type(tmp_df)
 
-                        ## validate data change row by row
-                        cmp_df = self.compare_data(tmp_df, change_df)
-                        data_capture = self.data_change_capture(cmp_df)
+                #         ## validate data change row by row
+                #         cmp_df = self.compare_data(tmp_df, change_df)
+                #         data_capture = self.data_change_capture(cmp_df)
                         
-                        ## write tmp file
-                        status = self.write_worksheet(data_capture)
+                #         ## write tmp file
+                #         status = self.write_worksheet(data_capture)
 
-                    except Exception as err:
-                        raise Exception(err)
+                    # except Exception as err:
+                    #     raise Exception(err)
 
-                    record.update({"function": "genarate_tmp_file", "status": status})
-                    logging.info(f"Write Data to Tmp file status: {status}")
+                    # record.update({"function": "genarate_tmp_file", "status": status})
+                    # logging.info(f"Write Data to Tmp file status: {status}")
 
             except Exception as err:
                 record.update({"err": err})
@@ -212,43 +258,6 @@ class Convert2File:
 
         status = "succeed"
         self.logging[-1].update({"status": status})
-            
-    def initial_data_type(self, df: pd.DataFrame) -> pd.DataFrame:
-
-        status = "failed"
-        self.logging[-1].update({"function": "initial_data_type", "status": status})
-        
-        try:
-            df = df.astype({
-                    "ApplicationCode": object,
-                    "AccountOwner": object,
-                    "AccountName": object,
-                    "AccountType": object,
-                    "EntitlementName": object,
-                    "SecondEntitlementName": object,
-                    "ThirdEntitlementName": object,
-                    "AccountStatus": object,
-                    "IsPrivileged": object,
-                    "AccountDescription": object,
-                    "CreateDate": "datetime64[ms]",
-                    "LastLogin": "datetime64[ms]",
-                    "LastUpdatedDate": "datetime64[ms]",
-                    "AdditionalAttribute": object,})
-            df[["CreateDate", "LastLogin", "LastUpdatedDate"]] = df[["CreateDate", "LastLogin", "LastUpdatedDate"]]\
-                .apply(pd.to_datetime, format="%Y%m%d%H%M%S")
-
-            if "remark" in df.columns:
-                df = df.loc[df["remark"] != "Remove"]
-            else:
-                df["remark"] = "Insert"
-
-        except Exception as err:
-            raise Exception(err)
-
-        status = "succeed"
-        self.logging[-1].update({"status": status})
-
-        return df
 
     def compare_data(self, df, new_df) -> pd.DataFrame:
         
