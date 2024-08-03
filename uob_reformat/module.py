@@ -181,29 +181,29 @@ class Convert2File:
         status = "failed"
         for i, record in enumerate(self.logging):
             try:            
-                ## read tmp file
+                ## Read tmp file
                 tmp_dir = join(Folder.TMP, self.module, self.date.strftime("%Y%m%d"))
                 os.makedirs(tmp_dir, exist_ok=True)
                 tmp_name = f"TMP_{Path(record["full_target"]).stem}.xlsx"
                 full_tmp = join(tmp_dir, tmp_name)
                 record.update({"tmp_dir": full_tmp})
                 
-                ## set dataframe from tmp file 
+                ## Set dataframe from tmp file 
                 self.create_workbook(i)            
                 data = self.sheet.values
                 columns = next(data)[0:]
                 tmp_df = pd.DataFrame(data, columns=columns)
                 tmp_df = self.set_initial_data_type(i, tmp_df)
                 
-                ## set dataframe from raw file      
+                ## Set dataframe from raw file      
                 raw_df = pd.DataFrame(record["data"])
                 
-                ## validate data change row by row
-                cmp_df = self.compare_data(i, tmp_df, raw_df)
-                data_capture = self.data_change_capture(i, cmp_df)
+                ## Validate data change row by row
+                cmp_df = self.compare_dataframe(i, tmp_df, raw_df)
+                cdc = self.change_data_capture(i, cmp_df)
                         
-                ## write tmp file
-                status = self.write_worksheet(i, data_capture)
+                ## Write tmp file
+                status = self.write_worksheet(i, cdc)
 
             except Exception as err:
                 record.update({"err": err})
@@ -252,9 +252,9 @@ class Convert2File:
         status = "succeed"
         self.logging[i].update({"status": status})
 
-    def compare_data(self, i: int, df: pd.DataFrame, new_df: pd.DataFrame) -> pd.DataFrame:
+    def compare_dataframe(self, i: int, df: pd.DataFrame, new_df: pd.DataFrame) -> pd.DataFrame:
         
-        logging.info("Compare data")
+        logging.info("Compare dataframe")
         
         status = "failed"
         self.logging[i].update({"function": "compare_data", "status": status})
@@ -277,9 +277,9 @@ class Convert2File:
         self.logging[i].update({"status": status})
         return df
     
-    def data_change_capture(self, i: int, df: pd.DataFrame) -> dict:
+    def change_data_capture(self, i: int, df: pd.DataFrame) -> dict:
         
-        logging.info("Data change capture")
+        logging.info("Change data capture")
         
         status = "failed"
         self.logging[i].update({"function": "data_change_capture", "status": status})
@@ -289,9 +289,9 @@ class Convert2File:
         
         self.update_rows = {}
         self.remove_rows = []
-        
         if len(df.index) > len(self.new_df.index):
             self.remove_rows = [idx for idx in list(df.index) if idx not in list(self.new_df.index)]
+            
         try:
             i = 0
             for idx, row in enumerate(self.merge_index, 2):
@@ -326,55 +326,56 @@ class Convert2File:
             df = df.drop(["count"], axis=1)
             rows = 2
             df.index += rows
-            data_dict = df.to_dict(orient="index")
+            cdc = df.to_dict(orient="index")
             
         except Exception as err:
             raise Exception(err)
         
         status = "succeed"
         self.logging[i].update({"status": status})
-        return data_dict
+        return cdc
 
-    def write_worksheet(self, i: int, data_capture: dict) -> str:
+    def write_worksheet(self, i: int, cdc: dict) -> str:
         
         status = "failed"
         if self.create:
             self.sheet_name = f"RUN_TIME_{self.sheet_num}"
             self.sheet = self.workbook.create_sheet(self.sheet_name)
 
-        logging.info(f"Write to Sheet: {self.sheet_name}")
+        logging.info(f"Write to sheet: {self.sheet_name}")
 
         rows = 2
-        max_row = max(data_capture, default=0)
+        max_row = max(cdc, default=0)
         self.logging[i].update({"function": "write_worksheet", "sheet_name": self.sheet_name, "status": status,})
         
         try:
             # write column
-            for idx, col in enumerate(data_capture[rows].keys(), 1):
+            for idx, col in enumerate(cdc[rows].keys(), 1):
                 self.sheet.cell(row=1, column=idx).value = col
 
             ## write row
             while rows <= max_row:
-                for idx, col in enumerate(data_capture[rows].keys(), 1):
+                for idx, col in enumerate(cdc[rows].keys(), 1):
                     if col == "remark":
                         if rows in self.remove_rows:
-                            ## Remove
-                            write_row = (f"{data_capture[rows][col]} rows: ({rows}) in tmp file")
+                            ## remove row
+                            write_row = (f"{cdc[rows][col]} rows: ({rows}) in tmp file")
                         elif rows in self.update_rows.keys():
-                            ## Update / Insert
-                            write_row = f"{data_capture[rows][col]} rows: ({rows}) in tmp file, Updating records: ({self.update_rows[rows]})"
+                            ## update / insert row
+                            write_row = f"{cdc[rows][col]} rows: ({rows}) in tmp file, Updating records: ({self.update_rows[rows]})"
                         else:
-                            ## No Change
+                            ## no change row
                             write_row = f"No change rows: ({rows}) in Tmp file" ## No change row
                         logging.info(write_row)
-                    self.sheet.cell(row=rows, column=idx).value = data_capture[rows][col]
+                            
+                    self.sheet.cell(row=rows, column=idx).value = cdc[rows][col]
                 rows += 1
                 
         except KeyError as err:
             raise KeyError(f"Can not write rows: {err} in tmp file")
 
         ## save file
-        full_tmp = self.logging[i]["input_dir"]
+        full_tmp = self.logging[i]["tmp_dir"]
         self.sheet.title = self.sheet_name
         self.workbook.active = self.sheet
         self.workbook.move_sheet(self.workbook.active, offset=-self.sheet_num)
@@ -393,7 +394,7 @@ class Convert2File:
             try:
                 ## Set dataframe from tmp/raw file
                 if self.store_tmp is True:
-                    new_df = pd.read_excel(record["input_dir"], 
+                    new_df = pd.read_excel(record["tmp_dir"], 
                                     sheet_name=record["sheet_name"], 
                                     dtype=object)
                 else:
@@ -410,11 +411,11 @@ class Convert2File:
                 target_df = self.set_initial_data_type(i, target_df)
                 
                 ## Validate data change row by row
-                cmp_df = self.compare_data(i, target_df, new_df)
-                data_capture = self.data_change_capture(i, cmp_df)
+                cmp_df = self.compare_dataframe(i, target_df, new_df)
+                cdc = self.change_data_capture(i, cmp_df)
                 
                 ## Write csv file
-                status = self.write_csv(i, data_capture)
+                status = self.write_csv(i, cdc)
 
             except Exception as err:
                 record.update({"err": err})
@@ -455,10 +456,10 @@ class Convert2File:
         self.logging[i].update({"status": status})
         return df
     
-    def write_csv(self, i: int, data_capture: dict) -> str:
+    def write_csv(self, i: int, cdc: dict) -> str:
         
         full_target = self.logging[i]["full_target"]
-        logging.info(f"Write mode: {self.write_mode} in Target file: {full_target}")
+        logging.info(f"Write mode: {self.write_mode} in target file: {full_target}")
 
         status = "failed"
         self.logging[i].update({"function": "write_csv", "status": status})
@@ -480,7 +481,7 @@ class Convert2File:
                 for idx , _ in enumerate(last_row, 2):
                     rows.update({idx: next(row)})
                 
-                for idx, value in data_capture.items():
+                for idx, value in cdc.items():
                     if value.get("remark") is not None:
                         if idx in self.update_rows.keys():
                             logging.info(f'{value["remark"]} rows: ({idx}) in target file, Updating records: ({self.update_rows[idx]})')
@@ -490,7 +491,7 @@ class Convert2File:
                         elif idx in self.remove_rows:
                             continue
                     else:
-                        rows[idx] = data_capture[idx]
+                        rows[idx] = cdc[idx]
             
             with open(full_target, "w", newline="\n") as writer:
                 csvout = csv.DictWriter(
