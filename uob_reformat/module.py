@@ -285,7 +285,7 @@ class Convert2File:
     
     def data_change_capture(self, i: int, df: pd.DataFrame) -> dict:
         
-        logging.info("Data Change Capture")
+        logging.info("Data change capture")
         
         status = "failed"
         self.logging[i].update({"function": "data_change_capture", "status": status})
@@ -371,7 +371,7 @@ class Convert2File:
                             write_row = f"{data_capture[rows][col]} rows: ({rows}) in tmp file, Updating records: ({self.update_rows[rows]})"
                         else:
                             ## No change row
-                            write_row = f"No Change Rows: ({rows}) in Tmp file"
+                            write_row = f"No change rows: ({rows}) in Tmp file"
                         logging.info(write_row)
                     self.sheet.cell(row=rows, column=idx).value = data_capture[rows][col]
                 rows += 1
