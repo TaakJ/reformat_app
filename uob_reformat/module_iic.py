@@ -21,6 +21,7 @@ class ModuleIIC(CallFunction):
         try:
             ## set params from confog file
             self.collect_params()
+            
             ## backup file
             # self.backup()
             
@@ -49,17 +50,23 @@ class ModuleIIC(CallFunction):
 
     def collect_data(self, i: int, format_file: any) -> dict:
 
-        status = "failed"
         module = self.logging[i]["module"]
         logging.info(f'Collect Data for module: {module}')
         
-        self.logging[i].update({"function": "collect_data", "status": status})
+        self.logging[i].update({"function": "collect_data"})
         
         data = []
         for line in format_file:
-            data += [re.sub(r'(?<!\w),', ",", line.strip().replace('"','')).split(",")]
+            line = line.strip().replace('"','')
+            data += [re.sub(r'(?<!\w),', ",", line).split(",")]
         
-        status = "succeed"
-        self.logging[i].update({"status": status})
+        df = pd.DataFrame(data)
+        df.columns = df.iloc[0].values
+        df = df[1:]
+        df = df.reset_index(drop=True)
+        print(df)
+        # change_df = self.initial_data_type(df)
         
-        return {module: data}
+        # self.logging[i].update({"status": status})
+        
+        # return {module: data}

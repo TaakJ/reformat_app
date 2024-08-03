@@ -50,11 +50,10 @@ class Convert2File:
     async def separate_data_file(self) -> None:
         
         logging.info("Separate Data from file")
-
-        status = "failed"
+        
         for i, record in enumerate(self.logging):
             
-            record.update({"function": "separate_data_from_file", "status": status})
+            record.update({"function": "separate_data_from_file"})
             
             try:
                 input_dir = record["input_dir"]
@@ -72,8 +71,8 @@ class Convert2File:
                 else:
                     continue
 
-                status = "succeed"
-                record.update({"data": data, "status": status})
+                # status = "succeed"
+                # record.update({"data": data, "status": status})
 
             except Exception as err:
                 record.update({"err": err})
@@ -83,7 +82,8 @@ class Convert2File:
             
     def read_excel_file(self, i: int) -> any:
 
-        self.logging[i].update({"function": "read_excel_file"})
+        status = "failed"
+        self.logging[i].update({"function": "read_excel_file", "status": status})
         
         try:
             input_dir = self.logging[i]["input_dir"]
@@ -93,12 +93,16 @@ class Convert2File:
 
         except Exception as err:
             raise Exception(err)
-
+        
+        status = "succeed"
+        self.logging[i].update({"status": status})
+        
         return data
 
     def read_file(self, i: int) -> any:
 
-        self.logging[i].update({"function": "read_file"})
+        status = "failed"
+        self.logging[i].update({"function": "read_file", "status": status})
         
         try:
             input_dir = self.logging[i]["input_dir"]
@@ -110,12 +114,15 @@ class Convert2File:
             
             line = StringIO(file.decode(encoding))
             
-            #data = self.get_extract_data(i, line)
+            data = self.get_extract_data(i, line)
 
         except Exception as err:
             raise Exception(err)
+        
+        status = "succeed"
+        self.logging[i].update({"status": status})
 
-        return "data"
+        return data
 
     async def genarate_tmp_file(self) -> None:
         
@@ -124,8 +131,8 @@ class Convert2File:
         logging.info("Genarate Data to Tmp file")
 
         status = "failed"
+        
         for record in self.logging:
-            
             try:
                 if record["module"] == "Target_file":
                     try:
