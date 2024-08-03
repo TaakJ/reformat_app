@@ -291,7 +291,7 @@ class Convert2File:
         self.logging[i].update({"function": "data_change_capture", "status": status})
         
         def format_record(record):
-            return "\n".join("{!r} => {!r};".format(columns, values) for columns, values in record.items())
+            return "\n".join("{!r} : {!r};".format(columns, values) for columns, values in record.items())
         
         self.update_rows = {}
         self.remove_rows = []
@@ -312,7 +312,7 @@ class Convert2File:
                             else:
                                 ## Update
                                 if data[1][row] != change_data[1][row]:
-                                    record.update({data[0]: change_data[1][row]})
+                                    record.update({data[0]: f"{data[1][row]} => {change_data[1][row]}"})
                                 df.loc[row, data[0]] = change_data[1][row]
                                 df.loc[row, "remark"] = "Update"
                         else:
@@ -365,10 +365,10 @@ class Convert2File:
                     if col == "remark":
                         if rows in self.remove_rows:
                             ## Remove row
-                            write_row = (f"{data_capture[rows][col]} Rows: ({rows}) in Tmp file")
+                            write_row = (f"{data_capture[rows][col]} rows: ({rows}) in tmp file")
                         elif rows in self.update_rows.keys():
                             ## Update / Insert row
-                            write_row = f"{data_capture[rows][col]} Rows: ({rows}) in Tmp file, Updating records: {self.update_rows[rows]}"
+                            write_row = f"{data_capture[rows][col]} rows: ({rows}) in tmp file, Updating records: ({self.update_rows[rows]})"
                         else:
                             ## No change row
                             write_row = f"No Change Rows: ({rows}) in Tmp file"
@@ -488,7 +488,7 @@ class Convert2File:
                 for idx, value in data_capture.items():
                     if value.get("remark") is not None:
                         if idx in self.update_rows.keys():
-                            logging.info(f'{value["remark"]} Rows: ({idx}) in Target file, Updating records: {self.update_rows[idx]}')
+                            logging.info(f'{value["remark"]} rows: ({idx}) in target file, Updating records: ({self.update_rows[idx]})')
                             value.popitem()
                             rows.update({idx: value})
                             
