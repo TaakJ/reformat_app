@@ -113,14 +113,26 @@ class Convert2File:
         
         status = "succeed"
         self.logging[i].update({"status": status})
-    
-    def initial_data_type(self, df: pd.DataFrame) -> pd.DataFrame:
         
-        try:
-            df = df.apply(lambda x: x.str.strip()).replace('', "NA")
-            # df[["CreateDate", "LastLogin", "LastUpdatedDate"]] = df[["CreateDate", "LastLogin", "LastUpdatedDate"]]\
-            #     .apply(pd.to_datetime, format="%Y%m%d%H%M%S", errors='coerce')
+    def set_initial_data_type(self, i: int, df: pd.DataFrame) -> pd.DataFrame:
+        
+        self.logging[i].update({"function": "set_initial_data_type"})
+        input_dir = self.logging[i]["input_dir"]
+        
+        if re.search(r'Param', input_dir) is not None:
+            template_name = "Param Requirements.xlsx"
+            df = self.param_type(df)
+        else:
+            template_name = "Application Data Requirements.xlsx"
+            df = self.data_type(df)
             
+        self.logging[i].update({"template": template_name})
+        
+        return df
+        
+    def data_type(self, df: pd.DataFrame) -> pd.DataFrame:
+        try:
+            df = df.apply(lambda x: x.str.strip()).replace('', 'NA')
             df = df.astype({
                     "ApplicationCode": object,
                     "AccountOwner": object,
@@ -136,7 +148,6 @@ class Convert2File:
                     "LastLogin": object,
                     "LastUpdatedDate": object,
                     "AdditionalAttribute": object,})
-            
             if "remark" in df.columns:
                 df = df.loc[df["remark"] != "Remove"]
             else:
@@ -147,15 +158,13 @@ class Convert2File:
         
         return df
     
-    def initial_param_type(self, df: pd.DataFrame) -> pd.DataFrame:
+    def param_type(self, df: pd.DataFrame) -> pd.DataFrame:
         try:
-            df = df.apply(lambda x: x.str.strip()).replace('', "NA")
-            
+            df = df.apply(lambda x: x.str.strip()).replace('', 'NA')
             df = df.astype({
                     "Parameter Name": object,
                     "Code value": object,
                     "Decode value": object,})
-            
             if "remark" in df.columns:
                 df = df.loc[df["remark"] != "Remove"]
             else:
@@ -294,7 +303,7 @@ class Convert2File:
         
         if len(df.index) > len(self.new_df.index):
             self.remove_rows = [idx for idx in list(df.index) if idx not in list(self.new_df.index)]
-        
+            
         try:
             i = 0
             for idx, row in enumerate(self.merge_index, 2):
@@ -302,7 +311,7 @@ class Convert2File:
                     record = {}
                     for data, change_data in zip(df.items(), self.new_df.items()):
                         ## No Change
-                        if df.loc[row, "count"] != 15:
+                        if df.loc[row, "count"] not in [3, 15]:
                             if df.loc[row, "count"] < 1:
                                 df.loc[row, data[0]] = data[1][row]
                                 df.loc[row, "remark"] = "No_change"
@@ -342,7 +351,6 @@ class Convert2File:
 
     def write_worksheet(self, i: int, data_capture: dict) -> str:
         
-        # data_capture
         status = "failed"
         if self.create:
             self.sheet_name = f"RUN_TIME_{self.sheet_num}"
@@ -350,93 +358,111 @@ class Convert2File:
 
         logging.info(f"Write to Sheet: {self.sheet_name}")
 
-        # rows = 2
-        # max_row = max(change_data, default=0)
-        # self.logging[-1].update({"function": "write_worksheet", "sheet_name": self.sheet_name, "status": status,})
+        rows = 2
+        max_row = max(data_capture, default=0)
+        self.logging[i].update({"function": "write_worksheet", "sheet_name": self.sheet_name, "status": status,})
         
-        # try:
-        #     # write column
-        #     for idx, col in enumerate(change_data[rows].keys(), 1):
-        #         self.sheet.cell(row=1, column=idx).value = col
+        try:
+            # write column
+            for idx, col in enumerate(data_capture[rows].keys(), 1):
+                self.sheet.cell(row=1, column=idx).value = col
 
-        #     ## write row
-        #     while rows <= max_row:
-        #         for idx, col in enumerate(change_data[rows].keys(), 1):
-
-        #             if col in ["CreateDate", "LastLogin", "LastUpdatedDate"]:
-        #                 change_data[rows][col] = change_data[rows][col].strftime("%Y%m%d%H%M%S")
+            ## write row
+            while rows <= max_row:
+                for idx, col in enumerate(data_capture[rows].keys(), 1):
+                    # if col in ["CreateDate", "LastLogin", "LastUpdatedDate"]:
+                    #     data_capture[rows][col] = data_capture[rows][col].strftime("%Y%m%d%H%M%S")
                         
-        #             self.sheet.cell(row=rows, column=idx).value = change_data[rows][col]
+                    self.sheet.cell(row=rows, column=idx).value = data_capture[rows][col]
 
-        #             if col == "remark":
-        #                 if rows in self.remove_rows:
-        #                     ## Remove row
-        #                     write_row = (f"{change_data[rows][col]} Rows: ({rows}) in Tmp file")
-        #                 elif rows in self.update_rows.keys():
-        #                     ## Update / Insert row
-        #                     write_row = f"{change_data[rows][col]} Rows: ({rows}) in Tmp file Updating records: {self.update_rows[rows]}"
-        #                 else:
-        #                     ## No change row
-        #                     write_row = f"No Change Rows: ({rows}) in Tmp file"
-        #                 logging.info(write_row)
-        #         rows += 1
+                    if col == "remark":
+                        if rows in self.remove_rows:
+                            ## Remove row
+                            write_row = (f"{data_capture[rows][col]} Rows: ({rows}) in Tmp file")
+                        elif rows in self.update_rows.keys():
+                            ## Update / Insert row
+                            write_row = f"{data_capture[rows][col]} Rows: ({rows}) in Tmp file Updating records: {self.update_rows[rows]}"
+                        else:
+                            ## No change row
+                            write_row = f"No Change Rows: ({rows}) in Tmp file"
+                        logging.info(write_row)
+                rows += 1
 
-        # except KeyError as err:
-        #     raise KeyError(f"Can not Write rows: {err} in Tmp file")
+        except KeyError as err:
+            raise KeyError(f"Can not Write rows: {err} in Tmp file")
 
-        # ## save file
-        # full_tmp = self.logging[-1]["input_dir"]
-        # self.sheet.title = self.sheet_name
-        # self.workbook.active = self.sheet
-        # self.workbook.move_sheet(self.workbook.active, offset=-self.sheet_num)
-        # self.workbook.save(full_tmp)
+        ## save file
+        full_tmp = self.logging[i]["input_dir"]
+        self.sheet.title = self.sheet_name
+        self.workbook.active = self.sheet
+        self.workbook.move_sheet(self.workbook.active, offset=-self.sheet_num)
+        self.workbook.save(full_tmp)
 
-        # status = "succeed"
-        # self.logging[-1].update({"status": status})
+        status = "succeed"
+        self.logging[i].update({"status": status})
 
-        # return status
+        return status
 
     async def genarate_target_file(self) -> None:
 
         logging.info("Genarate Data to Target file")
 
         status = "failed"
-        for record in self.logging:
+        for i, record in enumerate(self.logging):
             try:
+                ## read tmp file or dataframe
+                if self.store_tmp is True:
+                    df = pd.read_excel(record["input_dir"], 
+                                    sheet_name=record["sheet_name"], 
+                                    dtype=object)
+                else:
+                    df = pd.DataFrame(record["data"])
+                df = self.set_initial_data_type(i, df)
+                
+                ## read csv file
+                print(record["template"])
+                # try:
+                #     target_df = self.read_csv_file(self.full_target)
+                    
+                # except FileNotFoundError:
+                #     ## move from template file to target file
+                #     template_name = join(Folder.TEMPLATE, record["template"])
+                #     target_df = pd.read_excel(template_name)
+                #     target_df.to_csv(self.full_target, index=None, header=True, sep=",")
+                
+                # if record["module"] == "Target_file":
+                #     try:
+                #         ## read tmp file or dataframe
+                #         if self.store_tmp is True:
+                #             full_tmp = record["input_dir"]
+                #             sheet_name = record["sheet_name"]
+                #             change_df = pd.read_excel(full_tmp, sheet_name=sheet_name, dtype=object)
+                #         else:
+                #             data = record["data"]
+                #             change_df = pd.DataFrame(data)
+                #         change_df = self.initial_data_type(change_df)
 
-                if record["module"] == "Target_file":
-                    try:
-                        ## read tmp file or dataframe
-                        if self.store_tmp is True:
-                            full_tmp = record["input_dir"]
-                            sheet_name = record["sheet_name"]
-                            change_df = pd.read_excel(full_tmp, sheet_name=sheet_name, dtype=object)
-                        else:
-                            data = record["data"]
-                            change_df = pd.DataFrame(data)
-                        change_df = self.initial_data_type(change_df)
-
-                        ## read csv file
-                        try:
-                            target_df = self.read_csv_file(self.full_target)
+                #         ## read csv file
+                #         try:
+                #             target_df = self.read_csv_file(self.full_target)
                             
-                        except FileNotFoundError:
-                            ## move from template file to target file
-                            template_name = join(Folder.TEMPLATE, "Application Data Requirements.xlsx")
-                            target_df = pd.read_excel(template_name)
-                            target_df.to_csv(self.full_target, index=None, header=True, sep=",")
+                #         except FileNotFoundError:
+                #             ## move from template file to target file
+                #             template_name = join(Folder.TEMPLATE, "Application Data Requirements.xlsx")
+                #             target_df = pd.read_excel(template_name)
+                #             target_df.to_csv(self.full_target, index=None, header=True, sep=",")
                             
-                        ## optimize data
-                        data = self.optimize_data(target_df, change_df)
+                #         ## optimize data
+                #         data = self.optimize_data(target_df, change_df)
                         
-                        ## write csv file
-                        status = self.write_csv(self.full_target, data)
+                #         ## write csv file
+                #         status = self.write_csv(self.full_target, data)
 
-                    except Exception as err:
-                        raise Exception(err)
+                #     except Exception as err:
+                #         raise Exception(err)
 
-                    record.update({"function": "genarate_target_file", "state": status})
-                    logging.info(f"Genarate to Target file status: {status}")
+                #     record.update({"function": "genarate_target_file", "state": status})
+                #     logging.info(f"Genarate to Target file status: {status}")
 
             except Exception as err:
                 record.update({"err": err})

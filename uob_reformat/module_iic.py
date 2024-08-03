@@ -30,7 +30,7 @@ class ModuleIIC(CallFunction):
             await self.separate_data_file()
             if self.store_tmp is True:
                 await self.genarate_tmp_file()
-            # await self.genarate_target_file()
+            await self.genarate_target_file()
 
         except CustomException as err:
             logging.error('See Error Details: log_error.log')
@@ -62,23 +62,13 @@ class ModuleIIC(CallFunction):
             df.columns = df.iloc[0].values
             df = df[1:]
             df = df.reset_index(drop=True)
-            
-            input_dir = self.logging[i]["input_dir"]
-            
-            if re.search(r'Param', input_dir) is not None:
-                template_name = "Param Requirements.xlsx"
-                df = self.initial_param_type(df)
-                inital_type = 2
-            else:
-                template_name = "Application Data Requirements.xlsx"
-                df = self.initial_data_type(df)
-                inital_type = 1
+            df = self.set_initial_data_type(i, df)
             
         except Exception as err:
             raise Exception(err)
 
         status = "succeed"
-        self.logging[i].update({"data": df.to_dict("list"), "inital_type": inital_type, "template": template_name, "status": status})
+        self.logging[i].update({"data": df.to_dict("list"), "status": status})
         
         logging.info(f'Collect data from file: {self.logging[i]["input_dir"]}, status: {status}')
         
