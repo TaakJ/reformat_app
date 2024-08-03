@@ -52,6 +52,7 @@ class ModuleIIC(CallFunction):
         
         status = "failed"
         self.logging[i].update({"function": "collect_data", "status": status})
+        
         try:
             data = []
             for line in format_file:
@@ -68,6 +69,5 @@ class ModuleIIC(CallFunction):
 
         status = "succeed"
         self.logging[i].update({"data": df.to_dict("list"), "status": status})
-        
         logging.info(f'Collect data from file: {self.logging[i]["input_dir"]}, status: {status}')
         
