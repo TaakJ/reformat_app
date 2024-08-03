@@ -185,20 +185,15 @@ class Convert2File:
                 tmp_dir = join(Folder.TMP, self.module, self.date.strftime("%Y%m%d"))
                 os.makedirs(tmp_dir, exist_ok=True)
                 tmp_name = f"TMP_{Path(record["full_target"]).stem}.xlsx"
-                full_tmp = join(tmp_dir, tmp_name)                
-                
-                record.update({"input_dir": full_tmp})
+                full_tmp = join(tmp_dir, tmp_name)
+                record.update({"tmp_dir": full_tmp})
                 
                 ## set dataframe from tmp file 
                 self.create_workbook(i)            
                 data = self.sheet.values
                 columns = next(data)[0:]
                 tmp_df = pd.DataFrame(data, columns=columns)
-                
-                if record["inital_type"] == 2:
-                    tmp_df = self.initial_param_type(tmp_df)
-                else:
-                    tmp_df = self.initial_data_type(tmp_df)
+                tmp_df = self.set_initial_data_type(i, tmp_df)
                 
                 ## set dataframe from raw file      
                 raw_df = pd.DataFrame(record["data"])
@@ -221,8 +216,8 @@ class Convert2File:
             
     def create_workbook(self, i:int) -> None:
 
-        full_tmp = self.logging[i]["input_dir"]
-        logging.info(f"Create Tmp file: {full_tmp}")
+        full_tmp = self.logging[i]["tmp_dir"]
+        logging.info(f"Create tmp file: {full_tmp}")
 
         status = "failed"
         self.logging[i].update({"function": "create_workbook", "status": status})
@@ -265,13 +260,12 @@ class Convert2File:
         self.logging[i].update({"function": "compare_data", "status": status})
         
         try:
-            ## Merge index.
+            ## Merge index
             self.merge_index = np.union1d(df.index, new_df.index)
             ## As starter dataframe for compare
             df = df.reindex(index=self.merge_index, columns=df.columns).iloc[:,:-1]
             ## Change data / new data
             self.new_df = new_df.reindex(index=self.merge_index, columns=new_df.columns).iloc[:,:-1]
-            
             ## Compare data
             df["count"] = pd.DataFrame(np.where(df.ne(self.new_df), True, df), index=df.index, columns=df.columns)\
                 .apply(lambda x: (x == True).sum(), axis=1)
@@ -364,19 +358,20 @@ class Convert2File:
                 for idx, col in enumerate(data_capture[rows].keys(), 1):
                     if col == "remark":
                         if rows in self.remove_rows:
-                            ## Remove row
+                            ## Remove
                             write_row = (f"{data_capture[rows][col]} rows: ({rows}) in tmp file")
                         elif rows in self.update_rows.keys():
-                            ## Update / Insert row
+                            ## Update / Insert
                             write_row = f"{data_capture[rows][col]} rows: ({rows}) in tmp file, Updating records: ({self.update_rows[rows]})"
                         else:
-                            ## No change row
-                            write_row = f"No change rows: ({rows}) in Tmp file"
+                            ## No Change
+                            write_row = f"No change rows: ({rows}) in Tmp file" ## No change row
                         logging.info(write_row)
                     self.sheet.cell(row=rows, column=idx).value = data_capture[rows][col]
                 rows += 1
+                
         except KeyError as err:
-            raise KeyError(f"Can not Write rows: {err} in Tmp file")
+            raise KeyError(f"Can not write rows: {err} in tmp file")
 
         ## save file
         full_tmp = self.logging[i]["input_dir"]
@@ -396,7 +391,7 @@ class Convert2File:
         status = "failed"
         for i, record in enumerate(self.logging):
             try:
-                ## set dataframe from tmp/raw file
+                ## Set dataframe from tmp/raw file
                 if self.store_tmp is True:
                     new_df = pd.read_excel(record["input_dir"], 
                                     sheet_name=record["sheet_name"], 
@@ -405,7 +400,7 @@ class Convert2File:
                     new_df = pd.DataFrame(record["data"])
                 new_df = self.set_initial_data_type(i, new_df)
                 
-                ## set dataframe from target file
+                ## Set dataframe from target file
                 try:
                     target_df = self.read_csv_file(i)
                 except FileNotFoundError:
@@ -414,11 +409,11 @@ class Convert2File:
                     target_df.to_csv(record["full_target"], index=None, header=True, sep=",")
                 target_df = self.set_initial_data_type(i, target_df)
                 
-                ## validate data change row by row
+                ## Validate data change row by row
                 cmp_df = self.compare_data(i, target_df, new_df)
                 data_capture = self.data_change_capture(i, cmp_df)
                 
-                ## write csv file
+                ## Write csv file
                 status = self.write_csv(i, data_capture)
 
             except Exception as err:
