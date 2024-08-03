@@ -99,12 +99,10 @@ class Convert2File:
         
         try:
             input_dir = self.logging[i]["input_dir"]
-            
             logging.info(f"Read format text/csv file: {input_dir}")
             
             with open(input_dir, 'rb') as f:
                 file = f.read()
-                
             encoding_result = chardet.detect(file)
             encoding = encoding_result['encoding']
             line = StringIO(file.decode(encoding))
