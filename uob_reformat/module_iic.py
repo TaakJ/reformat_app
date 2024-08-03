@@ -28,8 +28,8 @@ class ModuleIIC(CallFunction):
             ## step run function
             await self.check_source_file()
             await self.separate_data_file()
-            # if self.store_tmp is True:
-            #     await self.genarate_tmp_file()
+            if self.store_tmp is True:
+                await self.genarate_tmp_file()
             # await self.genarate_target_file()
 
         except CustomException as err:
@@ -63,10 +63,12 @@ class ModuleIIC(CallFunction):
             df = df[1:]
             df = df.reset_index(drop=True)
             
-            if i == 0:
-                df = self.initial_data_type(df)
-            else:
+            input_dir = self.logging[i]["input_dir"]
+            
+            if re.search(r'_Param', input_dir) is not None:
                 df = self.initial_param_type(df)
+            else:
+                df = self.initial_data_type(df)
             
         except Exception as err:
             raise Exception(err)

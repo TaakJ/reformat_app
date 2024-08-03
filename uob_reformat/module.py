@@ -21,8 +21,7 @@ class Convert2File:
         
         logging.info("Check source file")
         
-        i = 0
-        for input_dir in self.full_input:
+        for input_dir, full_target in zip(self.full_input, self.full_target):
             if glob.glob(input_dir, recursive=True):
                 status = "found"
                 err = None
@@ -32,10 +31,9 @@ class Convert2File:
                     
             record = {"module": self.module,
                     "input_dir": input_dir,
-                    "full_target": self.full_target[i],
+                    "full_target": full_target,
                     "function": "check_source_file",
                     "status": status,}
-            i += 1
             
             if err is not None:
                 record.update({"err": err})    
@@ -67,7 +65,6 @@ class Convert2File:
                     continue
 
             except Exception as err:
-                print(err)
                 record.update({"err": err})
             
             if "err" in record:
@@ -175,9 +172,22 @@ class Convert2File:
         logging.info("Genarate Data to Tmp file")
 
         status = "failed"
-        for record in self.logging:
+        for i, record in enumerate(self.logging):
             try:
-                print(record)
+                data = record["data"]
+                change_df = pd.DataFrame(data)
+                
+                ## read tmp file
+                tmp_dir = join(Folder.TMP, self.module, self.date.strftime("%Y%m%d"))
+                os.makedirs(tmp_dir, exist_ok=True)
+                tmp_name = f"TMP_{Path(record["full_target"]).stem}.xlsx"
+                full_tmp = join(tmp_dir, tmp_name)
+                
+                record.update({"input_dir": full_tmp})
+                
+                ## crate tmp file
+                self.create_workbook(i)
+                
                 # if record["module"] == "Target_file":
                 #     try:
                 #         data = record["data"]
@@ -219,43 +229,44 @@ class Convert2File:
             if "err" in record:
                 raise CustomException(err=self.logging)
             
-    def create_workbook(self) -> None:
+    def create_workbook(self, i:int) -> None:
 
-        full_tmp = self.logging[-1]["input_dir"]
+        full_tmp = self.logging[i]["input_dir"]
         logging.info(f"Create Tmp file: {full_tmp}")
 
         status = "failed"
-        self.logging[-1].update({"function": "create_workbook", "status": status})
+        self.logging[i].update({"function": "create_workbook", "status": status})
 
-        try:
-            self.create = False
-            self.workbook = openpyxl.load_workbook(full_tmp)
-            get_sheet = self.workbook.get_sheet_names()
-            self.sheet_num = len(get_sheet)
-            self.sheet_name = f"RUN_TIME_{self.sheet_num - 1}"
+        # try:
+        #     self.create = False
+        #     self.workbook = openpyxl.load_workbook(full_tmp)
+        #     get_sheet = self.workbook.get_sheet_names()
+        #     self.sheet_num = len(get_sheet)
+        #     self.sheet_name = f"RUN_TIME_{self.sheet_num - 1}"
 
-            if self.sheet_name in get_sheet:
-                self.create = True
-                self.sheet = self.workbook.get_sheet_by_name(self.sheet_name)
-            else:
-                self.sheet = self.workbook.get_sheet_by_name("Field Name")
+        #     if self.sheet_name in get_sheet:
+        #         self.create = True
+        #         self.sheet = self.workbook.get_sheet_by_name(self.sheet_name)
+        #     else:
+        #         self.sheet = self.workbook.get_sheet_by_name("Field Name")
 
-        except FileNotFoundError:
-            template_name = "Application Data Requirements.xlsx"
-            full_template = join(Folder.TEMPLATE, template_name)
-            try:
-                if not glob.glob(full_tmp, recursive=True):
-                    shutil.copy2(full_template, full_tmp)
-            except:
-                raise
+        # except FileNotFoundError:
+        #     print("OK")
+            # template_name = "Application Data Requirements.xlsx"
+            # full_template = join(Folder.TEMPLATE, template_name)
+            # try:
+            #     if not glob.glob(full_tmp, recursive=True):
+            #         shutil.copy2(full_template, full_tmp)
+            # except:
+            #     raise
 
-            self.workbook = openpyxl.load_workbook(full_tmp)
-            self.sheet = self.workbook.get_sheet_by_name("Field Name")
-            self.sheet_name = "RUN_TIME_1"
-            self.sheet_num = 1
+        #     self.workbook = openpyxl.load_workbook(full_tmp)
+        #     self.sheet = self.workbook.get_sheet_by_name("Field Name")
+        #     self.sheet_name = "RUN_TIME_1"
+        #     self.sheet_num = 1
 
-        status = "succeed"
-        self.logging[-1].update({"status": status})
+        # status = "succeed"
+        # self.logging[i].update({"status": status})
 
     def compare_data(self, df, new_df) -> pd.DataFrame:
         
