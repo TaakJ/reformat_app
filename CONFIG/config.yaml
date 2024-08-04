@@ -41,7 +41,5 @@ LMT:
 MOC:
     input_dir: D:\IGAGD\MOC\download
     output_dir: D:\IGAGD\MOC\upload
-    input_file: MOCTH.xlsx
-    output_file: MOCIGAWINT.csv
-    input_param: MOCTH_Param.csv
-    output_param: MOCPARAMLIST.csv
+    input_file: MOCTH.csv, MOCTH_Param.csv
+    output_file: MOCIGAWINT.csv, MOCPARAMLIST.csv
