@@ -22,29 +22,47 @@ class Convert2File:
         
         logging.info("Check source file")
         
-        for input_dir, full_target in zip(self.full_input, self.full_target):
-            if glob.glob(input_dir, recursive=True):
-                status = "found"
-                err = None
-            else:
-                status = "not_found"
-                err = f"File Not Found {input_dir}"
+        for i, record in enumerate(self.logging):
+            record.update({"function": "check_source_file"})
+            
+            try:
+                for input_dir, full_target in zip(record["input_dir"], record["full_target"]):
+                    if glob.glob(input_dir, recursive=True):
+                        status = "found"
+                        err = None
+                    else:
+                        status = "not_found"
+                        err = f"File Not Found {input_dir}"
+                
+                # record = {"i": i,"input_dir": input_dir, "status": status}
+            
+                
+                print(record)
+                
                     
-            record = {"module": self.module,
-                    "input_dir": input_dir,
-                    "full_target": full_target,
-                    "function": "check_source_file",
-                    "status": status,}
+            except Exception as err:
+                record.update({"err": err})
+                
+            logging.info(f"Check source file: {record["input_dir"]}, status: {status}")
+                
+            if "err" in record:
+                raise CustomException(err=self.logging)
             
-            if err is not None:
-                record.update({"err": err})    
-            self.logging += [record]
+        #     record = {"module": self.module,
+        #             "input_dir": input_dir,
+        #             "full_target": full_target,
+        #             "function": "check_source_file",
+        #             "status": status,}
             
-            logging.info(f"Check source file: {input_dir}, status: {status}")
+        #     if err is not None:
+        #         record.update({"err": err})    
+        #     self.logging += [record]
             
-        self.logging.pop(0)
-        if [record for record in self.logging if "err" in record]:
-            raise CustomException(err=self.logging)
+        #     logging.info(f"Check source file: {input_dir}, status: {status}")
+            
+        # self.logging.pop(0)
+        # if [record for record in self.logging if "err" in record]:
+        #     raise CustomException(err=self.logging)
         
     async def separate_data_file(self) -> None:
         
