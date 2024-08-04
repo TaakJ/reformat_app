@@ -26,8 +26,10 @@ ICA:
 IIC:
     input_dir: D:\IGAGD\IIC\download
     output_dir: D:\IGAGD\IIC\upload
-    input_file: IICTH.csv, IICTH_Param.csv
-    output_file: IICIGAWINT.csv, IICPARAMLIST.csv
+    # input_file: IICTH.csv, IICTH_Param.csv
+    # output_file: IICIGAWINT.csv, IICPARAMLIST.csv
+    input_file: IICTH.csv
+    output_file: IICIGAWINT.csv
 LDS:
     input_dir: D:\IGAGD\LDS\download
     output_dir: D:\IGAGD\LDS\upload

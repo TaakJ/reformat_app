@@ -386,9 +386,9 @@ class Convert2File:
             try:
                 ## Set dataframe from tmp/raw file
                 if self.store_tmp is True:
-                    new_df = pd.read_excel(record["full_tmp"], 
-                                    sheet_name=record["sheet_name"], 
-                                    dtype=object)
+                    data = self.sheet.values
+                    columns = next(data)[0:]
+                    new_df = pd.DataFrame(data, columns=columns)
                 else:
                     new_df = pd.DataFrame(record["data"])
                 new_df = self.set_initial_data_type(i, new_df)
@@ -403,7 +403,7 @@ class Convert2File:
                     target_df.to_csv(record["full_target"], index=None, header=True, sep=",")
                 target_df = self.set_initial_data_type(i, target_df)
                 
-                ## Validate data change row by row
+                # Validate data change row by row
                 cmp_df = self.comparing_dataframes(i, target_df, new_df)
                 cdc = self.change_data_capture(i, cmp_df)
                 
