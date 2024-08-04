@@ -22,47 +22,21 @@ class Convert2File:
         
         logging.info("Check source file")
         
-        for i, record in enumerate(self.logging):
+        for record in self.logging:
             record.update({"function": "check_source_file"})
+            full_input = record["full_input"]
             
-            try:
-                for input_dir, full_target in zip(record["input_dir"], record["full_target"]):
-                    if glob.glob(input_dir, recursive=True):
-                        status = "found"
-                        err = None
-                    else:
-                        status = "not_found"
-                        err = f"File Not Found {input_dir}"
-                
-                # record = {"i": i,"input_dir": input_dir, "status": status}
+            if glob.glob(full_input, recursive=True):
+                status = "found"
+            else:
+                status = "not_found"
+                record.update({"err": f"File not found {full_input}"})
             
-                
-                print(record)
-                
-                    
-            except Exception as err:
-                record.update({"err": err})
-                
-            logging.info(f"Check source file: {record["input_dir"]}, status: {status}")
+            record.update({"status": status})
+            logging.info(f"Check source file: {full_input}, status: {status}")
                 
             if "err" in record:
                 raise CustomException(err=self.logging)
-            
-        #     record = {"module": self.module,
-        #             "input_dir": input_dir,
-        #             "full_target": full_target,
-        #             "function": "check_source_file",
-        #             "status": status,}
-            
-        #     if err is not None:
-        #         record.update({"err": err})    
-        #     self.logging += [record]
-            
-        #     logging.info(f"Check source file: {input_dir}, status: {status}")
-            
-        # self.logging.pop(0)
-        # if [record for record in self.logging if "err" in record]:
-        #     raise CustomException(err=self.logging)
         
     async def separate_data_file(self) -> None:
         
@@ -72,7 +46,7 @@ class Convert2File:
             record.update({"function": "separate_data_from_file"})
             
             try:
-                types = Path(record["input_dir"]).suffix
+                types = Path(record["full_input"]).suffix
                 status_file = record["status"]
                 
                 if status_file == "found":
@@ -95,8 +69,8 @@ class Convert2File:
         self.logging[i].update({"function": "read_excel_file", "status": status})
         
         try:
-            input_dir = self.logging[i]["input_dir"]
-            workbook = xlrd.open_workbook(input_dir)
+            full_input = self.logging[i]["full_input"]
+            workbook = xlrd.open_workbook(full_input)
             
             data = self.get_extract_data(i, workbook)
 
@@ -114,10 +88,10 @@ class Convert2File:
         self.logging[i].update({"function": "read_file", "status": status})
         
         try:
-            input_dir = self.logging[i]["input_dir"]
-            logging.info(f"Read format text/csv file: {input_dir}")
+            full_input = self.logging[i]["full_input"]
+            logging.info(f"Read format text/csv file: {full_input}")
             
-            with open(input_dir, 'rb') as f:
+            with open(full_input, 'rb') as f:
                 file = f.read()
             encoding_result = chardet.detect(file)
             encoding = encoding_result['encoding']
@@ -135,9 +109,9 @@ class Convert2File:
     def set_initial_data_type(self, i: int, df: pd.DataFrame) -> pd.DataFrame:
         
         self.logging[i].update({"function": "set_initial_data_type"})
-        input_dir = self.logging[i]["input_dir"]
+        full_input = self.logging[i]["full_input"]
         
-        if re.search(r'Param', input_dir) is not None:
+        if re.search(r'Param', full_input) is not None:
             template_name = "Param Requirements.xlsx"
             df = self.param_type(df)
         else:
@@ -204,7 +178,7 @@ class Convert2File:
                 os.makedirs(tmp_dir, exist_ok=True)
                 tmp_name = f"TMP_{Path(record["full_target"]).stem}.xlsx"
                 full_tmp = join(tmp_dir, tmp_name)
-                record.update({"tmp_dir": full_tmp})
+                record.update({"full_tmp": full_tmp})
                 
                 ## Set dataframe from tmp file 
                 self.create_workbook(i)            
@@ -234,7 +208,7 @@ class Convert2File:
             
     def create_workbook(self, i:int) -> None:
 
-        full_tmp = self.logging[i]["tmp_dir"]
+        full_tmp = self.logging[i]["full_tmp"]
         logging.info(f"Create tmp file: {full_tmp}")
 
         status = "failed"
@@ -393,7 +367,7 @@ class Convert2File:
             raise KeyError(f"Can not write rows: {err} in tmp file")
 
         ## save file
-        full_tmp = self.logging[i]["tmp_dir"]
+        full_tmp = self.logging[i]["full_tmp"]
         self.sheet.title = self.sheet_name
         self.workbook.active = self.sheet
         self.workbook.move_sheet(self.workbook.active, offset=-self.sheet_num)
@@ -412,7 +386,7 @@ class Convert2File:
             try:
                 ## Set dataframe from tmp/raw file
                 if self.store_tmp is True:
-                    new_df = pd.read_excel(record["tmp_dir"], 
+                    new_df = pd.read_excel(record["full_tmp"], 
                                     sheet_name=record["sheet_name"], 
                                     dtype=object)
                 else:

@@ -32,15 +32,16 @@ class CollectLog(ABC):
 
 class CollectParams(ABC):
     
+    def collet_logging(self):
+        print("OK")
+    
     def collect_params(self) -> None:
         
         logging.info(f'Set parameter from config file for module: {self.module}')
         
+        record = []
         status = "failed"
-        record = {"module": self.module, "function": "collect_params", "status": status}
-        
-        full_input = []
-        full_target= []
+        data = {"module": self.module, "function": "collect_params", "status": status}
         try:
             ## setup input dir / input file
             input_dir   = CONFIG[self.module]["input_dir"]
@@ -55,22 +56,30 @@ class CollectParams(ABC):
                         else join(d, f"{Path(x.strip()).stem}_{suffix}.csv") \
                         for x in f.split(",")]
             
-            ## mapping_confing
+            ## set logging
             i = 1
             for _input, _target in zip(set_input(input_dir, input_file), set_target(output_dir, output_file)):
                 for x in self.select_files:
                     if int(x) == i:
-                        full_input += [_input]
-                        full_target += [_target]
+                        status = "succeed"
+                        if set(('full_input', 'full_target')).issubset(data):
+                            copy_data =  data.copy()
+                            copy_data.update({"full_input": _input, 
+                                            "full_target": _target,
+                                            "status": status})
+                            record += [copy_data]
+                            
+                        else:
+                            data.update({"full_input": _input,
+                                        "full_target": _target,
+                                        "status": status})
+                            record += [data]
                 i += 1
                 
-            status = "succeed"
-            record.update({"input_dir": full_input, "full_target": full_target, "status": status})
-            
         except Exception as err:
             record.update({"err": err})
         
-        self.logSetter([record])
+        self.logSetter(record)
         
         if "err" in record:
             raise CustomException(err=self.logging)

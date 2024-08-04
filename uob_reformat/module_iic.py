@@ -27,7 +27,7 @@ class ModuleIIC(CallFunction):
             
             ## step run function
             await self.check_source_file()
-            # await self.separate_data_file()
+            await self.separate_data_file()
             # if self.store_tmp is True:
             #     await self.genarate_tmp_file()
             # await self.genarate_target_file()
@@ -69,5 +69,5 @@ class ModuleIIC(CallFunction):
 
         status = "succeed"
         self.logging[i].update({"data": df.to_dict("list"), "status": status})
-        logging.info(f'Collect data from file: {self.logging[i]["input_dir"]}, status: {status}')
+        logging.info(f'Collect data from file: {self.logging[i]["full_input"]}, status: {status}')
         

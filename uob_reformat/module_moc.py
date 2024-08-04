@@ -69,4 +69,4 @@ class ModuleMOC(CallFunction):
 
         status = "succeed"
         self.logging[i].update({"data": df.to_dict("list"), "status": status})
-        logging.info(f'Collect data from file: {self.logging[i]["input_dir"]}, status: {status}')
+        logging.info(f'Collect data from file: {self.logging[i]["full_input"]}, status: {status}')
