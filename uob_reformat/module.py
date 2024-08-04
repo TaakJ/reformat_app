@@ -387,34 +387,30 @@ class Convert2File:
                 ## Set dataframe from tmp/raw file
                 if self.store_tmp is True:
                     workbook = openpyxl.load_workbook(record["full_tmp"])
-                    sheet = self.workbook.get_sheet_by_name(record["sheet_name"])
-                    workbook.active
+                    sheet = workbook.get_sheet_by_name(record["sheet_name"])
                     data = sheet.values
                     columns = next(data)[0:]
                     new_df = pd.DataFrame(data, columns=columns)
                 else:
                     new_df = pd.DataFrame(record["data"])
+                new_df = self.set_initial_data_type(i, new_df)
+                
+                ## Set dataframe from target file
+                try:
+                    target_df = self.read_csv_file(i)
                     
-                print(new_df)
-                print()
-                # new_df = self.set_initial_data_type(i, new_df)
+                except FileNotFoundError:
+                    template_name = join(Folder.TEMPLATE, record["template"])
+                    target_df = pd.read_excel(template_name)
+                    target_df.to_csv(record["full_target"], index=None, header=True, sep=",")
+                target_df = self.set_initial_data_type(i, target_df)
                 
-                # ## Set dataframe from target file
-                # try:
-                #     target_df = self.read_csv_file(i)
-                    
-                # except FileNotFoundError:
-                #     template_name = join(Folder.TEMPLATE, record["template"])
-                #     target_df = pd.read_excel(template_name)
-                #     target_df.to_csv(record["full_target"], index=None, header=True, sep=",")
-                # target_df = self.set_initial_data_type(i, target_df)
+                # Validate data change row by row
+                cmp_df = self.comparing_dataframes(i, target_df, new_df)
+                cdc = self.change_data_capture(i, cmp_df)
                 
-                # # Validate data change row by row
-                # cmp_df = self.comparing_dataframes(i, target_df, new_df)
-                # cdc = self.change_data_capture(i, cmp_df)
-                
-                # ## Write csv file
-                # status = self.write_csv(i, cdc)
+                ## Write csv file
+                status = self.write_csv(i, cdc)
 
             except Exception as err:
                 record.update({"err": err})
