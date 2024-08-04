@@ -9,7 +9,6 @@ from datetime import timedelta
 import time
 from pathlib import Path
 from os.path import join
-from itertools import chain
 from .module import Convert2File
 from .setup import Folder, CONFIG
 from .exception import CustomException
@@ -32,62 +31,61 @@ class CollectLog(ABC):
 
 class CollectParams(ABC):
     
-    def collet_logging(self):
-        print("OK")
+    def full_input(self) -> list:
+        input_dir   = CONFIG[self.module]["input_dir"]
+        input_file  = CONFIG[self.module]["input_file"]
+        
+        set_input  = lambda dir, file: [join(dir, x.strip()) for x in file.split(",")]
+        
+        return set_input(input_dir, input_file)
     
-    def collect_params(self) -> None:
+    def full_target(self) -> list:
+        output_dir  = CONFIG[self.module]["output_dir"]
+        output_file = CONFIG[self.module]["output_file"]
         
-        logging.info(f'Set parameter from config file for module: {self.module}')
+        suffix = self.batch_date.strftime('%Y%m%d')
+        set_target = lambda dir, file: [join(dir , x.strip()) if self.write_mode == "overwrite" or self.manual\
+                    else join(dir, f"{Path(x.strip()).stem}_{suffix}.csv") for x in file.split(",")]
         
-        record = []
+        return set_target(output_dir, output_file)
+        
+    def colloct_setup(self) -> None:
+        
+        logging.info(f'Setup params/logging for module: {self.module}')
+        
+        log = []
         status = "failed"
-        data = {"module": self.module, "function": "collect_params", "status": status}
+        record = {"module": self.module, "function": "colloct_setup", "status": status}
         try:
-            ## setup input dir / input file
-            input_dir   = CONFIG[self.module]["input_dir"]
-            input_file  = CONFIG[self.module]["input_file"]
-            set_input  = lambda d, f: [join(d, x.strip()) for x in f.split(",")]
-            
-            ## setup output dir / output file
-            output_dir  = CONFIG[self.module]["output_dir"]
-            output_file = CONFIG[self.module]["output_file"]
-            suffix = self.batch_date.strftime('%Y%m%d')
-            set_target = lambda d, f: [join(d ,x.strip()) if self.write_mode == "overwrite" or self.manual \
-                        else join(d, f"{Path(x.strip()).stem}_{suffix}.csv") \
-                        for x in f.split(",")]
-            
-            ## set logging
             i = 1
-            for _input, _target in zip(set_input(input_dir, input_file), set_target(output_dir, output_file)):
-                for x in self.select_files:
-                    if int(x) == i:
+            for input, target in zip(self.full_input(), self.full_target()):
+                for n in self.select_files:
+                    if int(n) == i:
                         status = "succeed"
-                        if set(('full_input', 'full_target')).issubset(data):
-                            copy_data =  data.copy()
-                            copy_data.update({"full_input": _input, 
-                                            "full_target": _target,
+                        if set(('full_input', 'full_target')).issubset(record):
+                            copy_record =  record.copy()
+                            copy_record.update({"full_input": input,
+                                            "full_target": target,
                                             "status": status})
-                            record += [copy_data]
+                            log += [copy_record]
                             
                         else:
-                            data.update({"full_input": _input,
-                                        "full_target": _target,
+                            record.update({"full_input": input,
+                                        "full_target": target,
                                         "status": status})
-                            record += [data]
+                            log = [record]
                 i += 1
-                
         except Exception as err:
             record.update({"err": err})
-        
-        self.logSetter(record)
+            log += [record]
+            
+        self.logSetter(log)
         
         if "err" in record:
             raise CustomException(err=self.logging)
         
     def get_extract_data(self, i: int, format_file: any) -> dict:
-        
         logging.info("Extract file")
-        
         data = self.collect_data(i, format_file)
         return data
     

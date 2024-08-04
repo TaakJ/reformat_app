@@ -357,7 +357,7 @@ class Convert2File:
                             write_row = f"{cdc[rows][col]} rows: ({rows}) in tmp file, Updating records: ({self.update_rows[rows]})"
                         else:
                             ## no change row
-                            write_row = f"No change rows: ({rows}) in Tmp file" ## No change row
+                            write_row = f"No change rows: ({rows}) in tmp file" ## No change row
                         logging.info(write_row)
                             
                     self.sheet.cell(row=rows, column=idx).value = cdc[rows][col]
