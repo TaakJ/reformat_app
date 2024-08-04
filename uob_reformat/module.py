@@ -199,7 +199,7 @@ class Convert2File:
                 raw_df = pd.DataFrame(record["data"])
                 
                 ## Validate data change row by row
-                cmp_df = self.compare_dataframe(i, tmp_df, raw_df)
+                cmp_df = self.comparing_dataframes(i, tmp_df, raw_df)
                 cdc = self.change_data_capture(i, cmp_df)
                         
                 ## Write tmp file
@@ -252,9 +252,9 @@ class Convert2File:
         status = "succeed"
         self.logging[i].update({"status": status})
 
-    def compare_dataframe(self, i: int, df: pd.DataFrame, new_df: pd.DataFrame) -> pd.DataFrame:
+    def comparing_dataframes(self, i: int, df: pd.DataFrame, new_df: pd.DataFrame) -> pd.DataFrame:
         
-        logging.info("Compare dataframe")
+        logging.info("Comparing two dataframes and getting the differences")
         
         status = "failed"
         self.logging[i].update({"function": "compare_data", "status": status})
@@ -404,6 +404,7 @@ class Convert2File:
                 ## Set dataframe from target file
                 try:
                     target_df = self.read_csv_file(i)
+                    
                 except FileNotFoundError:
                     template_name = join(Folder.TEMPLATE, record["template"])
                     target_df = pd.read_excel(template_name)
@@ -411,7 +412,7 @@ class Convert2File:
                 target_df = self.set_initial_data_type(i, target_df)
                 
                 ## Validate data change row by row
-                cmp_df = self.compare_dataframe(i, target_df, new_df)
+                cmp_df = self.comparing_dataframes(i, target_df, new_df)
                 cdc = self.change_data_capture(i, cmp_df)
                 
                 ## Write csv file
@@ -436,16 +437,16 @@ class Convert2File:
         
         data = []
         with open(full_target, "r", newline="\n") as reader:
-            csv_reader = csv.reader(
+            csvin = csv.reader(
                 reader,
                 skipinitialspace=True,
                 delimiter=",",
                 quotechar='"',
                 quoting=csv.QUOTE_ALL)
-            header = next(csv_reader)
+            header = next(csvin)
                 
             ## skip last row (total row)
-            last_row, row = tee(csv_reader)
+            last_row, row = tee(csvin)
             next(chain(last_row, range(1)))
             for _ in last_row:
                 data.append(next(row))
