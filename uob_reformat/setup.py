@@ -131,13 +131,14 @@ class SetupParser:
                 ArgumentParams.ISFLAG: True,
                 ArgumentParams.DEFAULT: "overwrite",
             },
-            # {
-            #     ArgumentParams.SHORT_NAME: "-c",
-            #     ArgumentParams.NAME: "--clear",
-            #     ArgumentParams.DESCRIPTION: "-c: clear",
-            #     ArgumentParams.REQUIRED: False,
-            #     ArgumentParams.DEFAULT: 2,
-            # },
+            {
+                ArgumentParams.SHORT_NAME: "-f",
+                ArgumentParams.NAME: "--select_files",
+                ArgumentParams.DESCRIPTION: "-c: clear",
+                ArgumentParams.REQUIRED: False,
+                ArgumentParams.TYPE: lambda f: [x.strip() for x in f.split(",")],
+                ArgumentParams.DEFAULT: "1,2",
+            },
         ]
 
     def set_arguments(self) -> None:

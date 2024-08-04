@@ -32,74 +32,39 @@ class CollectLog(ABC):
 
 class CollectParams(ABC):
     
-    def __init__(self) -> None:
-        self._full_input = []
-        self._full_target = []
-        
-    # @property
-    # def full_input(self) -> list:
-    #     return self._full_input
-    
-    # @property
-    # def full_target(self) -> list:
-    #     return self._full_target
-    
-    # @full_input.setter
-    # def full_input(self, file: list) -> list:
-        
-    #     try:
-    #         input_dir   = CONFIG[self.module]["input_dir"]
-    #         input_param  = CONFIG[self.module]["input_param"]
-    #         add_file = [join(input_dir, input_param)]
-
-    #         self._full_input =  list(chain(file, add_file))
-            
-    #     except KeyError:
-    #         self._full_input =  file
-        
-    #     return self._full_input
-    
-    # @full_target.setter
-    # def full_target(self, file: list) -> list:
-        
-    #     try:
-    #         output_dir  = CONFIG[self.module]["output_dir"]
-    #         output_param = CONFIG[self.module]["output_param"]
-            
-    #         suffix = f"{self.batch_date.strftime('%Y%m%d')}"
-    #         _file = lambda file: file if (self.write_mode == "overwrite" or self.manual) else f"{Path(file).stem}_{suffix}.csv"
-    #         add_file = [join(output_dir, _file(output_param))]
-        
-    #         self._full_target =  list(chain(file, add_file))
-            
-    #     except KeyError:
-    #         self._full_target = file
-        
-    #     return self._full_target
-    
     def collect_params(self) -> None:
         
         logging.info(f'Set parameter from config file for module: {self.module}')
-        record = {"module": self.module, "function": "collect_params", "status": status}
-    
+        
         status = "failed"
+        record = {"module": self.module, "function": "collect_params", "status": status}
+        
+        self.full_input = []
+        self.full_target= []
         try:
-            file = lambda d, f: [join(d, x.strip()) for x in f.split(",")]
-            ## setup input dir / input file
             input_dir   = CONFIG[self.module]["input_dir"]
             input_file  = CONFIG[self.module]["input_file"]
-            
-            # print(file(input_dir, input_file))
-            # self.full_input = [join(input_dir, input_file)]
-            
-            # ## setup output dir / output file             
             output_dir  = CONFIG[self.module]["output_dir"]
             output_file = CONFIG[self.module]["output_file"]
             
-            # suffix = f"{self.batch_date.strftime('%Y%m%d')}"
-            # _file = lambda file: file if (self.write_mode == "overwrite" or self.manual) else f"{Path(file).stem}_{suffix}.csv"
-            # self.full_target = [join(output_dir, _file(output_file))]
+            ## setup input dir / input file
+            set_input  = lambda d, f: [join(d, x.strip()) for x in f.split(",")]
             
+            ## setup output dir / output file
+            suffix = self.batch_date.strftime('%Y%m%d')
+            set_target = lambda d, f: [join(d ,x.strip()) if self.write_mode == "overwrite" or self.manual \
+                        else join(d, f"{Path(x.strip()).stem}_{suffix}.csv") \
+                        for x in f.split(",")]
+            
+            ## mapping_confing
+            i = 1
+            for input_dir, full_target in zip(set_input(input_dir, input_file), set_target(output_dir, output_file)):
+                for x in self.select_files:
+                    if int(x) == i:
+                        self.full_input += [input_dir]
+                        self.full_target += [full_target]
+                i += 1
+                
             status = "succeed"
             record.update({"status": status})
             

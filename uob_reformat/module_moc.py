@@ -1,3 +1,4 @@
+import re
 import pandas as pd
 import logging
 from .function import CallFunction
@@ -19,19 +20,19 @@ class ModuleMOC(CallFunction):
         result = {"module": self.module, "task": "Completed"}
         try:
             ## set params from confog file
-            self._full_input = ""
             self.collect_params()
             
             ## backup file
-            self.backup()
+            # self.backup()
+            print(self.file_input)
+            print(self.file_target)
             
             ## step run function
-            await self.check_source_file()
-            await self.separate_data_file()
-            await self.mock_data()
-            if self.store_tmp is True:
-                await self.genarate_tmp_file()
-            await self.genarate_target_file()
+            # await self.check_source_file()
+            # await self.separate_data_file()
+            # if self.store_tmp is True:
+            #     await self.genarate_tmp_file()
+            # await self.genarate_target_file()
 
         except CustomException as err:
             logging.error('See Error Details: log_error.log')
@@ -50,86 +51,24 @@ class ModuleMOC(CallFunction):
         return result
 
     def collect_data(self, i: int, format_file: any) -> dict:
-
+        
         status = "failed"
-        module = self.logging[i]["module"]
-        logging.info(f'Collect Data for module: {module}')
-
         self.logging[i].update({"function": "collect_data", "status": status})
-        sheet_list = [sheet for sheet in format_file.sheet_names() if sheet != "StyleSheet"]
-
-        data = {}
-        for sheets in sheet_list:
-            cells = format_file.sheet_by_name(sheets)
-            for row in range(0, cells.nrows):
-                by_sheets = [cells.cell(row, col).value for col in range(cells.ncols)]
-                if not all(empty == "" for empty in by_sheets):
-                    if sheets not in data:
-                        data[sheets] = [by_sheets]
-                    else:
-                        data[sheets].append(by_sheets)
+        
+        try:
+            data = []
+            for line in format_file:
+                data += [re.sub(r'(?<!\w),', ",", line.strip().replace('"','')).split(",")]
+            
+            df = pd.DataFrame(data)
+            df.columns = df.iloc[0].values
+            df = df[1:]
+            df = df.reset_index(drop=True)
+            df = self.set_initial_data_type(i, df)
+            
+        except Exception as err:
+            raise Exception(err)
 
         status = "succeed"
-        self.logging[i].update({"status": status})
-
-        return data
-
-    async def mock_data(self) -> None:
-        mock_data = [
-            [
-                "ApplicationCode",
-                "AccountOwner",
-                "AccountName",
-                "AccountType",
-                "EntitlementName",
-                "SecondEntitlementName",
-                "ThirdEntitlementName",
-                "AccountStatus",
-                "IsPrivileged",
-                "AccountDescription",
-                "CreateDate",
-                "LastLogin",
-                "LastUpdatedDate",
-                "AdditionalAttribute",
-                "Country",
-            ],
-            [
-                "MOC",
-                "2",
-                "3",
-                "4",
-                "5",
-                "6",
-                "7",
-                "8",
-                "9",
-                "10",
-                self.batch_date,
-                self.date,
-                self.batch_date,
-                "14",
-                "TH",
-            ],
-            [
-                "MOC",
-                "16",
-                "17",
-                "18",
-                "19",
-                "20",
-                "21",
-                "22",
-                "23",
-                "24",
-                self.batch_date,
-                self.date,
-                self.batch_date,
-                "28",
-                "TH",
-            ],
-        ]
-        df = pd.DataFrame(mock_data)
-        df.columns = df.iloc[0].values
-        df = df[1:]
-        df = df.reset_index(drop=True)
-        self.logging.append({"module": "Target_file", "data": df.to_dict("list")})
+        self.logging[i].update({"data": df.to_dict("list"), "status": status})
+        logging.info(f'Collect data from file: {self.logging[i]["input_dir"]}, status: {status}')

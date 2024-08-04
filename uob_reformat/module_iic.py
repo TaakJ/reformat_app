@@ -24,6 +24,8 @@ class ModuleIIC(CallFunction):
             
             ## backup file
             # self.backup()
+            print(self.file_input)
+            print(self.file_target)
             
             ## step run function
             # await self.check_source_file()
