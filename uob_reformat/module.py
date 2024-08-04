@@ -201,7 +201,7 @@ class Convert2File:
                 record.update({"err": err})
                 
             record.update({"function": "genarate_tmp_file", "status": status})
-            logging.info(f"Write data to tmp file status: {status}")
+            logging.info(f"Write data to tmp file: {record["full_tmp"]}, status: {status}")
 
             if "err" in record:
                 raise CustomException(err=self.logging)
@@ -416,7 +416,7 @@ class Convert2File:
                 record.update({"err": err})
                 
             record.update({"function": "genarate_target_file", "state": status})
-            logging.info(f"Write data to target file, status: {status}")
+            logging.info(f"Write data to target file: {record["full_target"]}, status: {status}")
 
         if "err" in record:
             raise CustomException(err=self.logging)
@@ -454,7 +454,7 @@ class Convert2File:
     def write_csv(self, i: int, cdc: dict) -> str:
         
         full_target = self.logging[i]["full_target"]
-        logging.info(f"Write mode: {self.write_mode} in target file: {full_target}")
+        logging.info(f"Write mode: {self.write_mode}")
 
         status = "failed"
         self.logging[i].update({"function": "write_csv", "status": status})
