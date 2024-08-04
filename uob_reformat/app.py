@@ -134,19 +134,10 @@ class setup_app(QWidget):
         self.tmp_checked.setCheckable(True)
         self.tmp_checked.setChecked(True)
         hbox2.addWidget(self.tmp_checked)
-
-        # hbox3 = QHBoxLayout()
-        # self.clear_file = QLineEdit()
-        # self.clear_file.setFixedSize(55, 30)
-        # self.clear_file.setText(str(7))
-        # hbox3.addWidget(QLabel("Clear file after:  "))
-        # hbox3.addWidget(self.clear_file)
-        # hbox3.addWidget(QLabel(" day"))
-
+        
         vbox = QVBoxLayout()
         vbox.addLayout(hbox1)
         vbox.addLayout(hbox2)
-        # vbox.addLayout(hbox3)
 
         self.groupbox2.setLayout(vbox)
         self.radio1.clicked.connect(self.task_select_mode)
