@@ -134,7 +134,7 @@ class SetupParser:
             {
                 ArgumentParams.SHORT_NAME: "-f",
                 ArgumentParams.NAME: "--select_files",
-                ArgumentParams.DESCRIPTION: "-c: clear",
+                ArgumentParams.DESCRIPTION: "-f: select_files",
                 ArgumentParams.REQUIRED: False,
                 ArgumentParams.TYPE: lambda f: [x.strip() for x in f.split(",")],
                 ArgumentParams.DEFAULT: "1,2",
