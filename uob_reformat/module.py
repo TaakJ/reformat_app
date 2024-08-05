@@ -176,7 +176,7 @@ class Convert2File:
                 ## Read tmp file
                 tmp_dir = join(Folder.TMP, self.module, self.date.strftime("%Y%m%d"))
                 os.makedirs(tmp_dir, exist_ok=True)
-                tmp_name = f"TMP_{Path(record["full_target"]).stem}.xlsx"
+                tmp_name = f"T_{Path(record["full_target"]).stem}.xlsx"
                 full_tmp = join(tmp_dir, tmp_name)
                 record.update({"full_tmp": full_tmp})
                 
