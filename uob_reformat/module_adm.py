@@ -22,9 +22,7 @@ class ModuleADM(CallFunction):
             self.colloct_setup()
             
             if self.backup is True:
-                self.achieve_backup()
-                
-            print(self.logging)
+                self.achieve_backup()            
             
             # await self.check_source_file()
             # await self.separate_data_file()
