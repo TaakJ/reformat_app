@@ -102,7 +102,7 @@ class BackupAndClear:
         self._date = self.date.strftime("%Y%m%d")
         self.time = time.strftime("%H%M%S")
 
-        logging.info("Genarate barget file")
+        logging.info("Genarate backup file")
         self.backup_zip_file()
         
         backup_dir = join(self.root_dir, self._date)
@@ -130,7 +130,7 @@ class BackupAndClear:
                     if (cmp_df['count'] >= 1).any():
                         print("OK")
                     else:
-                        logging.info("No Backup file because no have change data")
+                        logging.info("No backup file because data is not change")
                         
                 except Exception:
                     pass
