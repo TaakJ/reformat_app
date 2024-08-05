@@ -1,8 +1,8 @@
 ADM:
     input_dir: D:\IGAGD\ADM\download
     output_dir: D:\IGAGD\ADM\upload
-    input_file: ADM.txt
-    output_file: ADMIGAWINT.csv
+    input_file: ADMTH.txt, ADMTH_Param.csv
+    output_file: ADMIGAWINT.csv, ADMPARAMLIST.csv
 BOS:
     input_dir: D:\IGAGD\BOS\download
     output_dir: D:\IGAGD\BOS\upload

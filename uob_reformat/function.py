@@ -35,19 +35,17 @@ class CollectParams(ABC):
         input_dir   = CONFIG[self.module]["input_dir"]
         input_file  = CONFIG[self.module]["input_file"]
         
-        set_input  = lambda dir, file: [join(dir, x.strip()) for x in file.split(",")]
-        
-        return set_input(input_dir, input_file)
+        set_dir  = lambda dir, file: [join(dir, x.strip()) for x in file.split(",")]
+        return set_dir(input_dir, input_file)
     
     def full_target(self) -> list:
         output_dir  = CONFIG[self.module]["output_dir"]
         output_file = CONFIG[self.module]["output_file"]
         
         suffix = self.batch_date.strftime('%Y%m%d')
-        set_target = lambda dir, file: [join(dir , x.strip()) if self.write_mode == "overwrite" or self.manual\
+        set_dir = lambda dir, file: [join(dir , x.strip()) if self.write_mode == "overwrite" or self.manual\
                     else join(dir, f"{Path(x.strip()).stem}_{suffix}.csv") for x in file.split(",")]
-        
-        return set_target(output_dir, output_file)
+        return set_dir(output_dir, output_file)
         
     def colloct_setup(self) -> None:
         
@@ -60,7 +58,7 @@ class CollectParams(ABC):
             i = 1
             for input, target in zip(self.full_input(), self.full_target()):
                 for n in self.select_files:
-                    if int(n) == i:
+                    if n == i:
                         status = "succeed"
                         if set(('full_input', 'full_target')).issubset(record):
                             copy_record =  record.copy()

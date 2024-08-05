@@ -30,7 +30,6 @@ from PyQt6.QtCore import (
     pyqtSignal,
     Qt
 )
-# from PyQt6.QtCore import Qt
 from qt_material import apply_stylesheet
 from .setup import Folder, PARAMS, CONFIG
 from .main import StartApp
@@ -68,7 +67,7 @@ class setup_app(QWidget):
     def ui(self):
 
         self.all_module = PARAMS["source"]
-        # self.filename = {module: f'M_{CONFIG[module]["output_file"]}' for module in self.all_module}
+        # self.filename = {module: {CONFIG[module]["output_file"]} for module in self.all_module}
         self.module = self.all_module
 
         grid = QGridLayout()
@@ -173,7 +172,7 @@ class setup_app(QWidget):
         self.checked1.setChecked(True)
         self.checked2 = QCheckBox("Execute Paramlist")
         self.checked2.setChecked(True)
-        self.execute = "1,2"
+        self.select_files = [1,2]
         
         layout = QGridLayout()
         layout.addWidget(input_lable, 0, 0)
@@ -315,14 +314,14 @@ class setup_app(QWidget):
         state_chk2 = self.checked2.isChecked()
         
         if state_chk1 is True and state_chk2 is True:
-            self.execute = "1,2"
+            self.select_files = [1,2]
         elif state_chk1 is True and state_chk2 is False:
-            self.execute = "1"
+            self.select_files = [1]
         elif state_chk1 is False and state_chk2 is True:
-            self.execute = "2"
+            self.select_files = [2]
         else:
             self.checked1.setChecked(True)
-            self.execute = "1"
+            self.select_files =  [1]
         
     def task_open_log(self, event):
         
@@ -348,16 +347,17 @@ class setup_app(QWidget):
                 "batch_date": self.calendar.calendarWidget().selectedDate().toPyDate(),
                 "store_tmp": self.tmp_checked.isChecked(),
                 "write_mode": self.mode,
-                "select_files": self.execute
+                "select_files": self.select_files
             })
-
-        # for module in self.module:
-        #     if module in self.filename.keys() and self.mode == "new":
-        #         suffix = PARAMS["batch_date"].strftime("%Y%m%d")
-        #         CONFIG[module]["output_file"] = f"{Path(self.filename[module]).stem}_{suffix}.csv"
-        #     else:
-        #         CONFIG[module]["output_file"] = self.filename[module]
-
+        
+        for module in self.module:
+            if self.mode == "new":
+                suffix = PARAMS["batch_date"].strftime("%Y%m%d")
+                set_dir = lambda file: [f"M_{Path(x.strip()).stem}_{suffix}.csv" for x in file.split(",")]
+            else:
+                set_dir = lambda file: [f"M_{x.strip()}" for x in file.split(",")]
+            CONFIG[module]["output_file"] = ", ".join(set_dir(CONFIG[module]["output_file"]))
+            
         if not self.__thread.isRunning():
             self.__thread = self.__get_thread()
             self.__thread.start()

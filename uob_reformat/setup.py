@@ -136,8 +136,8 @@ class SetupParser:
                 ArgumentParams.NAME: "--select_files",
                 ArgumentParams.DESCRIPTION: "-f: select_files",
                 ArgumentParams.REQUIRED: False,
-                ArgumentParams.TYPE: lambda f: [x.strip() for x in f.split(",")],
                 ArgumentParams.ISFLAG: False,
+                ArgumentParams.TYPE: lambda f: [int(x.strip()) for x in f.split(",")],
                 ArgumentParams.DEFAULT: "1,2",
             },
         ]

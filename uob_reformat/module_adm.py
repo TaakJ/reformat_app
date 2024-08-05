@@ -19,16 +19,13 @@ class ModuleADM(CallFunction):
         
         result = {"module": self.module, "task": "Completed"}
         try:
-            ## set params from confog file
-            self.collect_params()
+            self.colloct_setup()
             
-            # ## backup file
+            ## backup file
             # self.backup()
             
-            # ## step run function
-            await self.check_source_file()
-            await self.separate_data_file()
-            
+            # await self.check_source_file()
+            # await self.separate_data_file()
             # if self.store_tmp is True:
             #     await self.genarate_tmp_file()
             # await self.genarate_target_file()
@@ -68,64 +65,3 @@ class ModuleADM(CallFunction):
         self.logging[i].update({"status": status})
         
         return {module: data}
-
-    async def mock_data(self) -> None:
-        mock_data = [
-            [
-                "ApplicationCode",
-                "AccountOwner",
-                "AccountName",
-                "AccountType",
-                "EntitlementName",
-                "SecondEntitlementName",
-                "ThirdEntitlementName",
-                "AccountStatus",
-                "IsPrivileged",
-                "AccountDescription",
-                "CreateDate",
-                "LastLogin",
-                "LastUpdatedDate",
-                "AdditionalAttribute",
-                "Country",
-            ],
-            [
-                "ADM",
-                "2",
-                "3",
-                "4",
-                "5",
-                "6",
-                "7",
-                "8",
-                "9",
-                "10",
-                self.batch_date,
-                self.date,
-                self.batch_date,
-                "14",
-                "TH",
-            ],
-            [
-                "ADM",
-                "16",
-                "17",
-                "18",
-                "19",
-                "20",
-                "21",
-                "22",
-                "23",
-                "24",
-                self.batch_date,
-                self.date,
-                self.batch_date,
-                "28",
-                "TH",
-            ],
-        ]
-        df = pd.DataFrame(mock_data)
-        df.columns = df.iloc[0].values
-        df = df[1:]
-        df = df.reset_index(drop=True)
-        
-        self.logging.append({"module": "Target_file", "data": df.to_dict("list")})
