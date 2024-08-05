@@ -12,7 +12,6 @@ from .module import Convert2File
 from .setup import Folder, CONFIG
 from .exception import CustomException
 
-
 class CollectLog(ABC):
     def __init__(self) -> None:
         self._log = []
@@ -28,7 +27,6 @@ class CollectLog(ABC):
     @abstractmethod
     def logSetter(self, log: list):
         pass
-
 
 class CollectParams(ABC):
 
@@ -93,7 +91,6 @@ class CollectParams(ABC):
     def collect_data(self, i: int, format_file: any):
         pass
 
-
 class BackupAndClear:
 
     def achieve_backup(self) -> None:
@@ -105,10 +102,8 @@ class BackupAndClear:
         logging.info("Genarate backup file")
         self.backup_zip_file()
         self.backup_dir = join(self.root_dir, self._date)
-        try:
+        if not os.path.exists(self.backup_dir):
             os.makedirs(self.backup_dir)
-        except OSError:
-            pass
         
         list_of_files = glob.glob(f'{self.backup_dir}/*')
         for i, record in enumerate(self.logging):
@@ -143,10 +138,11 @@ class BackupAndClear:
                 full_backup = join(self.backup_dir, backup_file)
                 shutil.copy2(record["full_target"], full_backup)
                 
-                status = "succeed"
                 record.update({"full_backup": full_backup})
                 
+                status = "succeed"
                 logging.info(f"Backup file from {record["full_target"]} to {full_backup}, status {status}")
+                
             except Exception:
                 pass
         else:
@@ -159,25 +155,27 @@ class BackupAndClear:
         try:
             for date_dir in os.listdir(self.root_dir):
                 zip_dir = join(self.root_dir, date_dir)
-
-                if date_dir < self.date.strftime("%Y%m%d"):
-                    if not zip_dir.endswith(".zip"):
+                
+                if self._bk_date < date_dir:
+                    ## zip backup file
+                    if date_dir < self._date and not zip_dir.endswith(".zip"):
                         zip_name = join(self.root_dir, f"{date_dir}.zip")
-
                         with zipfile.ZipFile(zip_name, "w", zipfile.ZIP_DEFLATED) as zf:
                             for file in Path(zip_dir).rglob("*"):
                                 zf.write(file, file.relative_to(self.root_dir))
-
+                        
                         shutil.rmtree(zip_dir)
                         logging.info(f"Zip file: {zip_name}")
-
-                    elif date_dir < f"{self._bk_date}.zip":
-                        os.remove(zip_dir)
-                        logging.info(f"Clear Zip file: {zip_dir}")
                 else:
-                    continue
-        except OSError:
-            pass
+                    ## clear backup file
+                    if os.path.isfile(zip_dir):
+                        os.remove(zip_dir)
+                    else:
+                        shutil.rmtree(zip_dir)
+                    logging.info(f"Clear Zip file: {zip_dir}")
+                    
+        except OSError as err:
+            print(err)
         
     def clear_tmp(self) -> None:
         try:
