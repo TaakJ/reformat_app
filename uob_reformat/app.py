@@ -122,16 +122,19 @@ class setup_app(QWidget):
         self.groupbox2 = QGroupBox("Specify output file")
 
         hbox1 = QHBoxLayout()
-        self.radio1 = QRadioButton("Create new")
-        self.radio1.setChecked(True)
-        radio2 = QRadioButton("Overwrite")
-        self.mode = "new"
-        hbox1.addWidget(radio2)
-        hbox1.addWidget(self.radio1)
-
+        radio1 = QRadioButton("Create new file")
+        self.radio2 = QRadioButton("Overwrite file")
+        self.radio2.setChecked(True)
+        self.mode = "overwrite"
+        hbox1.addWidget(self.radio2)
+        hbox1.addWidget(radio1)
+        
         hbox2 = QHBoxLayout()
-        self.tmp_checked = QCheckBox("Create tmp file")
-        self.tmp_checked.setChecked(True)
+        self.tmp_checked = QCheckBox("Temporary file")
+        self.tmp_checked.setChecked(False)
+        self.backup_checked = QCheckBox("Backup file")
+        self.backup_checked.setChecked(True)
+        hbox2.addWidget(self.backup_checked)
         hbox2.addWidget(self.tmp_checked)
         
         vbox = QVBoxLayout()
@@ -139,8 +142,8 @@ class setup_app(QWidget):
         vbox.addLayout(hbox2)
 
         self.groupbox2.setLayout(vbox)
-        self.radio1.clicked.connect(self.task_select_mode)
-        radio2.clicked.connect(self.task_select_mode)
+        radio1.clicked.connect(self.task_select_mode)
+        self.radio2.clicked.connect(self.task_select_mode)
 
         return self.groupbox2
 
@@ -282,10 +285,10 @@ class setup_app(QWidget):
         self.output_dir.setText(CONFIG[self.get_value]["output_dir"])
 
     def task_select_mode(self):
-        if self.radio1.isChecked():
-            self.mode = "new"
-        else:
+        if self.radio2.isChecked():
             self.mode = "overwrite"
+        else:
+            self.mode = "new"
 
     def task_open_dialog(self, event):
         if event == 1:
@@ -346,16 +349,17 @@ class setup_app(QWidget):
                 "batch_date": self.calendar.calendarWidget().selectedDate().toPyDate(),
                 "store_tmp": self.tmp_checked.isChecked(),
                 "write_mode": self.mode,
-                "select_files": self.select_files
+                "select_files": self.select_files,
+                "backup": self.backup_checked.isChecked()
             })
         
-        for module in self.module:
-            if self.mode == "new":
-                suffix = PARAMS["batch_date"].strftime("%Y%m%d")
-                set_dir = lambda file: [f"M_{Path(x.strip()).stem}_{suffix}.csv" for x in file.split(",")]
-            else:
-                set_dir = lambda file: [f"M_{x.strip()}" for x in file.split(",")]
-            CONFIG[module]["output_file"] = ", ".join(set_dir(CONFIG[module]["output_file"]))
+        # for module in self.module:
+        #     if self.mode == "new":
+        #         suffix = PARAMS["batch_date"].strftime("%Y%m%d")
+        #         set_dir = lambda file: [f"M_{Path(x.strip()).stem}_{suffix}.csv" for x in file.split(",")]
+        #     else:
+        #         set_dir = lambda file: [f"M_{x.strip()}" for x in file.split(",")]
+        #     CONFIG[module]["output_file"] = ", ".join(set_dir(CONFIG[module]["output_file"]))
             
         if not self.__thread.isRunning():
             self.__thread = self.__get_thread()

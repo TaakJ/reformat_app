@@ -23,6 +23,8 @@ class ModuleADM(CallFunction):
             
             if self.backup is True:
                 self.achieve_backup()
+                
+            print(self.logging)
             
             # await self.check_source_file()
             # await self.separate_data_file()
