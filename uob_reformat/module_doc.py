@@ -19,7 +19,8 @@ class ModuleDOC(CallFunction):
 
         result = {"module": self.module, "task": "Completed"}
         try:
-            self.colloct_setup()
+            if self.backup is True:
+                self.achieve_backup()
             
             ## backup file
             # self.backup()
