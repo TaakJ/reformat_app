@@ -19,20 +19,16 @@ class ModuleLDS(CallFunction):
 
         result = {"module": self.module, "task": "Completed"}
         try:
-            ## set params from confog file
-            self._full_input = ""
-            self.collect_params()
+            self.colloct_setup()
             
             ## backup file
-            self.backup()
+            # self.backup()
             
-            ## step run function
-            await self.check_source_file()
-            await self.separate_data_file()
-            await self.mock_data()
-            if self.store_tmp is True:
-                await self.genarate_tmp_file()
-            await self.genarate_target_file()
+            # await self.check_source_file()
+            # await self.separate_data_file()
+            # if self.store_tmp is True:
+            #     await self.genarate_tmp_file()
+            # await self.genarate_target_file()
 
         except CustomException as err:
             logging.error('See Error Details: log_error.log')
