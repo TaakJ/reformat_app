@@ -107,7 +107,7 @@ class SetupParser:
                 ArgumentParams.DEFAULT: False,
             },
             {
-                ArgumentParams.SHORT_NAME: "-b",
+                ArgumentParams.SHORT_NAME: "-d",
                 ArgumentParams.NAME: "--batch_date",
                 ArgumentParams.DESCRIPTION: "format YYYY-MM-DD",
                 ArgumentParams.REQUIRED: False,
@@ -118,7 +118,15 @@ class SetupParser:
             {
                 ArgumentParams.SHORT_NAME: "-t",
                 ArgumentParams.NAME: "--store_tmp",
-                ArgumentParams.DESCRIPTION: "-t: not clear tmp",
+                ArgumentParams.DESCRIPTION: "-t: clear tmp",
+                ArgumentParams.REQUIRED: False,
+                ArgumentParams.ISFLAG: True,
+                ArgumentParams.DEFAULT: False,
+            },
+            {
+                ArgumentParams.SHORT_NAME: "-b",
+                ArgumentParams.NAME: "--backup",
+                ArgumentParams.DESCRIPTION: "-b: backup output file",
                 ArgumentParams.REQUIRED: False,
                 ArgumentParams.ISFLAG: True,
                 ArgumentParams.DEFAULT: False,

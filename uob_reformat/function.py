@@ -92,7 +92,7 @@ class CollectParams(ABC):
     
 class BackupAndClear:
     
-    def backup(self) -> None:
+    def achieve_backup(self) -> None:
         
         self.root_dir = join(Folder.BACKUP, self.module)
         self._date    = self.date.strftime("%Y%m%d")
@@ -101,34 +101,61 @@ class BackupAndClear:
         ## clear backup / zip file
         status = self.backup_zip_file()
         
-        logging.info("Backup file")
+        # logging.info("Backup file")
         
-        self.backup_dir = join(self.root_dir, self._date)
-        list_of_files = glob.glob(f'{self.backup_dir}/*')
-        if list_of_files != []:
+        # self.backup_dir = join(self.root_dir, self._date)
+        # list_of_files = glob.glob(f'{self.backup_dir}/*')
+        # if list_of_files != []:
             
-            backup_file = max(list_of_files, key=os.path.getctime)
-            try:
-                ## read csv file
-                bk_df = self.read_csv_file(backup_file)
-                bk_df = self.initial_data_type(bk_df)
-                df  = self.read_csv_file(self.full_target)
-                df = self.initial_data_type(df)
+        #     backup_file = max(list_of_files, key=os.path.getctime)
+        #     try:
+        #         ## read csv file
+        #         bk_df = self.read_csv_file(backup_file)
+        #         bk_df = self.initial_data_type(bk_df)
+        #         df  = self.read_csv_file(self.full_target)
+        #         df = self.initial_data_type(df)
                 
-                ## check value change
-                cmp_df = self.compare_data(bk_df, df)
-                if (cmp_df['count'] >= 2).any():
-                    status = self.genarate_backup_file()
-                else:
-                    logging.info("No Backup file because no have change data")
+        #         ## check value change
+        #         cmp_df = self.compare_data(bk_df, df)
+        #         if (cmp_df['count'] >= 2).any():
+        #             status = self.genarate_backup_file()
+        #         else:
+        #             logging.info("No Backup file because no have change data")
                     
-            except Exception:
-                pass
-        else:
-            status = self.genarate_backup_file()
+        #     except Exception:
+        #         pass
+        # else:
+        #     status = self.genarate_backup_file()
         
-        logging.info(f'Backup file status {status}')
+        # logging.info(f'Backup file status {status}')
     
+    def backup_zip_file(self):
+        
+        self.bk_date = self.date - timedelta(days=1)
+        self._bk_date = self.bk_date.strftime("%Y%m%d")
+        try:
+            for date_dir in os.listdir(self.root_dir):
+                zip_dir = join(self.root_dir, date_dir)
+                
+                if date_dir < self.date.strftime("%Y%m%d"):
+                    if not zip_dir.endswith(".zip"):
+                        zip_name = join(self.root_dir, f"{date_dir}.zip")
+                        
+                        with zipfile.ZipFile(zip_name, "w", zipfile.ZIP_DEFLATED) as zf:
+                            for file in Path(zip_dir).rglob("*"):
+                                zf.write(file, file.relative_to(self.root_dir))
+                                
+                        shutil.rmtree(zip_dir)
+                        logging.info(f'Zip file: {zip_name}')
+                        
+                    elif date_dir < f"{self._bk_date}.zip":
+                        os.remove(zip_dir)
+                        logging.info(f'Clear Zip file: {zip_dir}')
+                else:
+                    continue
+        except OSError:
+            pass
+        
     def genarate_backup_file(self) -> str:
         
         status = "failed"
@@ -155,41 +182,7 @@ class BackupAndClear:
             
         return status
     
-    def backup_zip_file(self) -> str:
-        
-        self.bk_date = self.date - timedelta(days=1)
-        self._bk_date = self.bk_date.strftime("%Y%m%d")
-        
-        status = "failed"
-        try:
-            status = "skipped"
-            for date_dir in os.listdir(self.root_dir):
-                
-                zip_dir = join(self.root_dir, date_dir)
-                zip_name = join(self.root_dir, f"{date_dir}.zip")
-                
-                if date_dir <= f'{self._bk_date}.zip':    
-                    os.remove(zip_dir)
-                    status = "succeed"
-                    
-                    logging.info(f'Clear Zip file: {zip_dir} status: {status}')
-                
-                else:
-                    if not zip_dir.endswith(".zip") and date_dir < self._date:
-                        with zipfile.ZipFile(zip_name, "w", zipfile.ZIP_DEFLATED) as zf:
-                            for file in Path(zip_dir).rglob("*"):
-                                zf.write(file, file.relative_to(self.root_dir))
-                        shutil.rmtree(zip_dir)
-                        
-                        status = "succeed"
-                        logging.info(f'Zip file: {zip_name} status: {status}')
-                    else:
-                        continue
-        except OSError:
-            pass
-        
-        return status
-                
+    
     def clear_tmp(self) -> None:
         try:
             tmp_dir = join(Folder.TMP, self.module)
