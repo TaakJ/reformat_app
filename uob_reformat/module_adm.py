@@ -15,7 +15,7 @@ class ModuleADM(CallFunction):
         
     async def run_process(self) -> dict:
         
-        logging.info(f'Module:"{self.module}"; Manual: "{self.manual}"; Run Date: "{self.batch_date}"; Store Tmp: "{self.store_tmp}"; Write Mode: "{self.write_mode}";')
+        logging.info(f'Module:"{self.module}"; Manual: "{self.manual}"; Run date: "{self.batch_date}"; Store tmp: "{self.store_tmp}"; Write mode: "{self.write_mode}";')
         
         result = {"module": self.module, "task": "Completed"}
         try:

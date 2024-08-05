@@ -14,7 +14,7 @@ class ModuleLMT(CallFunction):
 
     async def run_process(self) -> dict:
 
-        logging.info(f'Module:"{self.module}"; Manual: "{self.manual}"; Run Date: "{self.batch_date}"; Store Tmp: "{self.store_tmp}"; Write Mode: "{self.write_mode}";')
+        logging.info(f'Module:"{self.module}"; Manual: "{self.manual}"; Run date: "{self.batch_date}"; Store tmp: "{self.store_tmp}"; Write mode: "{self.write_mode}";')
 
         result = {"module": self.module, "task": "Completed"}
         try:
@@ -67,63 +67,3 @@ class ModuleLMT(CallFunction):
         status = "succeed"
         self.logging[i].update({"status": status})
         return data
-
-    async def mock_data(self) -> None:
-        mock_data = [
-            [
-                "ApplicationCode",
-                "AccountOwner",
-                "AccountName",
-                "AccountType",
-                "EntitlementName",
-                "SecondEntitlementName",
-                "ThirdEntitlementName",
-                "AccountStatus",
-                "IsPrivileged",
-                "AccountDescription",
-                "CreateDate",
-                "LastLogin",
-                "LastUpdatedDate",
-                "AdditionalAttribute",
-                "Country",
-            ],
-            [
-                "LMT",
-                "2",
-                "3",
-                "4",
-                "5",
-                "6",
-                "7",
-                "8",
-                "9",
-                "10",
-                self.batch_date,
-                self.date,
-                self.batch_date,
-                "14",
-                "TH",
-            ],
-            [
-                "LMT",
-                "16",
-                "17",
-                "18",
-                "19",
-                "20",
-                "21",
-                "22",
-                "23",
-                "24",
-                self.batch_date,
-                self.date,
-                self.batch_date,
-                "28",
-                "TH",
-            ],
-        ]
-        df = pd.DataFrame(mock_data)
-        df.columns = df.iloc[0].values
-        df = df[1:]
-        df = df.reset_index(drop=True)
-        self.logging.append({"module": "Target_file", "data": df.to_dict("list")})
