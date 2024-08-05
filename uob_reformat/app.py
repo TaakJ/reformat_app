@@ -28,7 +28,9 @@ from PyQt6.QtCore import (
     QThread,
     QObject,
     pyqtSignal,
+    Qt
 )
+# from PyQt6.QtCore import Qt
 from qt_material import apply_stylesheet
 from .setup import Folder, PARAMS, CONFIG
 from .main import StartApp
@@ -66,7 +68,7 @@ class setup_app(QWidget):
     def ui(self):
 
         self.all_module = PARAMS["source"]
-        self.filename = {module: f'M_{CONFIG[module]["output_file"]}' for module in self.all_module}
+        # self.filename = {module: f'M_{CONFIG[module]["output_file"]}' for module in self.all_module}
         self.module = self.all_module
 
         grid = QGridLayout()
@@ -131,7 +133,6 @@ class setup_app(QWidget):
 
         hbox2 = QHBoxLayout()
         self.tmp_checked = QCheckBox("Create tmp file")
-        self.tmp_checked.setCheckable(True)
         self.tmp_checked.setChecked(True)
         hbox2.addWidget(self.tmp_checked)
         
@@ -168,15 +169,11 @@ class setup_app(QWidget):
         self.output_btn = QPushButton("Upload")
         self.output_btn.setEnabled(False)
         
-        # hbox1 = QHBoxLayout()
-        self.checked1 = QCheckBox("Application")
-        self.checked1.setCheckable(True)
+        self.checked1 = QCheckBox("Execute Application")
         self.checked1.setChecked(True)
-        self.checked2 = QCheckBox("Paramlist")
-        self.checked2.setCheckable(True)
+        self.checked2 = QCheckBox("Execute Paramlist")
         self.checked2.setChecked(True)
-        # hbox1.addWidget(self.checked1)
-        # hbox1.addWidget(self.checked2)
+        self.execute = "1,2"
         
         layout = QGridLayout()
         layout.addWidget(input_lable, 0, 0)
@@ -187,14 +184,15 @@ class setup_app(QWidget):
         layout.addWidget(self.output_dir, 2, 1)
         layout.addWidget(self.output_btn, 2, 2)
         
-        layout.addWidget(self.checked1, 4, 0)
-        layout.addWidget(self.checked2, 4, 1)
-        
+        layout.addWidget(self.checked1, 4, 1, alignment=Qt.AlignmentFlag.AlignLeft)
+        layout.addWidget(self.checked2, 4, 1, alignment=Qt.AlignmentFlag.AlignRight)
         
         self.groupbox3.setLayout(layout)
 
         self.input_btn.clicked.connect(lambda: self.task_open_dialog(1))
         self.output_btn.clicked.connect(lambda: self.task_open_dialog(2))
+        self.checked1.clicked.connect(self.task_select_execute)
+        self.checked2.clicked.connect(self.task_select_execute)
 
         return self.groupbox3
 
@@ -218,8 +216,8 @@ class setup_app(QWidget):
         self.run_btn = QPushButton("START")
         self.run_btn.setFixedSize(110, 40)
         vbox1.addWidget(self.progress)
-        vbox1.addWidget(self.label)
-        vbox1.addWidget(self.run_btn)
+        vbox1.addWidget(self.label, alignment=Qt.AlignmentFlag.AlignCenter)
+        vbox1.addWidget(self.run_btn, alignment=Qt.AlignmentFlag.AlignCenter)
         vbox1.addStretch(1)
 
         vbox = QVBoxLayout()
@@ -311,7 +309,21 @@ class setup_app(QWidget):
         if dir_name:
             CONFIG[self.get_value][key_dir] = join(Path(dir_name))
             default_dir.setText(dir_name)
-
+            
+    def task_select_execute(self):
+        state_chk1 = self.checked1.isChecked()
+        state_chk2 = self.checked2.isChecked()
+        
+        if state_chk1 is True and state_chk2 is True:
+            self.execute = "1,2"
+        elif state_chk1 is True and state_chk2 is False:
+            self.execute = "1"
+        elif state_chk1 is False and state_chk2 is True:
+            self.execute = "2"
+        else:
+            self.checked1.setChecked(True)
+            self.execute = "1"
+        
     def task_open_log(self, event):
         
         date = datetime.now().strftime("%Y%m%d")
@@ -336,14 +348,15 @@ class setup_app(QWidget):
                 "batch_date": self.calendar.calendarWidget().selectedDate().toPyDate(),
                 "store_tmp": self.tmp_checked.isChecked(),
                 "write_mode": self.mode,
+                "select_files": self.execute
             })
 
-        for module in self.module:
-            if module in self.filename.keys() and self.mode == "new":
-                suffix = PARAMS["batch_date"].strftime("%Y%m%d")
-                CONFIG[module]["output_file"] = f"{Path(self.filename[module]).stem}_{suffix}.csv"
-            else:
-                CONFIG[module]["output_file"] = self.filename[module]
+        # for module in self.module:
+        #     if module in self.filename.keys() and self.mode == "new":
+        #         suffix = PARAMS["batch_date"].strftime("%Y%m%d")
+        #         CONFIG[module]["output_file"] = f"{Path(self.filename[module]).stem}_{suffix}.csv"
+        #     else:
+        #         CONFIG[module]["output_file"] = self.filename[module]
 
         if not self.__thread.isRunning():
             self.__thread = self.__get_thread()
