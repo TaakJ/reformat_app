@@ -125,8 +125,8 @@ class BackupAndClear:
                     else:
                         logging.info("No backup file because data is not change")
                         
-                except Exception:
-                    pass
+                except FileNotFoundError:
+                    self.genarate_backup_file(record)
             else:
                 self.genarate_backup_file(record)
             
