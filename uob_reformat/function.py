@@ -104,62 +104,53 @@ class BackupAndClear:
 
         logging.info("Genarate backup file")
         self.backup_zip_file()
-        
-        backup_dir = join(self.root_dir, self._date)
+        self.backup_dir = join(self.root_dir, self._date)
         try:
-            os.makedirs(backup_dir)
+            os.makedirs(self.backup_dir)
         except OSError:
             pass
         
-        list_of_files = glob.glob(f'{backup_dir}/*')
-        if list_of_files != []:
-            for i, record in enumerate(self.logging):
+        list_of_files = glob.glob(f'{self.backup_dir}/*')
+        for i, record in enumerate(self.logging):
+            if list_of_files != []:
                 try:
                     ## read target file
                     df  = self.read_csv_file(i, record["full_target"])
                     df  = self.set_initial_data_type(i, df)
                     
                     ## read backup file
-                    backup_file = f"BK_{Path(record["full_target"]).stem}.csv"
-                    full_backup = join(backup_dir, backup_file)
+                    full_backup = join(self.backup_dir, f"BK_{Path(record["full_target"]).stem}.csv")
                     bk_df = self.read_csv_file(i, full_backup)
                     bk_df = self.set_initial_data_type(i, bk_df)
 
                     # Validate data change row by row
                     cmp_df = self.comparing_dataframes(i, bk_df, df)
                     if (cmp_df['count'] >= 1).any():
-                        print("OK")
+                        self.genarate_backup_file(record)
                     else:
                         logging.info("No backup file because data is not change")
                         
                 except Exception:
                     pass
-        # else:
-        #     status = self.genarate_backup_file()
+            else:
+                self.genarate_backup_file(record)
             
-        
-    def genarate_backup_file(self, record) -> str:
-    
-        full_target = record["full_target"]
-        
+    def genarate_backup_file(self, record):
         status = "skipped"
-        if glob.glob(full_target, recursive=True):
-            try:
-                
-                backup_file = f"BK_{Path(full_target).stem}.csv"
+        if glob.glob(record["full_target"], recursive=True):
+            try:        
+                backup_file = f"BK_{Path(record["full_target"]).stem}.csv"
                 full_backup = join(self.backup_dir, backup_file)
-                shutil.copy2(full_target, full_backup)
+                shutil.copy2(record["full_target"], full_backup)
                 
                 status = "succeed"
                 record.update({"full_backup": full_backup})
                 
-                logging.info(f"Backup file from {full_target} to {full_backup}")
+                logging.info(f"Backup file from {record["full_target"]} to {full_backup}, status {status}")
             except Exception:
                 pass
         else:
-            logging.info(f"No target file {full_target}")
-                
-        return status
+            logging.info(f"No target file {record["full_target"]}, status {status}")
 
     def backup_zip_file(self):
 
