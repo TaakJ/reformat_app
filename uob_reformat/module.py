@@ -116,12 +116,12 @@ class Convert2File:
             df = self.param_type(df)
         else:
             template_name = "Application Data Requirements.xlsx"
-            df = self.data_type(df)
+            df = self.application_type(df)
             
         self.logging[i].update({"template": template_name})
         return df
         
-    def data_type(self, df: pd.DataFrame) -> pd.DataFrame:
+    def application_type(self, df: pd.DataFrame) -> pd.DataFrame:
         try:
             df = df.apply(lambda x: x.str.strip()).replace('', 'NA')
             df = df.astype({
@@ -355,9 +355,9 @@ class Convert2File:
                         elif rows in self.update_rows.keys():
                             ## update / insert row
                             write_row = f"{cdc[rows][col]} rows: ({rows}) in tmp file, Updating records: ({self.update_rows[rows]})"
-                        else:
-                            ## no change row
-                            write_row = f"No change rows: ({rows}) in tmp file" ## No change row
+                        # else:
+                        #     ## no change row
+                        #     write_row = f"No change rows: ({rows}) in tmp file" ## No change row
                         logging.info(write_row)
                             
                     self.sheet.cell(row=rows, column=idx).value = cdc[rows][col]

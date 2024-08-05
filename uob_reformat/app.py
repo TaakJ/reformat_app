@@ -82,20 +82,20 @@ class setup_app(QWidget):
         self.show()
 
     def layout1(self):
-        self.groupbox1 = QGroupBox("RUN EACH MODULE")
+        self.groupbox1 = QGroupBox("Run each module")
 
         hbox1 = QHBoxLayout()
-        self._all = QCheckBox("ALL")
+        self._all = QCheckBox("All")
         self._all.setChecked(True)
         self._all.setEnabled(True)
-        hbox1.addWidget(QLabel("Module :"))
+        hbox1.addWidget(QLabel("Module"))
         hbox1.addWidget(self._all)
 
         hbox2 = QHBoxLayout()
         self.combobox = QComboBox()
         self.combobox.addItems(self.module)
         self.combobox.setDisabled(True)
-        hbox2.addWidget(QLabel("Select Module:"))
+        hbox2.addWidget(QLabel("Select module"))
         hbox2.addWidget(self.combobox)
 
         hbox3 = QHBoxLayout()
@@ -104,7 +104,7 @@ class setup_app(QWidget):
         self.today = datetime.today()
         self.calendar.setDisplayFormat("yyyy-MM-dd")
         self.calendar.calendarWidget().setSelectedDate(self.today)
-        hbox3.addWidget(QLabel("Select Date:"))
+        hbox3.addWidget(QLabel("Select date"))
         hbox3.addWidget(self.calendar)
 
         vbox = QVBoxLayout()
@@ -119,7 +119,7 @@ class setup_app(QWidget):
         return self.groupbox1
 
     def layout2(self):
-        self.groupbox2 = QGroupBox("Specify Output file")
+        self.groupbox2 = QGroupBox("Specify output file")
 
         hbox1 = QHBoxLayout()
         self.radio1 = QRadioButton("Create new")
@@ -130,7 +130,7 @@ class setup_app(QWidget):
         hbox1.addWidget(self.radio1)
 
         hbox2 = QHBoxLayout()
-        self.tmp_checked = QCheckBox("Create Tmp file")
+        self.tmp_checked = QCheckBox("Create tmp file")
         self.tmp_checked.setCheckable(True)
         self.tmp_checked.setChecked(True)
         hbox2.addWidget(self.tmp_checked)
@@ -146,13 +146,13 @@ class setup_app(QWidget):
         return self.groupbox2
 
     def layout3(self):
-        self.groupbox3 = QGroupBox("Directory Each module")
+        self.groupbox3 = QGroupBox("Directory each module")
 
         self.get_value = self.combobox.currentText()
         defualt_input_dir = CONFIG[self.get_value]["input_dir"]
         defualt_output_dir = CONFIG[self.get_value]["output_dir"]
 
-        input_lable = QLabel("Incoming Path :")
+        input_lable = QLabel("Incoming path")
         self.full_input = QLineEdit()
         self.full_input.setText(defualt_input_dir)
         self.full_input.setEnabled(False)
@@ -160,14 +160,24 @@ class setup_app(QWidget):
         self.input_btn = QPushButton("Download")
         self.input_btn.setEnabled(False)
 
-        output_lable = QLabel("Outgoing Path :")
+        output_lable = QLabel("Outgoing path")
         self.output_dir = QLineEdit()
         self.output_dir.setText(defualt_output_dir)
         self.output_dir.setEnabled(False)
         self.output_dir.setReadOnly(True)
         self.output_btn = QPushButton("Upload")
         self.output_btn.setEnabled(False)
-
+        
+        # hbox1 = QHBoxLayout()
+        self.checked1 = QCheckBox("Application")
+        self.checked1.setCheckable(True)
+        self.checked1.setChecked(True)
+        self.checked2 = QCheckBox("Paramlist")
+        self.checked2.setCheckable(True)
+        self.checked2.setChecked(True)
+        # hbox1.addWidget(self.checked1)
+        # hbox1.addWidget(self.checked2)
+        
         layout = QGridLayout()
         layout.addWidget(input_lable, 0, 0)
         layout.addWidget(self.full_input, 0, 1)
@@ -176,6 +186,11 @@ class setup_app(QWidget):
         layout.addWidget(output_lable, 2, 0)
         layout.addWidget(self.output_dir, 2, 1)
         layout.addWidget(self.output_btn, 2, 2)
+        
+        layout.addWidget(self.checked1, 4, 0)
+        layout.addWidget(self.checked2, 4, 1)
+        
+        
         self.groupbox3.setLayout(layout)
 
         self.input_btn.clicked.connect(lambda: self.task_open_dialog(1))
@@ -185,7 +200,7 @@ class setup_app(QWidget):
 
     def layout4(self):
 
-        self.groupbox4 = QGroupBox("RUN AND STATUS JOB")
+        self.groupbox4 = QGroupBox("Run and status job")
 
         vbox1 = QVBoxLayout()
         self.progress = QProgressBar()
@@ -220,7 +235,7 @@ class setup_app(QWidget):
         self.groupbox5 = QGroupBox("log file")
 
         vbox1 = QVBoxLayout()
-        self.time_label = QLabel("No Output.")
+        self.time_label = QLabel("No output.")
         vbox1.addWidget(self.time_label)
 
         hbox = QHBoxLayout()
@@ -321,7 +336,6 @@ class setup_app(QWidget):
                 "batch_date": self.calendar.calendarWidget().selectedDate().toPyDate(),
                 "store_tmp": self.tmp_checked.isChecked(),
                 "write_mode": self.mode,
-                #"clear": int(self.clear_file.text())
             })
 
         for module in self.module:

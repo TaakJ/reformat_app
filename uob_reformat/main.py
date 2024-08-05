@@ -13,19 +13,20 @@ from datetime import datetime
 
 class RunModule:
     def __init__(self) -> None:
-        for key, value in PARAMS.items():
-            setattr(self, key, value)
-            
-        self.date = datetime.now()
+        # for key, value in PARAMS.items():
+        #     setattr(self, key, value)
         
-        ## initial setup / clear file
-        setup_folder()
-        setup_log()
-        clear_log()
+        # self.date = datetime.now()
         
-        self.loop = asyncio.new_event_loop()
-        asyncio.set_event_loop(self.loop)
-        self.results = self.loop.run_until_complete(self.mapping_module())
+        # setup_folder()
+        # setup_log()
+        # clear_log()
+        
+        print(PARAMS)
+        
+        # self.loop = asyncio.new_event_loop()
+        # asyncio.set_event_loop(self.loop)
+        # self.results = self.loop.run_until_complete(self.mapping_module())
         
     async def mapping_module(self):
         coros = []
