@@ -21,7 +21,6 @@ class ModuleADM(CallFunction):
         try:
             self.colloct_setup()
             
-            ## backup file
             if self.backup is True:
                 self.achieve_backup()
             

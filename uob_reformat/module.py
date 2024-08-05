@@ -97,7 +97,6 @@ class Convert2File:
             encoding = encoding_result['encoding']
             line = StringIO(file.decode(encoding))
             
-            ## call function collect data in module
             self.get_extract_data(i, line)
             
         except Exception as err:
@@ -355,9 +354,6 @@ class Convert2File:
                         elif rows in self.update_rows.keys():
                             ## update / insert row
                             write_row = f"{cdc[rows][col]} rows: ({rows}) in tmp file, Updating records: ({self.update_rows[rows]})"
-                        # else:
-                        #     ## no change row
-                        #     write_row = f"No change rows: ({rows}) in tmp file" ## No change row
                         logging.info(write_row)
                             
                     self.sheet.cell(row=rows, column=idx).value = cdc[rows][col]
@@ -397,7 +393,7 @@ class Convert2File:
                 
                 ## Set dataframe from target file
                 try:
-                    target_df = self.read_csv_file(i)
+                    target_df = self.read_csv_file(i, record["full_target"])
                     
                 except FileNotFoundError:
                     template_name = join(Folder.TEMPLATE, record["template"])
@@ -421,16 +417,15 @@ class Convert2File:
         if "err" in record:
             raise CustomException(err=self.logging)
         
-    def read_csv_file(self, i: int) -> pd.DataFrame:
+    def read_csv_file(self, i: int, file: str) -> pd.DataFrame:
         
-        full_target = self.logging[i]["full_target"]
-        logging.info(f"Read csv file: {full_target}")
+        logging.info(f"Read csv file: {file}")
         
         status = "failed"
         self.logging[i].update({"function": "read_csv", "status": status})
         
         data = []
-        with open(full_target, "r", newline="\n") as reader:
+        with open(file, "r", newline="\n") as reader:
             csvin = csv.reader(
                 reader,
                 skipinitialspace=True,
