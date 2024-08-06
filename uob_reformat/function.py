@@ -123,7 +123,7 @@ class BackupAndClear:
                     if (cmp_df['count'] >= 1).any():
                         self.genarate_backup_file(record)
                     else:
-                        logging.info("No backup file because data is not change")
+                        logging.info("No backup file because no data was changed")
                         
                 except FileNotFoundError:
                     self.genarate_backup_file(record)
