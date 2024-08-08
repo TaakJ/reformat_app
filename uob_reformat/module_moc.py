@@ -54,8 +54,10 @@ class ModuleMOC(CallFunction):
         try:
             data = []
             for line in format_file:
-                data += [re.sub(r'(?<!\w),', ",", line.strip().replace('"','')).split(",")]
+                find_word = line.strip().replace('"','')
+                data += [re.sub(r'(?<!\w),', ",", find_word).split(",")]
             
+            ## set dataframe
             df = pd.DataFrame(data)
             df.columns = df.iloc[0].values
             df = df[1:]
