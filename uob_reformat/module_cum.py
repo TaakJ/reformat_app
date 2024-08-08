@@ -51,21 +51,21 @@ class ModuleCUM(CallFunction):
         self.logging[i].update({"function": "collect_data", "status": status})
         
         try:
-            data = {}
+            data = []
             sheet_list = [sheet for sheet in format_file.sheet_names()]
             for sheets in sheet_list:
                 cells = format_file.sheet_by_name(sheets)
                 for row in range(0, cells.nrows):
                     by_sheets = [cells.cell(row, col).value for col in range(cells.ncols)][1:]
-                    
                     if not all(empty == "" for empty in by_sheets):
-                        if sheets not in data:
-                            data[sheets] = [by_sheets]
-                        else:
-                            data[sheets].append(by_sheets)
+                        data.append(by_sheets)
                             
             ## set dataframe
-            print(data)
+            df = pd.DataFrame(data)
+            df.columns = df.iloc[0].values
+            df = df[1:]
+            df = df.reset_index(drop=True)
+            print(df)
         
         except Exception as err:
             raise Exception(err)

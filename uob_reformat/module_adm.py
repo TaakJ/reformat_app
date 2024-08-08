@@ -57,8 +57,8 @@ class ModuleADM(CallFunction):
                 regex = re.compile(r"\w+.*")
                 find_word = "".join(regex.findall(line)).strip()
                 data += [re.sub(r"\W\s+", "||", find_word).split("||")]
-                
-            ## Set dataframe
+            
+            ## set dataframe
             df = pd.DataFrame(data)
             df = df.groupby(0)
             df = df.agg(lambda x: ",".join(x.unique())).reset_index()
