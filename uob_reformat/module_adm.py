@@ -62,21 +62,22 @@ class ModuleADM(CallFunction):
             df = pd.DataFrame(data)
             df = df.groupby(0)
             df = df.agg(lambda x: ",".join(x.unique())).reset_index()
-            df = df.assign(**{"ApplicationCode": "ADM",
-                            "AccountOwner": df.loc[:,0],
-                            "AccountName": df.loc[:,0],
-                            "AccountType": "USR",
-                            "EntitlementName": "",
-                            "SecondEntitlementName": "",
-                            "ThirdEntitlementName": "",
-                            "AccountStatus": "A",
-                            "IsPrivileged": "N",
-                            "AccountDescription": "",
-                            "CreateDate": "",
-                            "LastLogin": "",
-                            "LastUpdatedDate": "",
-                            "AdditionalAttribute": "",
-                            "Country": "TH",})
+            df = df.assign(**{
+                    "ApplicationCode": "ADM",
+                    "AccountOwner": df.loc[:,0],
+                    "AccountName": df.loc[:,0],
+                    "AccountType": "USR",
+                    "EntitlementName": "",
+                    "SecondEntitlementName": "",
+                    "ThirdEntitlementName": "",
+                    "AccountStatus": "A",
+                    "IsPrivileged": "N",
+                    "AccountDescription": "",
+                    "CreateDate": "",
+                    "LastLogin": "",
+                    "LastUpdatedDate": "",
+                    "AdditionalAttribute": "",
+                    "Country": "TH",})
             df["AdditionalAttribute"] = df[[4, 5, 6]].apply(lambda x: "#".join(x), axis=1)
             df = df.drop(df.loc[:,0:6].columns, axis=1)
             df = self.set_initial_data_type(i, df)
