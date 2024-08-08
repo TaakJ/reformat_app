@@ -50,23 +50,26 @@ class ModuleCUM(CallFunction):
         status = "failed"
         self.logging[i].update({"function": "collect_data", "status": status})
         
-        sheet_list = [sheet for sheet in format_file.sheet_names()]
-
-        data = {}
-        for sheets in sheet_list:
-            cells = format_file.sheet_by_name(sheets)
-            for row in range(0, cells.nrows):
-                by_sheets = [cells.cell(row, col).value for col in range(cells.ncols)][1:]
-                
-                if not all(empty == "" for empty in by_sheets):
-                    if sheets not in data:
-                        data[sheets] = [by_sheets]
-                    else:
-                        data[sheets].append(by_sheets)
-
-        ## set dataframe
+        try:
+            data = {}
+            sheet_list = [sheet for sheet in format_file.sheet_names()]
+            for sheets in sheet_list:
+                cells = format_file.sheet_by_name(sheets)
+                for row in range(0, cells.nrows):
+                    by_sheets = [cells.cell(row, col).value for col in range(cells.ncols)][1:]
+                    
+                    if not all(empty == "" for empty in by_sheets):
+                        if sheets not in data:
+                            data[sheets] = [by_sheets]
+                        else:
+                            data[sheets].append(by_sheets)
+                            
+            ## set dataframe
+            print(data)
         
+        except Exception as err:
+            raise Exception(err)
         
-        status = "succeed"
-        self.logging[i].update({"status": status})
-        return data
+        # status = "succeed"
+        # self.logging[i].update({"data": df.to_dict("list"), "status": status})
+        # logging.info(f'Collect data from file: {self.logging[i]["full_input"]}, status: {status}')
