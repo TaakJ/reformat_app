@@ -70,17 +70,16 @@ class Convert2File:
         
         try:
             full_input = self.logging[i]["full_input"]
+            logging.info(f"Read format excel file: {full_input}")
             workbook = xlrd.open_workbook(full_input)
             
-            data = self.get_extract_data(i, workbook)
+            self.get_extract_data(i, workbook)
 
         except Exception as err:
             raise Exception(err)
         
         status = "succeed"
         self.logging[i].update({"status": status})
-        
-        return data
 
     def read_file(self, i: int) -> any:
 
