@@ -77,7 +77,7 @@ class ModuleADM(CallFunction):
                             "LastUpdatedDate": "",
                             "AdditionalAttribute": "",
                             "Country": "TH",})
-            df["AdditionalAttribute"] = df[[4, 5, 6]].apply(lambda x: "#".join(x), axis =1)
+            df["AdditionalAttribute"] = df[[4, 5, 6]].apply(lambda x: "#".join(x), axis=1)
             df = df.drop(df.loc[:,0:6].columns, axis=1)
             df = self.set_initial_data_type(i, df)
             
