@@ -50,25 +50,22 @@ class ModuleADM(CallFunction):
     def collect_data(self, i: int, format_file: any) -> dict:
 
         status = "failed"
-        module = self.logging[i]["module"]
-        logging.info(f"Collect Data for module: {module}")
-
         self.logging[i].update({"function": "collect_data", "status": status})
-
+        
         try:
             data = []
             for line in format_file:
                 regex = re.compile(r"\w+.*")
                 find_word = "".join(regex.findall(line)).strip()
                 data += [re.sub(r"\W\s+", "||", find_word).split("||")]
-
-            ## set dataframe
+                
+            ## Set dataframe
             df = pd.DataFrame(data)
             df = df.groupby(0)
             df = df.agg(lambda x: ",".join(x.unique())).reset_index()
             df = df.assign(**{"ApplicationCode": "ADM",
-                            "AccountOwner": "",
-                            "AccountName": "",
+                            "AccountOwner": df.loc[:,0],
+                            "AccountName": df.loc[:,0],
                             "AccountType": "USR",
                             "EntitlementName": "",
                             "SecondEntitlementName": "",
@@ -81,12 +78,10 @@ class ModuleADM(CallFunction):
                             "LastUpdatedDate": "",
                             "AdditionalAttribute": "",
                             "Country": "TH",})
-            df["AccountOwner"] = df.loc[:,0]
-            df["AccountName"] = df.loc[:,1]
-            df["AdditionalAttribute"] = df[[4,5,6]].apply(lambda x: "#".join(x), axis =1)
-            df = df.drop(df.loc[:, 0:6].columns, axis=1)
+            df["AdditionalAttribute"] = df[[4, 5, 6]].apply(lambda x: "#".join(x), axis =1)
+            df = df.drop(df.loc[:,0:6].columns, axis=1)
             df = self.set_initial_data_type(i, df)
-
+            
         except Exception as err:
             raise Exception(err)
         

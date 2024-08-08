@@ -23,8 +23,8 @@ class ModuleCUM(CallFunction):
             if self.backup is True:
                 self.achieve_backup()
             
-            # await self.check_source_file()
-            # await self.separate_data_file()
+            await self.check_source_file()
+            await self.separate_data_file()
             # if self.store_tmp is True:
             #     await self.genarate_tmp_file()
             # await self.genarate_target_file()
@@ -48,10 +48,8 @@ class ModuleCUM(CallFunction):
     def collect_data(self, i: int, format_file: any) -> dict:
 
         status = "failed"
-        module = self.logging[i]["module"]
-        logging.info(f'Collect Data for module: {module}')
-
         self.logging[i].update({"function": "collect_data", "status": status})
+        
         sheet_list = [sheet for sheet in format_file.sheet_names()]
 
         data = {}
@@ -66,6 +64,9 @@ class ModuleCUM(CallFunction):
                     else:
                         data[sheets].append(by_sheets)
 
+        ## set dataframe
+        
+        
         status = "succeed"
         self.logging[i].update({"status": status})
         return data
