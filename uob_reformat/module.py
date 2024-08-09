@@ -170,7 +170,6 @@ class Convert2File:
         except FileNotFoundError:
             
             self.workbook = openpyxl.Workbook()
-            
             columns = self.logging[i]['columns']
             df = pd.DataFrame(columns=columns)
             
