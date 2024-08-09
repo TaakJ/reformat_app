@@ -131,9 +131,7 @@ class Convert2File:
                 
                 ## Validate data change row by row
                 cmp_df = self.comparing_dataframes(i, tmp_df, raw_df)
-                print(cmp_df)
-                
-                # cdc = self.change_data_capture(i, cmp_df)
+                cdc = self.change_data_capture(i, cmp_df)
                         
                 # ## Write tmp file
                 # status = self.write_worksheet(i, cdc)
@@ -225,6 +223,14 @@ class Convert2File:
         status = "succeed"
         self.logging[i].update({"status": status})
         return status
+    
+    # def add_column(self, df):
+    #     if set('remark').issubset(df.columns):    
+    #         df = df.loc[df['remark'] != "Remove"]
+    #     else:
+    #         df['remark'] = "Insert"
+
+    #     return df
         
     def comparing_dataframes(self, i: int, df: pd.DataFrame, new_df: pd.DataFrame) -> pd.DataFrame:
         
@@ -234,20 +240,9 @@ class Convert2File:
         self.logging[i].update({'function': "compare_data", 'status': status})
         
         try:
-            if 'remark' in df.columns and new_df.columns:
-                df = df.loc[df['remark'] != "Remove"]
-            else:
-                df['remark'] = "Insert" 
-                
-            if 'remark' in new_df.columns:
-                new_df = new_df.loc[df['remark'] != "Remove"]
-            else:
-                new_df['remark'] = "Insert"
-                
             self.merge_index = np.union1d(df.index, new_df.index)
-            df = df.reindex(index=self.merge_index, columns=df.columns).iloc[:,:-1]
-            self.new_df = new_df.reindex(index=self.merge_index, columns=new_df.columns).iloc[:,:-1]
-            
+            df = df.reindex(index=self.merge_index, columns=df.columns) #.iloc[:,:-1]
+            self.new_df = new_df.reindex(index=self.merge_index, columns=new_df.columns) #.iloc[:,:-1]
             ## Compare data
             df['count'] = pd.DataFrame(np.where(df.ne(self.new_df), True, df), index=df.index, columns=df.columns)\
                 .apply(lambda x: (x == True).sum(), axis=1)
@@ -256,7 +251,7 @@ class Convert2File:
             raise Exception(err)
         
         status = "succeed"
-        self.logging[i].update({"status": status})
+        self.logging[i].update({'status': status})
         
         return df
     
@@ -285,25 +280,25 @@ class Convert2File:
                         if df.loc[row, 'count'] not in [3, 15]:
                             if df.loc[row, 'count'] < 1:
                                 df.loc[row, data[0]] = data[1][row]
-                                df.loc[row, 'remark'] = "No_change"
+                                # df.loc[row, 'remark'] = "No_change"
                             else:
                                 ## Update
                                 if data[1][row] != change_data[1][row]:
                                     record.update({data[0]: f"{data[1][row]} => {change_data[1][row]}"})
                                 df.loc[row, data[0]] = change_data[1][row]
-                                df.loc[row, 'remark'] = "Update"
+                                # df.loc[row, 'remark'] = "Update"
                         else:
                             ## Insert
                             record.update({data[0]: change_data[1][row]})
                             df.loc[row, data[0]] = change_data[1][row]
-                            df.loc[row, 'remark'] = "Insert"
+                            # df.loc[row, 'remark'] = "Insert"
                             
                     if record != {}:
                         self.update_rows[idx] = format_record(record)
                 else:
                     ## Remove
                     self.remove_rows[i] = idx
-                    df.loc[row, 'remark'] = "Remove"
+                    # df.loc[row, 'remark'] = "Remove"
                     i += 1
             
             df = df.drop(['count'], axis=1)
@@ -316,6 +311,7 @@ class Convert2File:
         
         status = "succeed"
         self.logging[i].update({'status': status})
+        
         return cdc
 
     async def genarate_target_file(self) -> None:
