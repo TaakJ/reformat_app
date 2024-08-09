@@ -46,45 +46,49 @@ class ModuleADM(CallFunction):
 
         return result
 
-    def collect_data(self, i: int, format_file: any) -> dict:
+    def collect_user(self, i: int, format_file: any) -> dict:
 
         status = "failed"
-        self.logging[i].update({"function": "collect_data", "status": status})
+        self.logging[i].update({"function": "collect_user", "status": status})
         
-        try:
-            data = []
-            for line in format_file:
-                regex = re.compile(r"\w+.*")
-                find_word = "".join(regex.findall(line)).strip()
-                data += [re.sub(r"\W\s+", "||", find_word).split("||")]
+        print("OK")
+        # try:
+        #     data = []
+        #     for line in format_file:
+        #         regex = re.compile(r"\w+.*")
+        #         find_word = "".join(regex.findall(line)).strip()
+        #         data += [re.sub(r"\W\s+", "||", find_word).split("||")]
             
-            ## set dataframe
-            df = pd.DataFrame(data)
-            df = df.groupby(0)
-            df = df.agg(lambda x: ",".join(x.unique())).reset_index()
-            df = df.assign(**{
-                    "ApplicationCode": "ADM",
-                    "AccountOwner": df.loc[:,0],
-                    "AccountName": df.loc[:,0],
-                    "AccountType": "USR",
-                    "EntitlementName": "",
-                    "SecondEntitlementName": "",
-                    "ThirdEntitlementName": "",
-                    "AccountStatus": "A",
-                    "IsPrivileged": "N",
-                    "AccountDescription": "",
-                    "CreateDate": "",
-                    "LastLogin": "",
-                    "LastUpdatedDate": "",
-                    "AdditionalAttribute": "",
-                    "Country": "TH",})
-            df["AdditionalAttribute"] = df[[4, 5, 6]].apply(lambda x: "#".join(x), axis=1)
-            df = df.drop(df.loc[:,0:6].columns, axis=1)
-            df = self.set_initial_data_type(i, df)
+        #     ## set dataframe
+        #     df = pd.DataFrame(data)
+        #     df = df.groupby(0)
+        #     df = df.agg(lambda x: ",".join(x.unique())).reset_index()
+        #     df = df.assign(**{
+        #             "ApplicationCode": "ADM",
+        #             "AccountOwner": df.loc[:,0],
+        #             "AccountName": df.loc[:,0],
+        #             "AccountType": "USR",
+        #             "EntitlementName": "",
+        #             "SecondEntitlementName": "",
+        #             "ThirdEntitlementName": "",
+        #             "AccountStatus": "A",
+        #             "IsPrivileged": "N",
+        #             "AccountDescription": "",
+        #             "CreateDate": "",
+        #             "LastLogin": "",
+        #             "LastUpdatedDate": "",
+        #             "AdditionalAttribute": "",
+        #             "Country": "TH",})
+        #     df["AdditionalAttribute"] = df[[4, 5, 6]].apply(lambda x: "#".join(x), axis=1)
+        #     df = df.drop(df.loc[:,0:6].columns, axis=1)
+        #     df = self.set_initial_data_type(i, df)
             
-        except Exception as err:
-            raise Exception(err)
+        # except Exception as err:
+        #     raise Exception(err)
         
-        status = "succeed"
-        self.logging[i].update({"data": df.to_dict("list"), "status": status})
-        logging.info(f'Collect data from file: {self.logging[i]["full_input"]}, status: {status}')
+        # status = "succeed"
+        # self.logging[i].update({"data": df.to_dict("list"), "status": status})
+        # logging.info(f'Collect data from file: {self.logging[i]["full_input"]}, status: {status}')
+        
+    def collect_param(self, i: int, format_file: any) -> dict:
+        print("NOK")

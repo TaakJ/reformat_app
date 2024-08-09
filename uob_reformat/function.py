@@ -1,5 +1,6 @@
 from abc import ABC, abstractmethod
 import os
+import re
 import glob
 import shutil
 import zipfile
@@ -83,12 +84,34 @@ class CollectParams(ABC):
             raise CustomException(err=self.logging)
 
     def get_extract_data(self, i: int, format_file: any) -> dict:
+        
         logging.info("Extract file")
-        data = self.collect_data(i, format_file)
-        return data
+        
+        self.logging[i].update({"function": "get_extract_data"})
+        full_input = self.logging[i]["full_input"]
+        print(full_input)
+        
+        # if re.search(r'Param', full_input) is not None:
+        #     template_name = "Param Requirements.xlsx"
+        #     df = self.param_type(df)
+        # else:
+        #     template_name = "Application Data Requirements.xlsx"
+        #     df = self.application_type(df)
+            
+        # self.logging[i].update({"template": template_name})
+        # return df
+        
+        
+        # data = self.collect_data(i, format_file)
+
+        # return data
 
     @abstractmethod
-    def collect_data(self, i: int, format_file: any):
+    def collect_user(self, i: int, format_file: any):
+        pass
+    
+    @abstractmethod
+    def collect_param(self, i: int, format_file: any):
         pass
 
 class BackupAndClear:
@@ -174,8 +197,8 @@ class BackupAndClear:
                         shutil.rmtree(zip_dir)
                     logging.info(f"Clear Zip file: {zip_dir}")
                     
-        except OSError as err:
-            print(err)
+        except OSError:
+            pass
         
     def clear_tmp(self) -> None:
         try:
