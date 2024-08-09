@@ -45,10 +45,10 @@ class ModuleCUM(CallFunction):
         
         return result
 
-    def collect_data(self, i: int, format_file: any) -> dict:
+    def collect_user(self, i: int, format_file: any) -> dict:
 
         status = "failed"
-        self.logging[i].update({"function": "collect_data", "status": status})
+        self.logging[i].update({'function': "collect_user", 'status': status})
         
         try:
             data = []

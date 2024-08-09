@@ -164,12 +164,16 @@ class Convert2File:
             if self.sheet_name in get_sheet:
                 self.create = True
                 self.sheet = self.workbook.get_sheet_by_name(self.sheet_name)
-            else:
-                self.sheet = self.workbook.get_sheet_by_name('Field Name')
+            # else:
+            #     self.sheet = self.workbook.get_sheet_by_name('Field Name')
 
         except FileNotFoundError:
-            a = pd.DataFrame(columns=self.logging[i]["columns"])
-            print(a)
+            
+            self.workbook = openpyxl.Workbook()
+            
+            columns = self.logging[i]['columns']
+            df = pd.DataFrame(columns=columns)
+            
             
             
         #     full_template = join(Folder.TEMPLATE, template_name)
