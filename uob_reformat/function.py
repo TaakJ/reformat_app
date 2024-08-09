@@ -83,28 +83,27 @@ class CollectParams(ABC):
         if "err" in record:
             raise CustomException(err=self.logging)
 
-    def get_extract_data(self, i: int, format_file: any) -> dict:
-        
-        logging.info("Extract file")
+    def get_extract_file(self, i: int, format_file: any) -> dict:
         
         self.logging[i].update({"function": "get_extract_data"})
         full_input = self.logging[i]["full_input"]
-        print(full_input)
         
-        # if re.search(r'Param', full_input) is not None:
-        #     template_name = "Param Requirements.xlsx"
-        #     df = self.param_type(df)
-        # else:
-        #     template_name = "Application Data Requirements.xlsx"
-        #     df = self.application_type(df)
+        if re.search(r'_Param', full_input) is not None:
+            default_value = {
+                "Parameter Name": "NA",
+                "Code value": "NA",
+                "Decode value": "NA"
+            }
+            self.logging[i].update({"default_value": default_value})
+            self.collect_param(i, format_file)
             
-        # self.logging[i].update({"template": template_name})
-        # return df
-        
-        
-        # data = self.collect_data(i, format_file)
-
-        # return data
+        else:
+            columns = ["ApplicationCode", "AccountOwner", "AccountName", "AccountType", "EntitlementName", "SecondEntitlementName",
+                    "ThirdEntitlementName", "AccountStatus", "IsPrivileged", "AccountDescription", "CreateDate", "LastLogin", "LastUpdatedDate",
+                    "AdditionalAttribute", "Country"]
+            
+            self.logging[i].update({"columns": columns})
+            self.collect_user(i, format_file)
 
     @abstractmethod
     def collect_user(self, i: int, format_file: any):

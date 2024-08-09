@@ -73,3 +73,38 @@ class ModuleCUM(CallFunction):
         # status = "succeed"
         # self.logging[i].update({"data": df.to_dict("list"), "status": status})
         # logging.info(f'Collect data from file: {self.logging[i]["full_input"]}, status: {status}')
+        
+    # def collect_user(self, i: int, format_file: any) -> dict:
+
+    #     status = "failed"
+    #     self.logging[i].update({"function": "collect_user", "status": status})
+        
+    #     default_value = self.logging[i]["default_value"]
+    #     try:
+    #         data = []
+    #         for line in format_file:
+    #             regex = re.compile(r"\w+.*")
+    #             find_word = "".join(regex.findall(line)).strip()
+    #             data += [re.sub(r"\W\s+", "||", find_word).split("||")]
+            
+    #         ## set dataframe
+    #         df = pd.DataFrame(data)
+    #         df = df.groupby(0)
+    #         df = df.agg(lambda x: "+".join(x.unique())).reset_index()
+    #         default_value.update({
+    #             "ApplicationCode": "ADM", 
+    #             "AccountOwner": df[0], 
+    #             "AccountName": df[1],
+    #             "EntitlementName": df[[4, 5, 6]].apply(lambda x: "#".join(x), axis=1),
+    #             "AdditionalAttribute": df[[2, 4]].apply(lambda x: "#".join(x), axis=1),
+    #         })
+    #         df = df.drop(df.loc[:,0:6].columns, axis=1)
+    #         df = df.assign(**default_value).apply(lambda x: x.str.strip())
+    #         df = self.user_type(df)
+            
+    #     except Exception as err:
+    #         raise Exception(err)
+        
+    #     status = "succeed"
+    #     self.logging[i].update({"data": df.to_dict("list"), "status": status})
+    #     logging.info(f'Collect user data file: {self.logging[i]["full_input"]}, status: {status}')
