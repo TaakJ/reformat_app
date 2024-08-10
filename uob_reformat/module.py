@@ -129,18 +129,17 @@ class Convert2File:
                 ## Set dataframe from raw file      
                 raw_df = pd.DataFrame(record["data"])
                 
-                ## Validate data change row by row
+                # ## Validate data change row by row
                 cmp_df = self.comparing_dataframes(i, tmp_df, raw_df)
                 cdc = self.change_data_capture(i, cmp_df)
-                        
+                
                 # ## Write tmp file
-                # status = self.write_worksheet(i, cdc)
-
+                status = self.write_worksheet(i, cdc)
+                # record.update({'function': "genarate_tmp_file", 'status': status})
+                # logging.info(f"Write data to tmp file: {record['full_tmp']}, status: {status}")
+                
             except Exception as err:
                 record.update({'err': err})
-                
-            record.update({'function': "genarate_tmp_file", 'status': status})
-            logging.info(f"Write data to tmp file: {record['full_tmp']}, status: {status}")
 
             if "err" in record:
                 raise CustomException(err=self.logging)
@@ -181,7 +180,7 @@ class Convert2File:
         
         status = "failed"
         if self.create:
-            self.sheet_name = f"RUN_TIME_{self.sheet_num}"
+            self.sheet_name = f"RUN_TIME_{self.sheet_num + 1}"
             self.sheet = self.workbook.create_sheet(self.sheet_name)
 
         logging.info(f"Write to sheet: {self.sheet_name}")
@@ -198,16 +197,24 @@ class Convert2File:
             ## write row
             while rows <= max_row:
                 for idx, col in enumerate(cdc[rows].keys(), 1):
+                    # print(col)
+                    # print(self.update_rows.keys())
                     if col == "remark":
-                        if rows in self.remove_rows:
-                            ## remove row
-                            write_row = (f"{cdc[rows][col]} rows: ({rows}) in tmp file")
-                        elif rows in self.update_rows.keys():
-                            ## update / insert row
-                            write_row = f"{cdc[rows][col]} rows: ({rows}) in tmp file, Updating records: ({self.update_rows[rows]})"
-                        logging.info(write_row)
+                        print(rows)
+                        # if rows in self.remove_rows:
+                        #     ## remove row
+                        #     ''
+                        #     # print(cdc[rows][col])
+                        #     # record = (f"{cdc[rows][col]} rows: ({rows}) in tmp file")
+                        # elif rows in self.update_rows.keys():
+                        #     ## update / insert row
+                        #     print(rows)
+                        #     # record = f"{cdc[rows][col]} rows: ({rows}) in tmp file, Updating records: ({self.update_rows[rows]})"
                             
-                    self.sheet.cell(row=rows, column=idx).value = cdc[rows][col]
+                        # logging.info(record)
+                        
+                    # self.sheet.cell(row=rows, column=idx).value = cdc[rows][col]
+                    
                 rows += 1
                 
         except KeyError as err:
@@ -222,15 +229,16 @@ class Convert2File:
 
         status = "succeed"
         self.logging[i].update({"status": status})
+        
         return status
     
-    # def add_column(self, df):
-    #     if set('remark').issubset(df.columns):    
-    #         df = df.loc[df['remark'] != "Remove"]
-    #     else:
-    #         df['remark'] = "Insert"
-
-    #     return df
+    def add_column(self, df):
+        if set('remark').issubset(df.columns):    
+            df = df.loc[df['remark'] != "Remove"]
+        else:
+            df['remark'] = "Insert"
+            
+        return df
         
     def comparing_dataframes(self, i: int, df: pd.DataFrame, new_df: pd.DataFrame) -> pd.DataFrame:
         
@@ -241,8 +249,12 @@ class Convert2File:
         
         try:
             self.merge_index = np.union1d(df.index, new_df.index)
-            df = df.reindex(index=self.merge_index, columns=df.columns) #.iloc[:,:-1]
-            self.new_df = new_df.reindex(index=self.merge_index, columns=new_df.columns) #.iloc[:,:-1]
+            
+            df = self.add_column(df)
+            df = df.reindex(index=self.merge_index, columns=df.columns).iloc[:,:-1]
+            
+            new_df = self.add_column(new_df)
+            self.new_df = new_df.reindex(index=self.merge_index, columns=new_df.columns).iloc[:,:-1]
             ## Compare data
             df['count'] = pd.DataFrame(np.where(df.ne(self.new_df), True, df), index=df.index, columns=df.columns)\
                 .apply(lambda x: (x == True).sum(), axis=1)
@@ -280,25 +292,25 @@ class Convert2File:
                         if df.loc[row, 'count'] not in [3, 15]:
                             if df.loc[row, 'count'] < 1:
                                 df.loc[row, data[0]] = data[1][row]
-                                # df.loc[row, 'remark'] = "No_change"
+                                df.loc[row, 'remark'] = "No_change"
                             else:
                                 ## Update
                                 if data[1][row] != change_data[1][row]:
                                     record.update({data[0]: f"{data[1][row]} => {change_data[1][row]}"})
                                 df.loc[row, data[0]] = change_data[1][row]
-                                # df.loc[row, 'remark'] = "Update"
+                                df.loc[row, 'remark'] = "Update"
                         else:
                             ## Insert
                             record.update({data[0]: change_data[1][row]})
                             df.loc[row, data[0]] = change_data[1][row]
-                            # df.loc[row, 'remark'] = "Insert"
+                            df.loc[row, 'remark'] = "Insert"
                             
                     if record != {}:
                         self.update_rows[idx] = format_record(record)
                 else:
                     ## Remove
                     self.remove_rows[i] = idx
-                    # df.loc[row, 'remark'] = "Remove"
+                    df.loc[row, 'remark'] = "Remove"
                     i += 1
             
             df = df.drop(['count'], axis=1)
