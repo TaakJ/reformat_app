@@ -71,7 +71,7 @@ class ModuleADM(CallFunction):
                 'EntitlementName': df[[4, 5, 6]].apply(lambda x: '#'.join(x), axis=1),
                 'AccountStatus': "A",
                 'IsPrivileged': "N",
-                'AdditionalAttribute': df[[2, 4]].apply(lambda x: '#'.join(x), axis=1),
+                'AdditionalAttribute': df[[2, 4]].apply(lambda x: ';'.join(x), axis=1),
                 'Country': "TH"
             })
             df = df.assign(**set_value)
