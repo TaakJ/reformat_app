@@ -88,5 +88,5 @@ class ModuleADM(CallFunction):
     def collect_param(self, i: int, format_file: any) -> dict:
         
         status = "failed"
-        self.logging[i].update({'function': "collect_user", 'status': status})
+        self.logging[i].update({'function': "collect_param", 'status': status})
         columns = self.logging[i]['columns']
