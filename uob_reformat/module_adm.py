@@ -26,9 +26,9 @@ class ModuleADM(CallFunction):
 
             await self.check_source_file()
             await self.separate_data_file()
-            if self.store_tmp is True:
-                await self.genarate_tmp_file()
-            await self.genarate_target_file()
+            # if self.store_tmp is True:
+            #     await self.genarate_tmp_file()
+            # await self.genarate_target_file()
 
         except CustomException as err:
             logging.error("See Error Details: log_error.log")
@@ -57,26 +57,25 @@ class ModuleADM(CallFunction):
                 regex = re.compile(r"\w+.*")
                 find_word = ''.join(regex.findall(line)).strip()
                 data += [re.sub(r"\W\s+", '||', find_word).split('||')]
-            
             df = pd.DataFrame(data)
-            df = df.select_dtypes(object).apply(lambda x: x.str.strip())
-            df = df.groupby(0)
-            df = df.agg(lambda x: '+'.join(x.unique())).reset_index()
             
             ## mapping data
+            df = df.groupby(0)
+            df = df.agg(lambda x: '+'.join(x.unique())).reset_index()
             set_value = {column: "NA" for column in self.logging[i]['columns']}
             set_value.update({
                 'ApplicationCode': "ADM", 
                 'AccountOwner': df[0], 
                 'AccountName': df[1],
+                'AccountType': "USR",
                 'EntitlementName': df[[4, 5, 6]].apply(lambda x: '#'.join(x), axis=1),
                 'AccountStatus': "A",
                 'IsPrivileged': "N",
                 'AdditionalAttribute': df[[2, 4]].apply(lambda x: '#'.join(x), axis=1),
                 'Country': "TH"
             })
-            df = df.drop(df.loc[:, 0:6].columns, axis=1)
             df = df.assign(**set_value)
+            df = df.drop(df.iloc[:, 0:7].columns, axis=1)
             
         except Exception as err:
             raise Exception(err)

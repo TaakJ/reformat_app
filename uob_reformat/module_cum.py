@@ -3,12 +3,13 @@ import logging
 from .function import CallFunction
 from .exception import CustomException
 
+
 class ModuleCUM(CallFunction):
 
     def __init__(self, params: any) -> None:
         for key, value in vars(params).items():
             setattr(self, key, value)
-            
+
     def logSetter(self, log: list) -> None:
         self._log = log
 
@@ -19,10 +20,10 @@ class ModuleCUM(CallFunction):
         result = {"module": self.module, "task": "Completed"}
         try:
             self.colloct_setup()
-            
+
             if self.backup is True:
                 self.achieve_backup()
-            
+
             await self.check_source_file()
             await self.separate_data_file()
             # if self.store_tmp is True:
@@ -30,7 +31,7 @@ class ModuleCUM(CallFunction):
             # await self.genarate_target_file()
 
         except CustomException as err:
-            logging.error('See Error Details: log_error.log')
+            logging.error("See Error Details: log_error.log")
 
             logger = err.setup_errorlog(log_name=__name__)
             while True:
@@ -42,40 +43,58 @@ class ModuleCUM(CallFunction):
             result.update({"task": "Uncompleted"})
 
         logging.info(f'Stop Run Module "{self.module}"\r\n')
-        
+
         return result
 
     def collect_user(self, i: int, format_file: any) -> dict:
 
         status = "failed"
-        self.logging[i].update({'function': "collect_user", 'status': status})
-        
+        self.logging[i].update({"function": "collect_user", "status": status})
+
         try:
             data = []
             sheet_list = [sheet for sheet in format_file.sheet_names()]
             for sheets in sheet_list:
                 cells = format_file.sheet_by_name(sheets)
                 for row in range(0, cells.nrows):
-                    by_sheets = [cells.cell(row, col).value for col in range(cells.ncols)][1:]
+                    by_sheets = [str(cells.cell(row, col).value).strip() for col in range(cells.ncols)][1:]
                     if not all(empty == "" for empty in by_sheets):
                         data.append(by_sheets)
-                            
-            ## set dataframe
+
             df = pd.DataFrame(data)
             df.columns = df.iloc[0].values
             df = df[1:]
-            df = df.reset_index(drop=True)
-            print(df)
-        
+            
+            ## mapping data
+            df = df.groupby('USER_ID')
+            df = df.agg(lambda x: '+'.join(x.unique())).reset_index()
+            set_value = {column: "NA" for column in self.logging[i]['columns']}
+            set_value.update({
+                'ApplicationCode': "CUM", 
+                'AccountOwner': df['USER_ID'], 
+                'AccountName': df['USER_ID'],
+                'AccountType': "USR",
+                'EntitlementName': "NA",
+                'AccountStatus': "A",
+                'IsPrivileged': "N",
+                'CreateDate': df["VALID_FROM"].apply(pd.to_datetime, dayfirst=True).dt.strftime('%Y%m%d%H%M%S'), 
+                'LastLogin': df["Last Usage"].apply(pd.to_datetime, dayfirst=True).dt.strftime('%Y%m%d%H%M%S'),
+                'LastUpdatedDate': df["Last Change PWD"].apply(pd.to_datetime, dayfirst=True).dt.strftime('%Y%m%d%H%M%S'),
+                'AdditionalAttribute': df[['USER_ID', 'DEPARTMENT']].apply(lambda x: '#'.join(x), axis=1),
+                'Country': "TH"
+            })
+            df = df.assign(**set_value)
+            df = df.drop(df.iloc[:, 0:14].columns, axis=1)
+            
         except Exception as err:
             raise Exception(err)
-        
-        # status = "succeed"
-        # self.logging[i].update({"data": df.to_dict("list"), "status": status})
-        # logging.info(f'Collect data from file: {self.logging[i]["full_input"]}, status: {status}')
-    
+
+        status = "succeed"
+        self.logging[i].update({"data": df.to_dict("list"), "status": status})
+        logging.info(f'Collect data from file: {self.logging[i]["full_input"]}, status: {status}')
+
     def collect_param(self, i: int, format_file: any) -> dict:
-        
+
         status = "failed"
-        self.logging[i].update({'function': "collect_param", 'status': status})
-        columns = self.logging[i]['columns']
+        self.logging[i].update({"function": "collect_param", "status": status})
+        columns = self.logging[i]["columns"]
