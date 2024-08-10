@@ -329,17 +329,14 @@ class Convert2File:
                     new_df = pd.DataFrame(data, columns=columns)
                 else:
                     new_df = pd.DataFrame(record['data'])
-                new_df = self.set_initial_data_type(i, new_df)
                 
                 ## Set dataframe from target file
                 try:
                     target_df = self.read_csv_file(i, record['full_target'])
                     
                 except FileNotFoundError:
-                    template_name = join(Folder.TEMPLATE, record['template'])
-                    target_df = pd.read_excel(template_name)
+                    target_df = pd.DataFrame(columns=record['columns'])
                     target_df.to_csv(record["full_target"], index=None, header=True, sep=",")
-                target_df = self.set_initial_data_type(i, target_df)
                 
                 # Validate data change row by row
                 cmp_df = self.comparing_dataframes(i, target_df, new_df)
@@ -347,12 +344,11 @@ class Convert2File:
                 
                 ## Write csv file
                 status = self.write_csv(i, cdc)
+                record.update({'function': "genarate_target_file", 'status': status})
+                logging.info(f"Write data to target file: {record["full_target"]}, status: {status}")
 
             except Exception as err:
                 record.update({'err': err})
-                
-            record.update({'function': "genarate_target_file", 'status': status})
-            logging.info(f"Write data to target file: {record["full_target"]}, status: {status}")
 
         if 'err' in record:
             raise CustomException(err=self.logging)

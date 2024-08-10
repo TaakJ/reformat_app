@@ -69,15 +69,13 @@ class CollectParams(ABC):
                             copy_record.update({
                                 'full_input': input,
                                 'full_target': target,
-                                'status': status,
-                                })
+                                'status': status,})
                             log += [copy_record]
                         else:
                             record.update({
                                 'full_input': input,
                                 'full_target': target,
-                                'status': status,
-                                })
+                                'status': status,})
                             log = [record]
                 i += 1
         except Exception as err:
@@ -97,12 +95,13 @@ class CollectParams(ABC):
         if re.search(r"_Param", full_input) is not None:
             columns = ['Parameter Name', 'Code value', 'Decode value']
             self.logging[i].update({'columns': columns})
-            self.collect_param(i, format_file)
             
+            self.collect_param(i, format_file)
         else:
             columns = ['ApplicationCode', 'AccountOwner', 'AccountName', 'AccountType', 'EntitlementName', 'SecondEntitlementName', 'ThirdEntitlementName',
                     'AccountStatus', 'IsPrivileged', 'AccountDescription', 'CreateDate', 'LastLogin', 'LastUpdatedDate', 'AdditionalAttribute', 'Country']
             self.logging[i].update({'columns': columns})
+            
             self.collect_user(i, format_file)
 
     @abstractmethod
@@ -133,13 +132,11 @@ class BackupAndClear:
                 try:
                     ## read target file
                     df  = self.read_csv_file(i, record['full_target'])
-                    df  = self.set_initial_data_type(i, df)
                     
                     ## read backup file
                     full_backup = join(self.backup_dir, f"BK_{Path(record['full_target']).stem}.csv")
                     bk_df = self.read_csv_file(i, full_backup)
-                    bk_df = self.set_initial_data_type(i, bk_df)
-
+                    
                     # Validate data change row by row
                     cmp_df = self.comparing_dataframes(i, bk_df, df)
                     if (cmp_df['count'] >= 1).any():
