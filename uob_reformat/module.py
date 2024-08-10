@@ -24,16 +24,15 @@ class Convert2File:
         
         for record in self.logging:
             record.update({'function': "check_source_file"})
-            full_input = record['full_input']
             
-            if glob.glob(full_input, recursive=True):
+            if glob.glob(record['full_input'], recursive=True):
                 status = "found"
             else:
                 status = "not_found"
-                record.update({'err': f"File not found {full_input}"})
+                record.update({'err': f"File not found {record['full_input']}"})
             
             record.update({'status': status})
-            logging.info(f"Check source file: {full_input}, status: {status}")
+            logging.info(f"Check source file: {record['full_input']}, status: {status}")
                 
             if 'err' in record:
                 raise CustomException(err=self.logging)
@@ -69,9 +68,8 @@ class Convert2File:
         self.logging[i].update({'function': "read_excel_file", 'status': status})
         
         try:
-            full_input = self.logging[i]['full_input']
-            logging.info(f"Read format excel file: {full_input}")
-            workbook = xlrd.open_workbook(full_input)
+            logging.info(f"Read format excel file: {self.logging[i]['full_input']}")
+            workbook = xlrd.open_workbook(self.logging[i]['full_input'])
             
             self.get_extract_file(i, workbook)
 
@@ -87,10 +85,9 @@ class Convert2File:
         self.logging[i].update({'function': "read_file", 'status': status})
         
         try:
-            full_input = self.logging[i]['full_input']
-            logging.info(f"Read format text/csv file: {full_input}")
+            logging.info(f"Read format text/csv file: {self.logging[i]['full_input']}")
             
-            with open(full_input, 'rb') as f:
+            with open(self.logging[i]['full_input'], 'rb') as f:
                 file = f.read()
             encoding_result = chardet.detect(file)
             encoding = encoding_result['encoding']
@@ -103,142 +100,7 @@ class Convert2File:
         
         status = "succeed"
         self.logging[i].update({'status': status})
-
-    async def genarate_tmp_file(self) -> None:
         
-        self.clear_tmp()
-        
-        logging.info("Genarate data to tmp file")
-
-        status = "failed"
-        for i, record in enumerate(self.logging):
-            try:            
-                ## Read tmp file
-                tmp_dir = join(Folder.TMP, self.module, self.date.strftime('%Y%m%d'))
-                os.makedirs(tmp_dir, exist_ok=True)
-                tmp_name = f"{Path(record['full_target']).stem}.xlsx"
-                full_tmp = join(tmp_dir, tmp_name)
-                record.update({"full_tmp": full_tmp})
-                
-                ## Set dataframe from tmp file 
-                self.create_workbook(i)            
-                data = self.sheet.values
-                columns = next(data)[0:]
-                tmp_df = pd.DataFrame(data, columns=columns)
-                
-                ## Set dataframe from raw file      
-                raw_df = pd.DataFrame(record["data"])
-                
-                # ## Validate data change row by row
-                cmp_df = self.comparing_dataframes(i, tmp_df, raw_df)
-                cdc = self.change_data_capture(i, cmp_df)
-                
-                # ## Write tmp file
-                status = self.write_worksheet(i, cdc)
-                # record.update({'function': "genarate_tmp_file", 'status': status})
-                # logging.info(f"Write data to tmp file: {record['full_tmp']}, status: {status}")
-                
-            except Exception as err:
-                record.update({'err': err})
-
-            if "err" in record:
-                raise CustomException(err=self.logging)
-            
-    def create_workbook(self, i:int) -> None:
-
-        full_tmp = self.logging[i]['full_tmp']
-        logging.info(f"Create tmp file: {full_tmp}")
-        
-        status = "failed"
-        self.logging[i].update({'function': "create_workbook", 'status': status})
-
-        try:
-            self.create = False
-            self.workbook = openpyxl.load_workbook(full_tmp)
-            get_sheet = self.workbook.get_sheet_names()
-            self.sheet_num = len(get_sheet)
-            self.sheet_name = f"RUN_TIME_{self.sheet_num}"
-            
-            if self.sheet_name in get_sheet:
-                self.create = True
-                self.sheet = self.workbook.get_sheet_by_name(self.sheet_name)
-
-        except FileNotFoundError:
-            self.workbook = openpyxl.Workbook()
-            self.sheet_name = "RUN_TIME_1"
-            self.sheet =  self.workbook.get_sheet_by_name('Sheet')
-            self.sheet.title = self.sheet_name
-            self.sheet.append(self.logging[i]['columns'])
-            
-            self.workbook.save(full_tmp)
-            self.sheet_num = 1
-            
-        status = "succeed"
-        self.logging[i].update({'status': status})
-        
-    def write_worksheet(self, i: int, cdc: dict) -> str:
-        
-        status = "failed"
-        if self.create:
-            self.sheet_name = f"RUN_TIME_{self.sheet_num + 1}"
-            self.sheet = self.workbook.create_sheet(self.sheet_name)
-
-        logging.info(f"Write to sheet: {self.sheet_name}")
-
-        rows = 2
-        max_row = max(cdc, default=0)
-        self.logging[i].update({'function': "write_worksheet", 'sheet_name': self.sheet_name, 'status': status,})
-        
-        try:
-            # write column
-            for idx, col in enumerate(cdc[rows].keys(), 1):
-                self.sheet.cell(row=1, column=idx).value = col
-
-            ## write row
-            while rows <= max_row:
-                for idx, col in enumerate(cdc[rows].keys(), 1):
-                    # print(col)
-                    # print(self.update_rows.keys())
-                    if col == "remark":
-                        print(rows)
-                        # if rows in self.remove_rows:
-                        #     ## remove row
-                        #     ''
-                        #     # print(cdc[rows][col])
-                        #     # record = (f"{cdc[rows][col]} rows: ({rows}) in tmp file")
-                        # elif rows in self.update_rows.keys():
-                        #     ## update / insert row
-                        #     print(rows)
-                        #     # record = f"{cdc[rows][col]} rows: ({rows}) in tmp file, Updating records: ({self.update_rows[rows]})"
-                            
-                        # logging.info(record)
-                        
-                    # self.sheet.cell(row=rows, column=idx).value = cdc[rows][col]
-                    
-                rows += 1
-                
-        except KeyError as err:
-            raise KeyError(f"Can not write rows: {err} in tmp file")
-
-        ## save file
-        full_tmp = self.logging[i]['full_tmp']
-        self.sheet.title = self.sheet_name
-        self.workbook.active = self.sheet
-        self.workbook.move_sheet(self.workbook.active, offset=-self.sheet_num)
-        self.workbook.save(full_tmp)
-
-        status = "succeed"
-        self.logging[i].update({"status": status})
-        
-        return status
-    
-    def add_column(self, df):
-        if set('remark').issubset(df.columns):    
-            df = df.loc[df['remark'] != "Remove"]
-        else:
-            df['remark'] = "Insert"
-            
-        return df
         
     def comparing_dataframes(self, i: int, df: pd.DataFrame, new_df: pd.DataFrame) -> pd.DataFrame:
         
@@ -247,15 +109,22 @@ class Convert2File:
         status = "failed"
         self.logging[i].update({'function': "compare_data", 'status': status})
         
+        def remark_rows(df):
+            if set('remark').issubset(df.columns):    
+                df = df.loc[df['remark'] != "Remove"]
+            else:
+                df['remark'] = "Insert"
+            return df
+        
         try:
             self.merge_index = np.union1d(df.index, new_df.index)
             
-            df = self.add_column(df)
+            df = remark_rows(df)
             df = df.reindex(index=self.merge_index, columns=df.columns).iloc[:,:-1]
             
-            new_df = self.add_column(new_df)
+            new_df = remark_rows(new_df)
             self.new_df = new_df.reindex(index=self.merge_index, columns=new_df.columns).iloc[:,:-1]
-            ## Compare data
+            
             df['count'] = pd.DataFrame(np.where(df.ne(self.new_df), True, df), index=df.index, columns=df.columns)\
                 .apply(lambda x: (x == True).sum(), axis=1)
             
@@ -274,10 +143,10 @@ class Convert2File:
         status = "failed"
         self.logging[i].update({'function': "data_change_capture", 'status': status})
         
+        self.update_rows = {}
         def format_record(record):
             return "\n".join("{!r}: {!r};".format(columns, values) for columns, values in record.items())
         
-        self.update_rows = {}
         self.remove_rows = []
         if len(df.index) > len(self.new_df.index):
             self.remove_rows = [idx for idx in list(df.index) if idx not in list(self.new_df.index)]
@@ -325,6 +194,124 @@ class Convert2File:
         self.logging[i].update({'status': status})
         
         return cdc
+
+    async def genarate_tmp_file(self) -> None:
+        
+        self.clear_tmp()
+        
+        logging.info("Genarate data to tmp file")
+
+        status = "failed"
+        for i, record in enumerate(self.logging):
+            try:            
+                ## Read tmp file
+                tmp_dir = join(Folder.TMP, self.module, self.date.strftime('%Y%m%d'))
+                os.makedirs(tmp_dir, exist_ok=True)
+                tmp_name = f"{Path(record['full_target']).stem}.xlsx"
+                full_tmp = join(tmp_dir, tmp_name)
+                record.update({"full_tmp": full_tmp})
+                
+                ## Set dataframe from tmp file 
+                self.create_workbook(i)            
+                data = self.sheet.values
+                columns = next(data)[0:]
+                tmp_df = pd.DataFrame(data, columns=columns)
+                
+                ## Set dataframe from raw file      
+                raw_df = pd.DataFrame(record["data"])
+                
+                ## Validate data change row by row
+                cmp_df = self.comparing_dataframes(i, tmp_df, raw_df)
+                cdc = self.change_data_capture(i, cmp_df)
+                
+                ## Write tmp file
+                status = self.write_worksheet(i, cdc)
+                record.update({'function': "genarate_tmp_file", 'status': status})
+                logging.info(f"Write data to tmp file: {record['full_tmp']}, status: {status}")
+                
+            except Exception as err:
+                record.update({'err': err})
+
+            if "err" in record:
+                raise CustomException(err=self.logging)
+            
+    def create_workbook(self, i:int) -> None:
+        
+        logging.info(f"Create tmp file: {self.logging[i]['full_tmp']}")
+        
+        status = "failed"
+        self.logging[i].update({'function': "create_workbook", 'status': status})
+
+        try:
+            self.create = False
+            self.workbook = openpyxl.load_workbook(self.logging[i]['full_tmp'])
+            get_sheet = self.workbook.get_sheet_names()
+            self.sheet_num = len(get_sheet)
+            self.sheet_name = f"RUN_TIME_{self.sheet_num}"
+            
+            if self.sheet_name in get_sheet:
+                self.create = True
+                self.sheet = self.workbook.get_sheet_by_name(self.sheet_name)
+
+        except FileNotFoundError:
+            self.workbook = openpyxl.Workbook()
+            self.sheet_name = "RUN_TIME_1"
+            self.sheet =  self.workbook.get_sheet_by_name('Sheet')
+            self.sheet.title = self.sheet_name
+            self.sheet.append(self.logging[i]['columns'])
+            
+            self.workbook.save(self.logging[i]['full_tmp'])
+            self.sheet_num = 1
+            
+        status = "succeed"
+        self.logging[i].update({'status': status})
+        
+    def write_worksheet(self, i: int, cdc: dict) -> str:
+        
+        status = "failed"
+        if self.create:
+            self.sheet_name = f"RUN_TIME_{self.sheet_num + 1}"
+            self.sheet = self.workbook.create_sheet(self.sheet_name)
+
+        logging.info(f"Write to sheet: {self.sheet_name}")
+        
+        rows = 2
+        max_row = max(cdc, default=0)
+        self.logging[i].update({'function': "write_worksheet", 'sheet_name': self.sheet_name, 'status': status,})
+        
+        try:
+            # write column
+            for idx, col in enumerate(cdc[rows].keys(), 1):
+                self.sheet.cell(row=1, column=idx).value = col
+            ## write row
+            while rows <= max_row:
+                for idx, col in enumerate(cdc[rows].keys(), 1):
+                    self.sheet.cell(row=rows, column=idx).value = cdc[rows][col]
+                    if col == "remark":
+                        if rows in self.remove_rows:
+                            ## remove row
+                            record = f"{cdc[rows][col]} rows: ({rows}) in tmp file"
+                        elif rows in self.update_rows.keys():
+                            ## update / insert row
+                            record = f"{cdc[rows][col]} rows: ({rows}) in tmp file, Updating records: ({self.update_rows[rows]})"
+                        else:
+                            continue
+                        logging.info(record)
+                rows += 1
+                
+        except KeyError as err:
+            raise KeyError(f"Can not write rows: {err} in tmp file")
+        
+        ## save file
+        self.sheet.title = self.sheet_name
+        self.workbook.active = self.sheet
+        self.workbook.move_sheet(self.workbook.active, offset=-self.sheet_num)
+        self.workbook.save(self.logging[i]['full_tmp'])
+
+        status = "succeed"
+        self.logging[i].update({"status": status})
+        
+        return status
 
     async def genarate_target_file(self) -> None:
 
@@ -397,18 +384,18 @@ class Convert2File:
         
         status = "succeed"
         self.logging[i].update({'status': status})
+        
         return df
     
     def write_csv(self, i: int, cdc: dict) -> str:
         
-        full_target = self.logging[i]['full_target']
         logging.info(f"Write mode: {self.write_mode}")
 
         status = "failed"
         self.logging[i].update({'function': "write_csv", 'status': status})
 
         try:
-            with open(full_target, 'r', newline="\n") as reader:
+            with open(self.logging[i]['full_target'], 'r', newline="\n") as reader:
                 csvin = csv.DictReader(
                     reader,
                     skipinitialspace=True,
@@ -436,7 +423,7 @@ class Convert2File:
                     else:
                         rows[idx] = cdc[idx]
             
-            with open(full_target, 'w', newline="\n") as writer:
+            with open(self.logging[i]['full_target'], 'w', newline="\n") as writer:
                 csvout = csv.DictWriter(
                     writer,
                     csvin.fieldnames,
@@ -450,7 +437,7 @@ class Convert2File:
                         csvout.writerow(rows[idx])
                 writer.close()
             
-            with open(full_target, mode="a", newline="\n") as writer:
+            with open(self.logging[i]['full_target'], mode="a", newline="\n") as writer:
                 writer.write('"{}","{}"'.format('TotalCount', len(rows)))
                 logging.info(f'Total count: ({len(rows)}) row')
                 writer.close()
