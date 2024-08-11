@@ -21,7 +21,6 @@ class ArgumentParams:
 class Folder:
     _CURRENT_DIR        = os.getcwd()
     CONFIG              = join(_CURRENT_DIR,"config/")
-    TEMPLATE            = join(_CURRENT_DIR,"template/")
     BACKUP              = join(_CURRENT_DIR,"backup/")
     TMP                 = join(_CURRENT_DIR,"tmp/")
     LOG                 = join(_CURRENT_DIR,"log/")
