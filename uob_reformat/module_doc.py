@@ -50,13 +50,6 @@ class ModuleDOC(CallFunction):
 
         status = "failed"
         self.logging[i].update({'function': "collect_user", 'status': status})
-
-        # data = []
-        # for line in format_file:
-        #     regex = re.compile(r"\w+.*")
-        #     find_word = regex.findall(line)
-        #     if find_word != []:
-        #         data += [re.sub(r"\W\s+", "||", "".join(find_word).strip()).split("||")]
         
         # fix_data = []
         # for rows, value in enumerate(data):
@@ -77,7 +70,23 @@ class ModuleDOC(CallFunction):
         #         fix_data.append(fix_column)
         
         try:
-            ''
+            data = []
+            for line in format_file:
+                regex = re.compile(r"\w+.*")
+                find_word = regex.findall(line.strip())
+                if find_word != []:
+                    print(find_word)
+                # data += [re.sub(r'(?<!\w),', ",", find_word).split(",")]
+                # regex = re.compile(r"\w+.*")
+                # find_word = regex.findall(line)
+                # if find_word != []:
+                #     data += [re.sub(r"\W\s+", "||", "".join(find_word).strip()).split("||")]
+            
+            # df = pd.DataFrame(data)
+            # df.columns = df.iloc[0].values
+            # df = df[1:]
+            # print(df)
+            
         except Exception as err:
             raise Exception(err)
         
