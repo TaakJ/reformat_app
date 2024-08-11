@@ -63,13 +63,13 @@ class ModuleDOC(CallFunction):
                     data += [re.sub(r"\W\s+", '||', ''.join(find_word)).split('||')]
 
             clean_data = []
-            for rows, data in enumerate(data):
+            for rows, _data in enumerate(data):
                 if rows == 1:
-                    clean_data += [re.sub(r"\s+", ',', ','.join(data)).split(',')]
+                    clean_data += [re.sub(r"\s+", ',', ','.join(_data)).split(',')]
                 elif rows != 0:
                     fix_value = []
-                    for i, value in enumerate(data, 1):
-                        if i == 4:
+                    for idx, value in enumerate(_data, 1):
+                        if idx == 4:
                             value = re.sub(r"\s+", ',',value).split(',')
                             fix_value.extend(value)
                         else:

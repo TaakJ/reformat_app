@@ -95,13 +95,11 @@ class CollectParams(ABC):
         if re.search(r"_Param", full_input) is not None:
             columns = ['Parameter Name', 'Code value', 'Decode value']
             self.logging[i].update({'columns': columns})
-            
             self.collect_param(i, format_file)
         else:
             columns = ['ApplicationCode', 'AccountOwner', 'AccountName', 'AccountType', 'EntitlementName', 'SecondEntitlementName', 'ThirdEntitlementName',
                     'AccountStatus', 'IsPrivileged', 'AccountDescription', 'CreateDate', 'LastLogin', 'LastUpdatedDate', 'AdditionalAttribute', 'Country']
             self.logging[i].update({'columns': columns})
-            
             self.collect_user(i, format_file)
 
     @abstractmethod

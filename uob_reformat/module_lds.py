@@ -50,9 +50,10 @@ class ModuleLDS(CallFunction):
 
         status = "failed"
         self.logging[i].update({'function': "collect_user", 'status': status})
-        set_value = dict.fromkeys(self.logging[i]['columns'], "NA")
         
-        try:    
+        try:
+            set_value = dict.fromkeys(self.logging[i]['columns'], "NA")
+            
             data = []
             for line in format_file:
                 regex = re.compile(r"\w+.*")
@@ -61,13 +62,13 @@ class ModuleLDS(CallFunction):
                     data += [re.sub(r"\W\s+", '||', ''.join(find_word)).split('||')]
             
             clean_data = []
-            for rows, data in enumerate(data):
+            for rows, _data in enumerate(data):
                 if rows == 0:
-                    clean_data += [re.sub(r"\s+", ',', ','.join(data)).split(',')]
+                    clean_data += [re.sub(r"\s+", ',', ','.join(_data)).split(',')]
                 else:
                     fix_value = []
-                    for i, value in enumerate(data, 1):
-                        if i == 1:
+                    for idx, value in enumerate(_data, 1):
+                        if idx == 1:
                             value = re.sub(r"\s+", ',',value).split(',')
                             fix_value.extend(value)
                         else:
@@ -93,11 +94,10 @@ class ModuleLDS(CallFunction):
                 'LastUpdatedDate': df['edit_date'].apply(lambda x: x[:20]).apply(pd.to_datetime, dayfirst=True).dt.strftime('%Y%m%d%H%M%S'),
                 'Country': "TH"
             })
-            df = df.assign(**set_value)
+            df = df.assign(**set_value).fillna("NA")
             df = df.drop(df.iloc[:,:32].columns, axis=1)
             
         except Exception as err:
-            print(err)
             raise Exception(err)
         
         status = "succeed"
