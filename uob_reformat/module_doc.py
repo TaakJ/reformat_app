@@ -17,15 +17,15 @@ class ModuleDOC(CallFunction):
 
         logging.info(f'Module:"{self.module}"; Manual: "{self.manual}"; Run date: "{self.batch_date}"; Store tmp: "{self.store_tmp}"; Write mode: "{self.write_mode}";')
 
-        result = {"module": self.module, "task": "Completed"}
+        result = {'module': self.module, 'task': "Completed"}
         try:
             self.colloct_setup()
             
             if self.backup is True:
                 self.achieve_backup()
             
-            # await self.check_source_file()
-            # await self.separate_data_file()
+            await self.check_source_file()
+            await self.separate_data_file()
             # if self.store_tmp is True:
             #     await self.genarate_tmp_file()
             # await self.genarate_target_file()
@@ -40,45 +40,53 @@ class ModuleDOC(CallFunction):
                 except StopIteration:
                     break
 
-            result.update({"task": "Uncompleted"})
+            result.update({'task': "Uncompleted"})
 
         logging.info(f'Stop Run Module "{self.module}"\r\n')
         
         return result
 
-    def collect_data(self, i: int, format_file: any) -> dict:
+    def collect_user(self, i: int, format_file: any) -> dict:
 
         status = "failed"
-        module = self.logging[i]["module"]
-        logging.info(f'Collect Data for module: {module}')
+        self.logging[i].update({'function': "collect_user", 'status': status})
 
-        self.logging[i].update({"function": "collect_data", "status": status})
+        # data = []
+        # for line in format_file:
+        #     regex = re.compile(r"\w+.*")
+        #     find_word = regex.findall(line)
+        #     if find_word != []:
+        #         data += [re.sub(r"\W\s+", "||", "".join(find_word).strip()).split("||")]
+        
+        # fix_data = []
+        # for rows, value in enumerate(data):
+        #     if rows == 0:
+        #         continue
+        #     elif rows == 1:
+        #         ## header
+        #         fix_data += [" ".join(value).split(" ")]
+        #     else:
+        #         ## value
+        #         fix_column = []
+        #         for idx, column in enumerate(value, 1):
+        #             if idx == 4:
+        #                 l = re.sub(r"\s+", ",", column).split(",")
+        #                 fix_column.extend(l)
+        #             else:
+        #                 fix_column.append(column)
+        #         fix_data.append(fix_column)
+        
+        try:
+            ''
+        except Exception as err:
+            raise Exception(err)
+        
+        # status = "succeed"
+        # self.logging[i].update({'data': df.to_dict('list'), 'status': status})
+        # logging.info(f"Collect user from file: {self.logging[i]['full_input']}, status: {status}")
+    
+    def collect_param(self, i: int, format_file: any) -> dict:
 
-        data = []
-        for line in format_file:
-            regex = re.compile(r"\w+.*")
-            find_word = regex.findall(line)
-            if find_word != []:
-                data += [re.sub(r"\W\s+", "||", "".join(find_word).strip()).split("||")]
-
-        fix_data = []
-        for rows, value in enumerate(data):
-            if rows == 0:
-                continue
-            elif rows == 1:
-                ## header
-                fix_data += [" ".join(value).split(" ")]
-            else:
-                ## value
-                fix_column = []
-                for idx, column in enumerate(value, 1):
-                    if idx == 4:
-                        l = re.sub(r"\s+", ",", column).split(",")
-                        fix_column.extend(l)
-                    else:
-                        fix_column.append(column)
-                fix_data.append(fix_column)
-
-        status = "succeed"
-        self.logging[i].update({"status": status})
-        return {module: fix_data}
+        status = "failed"
+        self.logging[i].update({'function': "collect_param", 'status': status})
+        columns = self.logging[i]['columns']

@@ -62,7 +62,6 @@ class ModuleMOC(CallFunction):
             df.columns = df.iloc[0].values
             df = df[1:]
             df = df.reset_index(drop=True)
-            df = self.set_initial_data_type(i, df)
             
         except Exception as err:
             raise Exception(err)
