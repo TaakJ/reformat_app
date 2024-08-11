@@ -95,7 +95,7 @@ class SetupParser:
                 ArgumentParams.REQUIRED: False,
                 ArgumentParams.ISFLAG: False,
                 ArgumentParams.TYPE: lambda s: [x.strip().upper() for x in s.split(",")],
-                ArgumentParams.DEFAULT: 'adm,bos,cum,ica,iic,lds,lmt,moc',
+                ArgumentParams.DEFAULT: 'adm,bos,cum,doc,dil,ica,iic,lds,lmt,moc',
             },
             {
                 ArgumentParams.SHORT_NAME: '-m',

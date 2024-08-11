@@ -3,6 +3,7 @@ from .module_adm import ModuleADM
 from .module_bos import ModuleBOS
 from .module_cum import ModuleCUM
 from .module_doc import ModuleDOC
+from .module_dil import ModuleDIL
 from .module_ica import ModuleICA
 from .module_iic import ModuleIIC
 from .module_lds import ModuleLDS
@@ -47,6 +48,11 @@ class RunModule:
 
             elif module == "DOC":
                 tasks = ModuleDOC(self)
+                run = asyncio.create_task(tasks.run_process())
+                coros.append(run)
+                
+            elif module == "DIL":
+                tasks = ModuleDIL(self)
                 run = asyncio.create_task(tasks.run_process())
                 coros.append(run)
 

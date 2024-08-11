@@ -17,7 +17,12 @@ DOC:
   input_dir: D:\IGAGD\DOC\DOWNLOAD
   output_dir: D:\IGAGD\DOC\UPLOAD
   input_file: DocImage.txt
-  output_file: DOC.csv
+  output_file: DOCIGAWINT.csv
+DIL:
+  input_dir: D:\IGAGD\DOC\DOWNLOAD
+  output_dir: D:\IGAGD\DOC\UPLOAD
+  input_file: DocImage.txt
+  output_file: DILIGAWINT.csv
 ICA:
   input_dir: D:\IGAGD\ICA\DOWNLOAD
   output_dir: D:\IGAGD\ICA\UPLOAD
