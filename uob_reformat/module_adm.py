@@ -51,8 +51,9 @@ class ModuleADM(CallFunction):
         status = "failed"
         self.logging[i].update({'function': "collect_user", 'status': status})
         
-        set_value = {columns: "NA" for columns in self.logging[i]['columns']}
         try:
+            set_value = dict.fromkeys(self.logging[i]['columns'], "NA")
+            
             data = []
             for line in format_file:
                 regex = re.compile(r"\w+.*")

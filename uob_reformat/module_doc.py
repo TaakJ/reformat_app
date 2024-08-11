@@ -53,9 +53,10 @@ class ModuleDOC(CallFunction):
 
         status = "failed"
         self.logging[i].update({'function': "collect_user", 'status': status})
-        
-        set_value = {columns: "NA" for columns in self.logging[i]['columns']}
+    
         try:
+            set_value = dict.fromkeys(self.logging[i]['columns'], "NA")
+            
             data = []
             for line in format_file:
                 regex = re.compile(r"\w+.*")
@@ -87,7 +88,7 @@ class ModuleDOC(CallFunction):
             # df = df.groupby('USERNAME')
             # df = df.agg(lambda x: '+'.join(x.unique())).reset_index()
             # set_value = {column1: "NA" for column1 in self.logging[i]['columns']}
-            
+            print(df)
             print(set_value)
             # set_value.update({
             #     'ApplicationCode': "DOC",
