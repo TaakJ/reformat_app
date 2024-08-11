@@ -82,11 +82,11 @@ class ModuleDIL(CallFunction):
             df = df[1:]
             
             ## mapping data
-            df = df[df['APPCODE'] == "LOAN"]
+            df = df[df['APPCODE'] == "LNSIGNET"]
             df = df.groupby('USERNAME')
             df = df.agg(lambda x: '+'.join(x.unique())).reset_index()
             set_value.update({
-                'ApplicationCode': "DOC",
+                'ApplicationCode': "DIL",
                 'AccountOwner': df['USERNAME'],
                 'AccountName': df['NAME'],
                 'AccountType': "USR",
