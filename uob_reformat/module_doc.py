@@ -51,41 +51,33 @@ class ModuleDOC(CallFunction):
         status = "failed"
         self.logging[i].update({'function': "collect_user", 'status': status})
         
-        # fix_data = []
-        # for rows, value in enumerate(data):
-        #     if rows == 0:
-        #         continue
-        #     elif rows == 1:
-        #         ## header
-        #         fix_data += [" ".join(value).split(" ")]
-        #     else:
-        #         ## value
-        #         fix_column = []
-        #         for idx, column in enumerate(value, 1):
-        #             if idx == 4:
-        #                 l = re.sub(r"\s+", ",", column).split(",")
-        #                 fix_column.extend(l)
-        #             else:
-        #                 fix_column.append(column)
-        #         fix_data.append(fix_column)
-        
         try:
             data = []
             for line in format_file:
                 regex = re.compile(r"\w+.*")
                 find_word = regex.findall(line.strip())
                 if find_word != []:
-                    print(find_word)
-                # data += [re.sub(r'(?<!\w),', ",", find_word).split(",")]
-                # regex = re.compile(r"\w+.*")
-                # find_word = regex.findall(line)
-                # if find_word != []:
-                #     data += [re.sub(r"\W\s+", "||", "".join(find_word).strip()).split("||")]
+                    data += [re.sub(r"\W\s+", '||', ''.join(find_word)).split('||')]
             
-            # df = pd.DataFrame(data)
-            # df.columns = df.iloc[0].values
-            # df = df[1:]
-            # print(df)
+            clean_data = []
+            for rows, data in enumerate(data):
+                if rows == 1:
+                    clean_data += [re.sub(r"\s+", ',', ','.join(data)).split(',')]
+                elif rows != 0:
+                    fix_value = []
+                    for i, value in enumerate(data, 1):
+                        if i == 4:
+                            value = re.sub(r"\s+", ',', value).split(',')
+                            fix_value.extend(value)
+                        else:
+                            fix_value.append(value)        
+                    clean_data.append(fix_value)
+                else:
+                    continue
+            df = pd.DataFrame(clean_data)
+            df.columns = df.iloc[0].values
+            df = df[1:]
+            print(df)
             
         except Exception as err:
             raise Exception(err)

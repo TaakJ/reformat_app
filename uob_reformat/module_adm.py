@@ -56,7 +56,7 @@ class ModuleADM(CallFunction):
             for line in format_file:
                 regex = re.compile(r"\w+.*")
                 find_word = regex.findall(line.strip())
-                data += [re.sub(r"\W\s+", '||', find_word).split('||')]
+                data += [re.sub(r"\W\s+", '||', ''.join(find_word)).split('||')]
             df = pd.DataFrame(data)
             
             ## mapping data
