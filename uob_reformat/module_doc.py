@@ -16,9 +16,7 @@ class ModuleDOC(CallFunction):
 
     async def run_process(self) -> dict:
 
-        logging.info(
-            f'Module:"{self.module}"; Manual: "{self.manual}"; Run date: "{self.batch_date}"; Store tmp: "{self.store_tmp}"; Write mode: "{self.write_mode}";'
-        )
+        logging.info(f'Module:"{self.module}"; Manual: "{self.manual}"; Run date: "{self.batch_date}"; Store tmp: "{self.store_tmp}"; Write mode: "{self.write_mode}";')
 
         result = {"module": self.module, "task": "Completed"}
         try:
@@ -84,33 +82,32 @@ class ModuleDOC(CallFunction):
             df = df[1:]
             
             ## mapping data
-            # df = df[df['APPCODE'] == "LOAN"]
-            # df = df.groupby('USERNAME')
-            # df = df.agg(lambda x: '+'.join(x.unique())).reset_index()
-            # set_value = {column1: "NA" for column1 in self.logging[i]['columns']}
-            print(df)
-            print(set_value)
-            # set_value.update({
-            #     'ApplicationCode': "DOC",
-            #     'AccountOwner': df['USERNAME'],
-            #     'AccountName': df['NAME'],
-            #     'AccountType': "USR",
-            #     #'EntitlementName': df[['ADD_ID', 'SCAN', 'ADD_USER']].apply(lambda x: '#'.join(x), axis=1),
-            #     'AccountStatus': "A",
-            #     'IsPrivileged': "N",
-            #     'CreateDate': "NA",
-            #     'LastLogin': df["STAMP"].apply(lambda x: x[:10]).apply(pd.to_datetime, dayfirst=True).dt.strftime('%Y%m%d%H%M%S'),
-            #     'LastUpdatedDate': "NA",
-            #     'AdditionalAttribute': df[['APPCODE', 'ADD_USER']].apply(lambda x: ';'.join(x), axis=1),
-            #     'Country': "TH"
-            # })
+            df = df[df['APPCODE'] == "LOAN"]
+            df = df.groupby('USERNAME')
+            df = df.agg(lambda x: '+'.join(x.unique())).reset_index()
+            set_value.update({
+                'ApplicationCode': "DOC",
+                'AccountOwner': df['USERNAME'],
+                'AccountName': df['NAME'],
+                'AccountType': "USR",
+                'EntitlementName': df[['ADD_ID', 'SCAN', 'ADD_USER']].apply(lambda x: '#'.join(x), axis=1),
+                'AccountStatus': "A",
+                'IsPrivileged': "N",
+                'CreateDate': "NA",
+                'LastLogin': df["STAMP"].apply(lambda x: x[:10]).apply(pd.to_datetime, dayfirst=True).dt.strftime('%Y%m%d%H%M%S'),
+                'LastUpdatedDate': "NA",
+                'AdditionalAttribute': df[['APPCODE', 'ADD_USER']].apply(lambda x: ';'.join(x), axis=1),
+                'Country': "TH"
+            })
+            df = df.assign(**set_value)
+            df = df.drop(df.iloc[:,:10].columns, axis=1)
             
         except Exception as err:
-            print(err)
+            raise Exception(err)
 
-        # status = "succeed"
-        # self.logging[i].update({'data': df.to_dict('list'), 'status': status})
-        # logging.info(f"Collect user from file: {self.logging[i]['full_input']}, status: {status}")
+        status = "succeed"
+        self.logging[i].update({'data': df.to_dict('list'), 'status': status})
+        logging.info(f"Collect user from file: {self.logging[i]['full_input']}, status: {status}")
 
     def collect_param(self, i: int, format_file: any) -> dict:
 
