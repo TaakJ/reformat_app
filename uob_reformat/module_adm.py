@@ -51,6 +51,7 @@ class ModuleADM(CallFunction):
         status = "failed"
         self.logging[i].update({'function': "collect_user", 'status': status})
         
+        set_value = {columns: "NA" for columns in self.logging[i]['columns']}
         try:
             data = []
             for line in format_file:
@@ -62,7 +63,6 @@ class ModuleADM(CallFunction):
             ## mapping data
             df = df.groupby(0)
             df = df.agg(lambda x: '+'.join(x.unique())).reset_index()
-            set_value = {column: "NA" for column in self.logging[i]['columns']}
             set_value.update({
                 'ApplicationCode': "ADM", 
                 'AccountOwner': df[0], 

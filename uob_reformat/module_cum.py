@@ -50,6 +50,7 @@ class ModuleCUM(CallFunction):
         status = "failed"
         self.logging[i].update({'function': "collect_user", 'status': status})
 
+        set_value = {columns: "NA" for columns in self.logging[i]['columns']}
         try:
             data = []
             sheet_list = [sheet for sheet in format_file.sheet_names()]
@@ -67,7 +68,6 @@ class ModuleCUM(CallFunction):
             ## mapping data
             df = df.groupby('USER_ID')
             df = df.agg(lambda x: '+'.join(x.unique())).reset_index()
-            set_value = {column: "NA" for column in self.logging[i]['columns']}
             set_value.update({
                 'ApplicationCode': "CUM", 
                 'AccountOwner': df['USER_ID'], 
