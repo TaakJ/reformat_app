@@ -50,10 +50,9 @@ class ModuleLDS(CallFunction):
 
         status = "failed"
         self.logging[i].update({'function': "collect_user", 'status': status})
+        set_value = dict.fromkeys(self.logging[i]['columns'], "NA")
         
-        try:
-            set_value = dict.fromkeys(self.logging[i]['columns'], "NA")
-            
+        try:    
             data = []
             for line in format_file:
                 regex = re.compile(r"\w+.*")
@@ -94,10 +93,11 @@ class ModuleLDS(CallFunction):
                 'LastUpdatedDate': df['edit_date'].apply(lambda x: x[:20]).apply(pd.to_datetime, dayfirst=True).dt.strftime('%Y%m%d%H%M%S'),
                 'Country': "TH"
             })
-            df = df.assign(**set_value).fillna("NA")
+            df = df.assign(**set_value)
             df = df.drop(df.iloc[:,:32].columns, axis=1)
-        
+            
         except Exception as err:
+            print(err)
             raise Exception(err)
         
         status = "succeed"

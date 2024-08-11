@@ -58,7 +58,7 @@ class ModuleCUM(CallFunction):
             for sheets in sheet_list:
                 cells = format_file.sheet_by_name(sheets)
                 for row in range(0, cells.nrows):
-                    by_sheets = [cells.cell(row, col).value.strip() for col in range(cells.ncols)][1:]
+                    by_sheets = [str(cells.cell(row, col).value).strip() for col in range(cells.ncols)][1:]
                     if not all(empty == "" for empty in by_sheets):
                         data.append(by_sheets)
                         
