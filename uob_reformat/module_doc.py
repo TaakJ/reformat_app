@@ -57,7 +57,7 @@ class ModuleDOC(CallFunction):
                 regex = re.compile(r"\w+.*")
                 find_word = regex.findall(line.strip())
                 if find_word != []:
-                    data += [re.sub(r"\W\s+", '||', ''.join(find_word)).split('||')]
+                    data += [re.sub(r"\W\s+", '||', "".join(find_word)).split('||')]
             
             clean_data = []
             for rows, data in enumerate(data):
@@ -77,10 +77,36 @@ class ModuleDOC(CallFunction):
             df = pd.DataFrame(clean_data)
             df.columns = df.iloc[0].values
             df = df[1:]
+            
+            ## mapping data
+            df = df[df['APPCODE'] == "LOAN"]
+            df = df.groupby('USERNAME')
+            df = df.agg(lambda x: '+'.join(x.unique())).reset_index()
+            
+            df = df["STAMP"].apply(lambda x: x[:10]).apply(pd.to_datetime, dayfirst=True).dt.strftime('%Y%m%d%H%M%S')
+            
+            
+            # set_value = {column: "NA" for column in self.logging[i]['columns']}
+            # set_value.update({
+            #     'ApplicationCode': "DOC", 
+            #     'AccountOwner': df['USERNAME'], 
+            #     'AccountName': df['NAME'],
+            #     'AccountType': "USR",
+            #     'EntitlementName': df[['ADD_ID', 'SCAN', 'ADD_USER']].apply(lambda x: '#'.join(x), axis=1),
+            #     'AccountStatus': "A",
+            #     'IsPrivileged': "N",
+            #     'CreateDate': "NA", 
+            #     'LastLogin': df["STAMP"].apply(pd.to_datetime, dayfirst=True).dt.strftime('%Y%m%d%H%M%S'),
+            #     'LastUpdatedDate': "NA",
+            #     'AdditionalAttribute': df[['APPCODE', 'ADD_USER']].apply(lambda x: ';'.join(x), axis=1),
+            #     'Country': "TH"
+            # })
             print(df)
             
+            
         except Exception as err:
-            raise Exception(err)
+            print(err)
+            # raise Exception(err)
         
         # status = "succeed"
         # self.logging[i].update({'data': df.to_dict('list'), 'status': status})

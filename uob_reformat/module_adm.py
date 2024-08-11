@@ -75,7 +75,7 @@ class ModuleADM(CallFunction):
                 'Country': "TH"
             })
             df = df.assign(**set_value)
-            df = df.drop(df.iloc[:, 0:7].columns, axis=1)
+            df = df.drop(df.iloc[:,:7].columns, axis=1)
             
         except Exception as err:
             raise Exception(err)

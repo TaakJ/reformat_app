@@ -83,7 +83,7 @@ class ModuleCUM(CallFunction):
                 'Country': "TH"
             })
             df = df.assign(**set_value)
-            df = df.drop(df.iloc[:, 0:14].columns, axis=1)
+            df = df.drop(df.iloc[:,:14].columns, axis=1)
             
         except Exception as err:
             raise Exception(err)
