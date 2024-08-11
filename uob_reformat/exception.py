@@ -13,8 +13,8 @@ class CustomException(Exception):
         for key, value in self.__dict__.items():
             setattr(self,key,value)
         
-        self.date = datetime.now().strftime("%Y%m%d")
-        self.time = time.strftime("%H%M%S")
+        self.date = datetime.now().strftime('%Y%m%d')
+        self.time = time.strftime('%H%M%S')
         self.err_msg = self.generate_error()
         
     def __iter__(self):
@@ -36,9 +36,9 @@ class CustomException(Exception):
             except OSError:
                 pass
         
-        file_handler = logging.FileHandler(filename, mode="a")
+        file_handler = logging.FileHandler(filename, mode='a')
         file_handler.setLevel(logging.ERROR)
-        formatter = logging.Formatter(fmt=log_format,datefmt="%Y/%m/%d %H:%M:%S")
+        formatter = logging.Formatter(fmt=log_format,datefmt='%Y/%m/%d %H:%M:%S')
         file_handler.setFormatter(formatter)
         
         logger = logging.getLogger(log_name)
@@ -50,12 +50,11 @@ class CustomException(Exception):
 
     def generate_error(self) -> any:
         for i in range(len(self.err)):
-            module      = self.err[i]["module"]
-            # full_input  = self.err[i].get("full_input")
-            full_target = self.err[i].get("full_target")
-            status      = self.err[i]["status"]
-            func        = self.err[i]["function"]
-            err         = self.err[i].get("err")
+            module      = self.err[i]['module']
+            full_target = self.err[i].get('full_target')
+            status      = self.err[i]['status']
+            func        = self.err[i]['function']
+            err         = self.err[i].get('err')
             if err is not None:
                 err_msg = f'Module: "{module}"; File: "{full_target}"; Function: "{func}"; Status: "{status}"; ERROR: {err}'
                 yield err_msg

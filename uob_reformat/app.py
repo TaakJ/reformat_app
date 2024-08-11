@@ -58,7 +58,7 @@ class setup_app(QWidget):
 
         self.__thread = QThread()
 
-        if PARAMS["manual"] is False:
+        if PARAMS['manual'] is False:
             StartApp()
         else:
             self.ui()
@@ -66,7 +66,7 @@ class setup_app(QWidget):
 
     def ui(self):
 
-        self.all_module = PARAMS["source"]
+        self.all_module = PARAMS['source']
         self.module = self.all_module
 
         grid = QGridLayout()
@@ -281,8 +281,8 @@ class setup_app(QWidget):
     def task_select_module(self):
         self.get_value = self.combobox.currentText()
         self.module = [self.get_value]
-        self.full_input.setText(CONFIG[self.get_value]["input_dir"])
-        self.output_dir.setText(CONFIG[self.get_value]["output_dir"])
+        self.full_input.setText(CONFIG[self.get_value]['input_dir'])
+        self.output_dir.setText(CONFIG[self.get_value]['output_dir'])
 
     def task_select_mode(self):
         if self.radio2.isChecked():
@@ -345,22 +345,14 @@ class setup_app(QWidget):
         self.error_log.setHidden(True)
         
         PARAMS.update({
-                "source": self.module,
-                "batch_date": self.calendar.calendarWidget().selectedDate().toPyDate(),
-                "store_tmp": self.tmp_checked.isChecked(),
-                "write_mode": self.mode,
-                "select_files": self.select_files,
-                "backup": self.backup_checked.isChecked()
+                'source': self.module,
+                'batch_date': self.calendar.calendarWidget().selectedDate().toPyDate(),
+                'store_tmp': self.tmp_checked.isChecked(),
+                'write_mode': self.mode,
+                'select_files': self.select_files,
+                'backup': self.backup_checked.isChecked()
             })
         
-        # for module in self.module:
-        #     if self.mode == "new":
-        #         suffix = PARAMS["batch_date"].strftime("%Y%m%d")
-        #         set_dir = lambda file: [f"M_{Path(x.strip()).stem}_{suffix}.csv" for x in file.split(",")]
-        #     else:
-        #         set_dir = lambda file: [f"M_{x.strip()}" for x in file.split(",")]
-        #     CONFIG[module]["output_file"] = ", ".join(set_dir(CONFIG[module]["output_file"]))
-            
         if not self.__thread.isRunning():
             self.__thread = self.__get_thread()
             self.__thread.start()

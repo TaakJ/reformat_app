@@ -41,7 +41,7 @@ def setup_config() -> dict:
         with open(config_dir,"rb") as conf:
             config_yaml = yaml.safe_load(conf.read())
     else:
-        raise FileNotFoundError(f"Yaml config file path: '{config_dir}' doesn't exist.")
+        raise FileNotFoundError(f"Yaml config file path: {config_dir} doesn't exist.")
     return config_yaml
 
 def setup_log() -> None:
@@ -62,18 +62,18 @@ def setup_log() -> None:
         with open(Folder._LOGGER_CONFIG_DIR,"rb") as logger:
             config_yaml = yaml.safe_load(logger.read())
 
-            for i in config_yaml["handlers"].keys():
-                if "filename" in config_yaml["handlers"][i]:
-                    config_yaml["handlers"][i]["filename"] = filename
+            for i in config_yaml['handlers'].keys():
+                if 'filename' in config_yaml['handlers'][i]:
+                    config_yaml['handlers'][i]['filename'] = filename
             logging.config.dictConfig(config_yaml)
     else:
-        raise FileNotFoundError(f"Yaml file file_path: '{Folder._LOGGER_CONFIG_DIR}' doesn't exist.")
+        raise FileNotFoundError(f"Yaml file file_path: {Folder._LOGGER_CONFIG_DIR} doesn't exist.")
     
 def clear_log() -> None:
     bk_date = datetime.now() - timedelta(days=7) 
     
     for date_dir in os.listdir(Folder.LOG):
-        if date_dir <= bk_date.strftime("%Y%m%d"):
+        if date_dir <= bk_date.strftime('%Y%m%d'):
             log_dir = join(Folder.LOG, date_dir)
             shutil.rmtree(log_dir)
             
@@ -90,26 +90,26 @@ class SetupParser:
     def get_args_list() -> list[dict]:
         return [
             {
-                ArgumentParams.SHORT_NAME: "-s",
-                ArgumentParams.NAME: "--source",
-                ArgumentParams.DESCRIPTION: "-s: source",
+                ArgumentParams.SHORT_NAME: '-s',
+                ArgumentParams.NAME: '--source',
+                ArgumentParams.DESCRIPTION: '-s: source',
                 ArgumentParams.REQUIRED: False,
                 ArgumentParams.ISFLAG: False,
                 ArgumentParams.TYPE: lambda s: [x.strip().upper() for x in s.split(",")],
-                ArgumentParams.DEFAULT: "adm,bos,cum,ica,iic,lds,lmt,moc",
+                ArgumentParams.DEFAULT: 'adm,bos,cum,ica,iic,lds,lmt,moc',
             },
             {
-                ArgumentParams.SHORT_NAME: "-m",
-                ArgumentParams.NAME: "--manual",
-                ArgumentParams.DESCRIPTION: "-m: manual",
+                ArgumentParams.SHORT_NAME: '-m',
+                ArgumentParams.NAME: '--manual',
+                ArgumentParams.DESCRIPTION: '-m: manual',
                 ArgumentParams.REQUIRED: False,
                 ArgumentParams.ISFLAG: True,
                 ArgumentParams.DEFAULT: False,
             },
             {
-                ArgumentParams.SHORT_NAME: "-d",
-                ArgumentParams.NAME: "--batch_date",
-                ArgumentParams.DESCRIPTION: "format YYYY-MM-DD",
+                ArgumentParams.SHORT_NAME: '-d',
+                ArgumentParams.NAME: '--batch_date',
+                ArgumentParams.DESCRIPTION: 'format YYYY-MM-DD',
                 ArgumentParams.REQUIRED: False,
                 ArgumentParams.ISFLAG: False,
                 ArgumentParams.TYPE: lambda d: datetime.strptime(d,"%Y-%m-%d").date(),
