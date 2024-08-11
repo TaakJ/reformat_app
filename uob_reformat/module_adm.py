@@ -75,7 +75,7 @@ class ModuleADM(CallFunction):
                 'AdditionalAttribute': df[[2, 4]].apply(lambda x: ';'.join(x), axis=1),
                 'Country': "TH"
             })
-            df = df.assign(**set_value)
+            df = df.assign(**set_value).fillna("NA")
             df = df.drop(df.iloc[:,:7].columns, axis=1)
             
         except Exception as err:

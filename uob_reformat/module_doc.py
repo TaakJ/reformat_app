@@ -94,12 +94,12 @@ class ModuleDOC(CallFunction):
                 'AccountStatus': "A",
                 'IsPrivileged': "N",
                 'CreateDate': "NA",
-                'LastLogin': df["STAMP"].apply(lambda x: x[:10]).apply(pd.to_datetime, dayfirst=True).dt.strftime('%Y%m%d%H%M%S'),
+                'LastLogin': df['STAMP'].apply(lambda x: x[:10]).apply(pd.to_datetime, dayfirst=True).dt.strftime('%Y%m%d%H%M%S'),
                 'LastUpdatedDate': "NA",
                 'AdditionalAttribute': df[['APPCODE', 'ADD_USER']].apply(lambda x: ';'.join(x), axis=1),
                 'Country': "TH"
             })
-            df = df.assign(**set_value)
+            df = df.assign(**set_value).fillna("NA")
             df = df.drop(df.iloc[:,:10].columns, axis=1)
             
         except Exception as err:
