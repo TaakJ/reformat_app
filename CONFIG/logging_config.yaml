@@ -15,10 +15,10 @@ handlers:
     class: logging.handlers.RotatingFileHandler
     level: INFO
     formatter: verbose
-    mode: w
+    mode: a
     filename: 
 root: 
   level: INFO
   handlers:
-    #- console
+    - console
     - file
