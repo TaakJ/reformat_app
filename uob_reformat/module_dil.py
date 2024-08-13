@@ -60,7 +60,7 @@ class ModuleDIL(CallFunction):
                 regex = re.compile(r"\w+.*")
                 find_word = regex.findall(line.strip())
                 if find_word != []:
-                    data += [re.sub(r"\W\s+", '||', ''.join(find_word)).split('||')]
+                    data += [re.sub(r'(?<!\.)\s{2,}', '|', ''.join(find_word)).split('|')]
 
             clean_data = []
             for rows, _data in enumerate(data):
@@ -77,30 +77,36 @@ class ModuleDIL(CallFunction):
                     clean_data.append(fix_value)
                 else:
                     continue
+            
+            ## mapping data
+            def split_column(df):
+                comma = df['NAME'].count(',')
+                if comma == 2:
+                    _, role, department = df['NAME'].split(",")
+                else:
+                    role = ''
+                    _, department = df['NAME'].split(",")
+                return role, department
+            
             df = pd.DataFrame(clean_data)
             df.columns = df.iloc[0].values
             df = df[1:]
-            
-            ## mapping data
-            df = df[df['APPCODE'] == "LNSIGNET"]
-            df = df.groupby('USERNAME')
-            df = df.agg(lambda x: '+'.join(x.unique())).reset_index()
+            df = df[df['APPCODE'] == "LNSIGNET"].reset_index()
+            df[['ROLE', 'DEPARTMENT']] = df.apply(split_column, axis=1, result_type='expand')
+            df['STAMP'] = (df['STAMP'].apply(lambda x: x[:10]).apply(pd.to_datetime).dt.strftime('%Y%m%d') + df['STAMP'].apply(lambda x: x[11:19].replace('.','')))
             set_value.update({
                 'ApplicationCode': "DIL",
                 'AccountOwner': df['USERNAME'],
-                'AccountName': df['NAME'],
+                'AccountName': df['USERNAME'],
                 'AccountType': "USR",
-                'EntitlementName': df[['ADD_ID', 'SCAN', 'ADD_USER']].apply(lambda x: '#'.join(x), axis=1),
                 'AccountStatus': "A",
                 'IsPrivileged': "N",
-                'CreateDate': "NA",
-                'LastLogin': df['STAMP'].apply(lambda x: x[:10]).apply(pd.to_datetime, dayfirst=True).dt.strftime('%Y%m%d%H%M%S'),
-                'LastUpdatedDate': "NA",
-                'AdditionalAttribute': df[['APPCODE', 'ADD_USER']].apply(lambda x: ';'.join(x), axis=1),
+                'LastLogin': df['STAMP'],
+                'AdditionalAttribute': df[['DEPARTMENT', 'APPCODE', 'ROLE']].apply(lambda x: '#'.join(x), axis=1),
                 'Country': "TH"
             })
             df = df.assign(**set_value).fillna("NA")
-            df = df.drop(df.iloc[:,:10].columns, axis=1)
+            df = df.drop(df.iloc[:,:13].columns, axis=1)
             
         except Exception as err:
             raise Exception(err)
