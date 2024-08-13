@@ -14,9 +14,9 @@ class ModuleIIC(CallFunction):
         self._log = log
 
     async def run_process(self) -> dict:
-
+        
         logging.info(f'Module:"{self.module}"; Manual: "{self.manual}"; Run date: "{self.batch_date}"; Store tmp: "{self.store_tmp}"; Write mode: "{self.write_mode}";')
-
+        
         result = {"module": self.module, "task": "Completed"}
         try:
             self.colloct_setup()
@@ -55,22 +55,20 @@ class ModuleIIC(CallFunction):
             data = []
             for line in format_file:
                 find_word = line.strip().replace('"','')
-                data += [re.sub(r'(?<!\w),', ',', find_word).split(",")]
-            
-            
-            print(data)
-            # ## set dataframe
-            # df = pd.DataFrame(data)
-            # df.columns = df.iloc[0].values
-            # df = df[1:]
-            # df = df.reset_index(drop=True)
+                data += [re.sub(r'(?<!\w),', ',', ''.join(find_word)).split(",")]
+                
+            # mapping data
+            df = pd.DataFrame(data)
+            df.columns = df.iloc[0].values
+            df = df[1:]
+            df = df.reset_index(drop=True)
             
         except Exception as err:
             raise Exception(err)
-
-        # status = "succeed"
-        # self.logging[i].update({"data": df.to_dict("list"), "status": status})
-        # logging.info(f'Collect data from file: {self.logging[i]["full_input"]}, status: {status}')
+        
+        status = "succeed"
+        self.logging[i].update({'data': df.to_dict('list'), 'status': status})
+        logging.info(f'Collect data from file: {self.logging[i]['full_input']}, status: {status}')
         
     def collect_param(self, i: int, format_file: any) -> dict:
         
