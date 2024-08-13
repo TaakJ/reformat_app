@@ -59,7 +59,7 @@ class ModuleLDS(CallFunction):
                 regex = re.compile(r"\w+.*")
                 find_word = regex.findall(line.strip())
                 if find_word != []:
-                    data += [re.sub(r"\W\s+", '||', ''.join(find_word)).split('||')]
+                    data += [re.sub(r'(?<!\.)\s{2,}', '|', ''.join(find_word)).split('|')]
             
             clean_data = []
             data = data[:-1]
@@ -71,6 +71,7 @@ class ModuleLDS(CallFunction):
                     for idx, value in enumerate(_data, 1):
                         if idx == 1:
                             value = re.sub(r"\s+", ',',value).split(',')
+                            print(value)
                             fix_value.extend(value)
                         else:
                             fix_value.append(value)
@@ -80,7 +81,7 @@ class ModuleLDS(CallFunction):
             df = pd.DataFrame(clean_data)
             df.columns = df.iloc[0].values
             df = df[1:]
-            print(df)
+            # print(df)
             # df = df[df['Sector_Active'] == "Active"]
             # df = df.groupby('UserName')
             # df = df.agg(lambda x: '+'.join(x.unique())).reset_index()

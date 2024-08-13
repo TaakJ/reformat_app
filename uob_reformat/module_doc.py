@@ -86,12 +86,13 @@ class ModuleDOC(CallFunction):
             df = df[1:]
             
             df = df[df['APPCODE'] == "LOAN"]
-            mask = df['NAME'].str.contains('|'.join([r'\b'+i+r'\b' for i in df['NAME']]))
+            print(df['NAME'])
+            # mask = df['NAME'].str.contains('|'.join([r'\b'+x+r'\b' for x in df['USERNAME']]))
+            # df = df[df['NAME'].str.contains('nt|nv', na=False)]
             
-            import numpy as np
-            df['Flag'] = np.where(mask, 'expired', '')
-            
-            print(df)
+            # import numpy as np
+            # # df['Flag'] = np.where(mask, 'expired', '')
+            # print(df)
             
             # df['ROLE_ID'] = df['NAME'].apply(lambda x: x.strip().split(',')[2])
             # print(df)
