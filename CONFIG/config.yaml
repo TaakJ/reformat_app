@@ -1,7 +1,7 @@
 ADM:
   input_dir: D:\IGAGD\ADM\DOWNLOAD
   output_dir: D:\IGAGD\ADM\UPLOAD
-  input_file: ADM.txt
+  input_file: ADMUSER.txt
   output_file: ADMIGAWINT.csv
 BOS:
   input_dir: D:\IGAGD\BOS\DOWNLOAD
@@ -31,7 +31,7 @@ ICA:
 IIC:
   input_dir: D:\IGAGD\IIC\DOWNLOAD
   output_dir: D:\IGAGD\IIC\UPLOAD
-  input_file: IICTH.csv, IICTH_Param.csv
+  input_file: IICUSER.csv, IICTH_Param.csv
   output_file: IICIGAWINT.csv, IICPARAMLIST.csv
 LDS:
   input_dir: D:\IGAGD\LDS\DOWNLOAD

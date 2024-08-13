@@ -58,25 +58,25 @@ class ModuleADM(CallFunction):
             for line in format_file:
                 regex = re.compile(r"\w+.*")
                 find_word = regex.findall(line.strip())
-                data += [re.sub(r"\W\s+", '||', ''.join(find_word)).split('||')]
+                data += [''.join(find_word).split('||')]
             df = pd.DataFrame(data)
             
-            ## mapping data
+            # mapping data
             df = df.groupby(0)
             df = df.agg(lambda x: '+'.join(x.unique())).reset_index()
             set_value.update({
                 'ApplicationCode': "ADM", 
-                'AccountOwner': df[0], 
+                'AccountOwner': df[1], 
                 'AccountName': df[1],
                 'AccountType': "USR",
                 'EntitlementName': df[[4, 5, 6]].apply(lambda x: '#'.join(x), axis=1),
                 'AccountStatus': "A",
                 'IsPrivileged': "N",
-                'AdditionalAttribute': df[[2, 4]].apply(lambda x: ';'.join(x), axis=1),
+                'AdditionalAttribute': df[[2]].apply(lambda x: '#'.join(x), axis=1),
                 'Country': "TH"
             })
             df = df.assign(**set_value).fillna("NA")
-            df = df.drop(df.iloc[:,:7].columns, axis=1)
+            df = df.drop(df.iloc[:,1:7].columns, axis=1)
             
         except Exception as err:
             raise Exception(err)
