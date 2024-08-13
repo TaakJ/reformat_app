@@ -27,9 +27,9 @@ class ModuleDOC(CallFunction):
 
             await self.check_source_file()
             await self.separate_data_file()
-            # if self.store_tmp is True:
-            #     await self.genarate_tmp_file()
-            # await self.genarate_target_file()
+            if self.store_tmp is True:
+                await self.genarate_tmp_file()
+            await self.genarate_target_file()
 
         except CustomException as err:
             logging.error("See Error Details: log_error.log")
@@ -106,7 +106,7 @@ class ModuleDOC(CallFunction):
                 'Country': "TH"
             })
             df = df.assign(**set_value).fillna("NA")
-            df = df.drop(df.iloc[:,:10].columns, axis=1)
+            df = df.drop(df.iloc[:,:13].columns, axis=1)
             
         except Exception as err:
             raise Exception(err)
