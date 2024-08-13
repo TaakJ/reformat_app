@@ -26,9 +26,9 @@ class ModuleADM(CallFunction):
 
             await self.check_source_file()
             await self.separate_data_file()
-            # if self.store_tmp is True:
-            #     await self.genarate_tmp_file()
-            # await self.genarate_target_file()
+            if self.store_tmp is True:
+                await self.genarate_tmp_file()
+            await self.genarate_target_file()
 
         except CustomException as err:
             logging.error("See Error Details: log_error.log")
@@ -66,8 +66,8 @@ class ModuleADM(CallFunction):
             df = df.agg(lambda x: '+'.join(x.unique())).reset_index()
             set_value.update({
                 'ApplicationCode': "ADM", 
-                'AccountOwner': df[1], 
-                'AccountName': df[1],
+                'AccountOwner': df[0], 
+                'AccountName': df[0],
                 'AccountType': "USR",
                 'EntitlementName': df[[4, 5, 6]].apply(lambda x: '#'.join(x), axis=1),
                 'AccountStatus': "A",
