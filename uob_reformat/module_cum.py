@@ -61,12 +61,11 @@ class ModuleCUM(CallFunction):
                     by_sheets = [str(cells.cell(row, col).value).strip() for col in range(cells.ncols)][1:]
                     if not all(empty == "" for empty in by_sheets):
                         data.append(by_sheets)
-                        
+            
+            ## mapping data            
             df = pd.DataFrame(data)
             df.columns = df.iloc[0].values
             df = df[1:]
-            
-            ## mapping data
             df = df.groupby('USER_ID')
             df = df.agg(lambda x: '+'.join(x.unique())).reset_index()
             set_value.update({
@@ -74,13 +73,13 @@ class ModuleCUM(CallFunction):
                 'AccountOwner': df['USER_ID'], 
                 'AccountName': df['USER_ID'],
                 'AccountType': "USR",
-                'EntitlementName': df[['USER_ID', 'DEPARTMENT', 'GROUP_NO']].apply(lambda x: '#'.join(x), axis=1),
+                'EntitlementName': df[['GROUP_NO']].apply(lambda x: '#'.join(x), axis=1),
                 'AccountStatus': "A",
                 'IsPrivileged': "N",
                 'CreateDate': df['VALID_FROM'].apply(pd.to_datetime, dayfirst=True).dt.strftime('%Y%m%d%H%M%S'), 
                 'LastLogin': df['Last Usage'].apply(pd.to_datetime, dayfirst=True).dt.strftime('%Y%m%d%H%M%S'),
                 'LastUpdatedDate': df["Last Change PWD"].apply(pd.to_datetime, dayfirst=True).dt.strftime('%Y%m%d%H%M%S'),
-                'AdditionalAttribute': df[['USER_ID', 'DEPARTMENT']].apply(lambda x: ';'.join(x), axis=1),
+                'AdditionalAttribute': df[['DEPARTMENT']].apply(lambda x: '#'.join(x), axis=1),
                 'Country': "TH"
             })
             df = df.assign(**set_value).fillna("NA")

@@ -57,7 +57,7 @@ class ModuleIIC(CallFunction):
                 find_word = line.strip().replace('"','')
                 data += [re.sub(r'(?<!\w),', ',', ''.join(find_word)).split(",")]
                 
-            # mapping data
+            ## mapping data
             df = pd.DataFrame(data)
             df.columns = df.iloc[0].values
             df = df[1:]

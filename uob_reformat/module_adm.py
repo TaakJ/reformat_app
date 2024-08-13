@@ -59,9 +59,9 @@ class ModuleADM(CallFunction):
                 regex = re.compile(r"\w+.*")
                 find_word = regex.findall(line.strip())
                 data += [re.sub(r'(?<!\w)\|\|', '||', ''.join(find_word)).split("||")]
-            df = pd.DataFrame(data)
             
             # mapping data
+            df = pd.DataFrame(data)
             df = df.groupby(0)
             df = df.agg(lambda x: '+'.join(x.unique())).reset_index()
             set_value.update({

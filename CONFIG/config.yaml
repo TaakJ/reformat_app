@@ -11,7 +11,7 @@ BOS:
 CUM:
   input_dir: D:\IGAGD\CUM\DOWNLOAD
   output_dir: D:\IGAGD\CUM\UPLOAD
-  input_file: CUM.xls
+  input_file: CUMUSER.xls
   output_file: CUMIGAWINT.csv
 DOC:
   input_dir: D:\IGAGD\DOC\DOWNLOAD
@@ -41,10 +41,10 @@ LDS:
 LMT:
   input_dir: D:\IGAGD\LMT\DOWNLOAD
   output_dir: D:\IGAGD\LMT\UPLOAD
-  input_file: Lead Management.xlsx
+  input_file: LDSUSER.xlsx
   output_file: LMTIGAWINT.csv
 MOC:
   input_dir: D:\IGAGD\MOC\DOWNLOAD
   output_dir: D:\IGAGD\MOC\UPLOAD
-  input_file: MOCTH.csv, MOCTH_Param.csv
+  input_file: MOCUSER.csv, MOCTH_Param.csv
   output_file: MOCIGAWINT.csv, MOCPARAMLIST.csv
