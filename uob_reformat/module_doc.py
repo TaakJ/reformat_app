@@ -4,7 +4,6 @@ import logging
 from .function import CallFunction
 from .exception import CustomException
 
-
 class ModuleDOC(CallFunction):
 
     def __init__(self, params: any) -> None:
@@ -91,9 +90,10 @@ class ModuleDOC(CallFunction):
             df = pd.DataFrame(clean_data)
             df.columns = df.iloc[0].values
             df = df[1:]
-            df = df[df['APPCODE'] == "LOAN"].reset_index()
+            df = df[df['APPCODE'] == "LOAN"].reset_index(drop=True)
             df[['ROLE', 'DEPARTMENT']] = df.apply(split_column, axis=1, result_type='expand')
-            df['STAMP'] = (df['STAMP'].apply(lambda x: x[:10]).apply(pd.to_datetime).dt.strftime('%Y%m%d') + df['STAMP'].apply(lambda x: x[11:19].replace('.','')))
+            df['DATE'] = df['STAMP'].apply(lambda x: x[:10]).apply(pd.to_datetime).dt.strftime('%Y%m%d')
+            df['TIME'] = df['STAMP'].apply(lambda x: x[11:19].replace('.',''))
             set_value.update({
                 'ApplicationCode': "DOC",
                 'AccountOwner': df['USERNAME'],
@@ -101,12 +101,12 @@ class ModuleDOC(CallFunction):
                 'AccountType': "USR",
                 'AccountStatus': "A",
                 'IsPrivileged': "N",
-                'LastLogin': df['STAMP'],
+                'LastLogin': df['DATE'] + df['TIME'],
                 'AdditionalAttribute': df[['APPCODE', 'ROLE']].apply(lambda x: '#'.join(x), axis=1),
                 'Country': "TH"
             })
             df = df.assign(**set_value).fillna("NA")
-            df = df.drop(df.iloc[:,:13].columns, axis=1)
+            df = df.drop(df.iloc[:,:15].columns, axis=1)
             
         except Exception as err:
             raise Exception(err)

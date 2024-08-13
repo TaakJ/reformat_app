@@ -4,7 +4,6 @@ import logging
 from .function import CallFunction
 from .exception import CustomException
 
-
 class ModuleDIL(CallFunction):
 
     def __init__(self, params: any) -> None:
@@ -93,7 +92,8 @@ class ModuleDIL(CallFunction):
             df = df[1:]
             df = df[df['APPCODE'] == "LNSIGNET"].reset_index()
             df[['ROLE', 'DEPARTMENT']] = df.apply(split_column, axis=1, result_type='expand')
-            df['STAMP'] = (df['STAMP'].apply(lambda x: x[:10]).apply(pd.to_datetime).dt.strftime('%Y%m%d') + df['STAMP'].apply(lambda x: x[11:19].replace('.','')))
+            df['DATE'] = df['STAMP'].apply(lambda x: x[:10]).apply(pd.to_datetime).dt.strftime('%Y%m%d')
+            df['TIME'] = df['STAMP'].apply(lambda x: x[11:19].replace('.',''))
             set_value.update({
                 'ApplicationCode': "DIL",
                 'AccountOwner': df['USERNAME'],
@@ -101,12 +101,12 @@ class ModuleDIL(CallFunction):
                 'AccountType': "USR",
                 'AccountStatus': "A",
                 'IsPrivileged': "N",
-                'LastLogin': df['STAMP'],
+                'LastLogin': df['DATE'] + df['TIME'],
                 'AdditionalAttribute': df[['DEPARTMENT', 'APPCODE', 'ROLE']].apply(lambda x: '#'.join(x), axis=1),
                 'Country': "TH"
             })
-            df = df.assign(**set_value).fillna("NA")
-            df = df.drop(df.iloc[:,:13].columns, axis=1)
+            df = df.assign(**set_value).fillna("NA") 
+            df = df.drop(df.iloc[:,:15].columns, axis=1)
             
         except Exception as err:
             raise Exception(err)

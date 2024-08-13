@@ -78,7 +78,6 @@ class ModuleCUM(CallFunction):
                 'IsPrivileged': "N",
                 'CreateDate': df['VALID_FROM'].apply(pd.to_datetime, dayfirst=True).dt.strftime('%Y%m%d%H%M%S'), 
                 'LastLogin': df['Last Usage'].apply(pd.to_datetime, dayfirst=True).dt.strftime('%Y%m%d%H%M%S'),
-                'LastUpdatedDate': df['Last Change PWD'].apply(pd.to_datetime, dayfirst=True).dt.strftime('%Y%m%d%H%M%S'),
                 'AdditionalAttribute': df[['DEPARTMENT']].apply(lambda x: '#'.join(x), axis=1),
                 'Country': "TH"
             })
