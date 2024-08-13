@@ -26,9 +26,9 @@ class ModuleIIC(CallFunction):
             
             await self.check_source_file()
             await self.separate_data_file()
-            if self.store_tmp is True:
-                await self.genarate_tmp_file()
-            await self.genarate_target_file()
+            # if self.store_tmp is True:
+            #     await self.genarate_tmp_file()
+            # await self.genarate_target_file()
 
         except CustomException as err:
             logging.error('See Error Details: log_error.log')
@@ -46,10 +46,10 @@ class ModuleIIC(CallFunction):
         
         return result
 
-    def collect_data(self, i: int, format_file: any) -> dict:
+    def collect_user(self, i: int, format_file: any) -> dict:
         
         status = "failed"
-        self.logging[i].update({"function": "collect_data", "status": status})
+        self.logging[i].update({'function': "collect_user", 'status': status})
         
         try:
             data = []
@@ -57,16 +57,24 @@ class ModuleIIC(CallFunction):
                 find_word = line.strip().replace('"','')
                 data += [re.sub(r'(?<!\w),', ',', find_word).split(",")]
             
-            ## set dataframe
-            df = pd.DataFrame(data)
-            df.columns = df.iloc[0].values
-            df = df[1:]
-            df = df.reset_index(drop=True)
+            
+            print(data)
+            # ## set dataframe
+            # df = pd.DataFrame(data)
+            # df.columns = df.iloc[0].values
+            # df = df[1:]
+            # df = df.reset_index(drop=True)
             
         except Exception as err:
             raise Exception(err)
 
-        status = "succeed"
-        self.logging[i].update({"data": df.to_dict("list"), "status": status})
-        logging.info(f'Collect data from file: {self.logging[i]["full_input"]}, status: {status}')
+        # status = "succeed"
+        # self.logging[i].update({"data": df.to_dict("list"), "status": status})
+        # logging.info(f'Collect data from file: {self.logging[i]["full_input"]}, status: {status}')
+        
+    def collect_param(self, i: int, format_file: any) -> dict:
+        
+        status = "failed"
+        self.logging[i].update({'function': "collect_param", 'status': status})
+        columns = self.logging[i]['columns']
         

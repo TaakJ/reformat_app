@@ -58,7 +58,7 @@ class ModuleADM(CallFunction):
             for line in format_file:
                 regex = re.compile(r"\w+.*")
                 find_word = regex.findall(line.strip())
-                data += [''.join(find_word).split('||')]
+                data += [re.sub(r'(?<!\w)\|\|', '||', ''.join(find_word)).split("||")]
             df = pd.DataFrame(data)
             
             # mapping data
@@ -76,7 +76,7 @@ class ModuleADM(CallFunction):
                 'Country': "TH"
             })
             df = df.assign(**set_value).fillna("NA")
-            df = df.drop(df.iloc[:,1:7].columns, axis=1)
+            df = df.drop(df.iloc[:,0:7].columns, axis=1)
             
         except Exception as err:
             raise Exception(err)
