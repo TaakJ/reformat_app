@@ -31,8 +31,8 @@ ICA:
 IIC:
   input_dir: D:\IGAGD\IIC\DOWNLOAD
   output_dir: D:\IGAGD\IIC\UPLOAD
-  input_file: IICUSER.csv, IICTH_Param.csv
-  output_file: IICIGAWINT.csv, IICPARAMLIST.csv
+  input_file: IICUSER.csv
+  output_file: IICIGAWINT.csv
 LDS:
   input_dir: D:\IGAGD\LDS\DOWNLOAD
   output_dir: D:\IGAGD\LDS\UPLOAD
@@ -46,5 +46,5 @@ LMT:
 MOC:
   input_dir: D:\IGAGD\MOC\DOWNLOAD
   output_dir: D:\IGAGD\MOC\UPLOAD
-  input_file: MOCUSER.csv, MOCTH_Param.csv
-  output_file: MOCIGAWINT.csv, MOCPARAMLIST.csv
+  input_file: MOCUSER.csv
+  output_file: MOCIGAWINT.csv

@@ -17,7 +17,7 @@ class ModuleMOC(CallFunction):
 
         logging.info(f'Module:"{self.module}"; Manual: "{self.manual}"; Run date: "{self.batch_date}"; Store tmp: "{self.store_tmp}"; Write mode: "{self.write_mode}";')
 
-        result = {"module": self.module, "task": "Completed"}
+        result = {'module': self.module, 'task': "Completed"}
         try:
             self.colloct_setup()
             
@@ -26,9 +26,9 @@ class ModuleMOC(CallFunction):
             
             await self.check_source_file()
             await self.separate_data_file()
-            # if self.store_tmp is True:
-            #     await self.genarate_tmp_file()
-            # await self.genarate_target_file()
+            if self.store_tmp is True:
+                await self.genarate_tmp_file()
+            await self.genarate_target_file()
 
         except CustomException as err:
             logging.error('See Error Details: log_error.log')
@@ -55,7 +55,7 @@ class ModuleMOC(CallFunction):
             data = []
             for line in format_file:
                 find_word = line.strip().replace('"','')
-                data += [re.sub(r'(?<!\.),', ",", find_word).split(",")]
+                data += [re.sub(r'(?<!\.),', ',', find_word).split(',')]
             
             ## mapping data
             df = pd.DataFrame(data)
