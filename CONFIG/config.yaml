@@ -36,7 +36,7 @@ IIC:
 LDS:
   input_dir: D:\IGAGD\LDS\DOWNLOAD
   output_dir: D:\IGAGD\LDS\UPLOAD
-  input_file: LDS - P_UserDetail.txt
+  input_file: LDSUSER.txt
   output_file: LDSIGAWINT.csv
 LMT:
   input_dir: D:\IGAGD\LMT\DOWNLOAD

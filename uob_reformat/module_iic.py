@@ -55,7 +55,7 @@ class ModuleIIC(CallFunction):
             data = []
             for line in format_file:
                 find_word = line.strip().replace('"','')
-                data += [re.sub(r'(?<!\w),', ',', ''.join(find_word)).split(",")]
+                data += [re.sub(r'(?<!\.),', ',', ''.join(find_word)).split(",")]
                 
             ## mapping data
             df = pd.DataFrame(data)

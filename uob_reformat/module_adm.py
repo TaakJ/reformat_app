@@ -58,8 +58,8 @@ class ModuleADM(CallFunction):
             for line in format_file:
                 regex = re.compile(r"\w+.*")
                 find_word = regex.findall(line.strip())
-                data += [re.sub(r'(?<!\w)\|\|', '||', ''.join(find_word)).split("||")]
-            
+                data += [re.sub(r'(?<!\.)\|\|', '||', ''.join(find_word)).split("||")]
+                
             # mapping data
             df = pd.DataFrame(data)
             df = df.groupby(0)

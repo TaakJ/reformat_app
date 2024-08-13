@@ -60,8 +60,10 @@ class ModuleDOC(CallFunction):
                 regex = re.compile(r"\w+.*")
                 find_word = regex.findall(line.strip())
                 if find_word != []:
-                    data += [re.sub(r"\W\s+", '||', ''.join(find_word)).split('||')]
-
+                    data += [re.sub(r'(?<!\.)\s{2,}', '|', ''.join(find_word)).split('|')]
+            
+            ## remove last record
+            # data = data[:-1]
             clean_data = []
             for rows, _data in enumerate(data):
                 if rows == 1:
@@ -77,37 +79,46 @@ class ModuleDOC(CallFunction):
                     clean_data.append(fix_value)
                 else:
                     continue
+            
+            ## mapping data
             df = pd.DataFrame(clean_data)
             df.columns = df.iloc[0].values
             df = df[1:]
             
-            ## mapping data
             df = df[df['APPCODE'] == "LOAN"]
-            df = df.groupby('USERNAME')
-            df = df.agg(lambda x: '+'.join(x.unique())).reset_index()
-            set_value.update({
-                'ApplicationCode': "DOC",
-                'AccountOwner': df['USERNAME'],
-                'AccountName': df['NAME'],
-                'AccountType': "USR",
-                'EntitlementName': df[['ADD_ID', 'SCAN', 'ADD_USER']].apply(lambda x: '#'.join(x), axis=1),
-                'AccountStatus': "A",
-                'IsPrivileged': "N",
-                'CreateDate': "NA",
-                'LastLogin': df['STAMP'].apply(lambda x: x[:10]).apply(pd.to_datetime, dayfirst=True).dt.strftime('%Y%m%d%H%M%S'),
-                'LastUpdatedDate': "NA",
-                'AdditionalAttribute': df[['APPCODE', 'ADD_USER']].apply(lambda x: ';'.join(x), axis=1),
-                'Country': "TH"
-            })
-            df = df.assign(**set_value).fillna("NA")
-            df = df.drop(df.iloc[:,:10].columns, axis=1)
+            mask = df['NAME'].str.contains('|'.join([r'\b'+i+r'\b' for i in df['NAME']]))
+            
+            import numpy as np
+            df['Flag'] = np.where(mask, 'expired', '')
+            
+            print(df)
+            
+            # df['ROLE_ID'] = df['NAME'].apply(lambda x: x.strip().split(',')[2])
+            # print(df)
+            # df = df.groupby('USERNAME')
+            # df = df.agg(lambda x: '+'.join(x.unique())).reset_index()
+            # set_value.update({
+            #     'ApplicationCode': "DOC",
+            #     'AccountOwner': df['NAME'],
+            #     'AccountName': df['NAME'],
+            #     'AccountType': "USR",
+            #     'AccountStatus': "A",
+            #     'IsPrivileged': "N",
+            #     'CreateDate': "NA",
+            #     'LastLogin': df['STAMP'].apply(lambda x: x[:10]).apply(pd.to_datetime, dayfirst=True).dt.strftime('%Y%m%d%H%M%S'),
+            #     'LastUpdatedDate': "NA",
+            #     'AdditionalAttribute': df[['APPCODE', 'ADD_USER']].apply(lambda x: '#'.join(x), axis=1),
+            #     'Country': "TH"
+            # })
+            # df = df.assign(**set_value).fillna("NA")
+            # df = df.drop(df.iloc[:,:10].columns, axis=1)
             
         except Exception as err:
             raise Exception(err)
 
-        status = "succeed"
-        self.logging[i].update({'data': df.to_dict('list'), 'status': status})
-        logging.info(f"Collect user from file: {self.logging[i]['full_input']}, status: {status}")
+        # status = "succeed"
+        # self.logging[i].update({'data': df.to_dict('list'), 'status': status})
+        # logging.info(f"Collect user from file: {self.logging[i]['full_input']}, status: {status}")
 
     def collect_param(self, i: int, format_file: any) -> dict:
 
