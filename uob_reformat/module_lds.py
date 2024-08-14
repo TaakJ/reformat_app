@@ -80,34 +80,30 @@ class ModuleLDS(CallFunction):
             
             ## mapping data
             df = df[df['User_Active'] == 'Active'].reset_index(drop=True)
-            # df = df.groupby('UserName')
-            # df = df.agg(lambda x: '+'.join(x.unique())).reset_index()
-            # set_value = dict.fromkeys(self.logging[i]['columns'], "NA")
-            print(df)
-            df['LastLogin_Date'] = df['LastLogin_Date'].apply(lambda x: x[:19]).apply(pd.to_datetime).dt.strftime('%Y%m%d%H%M%S')
-            df['edit_date'] = df['edit_date'].apply(lambda x: x[:19]).apply(pd.to_datetime).dt.strftime('%Y%m%d%H%M%S')
-            
-            # set_value.update({
-            #     'ApplicationCode': 'LDS', 
-            #     'AccountOwner': df['UserName'], 
-            #     'AccountName': df['FullName'],
-            #     'AccountType': 'USR',
-            #     'AccountStatus': 'A',
-            #     'IsPrivileged': 'N',
-            #     'LastLogin': df['LastLogin_Date'].apply(lambda x: x[:20]).apply(pd.to_datetime, dayfirst=True).dt.strftime('%Y%m%d%H%M%S'),
-            #     'LastUpdatedDate': df['edit_date'].apply(lambda x: x[:20]).apply(pd.to_datetime, dayfirst=True).dt.strftime('%Y%m%d%H%M%S'),
-            #     'Country': "TH"
-            # })
-            # df = df.assign(**set_value).fillna("NA")
-            # df = df.drop(df.iloc[:,:32].columns, axis=1)
+            ## df = df.groupby('UserName')
+            ## df = df.agg(lambda x: '+'.join(x.unique())).reset_index()
+            set_value = dict.fromkeys(self.logging[i]['columns'], 'NA')
+            set_value.update({
+                'ApplicationCode': 'LDS', 
+                'AccountOwner': df['UserName'], 
+                'AccountName': df['FullName'],
+                'AccountType': 'USR',
+                'AccountStatus': 'A',
+                'IsPrivileged': 'N',
+                'LastLogin': pd.to_datetime(df['LastLogin_Date'].apply(lambda x: x[:19])).dt.strftime('%Y%m%d%H%M%S'),
+                'LastUpdatedDate': pd.to_datetime(df['edit_date'].apply(lambda x: x.replace('NULL','')[:19])).dt.strftime('%Y%m%d%H%M%S'),
+                'AdditionalAttribute': df[['CostCenterName','CostCenterCode']].apply(lambda x: '#'.join(x), axis=1),
+                'Country': "TH"
+            })
+            df = df.assign(**set_value).fillna('NA')
+            df = df.drop(df.iloc[:,:32].columns, axis=1)
             
         except Exception as err:
-            print(err)
             raise Exception(err)
         
-        # status = "succeed"
-        # self.logging[i].update({'data': df.to_dict('list'), 'status': status})
-        # logging.info(f"Collect user from file: {self.logging[i]['full_input']}, status: {status}")
+        status = 'succeed'
+        self.logging[i].update({'data': df.to_dict('list'), 'status': status})
+        logging.info(f"Collect user from file: {self.logging[i]['full_input']}, status: {status}")
         
     def collect_param(self, i: int, format_file: any) -> dict:
         
