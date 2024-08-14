@@ -54,7 +54,7 @@ class ModuleADM(CallFunction):
         try:
             data = []
             for line in format_file:
-                data += [re.sub(r'(?<!\.)\|\|', '|', line.strip()).split("|")]
+                data += [re.sub(r'(?<!\.)\|\|', '||', line.strip()).split("||")]
             
             ## mapping data
             df = pd.DataFrame(data)

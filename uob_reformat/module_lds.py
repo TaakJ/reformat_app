@@ -56,10 +56,11 @@ class ModuleLDS(CallFunction):
             for line in format_file:
                 regex = re.compile(r'\w+.*')
                 find_word = regex.findall(line.strip())
-                print(find_word)
-                # if find_word != []:
-                #     data += [re.sub(r'(?<!\.)\s{2,}', '|', ''.join(find_word)).split('|')]
+                if find_word != []:
+                    data += [re.sub(r'(?<!\.),', '||', ''.join(find_word)).split('||')]
             
+            df = pd.DataFrame(data)
+            print(df[15])
             # clean_data = []
             # data = data[:-1]
             # for rows, _data in enumerate(data):
