@@ -52,8 +52,6 @@ class ModuleDOC(CallFunction):
         self.logging[i].update({'function': "collect_user", 'status': status})
     
         try:
-            set_value = dict.fromkeys(self.logging[i]['columns'], "NA")
-            
             data = []
             for line in format_file:
                 regex = re.compile(r"\w+.*")
@@ -94,6 +92,7 @@ class ModuleDOC(CallFunction):
             df[['ROLE', 'DEPARTMENT']] = df.apply(split_column, axis=1, result_type='expand')
             df['DATE'] = df['STAMP'].apply(lambda x: x[:10]).apply(pd.to_datetime).dt.strftime('%Y%m%d')
             df['TIME'] = df['STAMP'].apply(lambda x: x[11:19].replace('.',''))
+            set_value = dict.fromkeys(self.logging[i]['columns'], "NA")
             set_value.update({
                 'ApplicationCode': "DOC",
                 'AccountOwner': df['USERNAME'],

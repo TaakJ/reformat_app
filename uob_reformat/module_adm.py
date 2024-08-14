@@ -52,8 +52,6 @@ class ModuleADM(CallFunction):
         self.logging[i].update({'function': "collect_user", 'status': status})
         
         try:
-            set_value = dict.fromkeys(self.logging[i]['columns'], "NA")
-            
             data = []
             for line in format_file:
                 regex = re.compile(r"\w+.*")
@@ -64,6 +62,7 @@ class ModuleADM(CallFunction):
             df = pd.DataFrame(data)
             df = df.groupby(0)
             df = df.agg(lambda x: '+'.join(x.unique())).reset_index()
+            set_value = dict.fromkeys(self.logging[i]['columns'], "NA")
             set_value.update({
                 'ApplicationCode': "ADM", 
                 'AccountOwner': df[0], 
