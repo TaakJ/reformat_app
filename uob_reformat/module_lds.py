@@ -73,23 +73,27 @@ class ModuleLDS(CallFunction):
                             fix_value.append(value)
                     clean_data.append(fix_value)
             
-            ## mapping data
+            ## set dataframe
             df = pd.DataFrame(clean_data)
             df.columns = df.iloc[0].values
-            df = df[1:].apply(lambda x: x.str.strip()).reset_index(drop=True)
+            df = df.iloc[1:,:-1].apply(lambda x: x.str.strip()).reset_index(drop=True)
             
-            df = df[df['User_Active'] == 'Active']
-            df = df.groupby('UserName')
-            # df = df.agg(lambda x: '+'.join(x.unique()))
-            print(df.dtypes)
+            ## mapping data
+            df = df[df['User_Active'] == 'Active'].reset_index(drop=True)
+            # df = df.groupby('UserName')
+            # df = df.agg(lambda x: '+'.join(x.unique())).reset_index()
             # set_value = dict.fromkeys(self.logging[i]['columns'], "NA")
+            print(df)
+            df['LastLogin_Date'] = df['LastLogin_Date'].apply(lambda x: x[:19]).apply(pd.to_datetime).dt.strftime('%Y%m%d%H%M%S')
+            df['edit_date'] = df['edit_date'].apply(lambda x: x[:19]).apply(pd.to_datetime).dt.strftime('%Y%m%d%H%M%S')
+            
             # set_value.update({
-            #     'ApplicationCode': "LDS", 
+            #     'ApplicationCode': 'LDS', 
             #     'AccountOwner': df['UserName'], 
             #     'AccountName': df['FullName'],
-            #     'AccountType': "USR",
-            #     'AccountStatus': "A",
-            #     'IsPrivileged': "N",
+            #     'AccountType': 'USR',
+            #     'AccountStatus': 'A',
+            #     'IsPrivileged': 'N',
             #     'LastLogin': df['LastLogin_Date'].apply(lambda x: x[:20]).apply(pd.to_datetime, dayfirst=True).dt.strftime('%Y%m%d%H%M%S'),
             #     'LastUpdatedDate': df['edit_date'].apply(lambda x: x[:20]).apply(pd.to_datetime, dayfirst=True).dt.strftime('%Y%m%d%H%M%S'),
             #     'Country': "TH"
@@ -98,6 +102,7 @@ class ModuleLDS(CallFunction):
             # df = df.drop(df.iloc[:,:32].columns, axis=1)
             
         except Exception as err:
+            print(err)
             raise Exception(err)
         
         # status = "succeed"
