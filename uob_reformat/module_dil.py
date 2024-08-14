@@ -62,12 +62,12 @@ class ModuleDIL(CallFunction):
             clean_data = []
             for rows, _data in enumerate(data):
                 if rows == 1:
-                    clean_data += [re.sub(r"\s+", ',', ','.join(_data)).split(',')]
+                    clean_data += [re.sub(r'\s+', ',', ','.join(_data)).split(',')]
                 elif rows != 0:
                     fix_value = []
                     for idx, value in enumerate(_data, 1):
                         if idx == 4:
-                            value = re.sub(r"\s+", ',',value).split(',')
+                            value = re.sub(r'\s+', ',', value).split(',')
                             fix_value.extend(value)
                         else:
                             fix_value.append(value)
