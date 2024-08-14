@@ -60,10 +60,12 @@ class ModuleCUM(CallFunction):
                     if not all(empty == '' for empty in by_sheets):
                         data.append(by_sheets)
             
-            ## mapping data            
+            ## set dataframe  
             df = pd.DataFrame(data)
             df.columns = df.iloc[0].values
-            df = df[1:]
+            df = df[1:].apply(lambda x: x.str.strip()).reset_index(drop=True)
+        
+            ## mapping data   
             df = df.groupby('USER_ID')
             df = df.agg(lambda x: '+'.join(x.unique())).reset_index()
             set_value = dict.fromkeys(self.logging[i]['columns'], 'NA')

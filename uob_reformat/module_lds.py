@@ -59,32 +59,29 @@ class ModuleLDS(CallFunction):
                 if find_word != []:
                     data += [re.sub(r'(?<!\.),', '||', ''.join(find_word)).split('||')]
             
-            df = pd.DataFrame(data)
-            print(df[15])
-            # clean_data = []
-            # data = data[:-1]
-            # for rows, _data in enumerate(data):
-            #     if rows == 0:
-            #         clean_data += [re.sub(r"\s+", ',', ','.join(_data)).split(',')]
-            #     else:
-            #         fix_value = []
-            #         for idx, value in enumerate(_data, 1):
-            #             if idx == 1:
-            #                 value = re.sub(r"\s+", ',',value).split(',')
-            #                 fix_value.extend(value)
-            #             else:
-            #                 fix_value.append(value)
-            #         clean_data.append(fix_value)
+            clean_data = []
+            for rows, _data in enumerate(data):
+                if rows == 0:
+                    clean_data += [re.sub(r'\s+', ',', ','.join(_data)).split(',')]
+                else:
+                    fix_value = []
+                    for idx, value in enumerate(_data, 1):
+                        if idx == 1:
+                            value = re.sub(r'\s+', ',', value).split(',')
+                            fix_value.extend(value)
+                        else:
+                            fix_value.append(value)
+                    clean_data.append(fix_value)
             
-            # ## mapping data
-            # df = pd.DataFrame(clean_data)
-            # df.columns = df.iloc[0].values
-            # df = df[1:]
+            ## mapping data
+            df = pd.DataFrame(clean_data)
+            df.columns = df.iloc[0].values
+            df = df[1:].apply(lambda x: x.str.strip()).reset_index(drop=True)
             
-            # print(df)
-            # df = df[df['Sector_Active'] == "Active"]
-            # df = df.groupby('UserName')
-            # df = df.agg(lambda x: '+'.join(x.unique())).reset_index()
+            df = df[df['User_Active'] == 'Active']
+            df = df.groupby('UserName')
+            # df = df.agg(lambda x: '+'.join(x.unique()))
+            print(df.dtypes)
             # set_value = dict.fromkeys(self.logging[i]['columns'], "NA")
             # set_value.update({
             #     'ApplicationCode': "LDS", 

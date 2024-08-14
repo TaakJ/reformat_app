@@ -56,8 +56,11 @@ class ModuleADM(CallFunction):
             for line in format_file:
                 data += [re.sub(r'(?<!\.)\|\|', '||', line.strip()).split("||")]
             
-            ## mapping data
+            ## set dataframe
             df = pd.DataFrame(data)
+            df = df.apply(lambda x: x.str.strip()).reset_index(drop=True)
+            
+            ## mapping data
             df = df.groupby(0)
             df = df.agg(lambda x: '+'.join(x.unique())).reset_index()
             set_value = dict.fromkeys(self.logging[i]['columns'], 'NA')

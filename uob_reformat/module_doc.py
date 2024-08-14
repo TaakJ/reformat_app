@@ -74,7 +74,12 @@ class ModuleDOC(CallFunction):
                     clean_data.append(fix_value)
                 else:
                     continue
-                
+            
+            ## set dataframe
+            df = pd.DataFrame(clean_data)
+            df.columns = df.iloc[0].values
+            df = df[1:].apply(lambda x: x.str.strip()).reset_index(drop=True)
+            
             ## mapping data
             def split_column(df):
                 comma = df['NAME'].count(',')
@@ -85,27 +90,23 @@ class ModuleDOC(CallFunction):
                     _, department = df['NAME'].split(',')
                 return role, department
             
-            df = pd.DataFrame(clean_data)
-            df.columns = df.iloc[0].values
-            df = df[1:]
-            df = df[df['APPCODE'] == 'LOAN'].reset_index(drop=True)
+            df = df[df['APPCODE'] == 'LOAN'].reset_index()
             df[['ROLE', 'DEPARTMENT']] = df.apply(split_column, axis=1, result_type='expand')
-            df['DATE'] = df['STAMP'].apply(lambda x: x[:10]).apply(pd.to_datetime).dt.strftime('%Y%m%d')
-            df['TIME'] = df['STAMP'].apply(lambda x: x[11:19].replace('.',''))
+            df['STAMP'] = df['STAMP'].apply(lambda x: x[:10]).apply(pd.to_datetime).dt.strftime('%Y%m%d') + df['STAMP'].apply(lambda x: x[11:19].replace('.',''))
             set_value = dict.fromkeys(self.logging[i]['columns'], 'NA')
             set_value.update({
                 'ApplicationCode': 'DOC',
                 'AccountOwner': df['USERNAME'],
-                'AccountName': df['USERNAME'],
+                'AccountName': df['NAME'],
                 'AccountType': 'USR',
                 'AccountStatus': 'A',
                 'IsPrivileged': 'N',
-                'LastLogin': df['DATE'] + df['TIME'],
+                'LastLogin': df['STAMP'],
                 'AdditionalAttribute': df[['APPCODE', 'ROLE']].apply(lambda x: '#'.join(x), axis=1),
                 'Country': 'TH'
             })
             df = df.assign(**set_value).fillna('NA')
-            df = df.drop(df.iloc[:,:15].columns, axis=1)
+            df = df.drop(df.iloc[:,:13].columns, axis=1)
             
         except Exception as err:
             raise Exception(err)
