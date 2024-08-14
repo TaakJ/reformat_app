@@ -17,7 +17,7 @@ class ModuleDOC(CallFunction):
 
         logging.info(f'Module:"{self.module}"; Manual: "{self.manual}"; Run date: "{self.batch_date}"; Store tmp: "{self.store_tmp}"; Write mode: "{self.write_mode}";')
 
-        result = {"module": self.module, "task": "Completed"}
+        result = {'module': self.module, 'task': "Completed"}
         try:
             self.colloct_setup()
 
@@ -40,7 +40,7 @@ class ModuleDOC(CallFunction):
                 except StopIteration:
                     break
 
-            result.update({"task": "Uncompleted"})
+            result.update({'task': "Uncompleted"})
 
         logging.info(f'Stop Run Module "{self.module}"\r\n')
 
