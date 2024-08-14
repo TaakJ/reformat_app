@@ -29,54 +29,54 @@ class RunModule:
     async def mapping_module(self):
         coros = []
         for module in self.source:
-            setattr(self, "module", module)
+            setattr(self, 'module', module)
             
-            if module == "ADM":                                
+            if module == 'ADM':                                
                 tasks = ModuleADM(self)
                 run = asyncio.create_task(tasks.run_process())
                 coros.append(run)
 
-            elif module == "BOS":
+            elif module == 'BOS':
                 tasks = ModuleBOS(self)
                 run = asyncio.create_task(tasks.run_process())
                 coros.append(run)
 
-            elif module == "CUM":
+            elif module == 'CUM':
                 tasks = ModuleCUM(self)
                 run = asyncio.create_task(tasks.run_process())
                 coros.append(run)
 
-            elif module == "DOC":
+            elif module == 'DOC':
                 tasks = ModuleDOC(self)
                 run = asyncio.create_task(tasks.run_process())
                 coros.append(run)
                 
-            elif module == "DIL":
+            elif module == 'DIL':
                 tasks = ModuleDIL(self)
                 run = asyncio.create_task(tasks.run_process())
                 coros.append(run)
 
-            elif module == "ICA":
+            elif module == 'ICA':
                 tasks = ModuleICA(self)
                 run = asyncio.create_task(tasks.run_process())
                 coros.append(run)
 
-            elif module == "IIC":
+            elif module == 'IIC':
                 tasks = ModuleIIC(self)
                 run = asyncio.create_task(tasks.run_process())
                 coros.append(run)
 
-            elif module == "LDS":
+            elif module == 'LDS':
                 tasks = ModuleLDS(self)
                 run = asyncio.create_task(tasks.run_process())
                 coros.append(run)
 
-            elif module == "LMT":
+            elif module == 'LMT':
                 tasks = ModuleLMT(self)
                 run = asyncio.create_task(tasks.run_process())
                 coros.append(run)
 
-            elif module == "MOC":
+            elif module == 'MOC':
                 tasks = ModuleMOC(self)
                 run = asyncio.create_task(tasks.run_process())
                 coros.append(run)

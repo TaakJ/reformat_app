@@ -45,37 +45,31 @@ class CollectParams(ABC):
 
         suffix = self.batch_date.strftime('%Y%m%d')
         set_dir = lambda dir, file: [(join(dir, x.strip())
-                if self.write_mode == "overwrite" or self.manual
+                if self.write_mode == 'overwrite' or self.manual
                 else join(dir, f"{Path(x.strip()).stem}_{suffix}.csv"))
-                for x in file.split(",")]
+                for x in file.split(',')]
         
         return set_dir(output_dir, output_file)
 
     def colloct_setup(self) -> None:
 
-        logging.info(f"Setup params/logging for module: {self.module}")
+        logging.info(f'Setup params/logging for module: {self.module}')
 
         log = []
-        status = "failed"
-        record = {'module': self.module, 'function': "colloct_setup", 'status': status}
+        status = 'failed'
+        record = {'module': self.module, 'function': 'colloct_setup', 'status': status}
         try:
             i = 1
             for input, target in zip(self.full_input(), self.full_target()):
                 for n in self.select_files:
                     if n == i:
-                        status = "succeed"
+                        status = 'succeed'
                         if set(('full_input', 'full_target')).issubset(record):
                             copy_record = record.copy()
-                            copy_record.update({
-                                'full_input': input,
-                                'full_target': target,
-                                'status': status,})
+                            copy_record.update({'full_input': input, 'full_target': target, 'status': status,})
                             log += [copy_record]
                         else:
-                            record.update({
-                                'full_input': input,
-                                'full_target': target,
-                                'status': status,})
+                            record.update({'full_input': input, 'full_target': target, 'status': status,})
                             log = [record]
                 i += 1
         except Exception as err:
@@ -89,17 +83,19 @@ class CollectParams(ABC):
 
     def get_extract_file(self, i: int, format_file: any) -> dict:
         
-        self.logging[i].update({'function': "get_extract_data"})
+        self.logging[i].update({'function': 'get_extract_data'})
         full_input = self.logging[i]['full_input']
         
         if re.search(r"_Param", full_input) is not None:
             columns = ['Parameter Name', 'Code value', 'Decode value']
             self.logging[i].update({'columns': columns})
+            
             self.collect_param(i, format_file)
         else:
             columns = ['ApplicationCode', 'AccountOwner', 'AccountName', 'AccountType', 'EntitlementName', 'SecondEntitlementName', 'ThirdEntitlementName',
                     'AccountStatus', 'IsPrivileged', 'AccountDescription', 'CreateDate', 'LastLogin', 'LastUpdatedDate', 'AdditionalAttribute', 'Country']
             self.logging[i].update({'columns': columns})
+            
             self.collect_user(i, format_file)
 
     @abstractmethod

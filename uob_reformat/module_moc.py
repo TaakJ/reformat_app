@@ -15,9 +15,9 @@ class ModuleMOC(CallFunction):
     
     async def run_process(self) -> dict:
 
-        logging.info(f'Module:"{self.module}"; Manual: "{self.manual}"; Run date: "{self.batch_date}"; Store tmp: "{self.store_tmp}"; Write mode: "{self.write_mode}";')
+        logging.info(f"Module:'{self.module}'; Manual: '{self.manual}'; Run date: '{self.batch_date}'; Store tmp: '{self.store_tmp}'; Write mode: '{self.write_mode}';")
 
-        result = {'module': self.module, 'task': "Completed"}
+        result = {'module': self.module, 'task': 'Completed'}
         try:
             self.colloct_setup()
             
@@ -40,16 +40,16 @@ class ModuleMOC(CallFunction):
                 except StopIteration:
                     break
 
-            result.update({"task": "Uncompleted"})
+            result.update({'task': 'Uncompleted'})
 
-        logging.info(f'Stop Run Module "{self.module}"\r\n')
+        logging.info(f"Stop Run Module '{self.module}'\r\n")
         
         return result
 
     def collect_user(self, i: int, format_file: any) -> dict:
         
-        status = "failed"
-        self.logging[i].update({'function': "collect_user", 'status': status})
+        status = 'failed'
+        self.logging[i].update({'function': 'collect_user', 'status': status})
         
         try:
             data = []
@@ -66,12 +66,12 @@ class ModuleMOC(CallFunction):
         except Exception as err:
             raise Exception(err)
 
-        status = "succeed"
+        status = 'succeed'
         self.logging[i].update({'data': df.to_dict('list'), 'status': status})
         logging.info(f"Collect user from file: {self.logging[i]['full_input']}, status: {status}")
         
     def collect_param(self, i: int, format_file: any) -> dict:
         
         status = "failed"
-        self.logging[i].update({'function': "collect_param", 'status': status})
+        self.logging[i].update({'function': 'collect_param', 'status': status})
         columns = self.logging[i]['columns']

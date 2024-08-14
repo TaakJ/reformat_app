@@ -15,9 +15,9 @@ class ModuleDOC(CallFunction):
 
     async def run_process(self) -> dict:
 
-        logging.info(f'Module:"{self.module}"; Manual: "{self.manual}"; Run date: "{self.batch_date}"; Store tmp: "{self.store_tmp}"; Write mode: "{self.write_mode}";')
+        logging.info(f"Module:'{self.module}'; Manual: '{self.manual}'; Run date: '{self.batch_date}'; Store tmp: '{self.store_tmp}'; Write mode: '{self.write_mode}';")
 
-        result = {'module': self.module, 'task': "Completed"}
+        result = {'module': self.module, 'task': 'Completed'}
         try:
             self.colloct_setup()
 
@@ -31,7 +31,7 @@ class ModuleDOC(CallFunction):
             await self.genarate_target_file()
 
         except CustomException as err:
-            logging.error("See Error Details: log_error.log")
+            logging.error('See Error Details: log_error.log')
 
             logger = err.setup_errorlog(log_name=__name__)
             while True:
@@ -40,16 +40,16 @@ class ModuleDOC(CallFunction):
                 except StopIteration:
                     break
 
-            result.update({'task': "Uncompleted"})
+            result.update({'task': 'Uncompleted'})
 
-        logging.info(f'Stop Run Module "{self.module}"\r\n')
+        logging.info(f"Stop Run Module '{self.module}'\r\n")
 
         return result
 
     def collect_user(self, i: int, format_file: any) -> dict:
 
-        status = "failed"
-        self.logging[i].update({'function': "collect_user", 'status': status})
+        status = 'failed'
+        self.logging[i].update({'function': 'collect_user', 'status': status})
     
         try:
             data = []
@@ -79,43 +79,43 @@ class ModuleDOC(CallFunction):
             def split_column(df):
                 comma = df['NAME'].count(',')
                 if comma == 2:
-                    _, role, department = df['NAME'].split(",")
+                    _, role, department = df['NAME'].split(',')
                 else:
                     role = ''
-                    _, department = df['NAME'].split(",")
+                    _, department = df['NAME'].split(',')
                 return role, department
             
             df = pd.DataFrame(clean_data)
             df.columns = df.iloc[0].values
             df = df[1:]
-            df = df[df['APPCODE'] == "LOAN"].reset_index(drop=True)
+            df = df[df['APPCODE'] == 'LOAN'].reset_index(drop=True)
             df[['ROLE', 'DEPARTMENT']] = df.apply(split_column, axis=1, result_type='expand')
             df['DATE'] = df['STAMP'].apply(lambda x: x[:10]).apply(pd.to_datetime).dt.strftime('%Y%m%d')
             df['TIME'] = df['STAMP'].apply(lambda x: x[11:19].replace('.',''))
-            set_value = dict.fromkeys(self.logging[i]['columns'], "NA")
+            set_value = dict.fromkeys(self.logging[i]['columns'], 'NA')
             set_value.update({
-                'ApplicationCode': "DOC",
+                'ApplicationCode': 'DOC',
                 'AccountOwner': df['USERNAME'],
                 'AccountName': df['USERNAME'],
-                'AccountType': "USR",
-                'AccountStatus': "A",
-                'IsPrivileged': "N",
+                'AccountType': 'USR',
+                'AccountStatus': 'A',
+                'IsPrivileged': 'N',
                 'LastLogin': df['DATE'] + df['TIME'],
                 'AdditionalAttribute': df[['APPCODE', 'ROLE']].apply(lambda x: '#'.join(x), axis=1),
-                'Country': "TH"
+                'Country': 'TH'
             })
-            df = df.assign(**set_value).fillna("NA")
+            df = df.assign(**set_value).fillna('NA')
             df = df.drop(df.iloc[:,:15].columns, axis=1)
             
         except Exception as err:
             raise Exception(err)
         
-        status = "succeed"
+        status = 'succeed'
         self.logging[i].update({'data': df.to_dict('list'), 'status': status})
         logging.info(f"Collect user from file: {self.logging[i]['full_input']}, status: {status}")
 
     def collect_param(self, i: int, format_file: any) -> dict:
 
-        status = "failed"
-        self.logging[i].update({"function": "collect_param", "status": status})
-        columns = self.logging[i]["columns"]
+        status = 'failed'
+        self.logging[i].update({'function': 'collect_param', 'status': status})
+        columns = self.logging[i]['columns']

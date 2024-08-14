@@ -28,7 +28,7 @@ class CustomException(Exception):
         log_name="", 
         file="log_error.log") -> any:
         
-        log_name = log_name + "." + self.time
+        log_name = log_name + '.' + self.time
         filename = Folder.LOG + join(self.date, file)
         if not os.path.exists(os.path.dirname(filename)):
             try:
@@ -56,5 +56,5 @@ class CustomException(Exception):
             func        = self.err[i]['function']
             err         = self.err[i].get('err')
             if err is not None:
-                err_msg = f'Module: "{module}"; File: "{full_target}"; Function: "{func}"; Status: "{status}"; ERROR: {err}'
+                err_msg = f"Module: '{module}'; File: '{full_target}'; Function: '{func}'; Status: '{status}'; ERROR: {err}"
                 yield err_msg
