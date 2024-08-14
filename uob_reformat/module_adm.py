@@ -54,11 +54,11 @@ class ModuleADM(CallFunction):
         try:
             data = []
             for line in format_file:
-                regex = re.compile(r"\w+.*")
-                find_word = regex.findall(line.strip())
-                data += [re.sub(r'(?<!\.)\|\|', '||', ''.join(find_word)).split("||")]
-                
-            # mapping data
+                # regex = re.compile(r'\w+.*')
+                # find_word = regex.findall(line.strip())
+                data += [re.sub(r'(?<!\.)\|\|', '|', line.strip()).split("|")]
+            
+            ## mapping data
             df = pd.DataFrame(data)
             df = df.groupby(0)
             df = df.agg(lambda x: '+'.join(x.unique())).reset_index()
@@ -74,7 +74,7 @@ class ModuleADM(CallFunction):
                 'AdditionalAttribute': df[[2]].apply(lambda x: '#'.join(x), axis=1),
                 'Country': "TH"
             })
-            df = df.assign(**set_value)
+            df = df.assign(**set_value).fillna("NA") 
             df = df.drop(df.iloc[:,0:7].columns, axis=1)
             
         except Exception as err:

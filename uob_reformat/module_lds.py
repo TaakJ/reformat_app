@@ -52,39 +52,38 @@ class ModuleLDS(CallFunction):
         self.logging[i].update({'function': "collect_user", 'status': status})
         
         try:
-            set_value = dict.fromkeys(self.logging[i]['columns'], "NA")
-            
             data = []
             for line in format_file:
-                regex = re.compile(r"\w+.*")
+                regex = re.compile(r'\w+.*')
                 find_word = regex.findall(line.strip())
                 if find_word != []:
                     data += [re.sub(r'(?<!\.)\s{2,}', '|', ''.join(find_word)).split('|')]
             
-            clean_data = []
-            data = data[:-1]
-            for rows, _data in enumerate(data):
-                if rows == 0:
-                    clean_data += [re.sub(r"\s+", ',', ','.join(_data)).split(',')]
-                else:
-                    fix_value = []
-                    for idx, value in enumerate(_data, 1):
-                        if idx == 1:
-                            value = re.sub(r"\s+", ',',value).split(',')
-                            print(value)
-                            fix_value.extend(value)
-                        else:
-                            fix_value.append(value)
-                    clean_data.append(fix_value)
+            # clean_data = []
+            # data = data[:-1]
+            # for rows, _data in enumerate(data):
+            #     if rows == 0:
+            #         clean_data += [re.sub(r"\s+", ',', ','.join(_data)).split(',')]
+            #     else:
+            #         fix_value = []
+            #         for idx, value in enumerate(_data, 1):
+            #             if idx == 1:
+            #                 value = re.sub(r"\s+", ',',value).split(',')
+            #                 fix_value.extend(value)
+            #             else:
+            #                 fix_value.append(value)
+            #         clean_data.append(fix_value)
             
-            ## mapping data
-            df = pd.DataFrame(clean_data)
-            df.columns = df.iloc[0].values
-            df = df[1:]
+            # ## mapping data
+            # df = pd.DataFrame(clean_data)
+            # df.columns = df.iloc[0].values
+            # df = df[1:]
+            
             # print(df)
             # df = df[df['Sector_Active'] == "Active"]
             # df = df.groupby('UserName')
             # df = df.agg(lambda x: '+'.join(x.unique())).reset_index()
+            # set_value = dict.fromkeys(self.logging[i]['columns'], "NA")
             # set_value.update({
             #     'ApplicationCode': "LDS", 
             #     'AccountOwner': df['UserName'], 

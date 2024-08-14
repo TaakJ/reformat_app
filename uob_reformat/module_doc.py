@@ -54,7 +54,7 @@ class ModuleDOC(CallFunction):
         try:
             data = []
             for line in format_file:
-                regex = re.compile(r"\w+.*")
+                regex = re.compile(r'\w+.*')
                 find_word = regex.findall(line.strip())
                 if find_word != []:
                     data += [re.sub(r'(?<!\.)\s{2,}', '|', ''.join(find_word)).split('|')]
