@@ -26,9 +26,9 @@ class ModuleDOC(CallFunction):
 
             await self.check_source_file()
             await self.separate_data_file()
-            if self.store_tmp is True:
-                await self.genarate_tmp_file()
-            await self.genarate_target_file()
+            # if self.store_tmp is True:
+            #     await self.genarate_tmp_file()
+            # await self.genarate_target_file()
 
         except CustomException as err:
             logging.error('See Error Details: log_error.log')
@@ -90,9 +90,8 @@ class ModuleDOC(CallFunction):
                     _, department = df['NAME'].split(',')
                 return role, department
             
-            df = df[df['APPCODE'] == 'LOAN'].reset_index()
+            df = df[df['APPCODE'] == 'LOAN'].reset_index(drop=True)
             df[['ROLE', 'DEPARTMENT']] = df.apply(split_column, axis=1, result_type='expand')
-            df['TIMESTAMP'] = pd.to_datetime(df['STAMP'].apply(lambda x: x[:10])).dt.strftime('%Y%m%d') + df['STAMP'].apply(lambda x: x[11:19].replace('.',''))
             set_value = dict.fromkeys(self.logging[i]['columns'], 'NA')
             set_value.update({
                 'ApplicationCode': 'DOC',
@@ -101,12 +100,12 @@ class ModuleDOC(CallFunction):
                 'AccountType': 'USR',
                 'AccountStatus': 'A',
                 'IsPrivileged': 'N',
-                'LastLogin': df['TIMESTAMP'],
+                'LastLogin': pd.to_datetime(df['STAMP'].apply(lambda x: x[:10])).dt.strftime('%Y%m%d') + df['STAMP'].apply(lambda x: x[11:19].replace('.','')),
                 'AdditionalAttribute': df[['APPCODE', 'ROLE']].apply(lambda x: '#'.join(x), axis=1),
                 'Country': 'TH'
             })
             df = df.assign(**set_value).fillna('NA')
-            df = df.drop(df.iloc[:,:14].columns, axis=1)
+            df = df.drop(df.iloc[:,:12].columns, axis=1)
             
         except Exception as err:
             raise Exception(err)
