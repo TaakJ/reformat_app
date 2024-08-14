@@ -79,25 +79,23 @@ class ModuleLDS(CallFunction):
             df = df.iloc[1:,:-1].apply(lambda x: x.str.strip()).reset_index(drop=True)
             
             ## mapping data
-            df = df[df['User_Active'] == 'Active'].reset_index(drop=True)
-            ## df = df.groupby('UserName')
-            ## df = df.agg(lambda x: '+'.join(x.unique())).reset_index()
-            set_value = dict.fromkeys(self.logging[i]['columns'], 'NA')
-            set_value.update({
-                'ApplicationCode': 'LDS', 
-                'AccountOwner': df['UserName'], 
-                'AccountName': df['FullName'],
-                'AccountType': 'USR',
-                'AccountStatus': 'A',
-                'IsPrivileged': 'N',
-                'LastLogin': pd.to_datetime(df['LastLogin_Date'].apply(lambda x: x[:19])).dt.strftime('%Y%m%d%H%M%S'),
-                'LastUpdatedDate': pd.to_datetime(df['edit_date'].apply(lambda x: x.replace('NULL','')[:19])).dt.strftime('%Y%m%d%H%M%S'),
-                'AdditionalAttribute': df[['CostCenterName','CostCenterCode']].apply(lambda x: '#'.join(x), axis=1),
-                'Country': "TH"
-            })
-            df = df.assign(**set_value).fillna('NA')
-            df = df.drop(df.iloc[:,:32].columns, axis=1)
-            
+            # df = df[df['User_Active'] == 'Active'].reset_index()
+            # set_value = dict.fromkeys(self.logging[i]['columns'], 'NA')
+            # set_value.update({
+            #     'ApplicationCode': 'LDS', 
+            #     'AccountOwner': df['UserName'], 
+            #     'AccountName': df['FullName'],
+            #     'AccountType': 'USR',
+            #     'AccountStatus': 'A',
+            #     'IsPrivileged': 'N',
+            #     'LastLogin': pd.to_datetime(df['LastLogin_Date'].apply(lambda x: x[:19])).dt.strftime('%Y%m%d%H%M%S'),
+            #     'LastUpdatedDate': pd.to_datetime(df['edit_date'].apply(lambda x: x.replace('NULL','')[:19])).dt.strftime('%Y%m%d%H%M%S'),
+            #     'AdditionalAttribute': df[['CostCenterName','CostCenterCode']].apply(lambda x: '#'.join(x), axis=1),
+            #     'Country': "TH"
+            # })
+            # df = df.assign(**set_value).fillna('NA')
+            # df = df.drop(df.iloc[:,:32].columns, axis=1)
+            # print(df)
         except Exception as err:
             raise Exception(err)
         
