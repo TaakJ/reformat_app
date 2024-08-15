@@ -45,25 +45,29 @@ class ModuleLMT(CallFunction):
         
         return result
 
-    def collect_data(self, i: int, format_file: any) -> dict:
+    def collect_user(self, i: int, format_file: any) -> dict:
 
         status = "failed"
-        module = self.logging[i]["module"]
-        logging.info(f'Collect Data for module: {module}')
-
-        self.logging[i].update({"function": "collect_data", "status": status})
+        self.logging[i].update({'function': 'collect_user', 'status': status})
+        
         sheet_list = [sheet for sheet in format_file.sheet_names() if sheet != "StyleSheet"]
 
-        data = {}
-        for sheets in sheet_list:
-            cells = format_file.sheet_by_name(sheets)
-            for row in range(0, cells.nrows):
-                by_sheets = [cells.cell(row, col).value for col in range(cells.ncols)]
-                if sheets not in data:
-                    data[sheets] = [by_sheets]
-                else:
-                    data[sheets].append(by_sheets)
+        # data = {}
+        # for sheets in sheet_list:
+        #     cells = format_file.sheet_by_name(sheets)
+        #     for row in range(0, cells.nrows):
+        #         by_sheets = [cells.cell(row, col).value for col in range(cells.ncols)]
+        #         if sheets not in data:
+        #             data[sheets] = [by_sheets]
+        #         else:
+        #             data[sheets].append(by_sheets)
 
-        status = "succeed"
-        self.logging[i].update({"status": status})
-        return data
+        # status = "succeed"
+        # self.logging[i].update({"status": status})
+        # return data
+        
+    def collect_param(self, i: int, format_file: any) -> dict:
+        
+        status = 'failed'
+        self.logging[i].update({'function': 'collect_param', 'status': status})
+        columns = self.logging[i]['columns']
