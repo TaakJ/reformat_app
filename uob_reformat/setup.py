@@ -6,7 +6,6 @@ import os
 from os.path import join
 import shutil
 from datetime import datetime, timedelta
-import time
 
 class ArgumentParams:
     SHORT_NAME = 'short_name'
@@ -46,24 +45,26 @@ def setup_config() -> dict:
 def setup_log() -> None:
     config_yaml = None
     date = datetime.now().strftime('%Y%m%d')
-    # get_time = time.strftime("%H%M%S")
-    # file = f"log_status_T{get_time}.log"
     file = 'log_status.log'
     
-    filename = Folder.LOG + join(date, file)
-    if not os.path.exists(os.path.dirname(filename)):
+    log_dir = Folder.LOG + date
+    if not os.path.exists(log_dir):
         try:
-            os.makedirs(os.path.dirname(filename))
+            os.makedirs(log_dir)
         except OSError:
             pass
 
     if os.path.exists(Folder._LOGGER_CONFIG_DIR):
         with open(Folder._LOGGER_CONFIG_DIR,'rb') as logger:
             config_yaml = yaml.safe_load(logger.read())
-
-            for i in config_yaml['handlers'].keys():
-                if 'filename' in config_yaml['handlers'][i]:
-                    config_yaml['handlers'][i]['filename'] = filename
+            
+            if 'file' in config_yaml['root']['handlers']:
+                for i in config_yaml['handlers'].keys():
+                    if 'filename' in config_yaml['handlers'][i]:
+                        config_yaml['handlers'][i]['filename'] = join(log_dir, file)
+            else:
+                config_yaml['handlers'].pop('file')
+                
             logging.config.dictConfig(config_yaml)
     else:
         raise FileNotFoundError(f"Yaml file file_path: {Folder._LOGGER_CONFIG_DIR} doesn't exist.")
