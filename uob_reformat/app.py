@@ -331,8 +331,9 @@ class setup_app(QWidget):
         log_dir = join(Folder.LOG, date)
         
         if event == 1:
-            list_of_files = glob.glob(f'{log_dir}/log_status_*') 
-            log_file = max(list_of_files, key=os.path.getctime)
+            # list_of_files = glob.glob(f'{log_dir}/log_status_*') 
+            # log_file = max(list_of_files, key=os.path.getctime)
+            log_file = join(log_dir, "log_status.log")
         else:
             log_file = join(log_dir, "log_error.log")
         webbrowser.open(log_file)
