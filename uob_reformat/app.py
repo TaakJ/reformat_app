@@ -78,7 +78,7 @@ class setup_app(QWidget):
         self.setLayout(grid)
 
         self.setWindowTitle("App")
-        self.setGeometry(700, 200, 620, 400)
+        self.setGeometry(700, 200, 600, 350)
         self.show()
 
     def layout1(self):
