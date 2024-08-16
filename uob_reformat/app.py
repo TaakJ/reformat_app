@@ -331,8 +331,6 @@ class setup_app(QWidget):
         log_dir = join(Folder.LOG, date)
         
         if event == 1:
-            # list_of_files = glob.glob(f'{log_dir}/log_status_*') 
-            # log_file = max(list_of_files, key=os.path.getctime)
             log_file = join(log_dir, "log_status.log")
         else:
             log_file = join(log_dir, "log_error.log")
@@ -391,10 +389,5 @@ def main():
         app,
         invert_secondary=True,
         theme="light_blue.xml",
-        extra={
-            "font_family": "monoespace",
-            "density_scale": "0",
-            "pyside6": True,
-            "linux": True,
-        },)
+        extra={"font_family": "monoespace",},)
     setup_app(app)
