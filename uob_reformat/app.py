@@ -389,5 +389,10 @@ def main():
         app,
         invert_secondary=True,
         theme="light_blue.xml",
-        extra={"font_family": "monoespace",},)
+        extra={
+            "font_family": "monoespace",
+            "density_scale": "0",
+            "pyside6": True,
+            "linux": True,
+        },)
     setup_app(app)
