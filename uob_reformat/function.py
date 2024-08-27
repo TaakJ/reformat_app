@@ -1,6 +1,5 @@
 from abc import ABC, abstractmethod
 import os
-import re
 import glob
 import shutil
 import zipfile
@@ -80,23 +79,6 @@ class CollectParams(ABC):
 
         if 'err' in record:
             raise CustomException(err=self.logging)
-
-    def get_extract_file(self, i: int, format_file: any) -> dict:
-        
-        self.logging[i].update({'function': 'get_extract_data'})
-        full_input = self.logging[i]['full_input']
-        
-        if re.search(r"_Param", full_input) is not None:
-            columns = ['Parameter Name', 'Code value', 'Decode value']
-            self.logging[i].update({'columns': columns})
-            
-            self.collect_param(i, format_file)
-        else:
-            columns = ['ApplicationCode', 'AccountOwner', 'AccountName', 'AccountType', 'EntitlementName', 'SecondEntitlementName', 'ThirdEntitlementName',
-                    'AccountStatus', 'IsPrivileged', 'AccountDescription', 'CreateDate', 'LastLogin', 'LastUpdatedDate', 'AdditionalAttribute', 'Country']
-            self.logging[i].update({'columns': columns})
-            
-            self.collect_user(i, format_file)
 
     @abstractmethod
     def collect_user(self, i: int, format_file: any):

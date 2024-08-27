@@ -1,4 +1,5 @@
 import logging
+import re
 from pathlib import Path
 from os.path import join
 import os
@@ -99,6 +100,22 @@ class Convert2File:
         status = 'succeed'
         self.logging[i].update({'status': status})
         
+    def get_extract_file(self, i: int, format_file: any) -> dict:
+        
+        self.logging[i].update({'function': 'get_extract_data'})
+        full_target = self.logging[i]['full_target']
+        
+        if re.search(r"PARAMLIST", full_target) is not None:
+            columns = ['Parameter Name', 'Code value', 'Decode value']
+            self.logging[i].update({'columns': columns})
+            
+            self.collect_param(i, format_file)
+        else:
+            columns = ['ApplicationCode', 'AccountOwner', 'AccountName', 'AccountType', 'EntitlementName', 'SecondEntitlementName', 'ThirdEntitlementName',
+                    'AccountStatus', 'IsPrivileged', 'AccountDescription', 'CreateDate', 'LastLogin', 'LastUpdatedDate', 'AdditionalAttribute', 'Country']
+            self.logging[i].update({'columns': columns})
+            
+            self.collect_user(i, format_file)
         
     def comparing_dataframes(self, i: int, df: pd.DataFrame, new_df: pd.DataFrame) -> pd.DataFrame:
         

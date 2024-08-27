@@ -26,9 +26,9 @@ class ModuleADM(CallFunction):
 
             await self.check_source_file()
             await self.separate_data_file()
-            if self.store_tmp is True:
-                await self.genarate_tmp_file()
-            await self.genarate_target_file()
+            # if self.store_tmp is True:
+            #     await self.genarate_tmp_file()
+            # await self.genarate_target_file()
 
         except CustomException as err:
             logging.error('See Error Details: log_error.log')
@@ -69,10 +69,11 @@ class ModuleADM(CallFunction):
                 'AccountOwner': df[0], 
                 'AccountName': df[0],
                 'AccountType': 'USR',
-                'EntitlementName': df[[4, 5, 6]].apply(lambda x: '#'.join(x), axis=1),
+                'EntitlementName': df[[4, 5, 6]].apply(lambda x: ';'.join(x), axis=1),
                 'AccountStatus': 'A',
                 'IsPrivileged': 'N',
-                'AdditionalAttribute': df[[2]].apply(lambda x: '#'.join(x), axis=1),
+                'AccountDescription': df[1],
+                'AdditionalAttribute': df[2],
                 'Country': 'TH'
             })
             df = df.assign(**set_value).fillna('NA') 
@@ -87,6 +88,31 @@ class ModuleADM(CallFunction):
         
     def collect_param(self, i: int, format_file: any) -> dict:
         
-        status = 'failed'
+        status = "failed"
         self.logging[i].update({'function': 'collect_param', 'status': status})
-        columns = self.logging[i]['columns']
+        
+        try:
+            data = []
+            for line in format_file:
+                data += [re.sub(r'(?<!\.)\|\|', '||', line.strip()).split("||")]
+            
+            ## set dataframe
+            df = pd.DataFrame(data)
+            
+            ## mapping data
+            set_value = dict.fromkeys(self.logging[i]['columns'], 'NA')
+            set_value.update({
+                'Parameter Name': df[4].unique(), 
+                'Code value': df[5].unique(), 
+                'Decode value': df[6].unique(),
+            })
+            df = df.assign(**set_value).fillna('NA') 
+            df = df.drop(df.iloc[:,:7].columns, axis=1)
+            print(df)
+            
+        except Exception as err:
+            raise Exception(err)
+        
+        status = 'succeed'
+        self.logging[i].update({'data': df.to_dict('list'), 'status': status})
+        logging.info(f"Collect param from file: {self.logging[i]['full_input']}, status: {status}")

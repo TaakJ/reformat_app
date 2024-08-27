@@ -71,6 +71,5 @@ class ModuleMOC(CallFunction):
         
     def collect_param(self, i: int, format_file: any) -> dict:
         
-        status = "failed"
+        status = 'failed'
         self.logging[i].update({'function': 'collect_param', 'status': status})
-        columns = self.logging[i]['columns']
