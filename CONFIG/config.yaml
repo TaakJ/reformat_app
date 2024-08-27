@@ -11,18 +11,18 @@ BOS:
 CUM:
   input_dir: D:\IGAGD\CUM\DOWNLOAD
   output_dir: D:\IGAGD\CUM\UPLOAD
-  input_file: CUMUSER.xls
-  output_file: CUMIGAWINT.csv
+  input_file: CUMUSER.xls, CUMUSER.xls
+  output_file: CUMIGAWINT.csv, CUMPARAMLIST.csv
 DOC:
   input_dir: D:\IGAGD\DOC\DOWNLOAD
   output_dir: D:\IGAGD\DOC\UPLOAD
-  input_file: DOCUSER.txt
-  output_file: DOCIGAWINT.csv
+  input_file: DOCUSER.txt, DOCUSER.txt
+  output_file: DOCIGAWINT.csv, DOCPARAMLIST.csv
 DIL:
   input_dir: D:\IGAGD\DOC\DOWNLOAD
   output_dir: D:\IGAGD\DOC\UPLOAD
-  input_file: DOCUSER.txt
-  output_file: DILIGAWINT.csv
+  input_file: DOCUSER.txt, DOCUSER.txt
+  output_file: DILIGAWINT.csv, DILPARAMLIST.csv
 ICA:
   input_dir: D:\IGAGD\ICA\DOWNLOAD
   output_dir: D:\IGAGD\ICA\UPLOAD
@@ -31,8 +31,8 @@ ICA:
 IIC:
   input_dir: D:\IGAGD\IIC\DOWNLOAD
   output_dir: D:\IGAGD\IIC\UPLOAD
-  input_file: IICUSER.csv
-  output_file: IICIGAWINT.csv
+  input_file: IICUSER.csv, IICPARAM.csv
+  output_file: IICIGAWINT.csv, IICPARAMLIST.csv
 LDS:
   input_dir: D:\IGAGD\LDS\DOWNLOAD
   output_dir: D:\IGAGD\LDS\UPLOAD
@@ -46,5 +46,5 @@ LMT:
 MOC:
   input_dir: D:\IGAGD\MOC\DOWNLOAD
   output_dir: D:\IGAGD\MOC\UPLOAD
-  input_file: MOCUSER.csv
-  output_file: MOCIGAWINT.csv
+  input_file: MOCUSER.csv, MOCPARAM.csv
+  output_file: MOCIGAWINT.csv, MOCPARAMLIST.csv
