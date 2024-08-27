@@ -25,9 +25,9 @@ class ModuleCUM(CallFunction):
 
             await self.check_source_file()
             await self.separate_data_file()
-            if self.store_tmp is True:
-                await self.genarate_tmp_file()
-            await self.genarate_target_file()
+            # if self.store_tmp is True:
+            #     await self.genarate_tmp_file()
+            # await self.genarate_target_file()
 
         except CustomException as err:
             logging.error('See Error Details: log_error.log')
@@ -63,23 +63,25 @@ class ModuleCUM(CallFunction):
             ## set dataframe  
             df = pd.DataFrame(data)
             df.columns = df.iloc[0].values
-            df = df[1:].apply(lambda x: x.str.strip()).reset_index(drop=True)
-        
-            ## mapping data   
+            df = df[1:].apply(lambda row: row.str.strip()).reset_index(drop=True)
+            
+            ## mapping data to column
             df = df.groupby('USER_ID')
-            df = df.agg(lambda x: '+'.join(x.unique())).reset_index()
+            df = df.agg(lambda row: '+'.join(row.unique())).reset_index()
+            
             set_value = dict.fromkeys(self.logging[i]['columns'], 'NA')
             set_value.update({
                 'ApplicationCode': 'CUM', 
                 'AccountOwner': df['USER_ID'], 
                 'AccountName': df['USER_ID'],
                 'AccountType': 'USR',
-                'EntitlementName': df[['GROUP_NO']].apply(lambda x: '#'.join(x), axis=1),
+                'EntitlementName': df['GROUP_NO'],
                 'AccountStatus': 'A',
                 'IsPrivileged': 'N',
+                'AccountDescription': df[['NAME','SURNAME']].apply(lambda row: row['NAME'] + ' ' + row['SURNAME'], axis=1),
                 'CreateDate': pd.to_datetime(df['VALID_FROM'], dayfirst=True).dt.strftime('%Y%m%d%H%M%S'), 
                 'LastLogin': pd.to_datetime(df['Last Usage'], dayfirst=True).dt.strftime('%Y%m%d%H%M%S'),
-                'AdditionalAttribute': df[['DEPARTMENT']].apply(lambda x: '#'.join(x), axis=1),
+                'AdditionalAttribute': df['DEPARTMENT'],
                 'Country': "TH"
             })
             df = df.assign(**set_value).fillna('NA')
@@ -96,4 +98,3 @@ class ModuleCUM(CallFunction):
 
         status = 'failed'
         self.logging[i].update({'function': 'collect_param', 'status': status})
-        columns = self.logging[i]['columns']

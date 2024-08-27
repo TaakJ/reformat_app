@@ -76,10 +76,11 @@ class ModuleLDS(CallFunction):
             ## set dataframe
             df = pd.DataFrame(clean_data)
             df.columns = df.iloc[0].values
-            df = df.iloc[1:,:-1].apply(lambda x: x.str.strip()).reset_index(drop=True)
+            df = df.iloc[1:,:-1].apply(lambda row: row.str.strip()).reset_index(drop=True)
 
-            ## mapping data
+            ## mapping data to column
             df = df[df['User_Active'] == 'Active'].reset_index(drop=True)
+            
             set_value = dict.fromkeys(self.logging[i]['columns'], 'NA')
             set_value.update({
                 'ApplicationCode': 'LDS', 
@@ -88,9 +89,9 @@ class ModuleLDS(CallFunction):
                 'AccountType': 'USR',
                 'AccountStatus': 'A',
                 'IsPrivileged': 'N',
-                'LastLogin': pd.to_datetime(df['LastLogin_Date'].apply(lambda x: x[:19])).dt.strftime('%Y%m%d%H%M%S'),
-                'LastUpdatedDate': pd.to_datetime(df['edit_date'].apply(lambda x: x.replace('NULL','')[:19])).dt.strftime('%Y%m%d%H%M%S'),
-                'AdditionalAttribute': df[['CostCenterName','CostCenterCode']].apply(lambda x: '#'.join(x), axis=1),
+                'LastLogin': pd.to_datetime(df['LastLogin_Date'].apply(lambda row: row[:19])).dt.strftime('%Y%m%d%H%M%S'),
+                'LastUpdatedDate': pd.to_datetime(df['edit_date'].apply(lambda row: row.replace('NULL','')[:19])).dt.strftime('%Y%m%d%H%M%S'),
+                'AdditionalAttribute': df[['CostCenterName','CostCenterCode']].apply(lambda row: '#'.join(row), axis=1),
                 'Country': "TH"
             })
             df = df.assign(**set_value).fillna('NA')

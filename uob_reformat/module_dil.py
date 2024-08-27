@@ -26,9 +26,9 @@ class ModuleDIL(CallFunction):
 
             await self.check_source_file()
             await self.separate_data_file()
-            if self.store_tmp is True:
-                await self.genarate_tmp_file()
-            await self.genarate_target_file()
+            # if self.store_tmp is True:
+            #     await self.genarate_tmp_file()
+            # await self.genarate_target_file()
 
         except CustomException as err:
             logging.error('See Error Details: log_error.log')
@@ -78,20 +78,29 @@ class ModuleDIL(CallFunction):
             ## set dataframe
             df = pd.DataFrame(clean_data)
             df.columns = df.iloc[0].values
-            df = df[1:].apply(lambda x: x.str.strip()).reset_index(drop=True)
+            df = df[1:].apply(lambda row: row.str.strip()).reset_index(drop=True)
             
-            ## mapping data
-            def split_column(df):
-                comma = df['NAME'].count(',')
+            def split_column(row):
+                comma = row['NAME'].count(',')
                 if comma == 2:
-                    _, role, department = df['NAME'].split(',')
+                    name, department, _ = row['NAME'].split(',')
                 else:
-                    role = ''
-                    _, department = df['NAME'].split(',')
-                return role, department
+                    name, department = row['NAME'].split(',')
+                return name, department
             
+            def attribute_column(row):
+                if row['ADD_ID'] == '0' and row['EDIT_ID'] == '0' and row['ADD_DOC'] == '0' and row['EDIT_DOC'] == '0' and row['SCAN'] == '0' and row['ADD_USER'] == '1':
+                    return 'Admin'
+                elif row['ADD_ID'] == '1' and row['EDIT_ID'] == '1' and row['ADD_DOC'] == '1' and row['EDIT_DOC'] == '1' and row['SCAN'] == '1' and row['ADD_USER'] == '0':
+                    return 'Index+Scan'
+                else:
+                    return 'User'
+            
+            ## mapping data to column
             df = df[df['APPCODE'] == 'LNSIGNET'].reset_index(drop=True)
-            df[['ROLE', 'DEPARTMENT']] = df.apply(split_column, axis=1, result_type='expand')
+            df[['NAME', 'DEPARTMENT']] = df.apply(split_column, axis=1, result_type='expand')
+            df['ATTRIBUTE'] = df.apply(attribute_column, axis=1)
+            
             set_value = dict.fromkeys(self.logging[i]['columns'], 'NA')
             set_value.update({
                 'ApplicationCode': 'DIL',
@@ -100,11 +109,11 @@ class ModuleDIL(CallFunction):
                 'AccountType': 'USR',
                 'AccountStatus': 'A',
                 'IsPrivileged': 'N',
-                'LastLogin': pd.to_datetime(df['STAMP'].apply(lambda x: x[:10])).dt.strftime('%Y%m%d') + df['STAMP'].apply(lambda x: x[11:19].replace('.','')),
-                'AdditionalAttribute': df[['DEPARTMENT', 'APPCODE', 'ROLE']].apply(lambda x: '#'.join(x), axis=1),
+                'AccountDescription': df['NAME'],
+                'AdditionalAttribute': df[['DEPARTMENT', 'APPCODE', 'ATTRIBUTE']].apply(lambda row: '#'.join(row), axis=1),
                 'Country': "TH"
             })
-            df = df.assign(**set_value).fillna('NA') 
+            df = df.assign(**set_value).fillna('NA')
             df = df.drop(df.iloc[:,:12].columns, axis=1)
             
         except Exception as err:
@@ -118,4 +127,3 @@ class ModuleDIL(CallFunction):
 
         status = 'failed'
         self.logging[i].update({'function': 'collect_param', 'status': status})
-        columns = self.logging[i]['columns']

@@ -58,18 +58,26 @@ class ModuleADM(CallFunction):
             
             ## set dataframe
             df = pd.DataFrame(data)
-            df = df.apply(lambda x: x.str.strip()).reset_index(drop=True)
+            df = df.apply(lambda row: row.str.strip()).reset_index(drop=True)
             
-            ## mapping data
+            ## mapping data to column
+            # 0:
+            # 1:
+            # 2:
+            # 3:
+            # 4:
+            # 5:
+            # 6:
             df = df.groupby(0)
-            df = df.agg(lambda x: '+'.join(x.unique())).reset_index()
+            df = df.agg(lambda row: '+'.join(row.unique())).reset_index()
+            
             set_value = dict.fromkeys(self.logging[i]['columns'], 'NA')
             set_value.update({
                 'ApplicationCode': 'ADM', 
-                'AccountOwner': df[0], 
+                'AccountOwner': df[0],
                 'AccountName': df[0],
                 'AccountType': 'USR',
-                'EntitlementName': df[[4, 5, 6]].apply(lambda x: ';'.join(x), axis=1),
+                'EntitlementName': df[[4, 5, 6]].apply(lambda row: ';'.join(row), axis=1),
                 'AccountStatus': 'A',
                 'IsPrivileged': 'N',
                 'AccountDescription': df[1],
@@ -88,7 +96,7 @@ class ModuleADM(CallFunction):
         
     def collect_param(self, i: int, format_file: any) -> dict:
         
-        status = "failed"
+        status = 'failed'
         self.logging[i].update({'function': 'collect_param', 'status': status})
         
         try:
@@ -99,16 +107,30 @@ class ModuleADM(CallFunction):
             ## set dataframe
             df = pd.DataFrame(data)
             
+            ## mapping data to column
+            # 0:
+            # 1:
+            # 2:
+            # 3:
+            # 4:
+            # 5:
+            # 6:
+            df = df.groupby(4)
+            df = df.agg(lambda row: ','.join(row.unique())).reset_index()
+            print(df[[4,5,6]])
+            
             ## mapping data
-            set_value = dict.fromkeys(self.logging[i]['columns'], 'NA')
-            set_value.update({
-                'Parameter Name': df[4].unique(), 
-                'Code value': df[5].unique(), 
-                'Decode value': df[6].unique(),
-            })
-            df = df.assign(**set_value).fillna('NA') 
-            df = df.drop(df.iloc[:,:7].columns, axis=1)
-            print(df)
+            # set_value = dict.fromkeys(self.logging[i]['columns'], 'NA')
+            # set_value.update({
+            #     'Parameter Name': df[4].unique(), 
+            #     'Code value': df[5].unique(),
+            #     'Decode value': df[6].unique(),
+            # })
+            
+
+            # df = df.from_dict(set_value, orient='index')
+            # print(df)
+            # df = df.drop(df.iloc[:,:7].columns, axis=1)
             
         except Exception as err:
             raise Exception(err)
