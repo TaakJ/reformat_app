@@ -61,13 +61,6 @@ class ModuleADM(CallFunction):
             df = df.apply(lambda row: row.str.strip()).reset_index(drop=True)
             
             ## mapping data to column
-            ## 0:
-            ## 1:
-            ## 2:
-            ## 3:
-            ## 4:
-            ## 5:
-            ## 6:
             df = df.groupby(0)
             df = df.agg(lambda row: '+'.join(row.unique())).reset_index()
             
@@ -106,16 +99,8 @@ class ModuleADM(CallFunction):
             
             ## set dataframe
             df = pd.DataFrame(data)
-            print(df)
-            ## mapping data to column
-            ## 0:
-            ## 1:
-            ## 2:
-            ## 3:
-            ## 4:
-            ## 5:
-            ## 6:
             
+            ## mapping data to column
             # df = df.groupby(4)
             # df = df.agg(lambda row: ';'.join(row.unique())).reset_index()
             # print(df[[4,5,6]])
@@ -126,8 +111,7 @@ class ModuleADM(CallFunction):
             #     'Code value': df[5].unique(),
             #     'Decode value': df[6].unique(),
             # })
-            # print(set_value)
-            # df = df.from_dict(set_value, orient='index')
+            # df = df.from_dict(set_value, orient='column')
             # print(df)
             # df = df.drop(df.iloc[:,:7].columns, axis=1)
             

@@ -98,3 +98,29 @@ class ModuleCUM(CallFunction):
 
         status = 'failed'
         self.logging[i].update({'function': 'collect_param', 'status': status})
+        
+        try:
+            data = []
+            sheet_list = [sheet for sheet in format_file.sheet_names()]
+            for sheets in sheet_list:
+                cells = format_file.sheet_by_name(sheets)
+                for row in range(0, cells.nrows):
+                    by_sheets = [str(cells.cell(row, col).value).strip() for col in range(cells.ncols)][1:]
+                    if not all(empty == '' for empty in by_sheets):
+                        data.append(by_sheets)
+            
+            ## set dataframe  
+            df = pd.DataFrame(data)
+            df.columns = df.iloc[0].values
+            df = df[1:].apply(lambda row: row.str.strip()).reset_index(drop=True)
+            
+            ## mapping data to column
+            # df = df.groupby('USER_ID')
+            # df = df.agg(lambda row: '+'.join(row.unique())).reset_index()
+            
+            set_value = dict.fromkeys(self.logging[i]['columns'], 'NA')
+            # df = df.assign(**set_value).fillna('NA')
+            # df = df.drop(df.iloc[:,:14].columns, axis=1)
+            
+        except Exception as err:
+            raise Exception(err)

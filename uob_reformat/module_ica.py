@@ -1,4 +1,5 @@
 import pandas as pd
+import re
 import logging
 from .function import CallFunction
 from .exception import CustomException
@@ -23,10 +24,10 @@ class ModuleICA(CallFunction):
             if self.backup is True:
                 self.achieve_backup()
             
-            # await self.check_source_file()
-            # await self.separate_data_file()
-            # if self.store_tmp is True:
-            #     await self.genarate_tmp_file()
+            await self.check_source_file()
+            await self.separate_data_file()
+            if self.store_tmp is True:
+                await self.genarate_tmp_file()
             # await self.genarate_target_file()
 
         except CustomException as err:
@@ -49,10 +50,28 @@ class ModuleICA(CallFunction):
 
         status = "failed"
         self.logging[i].update({'function': 'collect_user', 'status': status})
-
-        # self.logging[i].update({"function": "collect_data", "status": status})
-        # sheet_list = [sheet for sheet in format_file.sheet_names()]
-
+        
+        if re.search("1", self.logging[i]['full_input']):
+            status = 'succeed'
+            
+            data = 1
+            
+            self.logging[i].update({'data': data, 'status': status})
+            
+        elif re.search("4", self.logging[i]['full_input']):
+            status = 'succeed'
+            
+            data = 2
+            
+            self.logging[i].update({'data': data, 'status': status})
+        
+        elif re.search("3", self.logging[i]['full_input']):
+            status = 'succeed'
+            
+            data = 3
+            
+            self.logging[i].update({'data': data, 'status': status})
+        
         # data = {}
         # for sheets in sheet_list:
         #     cells = format_file.sheet_by_name(sheets)
@@ -62,13 +81,15 @@ class ModuleICA(CallFunction):
         #             data[sheets] = [by_sheets]
         #         else:
         #             data[sheets].append(by_sheets)
-
-        # status = "succeed"
-        # self.logging[i].update({"status": status})
-        # return data
+        
+        status = 'succeed'
+        self.logging[0].update({'data': '', 'status': status})
+        
+        logging.info(f"Collect user from file: {self.logging[i]['full_input']}, status: {status}")
         
     def collect_param(self, i: int, format_file: any) -> dict:
         
         status = 'failed'
         self.logging[i].update({'function': 'collect_param', 'status': status})
-        columns = self.logging[i]['columns']
+        
+        print(i)

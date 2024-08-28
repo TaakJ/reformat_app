@@ -1,7 +1,7 @@
 ADM:
   input_dir: D:\IGAGD\ADM\DOWNLOAD
   output_dir: D:\IGAGD\ADM\UPLOAD
-  input_file: ADMUSER.txt, ADMUSER.txt
+  input_file: ADMUSER.txt
   output_file: ADMIGAWINT.csv, ADMPARAMLIST.csv
 BOS:
   input_dir: D:\IGAGD\BOS\DOWNLOAD
@@ -11,23 +11,23 @@ BOS:
 CUM:
   input_dir: D:\IGAGD\CUM\DOWNLOAD
   output_dir: D:\IGAGD\CUM\UPLOAD
-  input_file: CUMUSER.xls, CUMUSER.xls
+  input_file: CUMUSER.xls
   output_file: CUMIGAWINT.csv, CUMPARAMLIST.csv
 DOC:
   input_dir: D:\IGAGD\DOC\DOWNLOAD
   output_dir: D:\IGAGD\DOC\UPLOAD
-  input_file: DOCUSER.txt, DOCUSER.txt
+  input_file: DOCUSER.txt
   output_file: DOCIGAWINT.csv, DOCPARAMLIST.csv
 DIL:
   input_dir: D:\IGAGD\DOC\DOWNLOAD
   output_dir: D:\IGAGD\DOC\UPLOAD
-  input_file: DOCUSER.txt, DOCUSER.txt
+  input_file: DOCUSER.txt
   output_file: DILIGAWINT.csv, DILPARAMLIST.csv
 ICA:
   input_dir: D:\IGAGD\ICA\DOWNLOAD
   output_dir: D:\IGAGD\ICA\UPLOAD
-  input_file: ICAS-NCR.xlsx
-  output_file: ICAIGAWINT.csv
+  input_file: 1.csv, 2.csv, 3.csv
+  output_file: ICAIGAWINT.csv, ICAPARAMLIST.csv
 IIC:
   input_dir: D:\IGAGD\IIC\DOWNLOAD
   output_dir: D:\IGAGD\IIC\UPLOAD
