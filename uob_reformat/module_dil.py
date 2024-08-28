@@ -121,7 +121,7 @@ class ModuleDIL(CallFunction):
 
         status = "succeed"
         self.logging[i].update({'data': df.to_dict('list'), 'status': status})
-        logging.info(f"Collect user from file: {self.logging[i]['full_input']}, status: {status}")
+        logging.info(f"Collect user data, status: {status}")
 
     def collect_param(self, i: int, format_file: any) -> dict:
 

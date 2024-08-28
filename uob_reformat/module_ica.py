@@ -46,40 +46,21 @@ class ModuleICA(CallFunction):
         
         return result
     
-    
     def collect_user(self, i: int, format_file: any) -> str:
 
         status = "failed"
         self.logging[i].update({'function': 'collect_user', 'status': status})
         
-        log = []
-        status = 'failed'
-        record = {'module': self.module, 'function': 'collect_user', 'status': status}
+        full_input = self.logging[i]['full_input'][i+1]
         try:
-            if re.search("1", self.logging[i]['full_input']):
-                status = 'succeed'
-                df = pd.DataFrame()
-                ''
-                
-            elif re.search("2", self.logging[i]['full_input']):
-                status = 'succeed'
-                df = pd.DataFrame()
-                'ok'
+            df = pd.DataFrame()
             
-            elif re.search("3", self.logging[i]['full_input']):
-                status = 'succeed'
-                data = 2
-                df = pd.DataFrame()
-                'nok'
-        
         except Exception as err:
             raise Exception(err)
         
-        print(self.logging[i])
-        
-        
-        # self.logging[i].update({'data': df.to_dict('list'), 'status': status})
-        # logging.info(f"Collect user from file: {self.logging[i]['full_input']}, status: {status}")
+        status = 'succeed'
+        self.logging[i].update({'data': df.to_dict('list'), 'status': status})
+        logging.info(f"Collect user data, status: {status}")
         
     def collect_param(self, i: int, format_file: any) -> dict:
         

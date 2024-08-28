@@ -44,34 +44,29 @@ class Convert2File:
         for i, record in enumerate(self.logging):
             record.update({'function': 'separate_data_from_file'})
             
-            print(i)
-            print(record)
-            # try:
-            #     types = Path(record['full_input']).suffix
-            #     status_file = record['status']
-                
-            #     if status_file == 'found':
-            #         if ['.xlsx', '.xls'].__contains__(types):
-            #             self.read_excel_file(i)
-            #         else:
-            #             self.read_file(i)
-            #     else:
-            #         continue
-
-            # except Exception as err:
-            #     record.update({'err': err})
+            try:
+                for full_input in record['full_input']:
+                    types = Path(full_input).suffix
+                    
+                    if ['.xlsx', '.xls'].__contains__(types):
+                        self.read_excel_file(i, full_input)
+                    else:
+                        self.read_file(i, full_input)
+                        
+            except Exception as err:
+                record.update({'err': err})
             
             if 'err' in record:
                 raise CustomException(err=self.logging)
             
-    def read_excel_file(self, i: int) -> any:
+    def read_excel_file(self, i: int, full_input: str) -> any:
 
         status = 'failed'
         self.logging[i].update({'function': 'read_excel_file', 'status': status})
         
         try:
-            logging.info(f"Read format excel file: {self.logging[i]['full_input']}")
-            workbook = xlrd.open_workbook(self.logging[i]['full_input'])
+            logging.info(f"Read format excel file: {full_input}")
+            workbook = xlrd.open_workbook(full_input)
             
             self.get_extract_file(i, workbook)
 
@@ -81,15 +76,15 @@ class Convert2File:
         status = 'succeed'
         self.logging[i].update({'status': status})
 
-    def read_file(self, i: int) -> any:
+    def read_file(self, i: int, full_input:str) -> any:
 
         status = 'failed'
         self.logging[i].update({'function': 'read_file', 'status': status})
         
         try:
-            logging.info(f"Read format text/csv file: {self.logging[i]['full_input']}")
+            logging.info(f"Read format text/csv file: {full_input}")
             
-            with open(self.logging[i]['full_input'], 'rb') as f:
+            with open(full_input, 'rb') as f:
                 file = f.read()
             encoding_result = chardet.detect(file)
             encoding = encoding_result['encoding']
@@ -106,17 +101,16 @@ class Convert2File:
     def get_extract_file(self, i: int, format_file: any) -> dict:
         
         self.logging[i].update({'function': 'get_extract_data'})
-        full_target = self.logging[i]['full_target']
         
+        full_target = self.logging[i]['full_target']
         if re.search(r"PARAMLIST", full_target) is not None:
             columns = ['Parameter Name', 'Code value', 'Decode value']
             self.logging[i].update({'columns': columns})
             
             self.collect_param(i, format_file)
-            
         else:
-            columns = ['ApplicationCode', 'AccountOwner', 'AccountName', 'AccountType', 'EntitlementName', 'SecondEntitlementName', 'ThirdEntitlementName',
-                    'AccountStatus', 'IsPrivileged', 'AccountDescription', 'CreateDate', 'LastLogin', 'LastUpdatedDate', 'AdditionalAttribute', 'Country']
+            columns = ['ApplicationCode', 'AccountOwner', 'AccountName', 'AccountType', 'EntitlementName', 'SecondEntitlementName', 'ThirdEntitlementName','AccountStatus', 
+                        'IsPrivileged', 'AccountDescription', 'CreateDate', 'LastLogin', 'LastUpdatedDate', 'AdditionalAttribute', 'Country']
             self.logging[i].update({'columns': columns})
             
             self.collect_user(i, format_file)
@@ -223,30 +217,32 @@ class Convert2File:
         status = "failed"
         for i, record in enumerate(self.logging):
             try:
-                ## Read tmp file
-                tmp_dir = join(Folder.TMP, self.module, self.date.strftime('%Y%m%d'))
-                os.makedirs(tmp_dir, exist_ok=True)
-                tmp_name = f"{Path(record['full_target']).stem}.xlsx"
-                full_tmp = join(tmp_dir, tmp_name)
-                record.update({"full_tmp": full_tmp})
+                print(i)
+                print(record)
+                # ## Read tmp file
+                # tmp_dir = join(Folder.TMP, self.module, self.date.strftime('%Y%m%d'))
+                # os.makedirs(tmp_dir, exist_ok=True)
+                # tmp_name = f"{Path(record['full_target']).stem}.xlsx"
+                # full_tmp = join(tmp_dir, tmp_name)
+                # record.update({"full_tmp": full_tmp})
                 
-                ## Set dataframe from tmp file 
-                self.create_workbook(i)            
-                data = self.sheet.values
-                columns = next(data)[0:]
-                tmp_df = pd.DataFrame(data, columns=columns)
+                # ## Set dataframe from tmp file 
+                # self.create_workbook(i)            
+                # data = self.sheet.values
+                # columns = next(data)[0:]
+                # tmp_df = pd.DataFrame(data, columns=columns)
                 
-                ## Set dataframe from raw file      
-                raw_df = pd.DataFrame(record['data'])
+                # ## Set dataframe from raw file      
+                # raw_df = pd.DataFrame(record['data'])
                 
-                ## Validate data change row by row
-                cmp_df = self.comparing_dataframes(i, tmp_df, raw_df)
-                cdc = self.change_data_capture(i, cmp_df)
+                # ## Validate data change row by row
+                # cmp_df = self.comparing_dataframes(i, tmp_df, raw_df)
+                # cdc = self.change_data_capture(i, cmp_df)
                 
-                ## Write tmp file
-                status = self.write_worksheet(i, cdc)
-                record.update({'function': 'genarate_tmp_file', 'status': status})
-                logging.info(f"Write data to tmp file: {record['full_tmp']}, status: {status}")
+                # ## Write tmp file
+                # status = self.write_worksheet(i, cdc)
+                # record.update({'function': 'genarate_tmp_file', 'status': status})
+                # logging.info(f"Write data to tmp file: {record['full_tmp']}, status: {status}")
                 
             except Exception as err:
                 record.update({'err': err})
