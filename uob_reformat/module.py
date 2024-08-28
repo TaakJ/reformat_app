@@ -24,15 +24,16 @@ class Convert2File:
         for record in self.logging:
             record.update({'function': 'check_source_file'})
             
-            if glob.glob(record['full_input'], recursive=True):
-                status = 'found'
-            else:
-                status = 'not_found'
-                record.update({'err': f"File not found {record['full_input']}"})
+            for full_input in record['full_input']:
+                if glob.glob(full_input, recursive=True):
+                    status = 'found'
+                else:
+                    status = 'not_found'
+                    record.update({'err': f"File not found {full_input}"})
             
-            record.update({'status': status})
-            logging.info(f"Check source file: {record['full_input']}, status: {status}")
-                
+                record.update({'status': status})
+                logging.info(f"Check source file: {full_input}, status: {status}")
+            
             if 'err' in record:
                 raise CustomException(err=self.logging)
         
@@ -43,20 +44,22 @@ class Convert2File:
         for i, record in enumerate(self.logging):
             record.update({'function': 'separate_data_from_file'})
             
-            try:
-                types = Path(record['full_input']).suffix
-                status_file = record['status']
+            print(i)
+            print(record)
+            # try:
+            #     types = Path(record['full_input']).suffix
+            #     status_file = record['status']
                 
-                if status_file == 'found':
-                    if ['.xlsx', '.xls'].__contains__(types):
-                        self.read_excel_file(i)
-                    else:
-                        self.read_file(i)
-                else:
-                    continue
+            #     if status_file == 'found':
+            #         if ['.xlsx', '.xls'].__contains__(types):
+            #             self.read_excel_file(i)
+            #         else:
+            #             self.read_file(i)
+            #     else:
+            #         continue
 
-            except Exception as err:
-                record.update({'err': err})
+            # except Exception as err:
+            #     record.update({'err': err})
             
             if 'err' in record:
                 raise CustomException(err=self.logging)

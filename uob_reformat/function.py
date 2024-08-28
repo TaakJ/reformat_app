@@ -58,35 +58,26 @@ class CollectParams(ABC):
         log = []
         status = 'failed'
         record = {'module': self.module, 'function': 'colloct_setup', 'status': status}
+        
         try:
             i = 1
-            if len(self.full_input()) == len(self.full_target()):
-                for input, target in list(itertools.zip_longest(self.full_input(), self.full_target())):
-                    for n in self.select_files:
-                        if n == i:
-                            status = 'succeed'
-                            if set(('full_input', 'full_target')).issubset(record):
-                                copy_record = record.copy()
-                                copy_record.update({'full_input': input, 'full_target': target, 'status': status,})
-                                log += [copy_record]
-                            else:
-                                record.update({'full_input': input, 'full_target': target, 'status': status,})
-                                log = [record]
-                    i += 1
-            else:
-                for target in self.full_target():
-                    for n in self.select_files:
-                        for input in self.full_input():
-                            if n == i:
-                                status = 'succeed'
-                                if set(('full_input', 'full_target')).issubset(record):
-                                    copy_record = record.copy()
-                                    copy_record.update({'full_input': input, 'full_target': target, 'status': status,})
-                                    log += [copy_record]
-                                else:
-                                    record.update({'full_input': input, 'full_target': target, 'status': status,})
-                                    log = [record]
-                    i += 1
+            for full_target in self.full_target():
+                for n in self.select_files:
+                    if n == i:
+                        if len(self.full_input()) == len(self.full_target()):
+                            full_input = [self.full_input()[n-1]]
+                        else:
+                            full_input = self.full_input()
+                        
+                        status = 'succeed'
+                        if set(('full_input', 'full_target')).issubset(record):
+                            copy_record = record.copy()
+                            copy_record.update({'full_input': full_input, 'full_target': full_target, 'status': status,})
+                            log += [copy_record]
+                        else:
+                            record.update({'full_input': full_input, 'full_target': full_target, 'status': status,})
+                            log = [record]
+                i += 1
                 
         except Exception as err:
             record.update({'err': err})

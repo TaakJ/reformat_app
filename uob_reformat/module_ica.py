@@ -75,7 +75,8 @@ class ModuleICA(CallFunction):
         except Exception as err:
             raise Exception(err)
         
-        return 'data'
+        print(self.logging[i])
+        
         
         # self.logging[i].update({'data': df.to_dict('list'), 'status': status})
         # logging.info(f"Collect user from file: {self.logging[i]['full_input']}, status: {status}")
