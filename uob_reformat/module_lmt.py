@@ -45,7 +45,7 @@ class ModuleLMT(CallFunction):
         
         return result
 
-    def collect_user(self, i: int, format_file: any) -> dict:
+    def collect_user(self, i: int, format_file: any):
 
         status = "failed"
         self.logging[i].update({'function': 'collect_user', 'status': status})
@@ -66,7 +66,7 @@ class ModuleLMT(CallFunction):
         # self.logging[i].update({"status": status})
         # return data
         
-    def collect_param(self, i: int, format_file: any) -> dict:
+    def collect_param(self, i: int, format_file: any):
         
         status = 'failed'
         self.logging[i].update({'function': 'collect_param', 'status': status})

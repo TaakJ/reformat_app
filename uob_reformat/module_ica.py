@@ -47,7 +47,7 @@ class ModuleICA(CallFunction):
         return result
     
     
-    def collect_user(self, i: int, format_file: any) -> dict:
+    def collect_user(self, i: int, format_file: any) -> str:
 
         status = "failed"
         self.logging[i].update({'function': 'collect_user', 'status': status})
@@ -75,9 +75,10 @@ class ModuleICA(CallFunction):
         except Exception as err:
             raise Exception(err)
         
-        print(df)
-        self.logging[i].update({'data': df.to_dict('list'), 'status': status})
-        logging.info(f"Collect user from file: {self.logging[i]['full_input']}, status: {status}")
+        return ''
+        
+        # self.logging[i].update({'data': df.to_dict('list'), 'status': status})
+        # logging.info(f"Collect user from file: {self.logging[i]['full_input']}, status: {status}")
         
     def collect_param(self, i: int, format_file: any) -> dict:
         
