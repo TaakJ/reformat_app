@@ -76,7 +76,7 @@ class Convert2File:
         status = 'succeed'
         self.logging[i].update({'status': status})
 
-    def read_file(self, i: int, full_input:str) -> any:
+    def read_file(self, i: int, full_input: str) -> any:
 
         status = 'failed'
         self.logging[i].update({'function': 'read_file', 'status': status})
