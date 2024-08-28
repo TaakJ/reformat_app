@@ -46,7 +46,7 @@ class ModuleLDS(CallFunction):
         
         return result
 
-    def collect_user(self, i: int, format_file: any):
+    def collect_user(self, i: int, format_file: any) -> dict:
 
         status = 'failed'
         self.logging[i].update({'function': 'collect_user', 'status': status})
@@ -104,7 +104,7 @@ class ModuleLDS(CallFunction):
         self.logging[i].update({'data': df.to_dict('list'), 'status': status})
         logging.info(f"Collect user from file: {self.logging[i]['full_input']}, status: {status}")
         
-    def collect_param(self, i: int, format_file: any):
+    def collect_param(self, i: int, format_file: any) -> dict:
         
         status = "failed"
         self.logging[i].update({'function': 'collect_param', 'status': status})

@@ -108,11 +108,14 @@ class Convert2File:
         if re.search(r"PARAMLIST", full_target) is not None:
             columns = ['Parameter Name', 'Code value', 'Decode value']
             self.logging[i].update({'columns': columns})
+            
             self.collect_param(i, format_file)
+            
         else:
             columns = ['ApplicationCode', 'AccountOwner', 'AccountName', 'AccountType', 'EntitlementName', 'SecondEntitlementName', 'ThirdEntitlementName',
                     'AccountStatus', 'IsPrivileged', 'AccountDescription', 'CreateDate', 'LastLogin', 'LastUpdatedDate', 'AdditionalAttribute', 'Country']
             self.logging[i].update({'columns': columns})
+            
             self.collect_user(i, format_file)
         
     def comparing_dataframes(self, i: int, df: pd.DataFrame, new_df: pd.DataFrame) -> pd.DataFrame:
@@ -213,39 +216,34 @@ class Convert2File:
         self.clear_tmp()
         
         logging.info('Genarate data to tmp file')
-
-        print(self.logging)
         
         status = "failed"
         for i, record in enumerate(self.logging):
             try:
-                ''
-                # print(i)
-                # print(record)            
-                # ## Read tmp file
-                # tmp_dir = join(Folder.TMP, self.module, self.date.strftime('%Y%m%d'))
-                # os.makedirs(tmp_dir, exist_ok=True)
-                # tmp_name = f"{Path(record['full_target']).stem}.xlsx"
-                # full_tmp = join(tmp_dir, tmp_name)
-                # record.update({"full_tmp": full_tmp})
+                ## Read tmp file
+                tmp_dir = join(Folder.TMP, self.module, self.date.strftime('%Y%m%d'))
+                os.makedirs(tmp_dir, exist_ok=True)
+                tmp_name = f"{Path(record['full_target']).stem}.xlsx"
+                full_tmp = join(tmp_dir, tmp_name)
+                record.update({"full_tmp": full_tmp})
                 
-                # ## Set dataframe from tmp file 
-                # self.create_workbook(i)            
-                # data = self.sheet.values
-                # columns = next(data)[0:]
-                # tmp_df = pd.DataFrame(data, columns=columns)
+                ## Set dataframe from tmp file 
+                self.create_workbook(i)            
+                data = self.sheet.values
+                columns = next(data)[0:]
+                tmp_df = pd.DataFrame(data, columns=columns)
                 
-                # ## Set dataframe from raw file      
-                # raw_df = pd.DataFrame(record['data'])
+                ## Set dataframe from raw file      
+                raw_df = pd.DataFrame(record['data'])
                 
-                # ## Validate data change row by row
-                # cmp_df = self.comparing_dataframes(i, tmp_df, raw_df)
-                # cdc = self.change_data_capture(i, cmp_df)
+                ## Validate data change row by row
+                cmp_df = self.comparing_dataframes(i, tmp_df, raw_df)
+                cdc = self.change_data_capture(i, cmp_df)
                 
-                # ## Write tmp file
-                # status = self.write_worksheet(i, cdc)
-                # record.update({'function': 'genarate_tmp_file', 'status': status})
-                # logging.info(f"Write data to tmp file: {record['full_tmp']}, status: {status}")
+                ## Write tmp file
+                status = self.write_worksheet(i, cdc)
+                record.update({'function': 'genarate_tmp_file', 'status': status})
+                logging.info(f"Write data to tmp file: {record['full_tmp']}, status: {status}")
                 
             except Exception as err:
                 record.update({'err': err})

@@ -46,7 +46,7 @@ class ModuleADM(CallFunction):
 
         return result
 
-    def collect_user(self, i: int, format_file: any):
+    def collect_user(self, i: int, format_file: any) -> dict:
 
         status = "failed"
         self.logging[i].update({'function': 'collect_user', 'status': status})
