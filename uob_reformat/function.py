@@ -58,7 +58,6 @@ class CollectParams(ABC):
         log = []
         status = 'failed'
         record = {'module': self.module, 'function': 'colloct_setup', 'status': status}
-        
         try:
             i = 1
             if len(self.full_input()) == len(self.full_target()):
@@ -204,7 +203,6 @@ class BackupAndClear:
 
         except OSError:
             pass
-
 
 class CallFunction(Convert2File, CollectLog, CollectParams, BackupAndClear):
     pass

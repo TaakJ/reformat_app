@@ -45,51 +45,41 @@ class ModuleICA(CallFunction):
         logging.info(f'Stop Run Module "{self.module}"\r\n')
         
         return result
-
+    
+    
     def collect_user(self, i: int, format_file: any) -> dict:
 
         status = "failed"
         self.logging[i].update({'function': 'collect_user', 'status': status})
         
-        if re.search("1", self.logging[i]['full_input']):
-            status = 'succeed'
+        log = []
+        status = 'failed'
+        record = {'module': self.module, 'function': 'collect_user', 'status': status}
+        try:
+            if re.search("1", self.logging[i]['full_input']):
+                status = 'succeed'
+                df = pd.DataFrame()
+                ''
+                
+            elif re.search("2", self.logging[i]['full_input']):
+                status = 'succeed'
+                df = pd.DataFrame()
+                'ok'
             
-            data = 1
-            
-            self.logging[i].update({'data': data, 'status': status})
-            
-        elif re.search("4", self.logging[i]['full_input']):
-            status = 'succeed'
-            
-            data = 2
-            
-            self.logging[i].update({'data': data, 'status': status})
+            elif re.search("3", self.logging[i]['full_input']):
+                status = 'succeed'
+                data = 2
+                df = pd.DataFrame()
+                'nok'
         
-        elif re.search("3", self.logging[i]['full_input']):
-            status = 'succeed'
-            
-            data = 3
-            
-            self.logging[i].update({'data': data, 'status': status})
+        except Exception as err:
+            raise Exception(err)
         
-        # data = {}
-        # for sheets in sheet_list:
-        #     cells = format_file.sheet_by_name(sheets)
-        #     for row in range(0, cells.nrows):
-        #         by_sheets = [cells.cell(row, col).value for col in range(cells.ncols)]
-        #         if sheets not in data:
-        #             data[sheets] = [by_sheets]
-        #         else:
-        #             data[sheets].append(by_sheets)
-        
-        status = 'succeed'
-        self.logging[0].update({'data': '', 'status': status})
-        
+        print(df)
+        self.logging[i].update({'data': df.to_dict('list'), 'status': status})
         logging.info(f"Collect user from file: {self.logging[i]['full_input']}, status: {status}")
         
     def collect_param(self, i: int, format_file: any) -> dict:
         
         status = 'failed'
         self.logging[i].update({'function': 'collect_param', 'status': status})
-        
-        print(i)

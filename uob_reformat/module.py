@@ -214,11 +214,14 @@ class Convert2File:
         
         logging.info('Genarate data to tmp file')
 
+        print(self.logging)
+        
         status = "failed"
         for i, record in enumerate(self.logging):
             try:
-                print(i)
-                print(record)            
+                ''
+                # print(i)
+                # print(record)            
                 # ## Read tmp file
                 # tmp_dir = join(Folder.TMP, self.module, self.date.strftime('%Y%m%d'))
                 # os.makedirs(tmp_dir, exist_ok=True)
