@@ -59,20 +59,20 @@ class CollectParams(ABC):
         
         try:
             full_input = self.full_input()
-            full_target = self.full_target()
-            
-            for i, target in enumerate(full_target, 1):
+                        
+            for i, full_target in enumerate(self.full_target(), 1):
                 for select_num in [n for n in self.select_files if i == n]:
-                    if len(full_input) == len(full_target):
+                    
+                    if len(self.full_input()) == len(self.full_target()):
                         full_input = [self.full_input()[select_num-1]]
                         
                     status = 'succeed'
                     if set(('full_input', 'full_target')).issubset(record):
                         copy_record = record.copy()
-                        copy_record.update({'full_input': full_input, 'full_target': target, 'status': status,})
+                        copy_record.update({'full_input': full_input, 'full_target': full_target, 'program': 'USER' if select_num == 1 else 'PARAM', 'status': status,})
                         log += [copy_record]
                     else:
-                        record.update({'full_input': full_input, 'full_target': target, 'status': status,})
+                        record.update({'full_input': full_input, 'full_target': full_target, 'program': 'USER' if select_num == 1 else 'PARAM', 'status': status,})
                         log = [record]
                 
         except Exception as err:

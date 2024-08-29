@@ -32,7 +32,7 @@ class Convert2File:
                     record.update({'err': f"File not found {full_input}"})
             
                 record.update({'status': status})
-                logging.info(f"Check source file: {full_input}, status: {status}")
+                logging.info(f"Check source file: {full_input}, for run: {record['program']}, status: {status}")
             
             if 'err' in record:
                 raise CustomException(err=self.logging)
@@ -65,7 +65,7 @@ class Convert2File:
         self.logging[i].update({'function': 'read_excel_file', 'status': status})
         
         try:
-            logging.info(f"Read format excel file: {full_input}")
+            logging.info(f"Read format excel file: {full_input} , for run: {self.logging[i]['program']}")
             workbook = xlrd.open_workbook(full_input)
             
             self.get_extract_file(i, workbook)
@@ -82,7 +82,7 @@ class Convert2File:
         self.logging[i].update({'function': 'read_file', 'status': status})
         
         try:
-            logging.info(f"Read format text/csv file: {full_input}")
+            logging.info(f"Read format text/csv file: {full_input}, for run: {self.logging[i]['program']}")
             
             with open(full_input, 'rb') as f:
                 file = f.read()
