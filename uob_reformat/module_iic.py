@@ -61,7 +61,7 @@ class ModuleIIC(CallFunction):
             df = pd.DataFrame(data)
             df.columns = df.iloc[0].values
             df = df[1:].apply(lambda row: row.str.strip()).reset_index(drop=True)
-
+            
         except Exception as err:
             raise Exception(err)
 
@@ -73,3 +73,21 @@ class ModuleIIC(CallFunction):
 
         status = "failed"
         self.logging[i].update({"function": "collect_param", "status": status})
+        
+        try:
+            data = []
+            for line in format_file:
+                find_word = line.strip().replace('"', "")
+                data += [re.sub(r"(?<!\.),", ",", "".join(find_word)).split(",")]
+
+            ## mapping data to column
+            df = pd.DataFrame(data)
+            df.columns = df.iloc[0].values
+            df = df[1:].apply(lambda row: row.str.strip()).reset_index(drop=True)
+            
+        except Exception as err:
+            raise Exception(err)
+
+        status = "succeed"
+        self.logging[i].update({"data": df.to_dict("list"), "status": status})
+        logging.info(f"Collect user param, status: {status}")

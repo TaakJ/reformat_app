@@ -51,16 +51,19 @@ class ModuleICA(CallFunction):
         status = "failed"
         self.logging[i].update({'function': 'collect_user', 'status': status})
         
-        full_input = self.logging[i]['full_input'][i+1]
         try:
-            df = pd.DataFrame()
+            data = []
+            for line in format_file:
+                data += [re.sub(r'(?<!\.)\|\|', '||', line.strip()).split("||")]
+            
+            print(data)
             
         except Exception as err:
             raise Exception(err)
         
         status = 'succeed'
-        self.logging[i].update({'data': df.to_dict('list'), 'status': status})
-        logging.info(f"Collect user data, status: {status}")
+        # self.logging[i].update({'data': df.to_dict('list'), 'status': status})
+        # logging.info(f"Collect user data, status: {status}")
         
     def collect_param(self, i: int, format_file: any) -> dict:
         
