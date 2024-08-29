@@ -228,7 +228,7 @@ class Convert2File:
                 self.create_workbook(i)            
                 data = self.sheet.values
                 columns = next(data)[0:]
-                tmp_df = pd.DataFrame(data, columns=columns)
+                tmp_df = pd.DataFrame(data, columns=columns).replace([None], [''])
                 
                 ## Set dataframe from raw file      
                 raw_df = pd.DataFrame(record['data'])
@@ -339,10 +339,10 @@ class Convert2File:
                     sheet = workbook.get_sheet_by_name(record['sheet_name'])
                     data = sheet.values
                     columns = next(data)[0:]
-                    new_df = pd.DataFrame(data, columns=columns)
+                    new_df = pd.DataFrame(data, columns=columns).replace([None], [''])
                 else:
                     new_df = pd.DataFrame(record['data'])
-                
+                    
                 ## Set dataframe from target file
                 try:
                     target_df = self.read_csv_file(i, record['full_target'])
