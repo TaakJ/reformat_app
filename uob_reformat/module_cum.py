@@ -25,9 +25,9 @@ class ModuleCUM(CallFunction):
 
             await self.check_source_file()
             await self.separate_data_file()
-            # if self.store_tmp is True:
-            #     await self.genarate_tmp_file()
-            # await self.genarate_target_file()
+            if self.store_tmp is True:
+                await self.genarate_tmp_file()
+            await self.genarate_target_file()
 
         except CustomException as err:
             logging.error('See Error Details: log_error.log')
@@ -82,7 +82,7 @@ class ModuleCUM(CallFunction):
                 'CreateDate': pd.to_datetime(df['VALID_FROM'], dayfirst=True).dt.strftime('%Y%m%d%H%M%S'), 
                 'LastLogin': pd.to_datetime(df['Last Usage'], dayfirst=True).dt.strftime('%Y%m%d%H%M%S'),
                 'AdditionalAttribute': df['DEPARTMENT'],
-                'Country': "TH"
+                'Country': 'TH'
             })
             df = df.assign(**set_value).fillna('NA')
             df = df.drop(df.iloc[:,:14].columns, axis=1)
@@ -114,13 +114,24 @@ class ModuleCUM(CallFunction):
             df.columns = df.iloc[0].values
             df = df[1:].apply(lambda row: row.str.strip()).reset_index(drop=True)
             
-            ## mapping data to column
-            # df = df.groupby('USER_ID')
-            # df = df.agg(lambda row: '+'.join(row.unique())).reset_index()
-            
-            set_value = dict.fromkeys(self.logging[i]['columns'], 'NA')
-            # df = df.assign(**set_value).fillna('NA')
-            # df = df.drop(df.iloc[:,:14].columns, axis=1)
+            set_value = [
+                {
+                    'Parameter Name': 'Group_No',
+                    'Code value': df['GROUP_NO'].unique(),
+                    'Decode value': df['GROUP_NO'].unique(),
+                },
+                {
+                    'Parameter Name': 'Department',
+                    'Code value': df['DEPARTMENT'].unique(),
+                    'Decode value': df['DEPARTMENT'].unique(),
+                },
+            ]
+            df = pd.DataFrame(set_value)
+            df = df.explode(['Code value', 'Decode value']).reset_index(drop=True)
             
         except Exception as err:
             raise Exception(err)
+        
+        status = 'succeed'
+        self.logging[i].update({'data': df.to_dict('list'), 'status': status})
+        logging.info(f'Collect param data, status: {status}')
