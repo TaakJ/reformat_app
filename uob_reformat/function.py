@@ -34,7 +34,7 @@ class CollectParams(ABC):
     def full_input(self) -> list:
         input_dir = CONFIG[self.module]['input_dir']
         input_file = CONFIG[self.module]['input_file']
-
+        
         set_dir = lambda dir, file: [join(dir, x.strip()) for x in file.split(",")]
         
         return set_dir(input_dir, input_file)
@@ -44,10 +44,8 @@ class CollectParams(ABC):
         output_file = CONFIG[self.module]['output_file']
 
         suffix = self.batch_date.strftime('%Y%m%d')
-        set_dir = lambda dir, file: [(join(dir, x.strip())
-                if self.write_mode == 'overwrite' or self.manual
-                else join(dir, f"{Path(x.strip()).stem}_{suffix}.csv"))
-                for x in file.split(',')]
+        set_dir = lambda dir, file: [(join(dir, x.strip()) if self.write_mode == 'overwrite' or self.manual else join(dir, f"{Path(x.strip()).stem}_{suffix}.csv"))\
+            for x in file.split(',')]
         
         return set_dir(output_dir, output_file)
 
@@ -60,30 +58,29 @@ class CollectParams(ABC):
         record = {'module': self.module, 'function': 'colloct_setup', 'status': status}
         
         try:
-            i = 1
-            for full_target in self.full_target():
-                for n in self.select_files:
-                    if n == i:
-                        if len(self.full_input()) == len(self.full_target()):
-                            full_input = [self.full_input()[n-1]]
-                        else:
-                            full_input = self.full_input()
+            full_input = self.full_input()
+            full_target = self.full_target()
+            
+            for i, target in enumerate(full_target, 1):
+                for select_num in [n for n in self.select_files if i == n]:
+                    if len(full_input) == len(full_target):
+                        full_input = [self.full_input()[select_num-1]]
                         
-                        status = 'succeed'
-                        if set(('full_input', 'full_target')).issubset(record):
-                            copy_record = record.copy()
-                            copy_record.update({'full_input': full_input, 'full_target': full_target, 'status': status,})
-                            log += [copy_record]
-                        else:
-                            record.update({'full_input': full_input, 'full_target': full_target, 'status': status,})
-                            log = [record]
-                i += 1
+                    status = 'succeed'
+                    if set(('full_input', 'full_target')).issubset(record):
+                        copy_record = record.copy()
+                        copy_record.update({'full_input': full_input, 'full_target': target, 'status': status,})
+                        log += [copy_record]
+                    else:
+                        record.update({'full_input': full_input, 'full_target': target, 'status': status,})
+                        log = [record]
                 
         except Exception as err:
             record.update({'err': err})
             log += [record]
 
         self.logSetter(log)
+        print(self.logging)
 
         if 'err' in record:
             raise CustomException(err=self.logging)
