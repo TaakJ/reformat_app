@@ -137,7 +137,8 @@ class ModuleADM(CallFunction):
                     'Parameter Name': 'Department', 
                     'Code value': df[2].unique(), 
                     'Decode value': df[2].unique()
-                }]
+                }
+            ]
             df = pd.DataFrame(set_value)
             df = df.explode(['Code value', 'Decode value']).reset_index(drop=True)
             
