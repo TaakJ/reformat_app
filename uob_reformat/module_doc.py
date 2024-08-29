@@ -130,6 +130,7 @@ class ModuleDOC(CallFunction):
         self.logging[i].update({'function': 'collect_param', 'status': status})
 
         try:
+            ## mapping data to column
             set_value = [
                 {
                     "Parameter Name": 'AppCode',

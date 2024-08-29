@@ -44,6 +44,19 @@ class ModuleCUM(CallFunction):
         logging.info(f"Stop Run Module '{self.module}'\r\n")
 
         return result
+    
+    def read_format_file(self, format_file) -> list:
+        
+        data = []
+        sheet_list = [sheet for sheet in format_file.sheet_names()]
+        for sheets in sheet_list:
+            cells = format_file.sheet_by_name(sheets)
+            for row in range(0, cells.nrows):
+                by_sheets = [str(cells.cell(row, col).value).strip() for col in range(cells.ncols)][1:]
+                if not all(empty == '' for empty in by_sheets):
+                    data.append(by_sheets)
+                    
+        return data
 
     def collect_user(self, i: int, format_file: any) -> dict:
 
@@ -51,17 +64,11 @@ class ModuleCUM(CallFunction):
         self.logging[i].update({'function': 'collect_user', 'status': status})
         
         try:
-            data = []
-            sheet_list = [sheet for sheet in format_file.sheet_names()]
-            for sheets in sheet_list:
-                cells = format_file.sheet_by_name(sheets)
-                for row in range(0, cells.nrows):
-                    by_sheets = [str(cells.cell(row, col).value).strip() for col in range(cells.ncols)][1:]
-                    if not all(empty == '' for empty in by_sheets):
-                        data.append(by_sheets)
+            
+            clean_data = self.read_format_file(format_file)
             
             ## set dataframe  
-            df = pd.DataFrame(data)
+            df = pd.DataFrame(clean_data)
             df.columns = df.iloc[0].values
             df = df[1:].apply(lambda row: row.str.strip()).reset_index(drop=True)
             
@@ -100,20 +107,15 @@ class ModuleCUM(CallFunction):
         self.logging[i].update({'function': 'collect_param', 'status': status})
         
         try:
-            data = []
-            sheet_list = [sheet for sheet in format_file.sheet_names()]
-            for sheets in sheet_list:
-                cells = format_file.sheet_by_name(sheets)
-                for row in range(0, cells.nrows):
-                    by_sheets = [str(cells.cell(row, col).value).strip() for col in range(cells.ncols)][1:]
-                    if not all(empty == '' for empty in by_sheets):
-                        data.append(by_sheets)
+            
+            clean_data = self.read_format_file(format_file)
             
             ## set dataframe  
-            df = pd.DataFrame(data)
+            df = pd.DataFrame(clean_data)
             df.columns = df.iloc[0].values
             df = df[1:].apply(lambda row: row.str.strip()).reset_index(drop=True)
             
+            ## mapping data to column
             set_value = [
                 {
                     'Parameter Name': 'Group_No',
