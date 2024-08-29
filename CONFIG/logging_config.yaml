@@ -16,7 +16,8 @@ handlers:
     level: INFO
     formatter: verbose
     mode: a
-    filename: 
+    filename:
+    encoding: utf8
 root: 
   level: INFO
   handlers:

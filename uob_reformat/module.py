@@ -217,32 +217,30 @@ class Convert2File:
         status = "failed"
         for i, record in enumerate(self.logging):
             try:
-                print(i)
-                print(record)
-                # ## Read tmp file
-                # tmp_dir = join(Folder.TMP, self.module, self.date.strftime('%Y%m%d'))
-                # os.makedirs(tmp_dir, exist_ok=True)
-                # tmp_name = f"{Path(record['full_target']).stem}.xlsx"
-                # full_tmp = join(tmp_dir, tmp_name)
-                # record.update({"full_tmp": full_tmp})
+                ## Read tmp file
+                tmp_dir = join(Folder.TMP, self.module, self.date.strftime('%Y%m%d'))
+                os.makedirs(tmp_dir, exist_ok=True)
+                tmp_name = f"{Path(record['full_target']).stem}.xlsx"
+                full_tmp = join(tmp_dir, tmp_name)
+                record.update({"full_tmp": full_tmp})
                 
-                # ## Set dataframe from tmp file 
-                # self.create_workbook(i)            
-                # data = self.sheet.values
-                # columns = next(data)[0:]
-                # tmp_df = pd.DataFrame(data, columns=columns)
+                ## Set dataframe from tmp file 
+                self.create_workbook(i)            
+                data = self.sheet.values
+                columns = next(data)[0:]
+                tmp_df = pd.DataFrame(data, columns=columns)
                 
-                # ## Set dataframe from raw file      
-                # raw_df = pd.DataFrame(record['data'])
+                ## Set dataframe from raw file      
+                raw_df = pd.DataFrame(record['data'])
                 
-                # ## Validate data change row by row
-                # cmp_df = self.comparing_dataframes(i, tmp_df, raw_df)
-                # cdc = self.change_data_capture(i, cmp_df)
+                ## Validate data change row by row
+                cmp_df = self.comparing_dataframes(i, tmp_df, raw_df)
+                cdc = self.change_data_capture(i, cmp_df)
                 
-                # ## Write tmp file
-                # status = self.write_worksheet(i, cdc)
-                # record.update({'function': 'genarate_tmp_file', 'status': status})
-                # logging.info(f"Write data to tmp file: {record['full_tmp']}, status: {status}")
+                ## Write tmp file
+                status = self.write_worksheet(i, cdc)
+                record.update({'function': 'genarate_tmp_file', 'status': status})
+                logging.info(f"Write data to tmp file: {record['full_tmp']}, status: {status}")
                 
             except Exception as err:
                 record.update({'err': err})
@@ -376,7 +374,7 @@ class Convert2File:
         self.logging[i].update({'function': 'read_csv', 'status': status})
         
         data = []
-        with open(file, 'r', newline="\n") as reader:
+        with open(file, 'r', newline="\n", encoding='utf-8') as reader:
             csvin = csv.reader(
                 reader,
                 skipinitialspace=True,
@@ -406,7 +404,7 @@ class Convert2File:
         self.logging[i].update({'function': 'write_csv', 'status': status})
 
         try:
-            with open(self.logging[i]['full_target'], 'r', newline="\n") as reader:
+            with open(self.logging[i]['full_target'], 'r', newline="\n", encoding='utf-8') as reader:
                 csvin = csv.DictReader(
                     reader,
                     skipinitialspace=True,
@@ -434,7 +432,7 @@ class Convert2File:
                     else:
                         rows[idx] = cdc[idx]
             
-            with open(self.logging[i]['full_target'], 'w', newline="\n") as writer:
+            with open(self.logging[i]['full_target'], 'w', newline="\n", encoding='utf-8') as writer:
                 csvout = csv.DictWriter(
                     writer,
                     csvin.fieldnames,
@@ -448,7 +446,7 @@ class Convert2File:
                         csvout.writerow(rows[idx])
                 writer.close()
             
-            with open(self.logging[i]['full_target'], mode='a', newline='\n') as writer:
+            with open(self.logging[i]['full_target'], mode='a', newline='\n', encoding='utf-8') as writer:
                 writer.write('"{}","{}"'.format('TotalCount', len(rows)))
                 logging.info(f'Total count: ({len(rows)}) row')
                 writer.close()
