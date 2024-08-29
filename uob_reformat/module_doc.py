@@ -45,6 +45,23 @@ class ModuleDOC(CallFunction):
         logging.info(f"Stop Run Module '{self.module}'\r\n")
 
         return result
+    
+    def split_column(self, row: any) -> any:
+        comma = row['NAME'].count(',')
+        if comma == 2:
+            name, department, _ = row['NAME'].split(',')
+        else:
+            name, department = row['NAME'].split(',')
+            
+        return name, department
+    
+    def attribute_column(self, row: any) -> str:
+        if row['ADD_ID'] == '0' and row['EDIT_ID'] == '0' and row['ADD_DOC'] == '0' and row['EDIT_DOC'] == '0' and row['SCAN'] == '0' and row['ADD_USER'] == '1':
+            return 'Admin'
+        elif row['ADD_ID'] == '1' and row['EDIT_ID'] == '1' and row['ADD_DOC'] == '1' and row['EDIT_DOC'] == '1' and row['SCAN'] == '1' and row['ADD_USER'] == '0':
+            return 'Index+Scan'
+        else:
+            return 'Inquiry'
 
     def collect_user(self, i: int, format_file: any) -> dict:
 
@@ -80,26 +97,10 @@ class ModuleDOC(CallFunction):
             df.columns = df.iloc[0].values
             df = df[1:].apply(lambda row: row.str.strip()).reset_index(drop=True)
             
-            def split_column(row):
-                comma = row['NAME'].count(',')
-                if comma == 2:
-                    name, department, _ = row['NAME'].split(',')
-                else:
-                    name, department = row['NAME'].split(',')
-                return name, department
-            
-            def attribute_column(row):
-                if row['ADD_ID'] == '0' and row['EDIT_ID'] == '0' and row['ADD_DOC'] == '0' and row['EDIT_DOC'] == '0' and row['SCAN'] == '0' and row['ADD_USER'] == '1':
-                    return 'Admin'
-                elif row['ADD_ID'] == '1' and row['EDIT_ID'] == '1' and row['ADD_DOC'] == '1' and row['EDIT_DOC'] == '1' and row['SCAN'] == '1' and row['ADD_USER'] == '0':
-                    return 'Index+Scan'
-                else:
-                    return 'Inquiry'
-            
             ## mapping data to column
             df = df[df['APPCODE'] == 'LOAN'].reset_index(drop=True)
-            df[['NAME', 'DEPARTMENT']] = df.apply(split_column, axis=1, result_type='expand')
-            df['ATTRIBUTE'] = df.apply(attribute_column, axis=1)
+            df[['NAME', 'DEPARTMENT']] = df.apply(self.split_column, axis=1, result_type='expand')
+            df['ATTRIBUTE'] = df.apply(self.attribute_column, axis=1)
             
             set_value = dict.fromkeys(self.logging[i]['columns'], 'NA')
             set_value.update({
@@ -149,4 +150,4 @@ class ModuleDOC(CallFunction):
         
         status = 'succeed'
         self.logging[i].update({'data': df.to_dict('list'), 'status': status})
-        logging.info(f"Collect user data, status: {status}")
+        logging.info(f'Collect param data, status: {status}')

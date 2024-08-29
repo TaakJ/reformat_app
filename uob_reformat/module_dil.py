@@ -45,67 +45,75 @@ class ModuleDIL(CallFunction):
         logging.info(f"Stop Run Module '{self.module}'\r\n")
 
         return result
+    
+    def split_column(self, row: any) -> any:
+        comma = row['NAME'].count(',')
+        if comma == 2:
+            name, department, _ = row['NAME'].split(',')
+        else:
+            name, department = row['NAME'].split(',')
+            
+        return name, department
+    
+    def attribute_column(self, row: any) -> str:
+        if row['ADD_ID'] == '0' and row['EDIT_ID'] == '0' and row['ADD_DOC'] == '0' and row['EDIT_DOC'] == '0' and row['SCAN'] == '0' and row['ADD_USER'] == '1':
+            return 'Admin'
+        elif row['ADD_ID'] == '1' and row['EDIT_ID'] == '1' and row['ADD_DOC'] == '1' and row['EDIT_DOC'] == '1' and row['SCAN'] == '1' and row['ADD_USER'] == '0':
+            return 'Index+Scan'
+        else:
+            return 'Inquiry'
+        
+    def read_format_file(self, format_file) -> list:
+        
+        data = []
+        for line in format_file:
+            regex = re.compile(r'\w+.*')
+            find_word = regex.findall(line.strip())
+            if find_word != []:
+                data += [re.sub(r'(?<!\.)\s{2,}', '||', ''.join(find_word)).split('||')]
 
+        clean_data = []
+        for rows, _data in enumerate(data):
+            if rows == 1:
+                clean_data += [re.sub(r'\s+', ',', ','.join(_data)).split(',')]
+            elif rows != 0:
+                fix_value = []
+                for idx, value in enumerate(_data, 1):
+                    if idx == 4:
+                        value = re.sub(r'\s+', ',', value).split(',')
+                        fix_value.extend(value)
+                    else:
+                        fix_value.append(value)
+                clean_data.append(fix_value)
+            else:
+                continue
+            
+        return clean_data
+        
     def collect_user(self, i: int, format_file: any) -> dict:
 
         status = 'failed'
         self.logging[i].update({'function': 'collect_user', 'status': status})
     
         try:
-            data = []
-            for line in format_file:
-                regex = re.compile(r'\w+.*')
-                find_word = regex.findall(line.strip())
-                if find_word != []:
-                    data += [re.sub(r'(?<!\.)\s{2,}', '||', ''.join(find_word)).split('||')]
-
-            clean_data = []
-            for rows, _data in enumerate(data):
-                if rows == 1:
-                    clean_data += [re.sub(r'\s+', ',', ','.join(_data)).split(',')]
-                elif rows != 0:
-                    fix_value = []
-                    for idx, value in enumerate(_data, 1):
-                        if idx == 4:
-                            value = re.sub(r'\s+', ',', value).split(',')
-                            fix_value.extend(value)
-                        else:
-                            fix_value.append(value)
-                    clean_data.append(fix_value)
-                else:
-                    continue
+            
+            clean_data = self.read_format_file(format_file)
             
             ## set dataframe
             df = pd.DataFrame(clean_data)
             df.columns = df.iloc[0].values
             df = df[1:].apply(lambda row: row.str.strip()).reset_index(drop=True)
             
-            def split_column(row):
-                comma = row['NAME'].count(',')
-                if comma == 2:
-                    name, department, _ = row['NAME'].split(',')
-                else:
-                    name, department = row['NAME'].split(',')
-                return name, department
-            
-            def attribute_column(row):
-                if row['ADD_ID'] == '0' and row['EDIT_ID'] == '0' and row['ADD_DOC'] == '0' and row['EDIT_DOC'] == '0' and row['SCAN'] == '0' and row['ADD_USER'] == '1':
-                    return 'Admin'
-                elif row['ADD_ID'] == '1' and row['EDIT_ID'] == '1' and row['ADD_DOC'] == '1' and row['EDIT_DOC'] == '1' and row['SCAN'] == '1' and row['ADD_USER'] == '0':
-                    return 'Index+Scan'
-                else:
-                    return 'User'
-            
             ## mapping data to column
             df = df[df['APPCODE'] == 'LNSIGNET'].reset_index(drop=True)
-            df[['NAME', 'DEPARTMENT']] = df.apply(split_column, axis=1, result_type='expand')
-            df['ATTRIBUTE'] = df.apply(attribute_column, axis=1)
+            df[['NAME', 'DEPARTMENT']] = df.apply(self.split_column, axis=1, result_type='expand')
+            df['ATTRIBUTE'] = df.apply(self.attribute_column, axis=1)
             
             set_value = dict.fromkeys(self.logging[i]['columns'], 'NA')
             set_value.update({
                 'ApplicationCode': 'DIL',
                 'AccountOwner': df['USERNAME'],
-                'AccountName': df['NAME'],
+                'AccountName': df['USERNAME'],
                 'AccountType': 'USR',
                 'AccountStatus': 'A',
                 'IsPrivileged': 'N',
@@ -127,3 +135,43 @@ class ModuleDIL(CallFunction):
 
         status = 'failed'
         self.logging[i].update({'function': 'collect_param', 'status': status})
+        
+        try:
+            
+            clean_data = self.read_format_file(format_file)
+            
+            ## set dataframe
+            df = pd.DataFrame(clean_data)
+            df.columns = df.iloc[0].values
+            df = df[1:].apply(lambda row: row.str.strip()).reset_index(drop=True)
+            
+            ## mapping data to column
+            df = df[df['APPCODE'] == 'LNSIGNET'].reset_index(drop=True)
+            df[['NAME', 'DEPARTMENT']] = df.apply(self.split_column, axis=1, result_type='expand')
+            
+            set_value = [
+                {
+                    "Parameter Name": 'Department',
+                    "Code value": df['DEPARTMENT'].unique(),
+                    "Decode value": df['DEPARTMENT'].unique(),
+                },
+                {
+                    "Parameter Name": 'AppCode',
+                    "Code value": 'LNSIGNET',
+                    "Decode value": 'LNSIGNET',
+                },
+                {
+                    "Parameter Name": 'Role',
+                    "Code value": ['Inquiry', 'Admin', 'Index + Scan'],
+                    "Decode value": ['Inquiry', 'Admin', 'Index + Scan'],
+                },
+            ]
+            df = pd.DataFrame(set_value)
+            df = df.explode(['Code value', 'Decode value']).reset_index(drop=True)
+            
+        except Exception as err:
+            raise Exception(err)
+
+        status = 'succeed'
+        self.logging[i].update({'data': df.to_dict('list'), 'status': status})
+        logging.info(f'Collect param data, status: {status}')
