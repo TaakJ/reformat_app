@@ -26,9 +26,9 @@ class ModuleDIL(CallFunction):
 
             await self.check_source_file()
             await self.separate_data_file()
-            # if self.store_tmp is True:
-            #     await self.genarate_tmp_file()
-            # await self.genarate_target_file()
+            if self.store_tmp is True:
+                await self.genarate_tmp_file()
+            await self.genarate_target_file()
 
         except CustomException as err:
             logging.error('See Error Details: log_error.log')
@@ -151,14 +151,14 @@ class ModuleDIL(CallFunction):
             
             set_value = [
                 {
-                    "Parameter Name": 'Department',
-                    "Code value": df['DEPARTMENT'].unique(),
-                    "Decode value": df['DEPARTMENT'].unique(),
+                    'Parameter Name': 'Department',
+                    'Code value': df['DEPARTMENT'].unique(),
+                    'Decode value': df['DEPARTMENT'].unique(),
                 },
                 {
-                    "Parameter Name": 'AppCode',
-                    "Code value": 'LNSIGNET',
-                    "Decode value": 'LNSIGNET',
+                    'Parameter Name': 'AppCode',
+                    'Code value': 'LNSIGNET',
+                    'Decode value': 'LNSIGNET',
                 },
                 {
                     "Parameter Name": 'Role',
