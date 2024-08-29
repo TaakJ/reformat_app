@@ -41,8 +41,8 @@ LDS:
 LMT:
   input_dir: D:\IGAGD\LMT\DOWNLOAD
   output_dir: D:\IGAGD\LMT\UPLOAD
-  input_file: LDSUSER.xlsx
-  output_file: LMTIGAWINT.csv
+  input_file: LMTTH.CSV
+  output_file: LMTIGAWINT.csv, LMTPARAMLIST.CSV
 MOC:
   input_dir: D:\IGAGD\MOC\DOWNLOAD
   output_dir: D:\IGAGD\MOC\UPLOAD

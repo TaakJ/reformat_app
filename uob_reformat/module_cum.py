@@ -73,7 +73,7 @@ class ModuleCUM(CallFunction):
             df = df[1:].apply(lambda row: row.str.strip()).reset_index(drop=True)
             
             ## mapping data to column
-            df = df.groupby('USER_ID')
+            df = df.groupby('USER_ID', sort=False)
             df = df.agg(lambda row: '+'.join(row.unique())).reset_index()
             
             set_value = dict.fromkeys(self.logging[i]['columns'], 'NA')
