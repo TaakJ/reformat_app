@@ -26,9 +26,9 @@ class ModuleDOC(CallFunction):
 
             await self.check_source_file()
             await self.separate_data_file()
-            # if self.store_tmp is True:
-            #     await self.genarate_tmp_file()
-            # await self.genarate_target_file()
+            if self.store_tmp is True:
+                await self.genarate_tmp_file()
+            await self.genarate_target_file()
 
         except CustomException as err:
             logging.error('See Error Details: log_error.log')
@@ -94,7 +94,7 @@ class ModuleDOC(CallFunction):
                 elif row['ADD_ID'] == '1' and row['EDIT_ID'] == '1' and row['ADD_DOC'] == '1' and row['EDIT_DOC'] == '1' and row['SCAN'] == '1' and row['ADD_USER'] == '0':
                     return 'Index+Scan'
                 else:
-                    return 'User'
+                    return 'Inquiry'
             
             ## mapping data to column
             df = df[df['APPCODE'] == 'LOAN'].reset_index(drop=True)
@@ -103,14 +103,14 @@ class ModuleDOC(CallFunction):
             
             set_value = dict.fromkeys(self.logging[i]['columns'], 'NA')
             set_value.update({
-                'ApplicationCode': 'DIL',
+                'ApplicationCode': 'DOC',
                 'AccountOwner': df['USERNAME'],
-                'AccountName': df['NAME'],
+                'AccountName': df['USERNAME'],
                 'AccountType': 'USR',
                 'AccountStatus': 'A',
                 'IsPrivileged': 'N',
                 'AccountDescription': df['NAME'],
-                'AdditionalAttribute': df[['DEPARTMENT', 'APPCODE', 'ATTRIBUTE']].apply(lambda row: '#'.join(row), axis=1),
+                'AdditionalAttribute': df[['APPCODE', 'ATTRIBUTE']].apply(lambda row: '#'.join(row), axis=1),
                 'Country': "TH"
             })
             df = df.assign(**set_value).fillna('NA')
@@ -127,3 +127,26 @@ class ModuleDOC(CallFunction):
 
         status = 'failed'
         self.logging[i].update({'function': 'collect_param', 'status': status})
+
+        try:
+            set_value = [
+                {
+                    "Parameter Name": 'AppCode',
+                    "Code value": 'LOAN',
+                    "Decode value": 'LOAN',
+                },
+                {
+                    "Parameter Name": 'Role',
+                    "Code value": ['Inquiry', 'Admin', 'Index + Scan'],
+                    "Decode value": ['Inquiry', 'Admin', 'Index + Scan'],
+                },
+            ]
+            df = pd.DataFrame(set_value)
+            df = df.explode(['Code value', 'Decode value']).reset_index(drop=True)
+            
+        except Exception as err:
+            raise Exception(err)
+        
+        status = 'succeed'
+        self.logging[i].update({'data': df.to_dict('list'), 'status': status})
+        logging.info(f"Collect user data, status: {status}")

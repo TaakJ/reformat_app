@@ -16,12 +16,12 @@ CUM:
 DOC:
   input_dir: D:\IGAGD\DOC\DOWNLOAD
   output_dir: D:\IGAGD\DOC\UPLOAD
-  input_file: DOCUSER.txt
-  output_file: DOCIGAWINT.csv, DOCPARAMLIST.csv
+  input_file: DocImage.txt
+  output_file: DOCIGAWINT.csv, DOCPARAMLIST.CSV
 DIL:
-  input_dir: D:\IGAGD\DOC\DOWNLOAD
-  output_dir: D:\IGAGD\DOC\UPLOAD
-  input_file: DOCUSER.txt
+  input_dir: D:\IGAGD\DIL\DOWNLOAD
+  output_dir: D:\IGAGD\DIL\UPLOAD
+  input_file: DocImage.txt
   output_file: DILIGAWINT.csv, DILPARAMLIST.csv
 ICA:
   input_dir: D:\IGAGD\ICA\DOWNLOAD
