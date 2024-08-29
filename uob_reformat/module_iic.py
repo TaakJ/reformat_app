@@ -4,7 +4,6 @@ from .function import CallFunction
 from .exception import CustomException
 import pandas as pd
 
-
 class ModuleIIC(CallFunction):
 
     def __init__(self, params: any) -> None:
