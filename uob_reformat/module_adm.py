@@ -18,7 +18,7 @@ class ModuleADM(CallFunction):
 
         logging.info(f"Module:'{self.module}'; Manual: '{self.manual}'; Run date: '{self.batch_date}'; Store tmp: '{self.store_tmp}'; Write mode: '{self.write_mode}';")
 
-        result = {"module": self.module, "task": "Completed"}
+        result = {'module': self.module, 'task': 'Completed'}
         try:
             self.colloct_setup()
 
@@ -32,7 +32,7 @@ class ModuleADM(CallFunction):
             await self.genarate_target_file()
 
         except CustomException as err:
-            logging.error("See Error Details: log_error.log")
+            logging.error('See Error Details: log_error.log')
 
             logger = err.setup_errorlog(log_name=__name__)
             while True:
@@ -41,7 +41,7 @@ class ModuleADM(CallFunction):
                 except StopIteration:
                     break
 
-            result.update({"task": "Uncompleted"})
+            result.update({'task': 'Uncompleted'})
 
         logging.info(f"Stop Run Module '{self.module}'\r\n")
 
@@ -49,8 +49,8 @@ class ModuleADM(CallFunction):
 
     def collect_user(self, i: int, format_file: any) -> dict:
 
-        status = "failed"
-        self.logging[i].update({"function": "collect_user", "status": status})
+        status = 'failed'
+        self.logging[i].update({'function': 'collect_user', 'status': status})
 
         try:
             data = []
@@ -78,7 +78,7 @@ class ModuleADM(CallFunction):
                 'AccountOwner': df[0],
                 'AccountName': df[0],
                 'AccountType': 'USR',
-                'EntitlementName': df[[4, 6, 5]].apply(lambda row: ";".join(row), axis=1),
+                'EntitlementName': df[[4, 6, 5]].apply(lambda row: ';'.join(row), axis=1),
                 'AccountStatus': 'A',
                 'IsPrivileged': 'N',
                 'AccountDescription': df[1],
@@ -103,7 +103,7 @@ class ModuleADM(CallFunction):
         try:
             data = []
             for line in format_file:
-                data += [re.sub(r"(?<!\.)\|\|", "||", line.strip()).split("||")]
+                data += [re.sub(r'(?<!\.)\|\|', '||', line.strip()).split('||')]
 
             ## set dataframe
             df = pd.DataFrame(data)
@@ -146,5 +146,5 @@ class ModuleADM(CallFunction):
             raise Exception(err)
 
         status = 'succeed'
-        self.logging[i].update({"data": df.to_dict('list'), 'status': status})
+        self.logging[i].update({'data': df.to_dict('list'), 'status': status})
         logging.info(f'Collect param data, status: {status}')
