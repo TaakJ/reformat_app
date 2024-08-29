@@ -26,7 +26,7 @@ DIL:
 ICA:
   input_dir: D:\IGAGD\ICA\DOWNLOAD
   output_dir: D:\IGAGD\ICA\UPLOAD
-  input_file: 1.csv, 2.csv, 3.csv
+  input_file: ICAS_TBL_USER, ICAS_TBL_USER_GROUP, ICAS_TBL_USER_BANK_BRANCH
   output_file: ICAIGAWINT.csv, ICAPARAMLIST.csv
 IIC:
   input_dir: D:\IGAGD\IIC\DOWNLOAD
