@@ -24,8 +24,8 @@ class ModuleICA(CallFunction):
             if self.backup is True:
                 self.achieve_backup()
             
-            # await self.check_source_file()
-            # await self.separate_data_file()
+            await self.check_source_file()
+            await self.separate_data_file()
             # if self.store_tmp is True:
             #     await self.genarate_tmp_file()
             # await self.genarate_target_file()
