@@ -76,7 +76,7 @@ class CollectParams(ABC):
             # 0: input file
             # 1: target file
             for i, files in enumerate(mapping_list,1):
-                for select_num in [n for n in self.select_files if i == n]:
+                for select_num in [num for num in self.select_files if i == num]:
                     
                     status = 'succeed'
                     if set(('full_input', 'full_target')).issubset(record):
