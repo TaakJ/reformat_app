@@ -1,4 +1,5 @@
 import re
+import glob
 import pandas as pd
 import logging
 from .function import CallFunction
@@ -46,10 +47,31 @@ class ModuleBOS(CallFunction):
         
         return result
     
-    def read_mutiple_file(self, i:int):
+    def read_depend_file(self, i: int) -> pd.DataFrame:
         
-        print(self.logging[i])
-        
+        data = []
+        for full_depend in self.logging[i]['full_depend']:
+            
+            if glob.glob(full_depend, recursive=True):
+                logging.info(f"Check depned file: {full_depend}, for run: {self.logging[i]['program']}, status: 'found'")
+                
+                format_file = self.read_file(i, full_depend)
+                for line in format_file:
+                    data += [re.sub(r'(?<!\.),', '||', line.strip()).split('||')]
+                    
+                df = pd.DataFrame(data)
+                df.columns = df.iloc[0].values
+                df = df[1:].apply(lambda row: row.str.strip()).reset_index(drop=True)
+                df['rc_code'] = df['rc_code'].apply(lambda row: '{:0>3}'.format(row))
+                df[['Domain', 'username']] = df['username'].str.extract(r'^(.*?)\\(.*)$')
+                
+            else:
+                self.logging[i].update({'err': f'File not found {full_depend}'})
+                
+            if 'err' in self.logging[i]:
+                raise CustomException(err=self.logging)
+
+        return df
         
     def collect_user(self, i: int, format_file: any) -> dict:
 
@@ -61,34 +83,38 @@ class ModuleBOS(CallFunction):
             for line in format_file:
                 data += [re.sub(r'(?<!\.),', '||', line.strip()).split('||')]
             
-            ## set dataframe
+            ## set dataframe on main file
             df = pd.DataFrame(data)
             df.columns = df.iloc[0].values
             df = df[1:].apply(lambda row: row.str.strip()).reset_index(drop=True)
+            df['branch_code'] = df['branch_code'].apply(lambda row: '{:0>3}'.format(row))
+            df[['Domain', 'username']] = df['user_name'].str.extract(r'^(.*?)\\(.*)$')
+            
+            ## set dataframe on depned file
+            depend_df = self.read_depend_file(i)
             
             ## mapping data to column
-            df['branch_code'] = df['branch_code'].apply(lambda row: '{:0>3}'.format(row))
-            df[['Domain', 'user_name']] = df['user_name'].str.extract(r'^(.*?)\\(.*)$')
+            merge_df = pd.merge(df, depend_df, on='username', how='left', validate="m:m").replace([None],[''])
+            merge_df = merge_df.groupby(['username', 'branch_code'], sort=False)
+            merge_df = merge_df.agg(lambda row: '+'.join(row.unique())).reset_index()
             
-            self.read_mutiple_file(i)
-            # df.apply(self.split_column, axis=1, result_type='expand')
-            
-            # set_value = dict.fromkeys(self.logging[i]['columns'], 'NA')
-            # set_value.update({
-            #     'ApplicationCode': 'BOS',
-            #     'AccountOwner': df['user_name'],
-            #     'AccountName': df['user_name'],
-            #     'AccountType': 'USR',
-            #     # 'EntitlementName': df[[4, 6, 5]].apply(lambda row: ';'.join(row), axis=1),
-            #     'AccountStatus': 'A',
-            #     'IsPrivileged': 'N',
-            #     'AccountDescription': df['employee_display_name'],
-            #     'AdditionalAttribute': df['branch_code'],
-            #     'Country': 'TH',
-            # })
-            # df = df.assign(**set_value).fillna('NA')
-            # df = df.drop(df.iloc[:, :7].columns, axis=1)
-            # print(df)
+            set_value = dict.fromkeys(self.logging[i]['columns'], 'NA')
+            set_value.update(
+                {
+                    'ApplicationCode': 'BOS',
+                    'AccountOwner': merge_df['username'],
+                    'AccountName': merge_df['username'],
+                    'AccountType': 'USR',
+                    'EntitlementName': merge_df[['rolename_y', 'rolename_x']].apply(lambda row: ';'.join(row), axis=1),
+                    'AccountStatus': 'A',
+                    'IsPrivileged': 'N',
+                    'AccountDescription': merge_df['employee_display_name'],
+                    'AdditionalAttribute': merge_df['branch_code'],
+                    'Country': 'TH',
+                }
+            )
+            merge_df = merge_df.assign(**set_value).replace([None],['NA'])
+            merge_df = merge_df.drop(merge_df.iloc[:, :14].columns, axis=1)
             
         except Exception as err:
             raise Exception(err)

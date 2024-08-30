@@ -83,7 +83,7 @@ class ModuleLMT(CallFunction):
                     'Country': 'TH',
                 }
             )
-            df = df.assign(**set_value).fillna('NA')
+            df = df.assign(**set_value).replace([None],['NA'])
             df = df.drop(df.iloc[:, :8].columns, axis=1)
 
         except Exception as err:
@@ -127,7 +127,7 @@ class ModuleLMT(CallFunction):
                     'Decode value': df['ProgramTemplate'].unique(),
                 },
             ]
-            df = pd.DataFrame(set_value)
+            df = pd.DataFrame(set_value).replace([None],['NA'])
             df = df.explode(['Code value', 'Decode value']).reset_index(drop=True)
 
         except Exception as err:

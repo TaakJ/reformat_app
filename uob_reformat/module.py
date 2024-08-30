@@ -48,9 +48,11 @@ class Convert2File:
                 types = Path(full_input).suffix
                 
                 if ['.xlsx', '.xls'].__contains__(types):
-                    self.read_excel_file(i, full_input)
+                    format_file = self.read_excel_file(i, full_input)
                 else:
-                    self.read_file(i, full_input)
+                    format_file = self.read_file(i, full_input)
+                    
+                self.get_extract_file(i, format_file)
                         
             except Exception as err:
                 record.update({'err': err})
@@ -60,21 +62,21 @@ class Convert2File:
             
             
     def read_excel_file(self, i: int, full_input: str) -> any:
-
+        
         status = 'failed'
         self.logging[i].update({'function': 'read_excel_file', 'status': status})
         
         try:
             logging.info(f"Read format excel file: {full_input} , for run: {self.logging[i]['program']}")
-            workbook = xlrd.open_workbook(full_input)
+            format_file = xlrd.open_workbook(full_input)
             
-            self.get_extract_file(i, workbook)
-
         except Exception as err:
             raise Exception(err)
         
         status = 'succeed'
         self.logging[i].update({'status': status})
+        
+        return format_file
 
     def read_file(self, i: int, full_input: str) -> any:
 
@@ -88,9 +90,7 @@ class Convert2File:
                 file = f.read()
             encoding_result = chardet.detect(file)
             encoding = encoding_result['encoding']
-            line = StringIO(file.decode(encoding))
-            
-            self.get_extract_file(i, line)
+            format_file = StringIO(file.decode(encoding))
             
         except Exception as err:
             raise Exception(err)
@@ -98,15 +98,20 @@ class Convert2File:
         status = 'succeed'
         self.logging[i].update({'status': status})
         
+        return format_file
+        
     def get_extract_file(self, i: int, format_file: any) -> dict:
         
         self.logging[i].update({'function': 'get_extract_data'})
         
         full_target = self.logging[i]['full_target']
+        
         if re.search(r"PARAMLIST", full_target) is not None:
             # columns = ['Parameter Name', 'Code value', 'Decode value']
             # self.logging[i].update({'columns': columns})
+            
             self.collect_param(i, format_file)
+            
         else:
             columns = ['ApplicationCode', 'AccountOwner', 'AccountName', 'AccountType', 'EntitlementName', 'SecondEntitlementName', 'ThirdEntitlementName','AccountStatus', 
                         'IsPrivileged', 'AccountDescription', 'CreateDate', 'LastLogin', 'LastUpdatedDate', 'AdditionalAttribute', 'Country']

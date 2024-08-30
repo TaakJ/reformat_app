@@ -27,9 +27,9 @@ class ModuleADM(CallFunction):
 
             await self.check_source_file()
             await self.separate_data_file()
-            if self.store_tmp is True:
-                await self.genarate_tmp_file()
-            await self.genarate_target_file()
+            # if self.store_tmp is True:
+            #     await self.genarate_tmp_file()
+            # await self.genarate_target_file()
 
         except CustomException as err:
             logging.error('See Error Details: log_error.log')
@@ -69,7 +69,7 @@ class ModuleADM(CallFunction):
             # 4: Group
             # 5: Zone
             # 6: Role
-            df = df.groupby(0)
+            df = df.groupby(0, sort=False)
             df = df.agg(lambda row: '+'.join(row.unique())).reset_index()
 
             set_value = dict.fromkeys(self.logging[i]['columns'], 'NA')
@@ -87,7 +87,7 @@ class ModuleADM(CallFunction):
                     'Country': 'TH',
                 }
             )
-            df = df.assign(**set_value).fillna('NA')
+            df = df.assign(**set_value).replace([None],['NA'])
             df = df.drop(df.iloc[:, :7].columns, axis=1)
 
         except Exception as err:
@@ -141,7 +141,7 @@ class ModuleADM(CallFunction):
                     'Decode value': df[2].unique()
                 }
             ]
-            df = pd.DataFrame(set_value)
+            df = pd.DataFrame(set_value).replace([None],['NA'])
             df = df.explode(['Code value', 'Decode value']).reset_index(drop=True)
             
         except Exception as err:

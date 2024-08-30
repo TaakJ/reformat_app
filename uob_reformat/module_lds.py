@@ -105,7 +105,7 @@ class ModuleLDS(CallFunction):
                     'Country': "TH"
                 }
             )
-            df = df.assign(**set_value).fillna('NA')
+            df = df.assign(**set_value).replace([None],['NA'])
             df = df.drop(df.iloc[:,:33].columns, axis=1)
             
         except Exception as err:
@@ -150,7 +150,7 @@ class ModuleLDS(CallFunction):
                     'Decode value': df['CostCenterName'].unique(),
                 },
             ]
-            df = pd.DataFrame(set_value)
+            df = pd.DataFrame(set_value).replace([None],['NA'])
             df = df.explode(['Code value', 'Decode value']).reset_index(drop=True)
 
         except Exception as err:
