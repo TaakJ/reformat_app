@@ -6,8 +6,9 @@ ADM:
 BOS:
   input_dir: D:\IGAGD\BOS\DOWNLOAD
   output_dir: D:\IGAGD\BOS\UPLOAD
-  input_file: BOSUSER.xlsx
-  output_file: BOSIGAWINT.csv
+  input_file: BOSTH.csv
+  output_file: BOSIGAWINT.csv, BOSPARAMLIST.csv
+  depend_file: BOSTH_Param.csv
 CUM:
   input_dir: D:\IGAGD\CUM\DOWNLOAD
   output_dir: D:\IGAGD\CUM\UPLOAD
@@ -26,8 +27,9 @@ DIL:
 ICA:
   input_dir: D:\IGAGD\ICA\DOWNLOAD
   output_dir: D:\IGAGD\ICA\UPLOAD
-  input_file: ICAS_TBL_USER, ICAS_TBL_USER_GROUP, ICAS_TBL_USER_BANK_BRANCH
+  input_file: ICAS_TBL_USER
   output_file: ICAIGAWINT.csv, ICAPARAMLIST.csv
+  depend_file: ICAS_TBL_GROUP, ICAS_TBL_USER_GROUP, ICAS_TBL_USER_BANK_BRANCH
 IIC:
   input_dir: D:\IGAGD\IIC\DOWNLOAD
   output_dir: D:\IGAGD\IIC\UPLOAD

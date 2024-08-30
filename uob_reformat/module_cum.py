@@ -77,20 +77,22 @@ class ModuleCUM(CallFunction):
             df = df.agg(lambda row: '+'.join(row.unique())).reset_index()
             
             set_value = dict.fromkeys(self.logging[i]['columns'], 'NA')
-            set_value.update({
-                'ApplicationCode': 'CUM', 
-                'AccountOwner': df['USER_ID'], 
-                'AccountName': df['USER_ID'],
-                'AccountType': 'USR',
-                'EntitlementName': df['GROUP_NO'],
-                'AccountStatus': 'A',
-                'IsPrivileged': 'N',
-                'AccountDescription': df[['NAME','SURNAME']].apply(lambda row: row['NAME'] + ' ' + row['SURNAME'], axis=1),
-                'CreateDate': pd.to_datetime(df['VALID_FROM'], dayfirst=True).dt.strftime('%Y%m%d%H%M%S'), 
-                'LastLogin': pd.to_datetime(df['Last Usage'], dayfirst=True).dt.strftime('%Y%m%d%H%M%S'),
-                'AdditionalAttribute': df['DEPARTMENT'],
-                'Country': 'TH'
-            })
+            set_value.update(
+                {
+                    'ApplicationCode': 'CUM', 
+                    'AccountOwner': df['USER_ID'], 
+                    'AccountName': df['USER_ID'],
+                    'AccountType': 'USR',
+                    'EntitlementName': df['GROUP_NO'],
+                    'AccountStatus': 'A',
+                    'IsPrivileged': 'N',
+                    'AccountDescription': df[['NAME','SURNAME']].apply(lambda row: row['NAME'] + ' ' + row['SURNAME'], axis=1),
+                    'CreateDate': pd.to_datetime(df['VALID_FROM'], dayfirst=True).dt.strftime('%Y%m%d%H%M%S'), 
+                    'LastLogin': pd.to_datetime(df['Last Usage'], dayfirst=True).dt.strftime('%Y%m%d%H%M%S'),
+                    'AdditionalAttribute': df['DEPARTMENT'],
+                    'Country': 'TH'
+                }
+            )
             df = df.assign(**set_value).fillna('NA')
             df = df.drop(df.iloc[:,:14].columns, axis=1)
             

@@ -25,8 +25,8 @@ class ModuleICA(CallFunction):
             if self.backup is True:
                 self.achieve_backup()
 
-            await self.check_source_file()
-            await self.separate_data_file()
+            # await self.check_source_file()
+            # await self.separate_data_file()
             # if self.store_tmp is True:
             #     await self.genarate_tmp_file()
             # await self.genarate_target_file()
@@ -56,6 +56,8 @@ class ModuleICA(CallFunction):
             data = []
             for line in format_file:
                 data += [re.sub(r'(?<!\.)\|\|', '||', line.strip()).split('||')]
+                
+            print(data)
 
         except Exception as err:
             raise Exception(err)

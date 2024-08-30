@@ -90,19 +90,21 @@ class ModuleLDS(CallFunction):
             
             ## mapping data to column
             set_value = dict.fromkeys(self.logging[i]['columns'], 'NA')
-            set_value.update({
-                'ApplicationCode': 'LDS', 
-                'AccountOwner': df['UserName'], 
-                'AccountName': df['UserName'],
-                'AccountType': 'USR',
-                'AccountStatus': 'A',
-                'IsPrivileged': 'N',
-                'AccountDescription': df['FullName'],
-                'LastLogin': pd.to_datetime(df['LastLogin_Date'].apply(lambda row: row[:19]), errors='coerce').dt.strftime('%Y%m%d%H%M%S'),
-                'LastUpdatedDate': pd.to_datetime(df['edit_date'].apply(lambda row: row[:19]), errors='coerce').dt.strftime('%Y%m%d%H%M%S'),
-                'AdditionalAttribute': df[['CostCenterName','CostCenterCode']].apply(lambda row: '#'.join(row), axis=1),
-                'Country': "TH"
-            })
+            set_value.update(
+                {
+                    'ApplicationCode': 'LDS', 
+                    'AccountOwner': df['UserName'], 
+                    'AccountName': df['UserName'],
+                    'AccountType': 'USR',
+                    'AccountStatus': 'A',
+                    'IsPrivileged': 'N',
+                    'AccountDescription': df['FullName'],
+                    'LastLogin': pd.to_datetime(df['LastLogin_Date'].apply(lambda row: row[:19]), errors='coerce').dt.strftime('%Y%m%d%H%M%S'),
+                    'LastUpdatedDate': pd.to_datetime(df['edit_date'].apply(lambda row: row[:19]), errors='coerce').dt.strftime('%Y%m%d%H%M%S'),
+                    'AdditionalAttribute': df[['CostCenterName','CostCenterCode']].apply(lambda row: '#'.join(row), axis=1),
+                    'Country': "TH"
+                }
+            )
             df = df.assign(**set_value).fillna('NA')
             df = df.drop(df.iloc[:,:33].columns, axis=1)
             

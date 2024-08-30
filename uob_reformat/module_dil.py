@@ -110,17 +110,19 @@ class ModuleDIL(CallFunction):
             df['ATTRIBUTE'] = df.apply(self.attribute_column, axis=1)
             
             set_value = dict.fromkeys(self.logging[i]['columns'], 'NA')
-            set_value.update({
-                'ApplicationCode': 'DIL',
-                'AccountOwner': df['USERNAME'],
-                'AccountName': df['USERNAME'],
-                'AccountType': 'USR',
-                'AccountStatus': 'A',
-                'IsPrivileged': 'N',
-                'AccountDescription': df['NAME'],
-                'AdditionalAttribute': df[['DEPARTMENT', 'APPCODE', 'ATTRIBUTE']].apply(lambda row: '#'.join(row), axis=1),
-                'Country': "TH"
-            })
+            set_value.update(
+                {
+                    'ApplicationCode': 'DIL',
+                    'AccountOwner': df['USERNAME'],
+                    'AccountName': df['USERNAME'],
+                    'AccountType': 'USR',
+                    'AccountStatus': 'A',
+                    'IsPrivileged': 'N',
+                    'AccountDescription': df['NAME'],
+                    'AdditionalAttribute': df[['DEPARTMENT', 'APPCODE', 'ATTRIBUTE']].apply(lambda row: '#'.join(row), axis=1),
+                    'Country': "TH"
+                }
+            )
             df = df.assign(**set_value).fillna('NA')
             df = df.drop(df.iloc[:,:12].columns, axis=1)
             

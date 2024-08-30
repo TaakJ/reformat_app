@@ -1,5 +1,4 @@
 from abc import ABC, abstractmethod
-import itertools 
 import os
 import glob
 import shutil
@@ -31,13 +30,19 @@ class CollectLog(ABC):
 
 class CollectParams(ABC):
 
-    def full_input(self) -> list:
+    def full_input(self) -> any:
         input_dir = CONFIG[self.module]['input_dir']
         input_file = CONFIG[self.module]['input_file']
         
         set_dir = lambda dir, file: [join(dir, x.strip()) for x in file.split(",")]
+        full_input = set_dir(input_dir, input_file)
         
-        return set_dir(input_dir, input_file)
+        full_depend = []
+        depend_file = CONFIG[self.module].get('depend_file')
+        if depend_file is not None:
+            full_depend  = set_dir(input_dir, depend_file)
+        
+        return full_input, full_depend
 
     def full_target(self) -> list:
         output_dir = CONFIG[self.module]['output_dir']
@@ -47,7 +52,9 @@ class CollectParams(ABC):
         set_dir = lambda dir, file: [(join(dir, x.strip()) if self.write_mode == 'overwrite' or self.manual else join(dir, f"{Path(x.strip()).stem}_{suffix}.csv"))\
             for x in file.split(',')]
         
-        return set_dir(output_dir, output_file)
+        full_target = set_dir(output_dir, output_file)
+        
+        return full_target
 
     def colloct_setup(self) -> None:
 
@@ -58,28 +65,52 @@ class CollectParams(ABC):
         record = {'module': self.module, 'function': 'colloct_setup', 'status': status}
         
         try:
-            full_input = self.full_input()
-                        
-            for i, full_target in enumerate(self.full_target(), 1):
+            full_input, full_depend = self.full_input()
+            full_target = self.full_target()
+            
+            if len(full_input) == len(full_target):
+                mapping_list = list(zip(full_input, full_target))
+            else:
+                mapping_list = [(input, target) for input in full_input for target in full_target]
+            
+            for i, files in enumerate(mapping_list,1):
                 for select_num in [n for n in self.select_files if i == n]:
-                    
-                    if len(self.full_input()) == len(self.full_target()):
-                        full_input = [self.full_input()[select_num-1]]
-                        
                     status = 'succeed'
+                    # 0: input file
+                    # 1: target file
                     if set(('full_input', 'full_target')).issubset(record):
                         copy_record = record.copy()
-                        copy_record.update({'full_input': full_input, 'full_target': full_target, 'program': 'USER' if select_num == 1 else 'PARAM', 'status': status,})
+                        copy_record.update(
+                            {
+                                'full_input': [files[0]], 
+                                'full_target': [files[1]],
+                                'program': 'USER' if select_num == 1 else 'PARAM', 
+                                'status': status,
+                            })
+                        
+                        if full_depend != []:
+                            copy_record.setdefault('full_depend', full_depend)
                         log += [copy_record]
+                        
                     else:
-                        record.update({'full_input': full_input, 'full_target': full_target, 'program': 'USER' if select_num == 1 else 'PARAM', 'status': status,})
+                        record.update(
+                            {
+                                'full_input': [files[0]], 
+                                'full_target': [files[1]],
+                                'program': 'USER' if select_num == 1 else 'PARAM',
+                                'status': status,
+                            })
+                        
+                        if full_depend != []:
+                            record.setdefault('full_depend', full_depend)
                         log = [record]
-                
+                        
         except Exception as err:
             record.update({'err': err})
             log += [record]
 
         self.logSetter(log)
+        print(self.logging)
 
         if 'err' in record:
             raise CustomException(err=self.logging)

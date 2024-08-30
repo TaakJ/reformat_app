@@ -25,11 +25,11 @@ class ModuleADM(CallFunction):
             if self.backup is True:
                 self.achieve_backup()
 
-            await self.check_source_file()
-            await self.separate_data_file()
-            if self.store_tmp is True:
-                await self.genarate_tmp_file()
-            await self.genarate_target_file()
+            # await self.check_source_file()
+            # await self.separate_data_file()
+            # if self.store_tmp is True:
+            #     await self.genarate_tmp_file()
+            # await self.genarate_target_file()
 
         except CustomException as err:
             logging.error('See Error Details: log_error.log')
@@ -73,18 +73,20 @@ class ModuleADM(CallFunction):
             df = df.agg(lambda row: '+'.join(row.unique())).reset_index()
 
             set_value = dict.fromkeys(self.logging[i]['columns'], 'NA')
-            set_value.update({
-                'ApplicationCode': 'ADM',
-                'AccountOwner': df[0],
-                'AccountName': df[0],
-                'AccountType': 'USR',
-                'EntitlementName': df[[4, 6, 5]].apply(lambda row: ';'.join(row), axis=1),
-                'AccountStatus': 'A',
-                'IsPrivileged': 'N',
-                'AccountDescription': df[1],
-                'AdditionalAttribute': df[2],
-                'Country': 'TH',
-            })
+            set_value.update(
+                {
+                    'ApplicationCode': 'ADM',
+                    'AccountOwner': df[0],
+                    'AccountName': df[0],
+                    'AccountType': 'USR',
+                    'EntitlementName': df[[4, 6, 5]].apply(lambda row: ';'.join(row), axis=1),
+                    'AccountStatus': 'A',
+                    'IsPrivileged': 'N',
+                    'AccountDescription': df[1],
+                    'AdditionalAttribute': df[2],
+                    'Country': 'TH',
+                }
+            )
             df = df.assign(**set_value).fillna('NA')
             df = df.drop(df.iloc[:, :7].columns, axis=1)
 

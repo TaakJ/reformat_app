@@ -1,3 +1,4 @@
+import re
 import pandas as pd
 import logging
 from .function import CallFunction
@@ -44,29 +45,57 @@ class ModuleBOS(CallFunction):
         logging.info(f'Stop Run Module "{self.module}"\r\n')
         
         return result
-
+    
+    def read_mutiple_file(self, i:int):
+        print(self.logging[i])
+        
+        
+        
     def collect_user(self, i: int, format_file: any) -> dict:
 
-        status = "failed"
+        status = 'failed'
         self.logging[i].update({'function': 'collect_user', 'status': status})
 
-        # self.logging[i].update({"function": "collect_data", "status": status})
-        # sheet_list = [sheet for sheet in format_file.sheet_names()]
+        try:
+            data = []
+            for line in format_file:
+                data += [re.sub(r'(?<!\.),', '||', line.strip()).split('||')]
+            
+            ## set dataframe
+            df = pd.DataFrame(data)
+            df.columns = df.iloc[0].values
+            df = df[1:].apply(lambda row: row.str.strip()).reset_index(drop=True)
+            
+            ## mapping data to column
+            df['branch_code'] = df['branch_code'].apply(lambda row: '{:0>3}'.format(row))
+            df[['Domain', 'user_name']] = df['user_name'].str.extract(r'^(.*?)\\(.*)$')
+            
+            self.read_mutiple_file(i)
+            # df.apply(self.split_column, axis=1, result_type='expand')
+            
+            # set_value = dict.fromkeys(self.logging[i]['columns'], 'NA')
+            # set_value.update({
+            #     'ApplicationCode': 'BOS',
+            #     'AccountOwner': df['user_name'],
+            #     'AccountName': df['user_name'],
+            #     'AccountType': 'USR',
+            #     # 'EntitlementName': df[[4, 6, 5]].apply(lambda row: ';'.join(row), axis=1),
+            #     'AccountStatus': 'A',
+            #     'IsPrivileged': 'N',
+            #     'AccountDescription': df['employee_display_name'],
+            #     'AdditionalAttribute': df['branch_code'],
+            #     'Country': 'TH',
+            # })
+            # df = df.assign(**set_value).fillna('NA')
+            # df = df.drop(df.iloc[:, :7].columns, axis=1)
+            # print(df)
+            
+        except Exception as err:
+            raise Exception(err)
 
-        # data = {}
-        # for sheets in sheet_list:
-        #     cells = format_file.sheet_by_name(sheets)
-        #     for row in range(0, cells.nrows):
-        #         by_sheets = [cells.cell(row, col).value for col in range(cells.ncols)]
-        #         if sheets not in data:
-        #             data[sheets] = [by_sheets]
-        #         else:
-        #             data[sheets].append(by_sheets)
-
-        # status = "succeed"
-        # self.logging[i].update({"status": status})
-
-        # return data
+        # status = 'succeed'
+        # self.logging[i].update({'data': df.to_dict('list'), 'status': status})
+        # logging.info(f'Collect user data, status: {status}')
     
     def collect_param(self, i: int, format_file: any) -> dict:
         
