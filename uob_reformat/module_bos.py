@@ -24,9 +24,8 @@ class ModuleBOS(CallFunction):
             if self.backup is True:
                 self.achieve_backup()
             
-            await self.check_source_file('full_input')
-            print(self.logging)
-            # await self.separate_data_file()
+            await self.check_source_file()
+            await self.separate_data_file()
             # if self.store_tmp is True:
             #     await self.genarate_tmp_file()
             # await self.genarate_target_file()
@@ -48,7 +47,9 @@ class ModuleBOS(CallFunction):
         return result
     
     def read_mutiple_file(self, i:int):
-        print(self.logging[i])
+        
+        full_depend = self.logging[i]['full_depend']
+        print(full_depend)
         
         
     def collect_user(self, i: int, format_file: any) -> dict:
@@ -101,4 +102,3 @@ class ModuleBOS(CallFunction):
         
         status = 'failed'
         self.logging[i].update({'function': 'collect_param', 'status': status})
-        columns = self.logging[i]['columns']
