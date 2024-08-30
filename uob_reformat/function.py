@@ -49,8 +49,7 @@ class CollectParams(ABC):
         output_file = CONFIG[self.module]['output_file']
 
         suffix = self.batch_date.strftime('%Y%m%d')
-        set_dir = lambda dir, file: [(join(dir, x.strip()) if self.write_mode == 'overwrite' or self.manual else join(dir, f"{Path(x.strip()).stem}_{suffix}.csv"))\
-            for x in file.split(',')]
+        set_dir = lambda dir, file: [(join(dir, x.strip()) if self.write_mode == 'overwrite' or self.manual else join(dir, f"{Path(x.strip()).stem}_{suffix}.csv")) for x in file.split(',')]
         
         full_target = set_dir(output_dir, output_file)
         
@@ -83,7 +82,7 @@ class CollectParams(ABC):
                         copy_record = record.copy()
                         copy_record.update(
                             {
-                                'full_input': [files[0]], 
+                                'full_input': files[0], 
                                 'full_target': files[1],
                                 'program': 'USER' if select_num == 1 else 'PARAM', 
                                 'status': status,
@@ -97,7 +96,7 @@ class CollectParams(ABC):
                     else:
                         record.update(
                             {
-                                'full_input': [files[0]], 
+                                'full_input': files[0], 
                                 'full_target': files[1],
                                 'program': 'USER' if select_num == 1 else 'PARAM',
                                 'status': status,

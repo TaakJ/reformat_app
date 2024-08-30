@@ -16,24 +16,24 @@ from .exception import CustomException
 from .setup import Folder
 
 class Convert2File:
-
+            
     async def check_source_file(self) -> None:
         
         logging.info('Check source file')
-        
+
         for record in self.logging:
             record.update({'function': 'check_source_file'})
-            
-            for full_input in record['full_input']:
-                if glob.glob(full_input, recursive=True):
-                    status = 'found'
-                else:
-                    status = 'not_found'
-                    record.update({'err': f'File not found {full_input}'})
-                    
-                record.update({'status': status})
-                logging.info(f"Check source file: {full_input}, for run: {record['program']}, status: {status}")
-            
+
+            # for full_input in record['full_input']:
+            if glob.glob(record['full_input'], recursive=True):
+                status = 'found'
+            else:
+                status = 'not_found'
+                record.update({'err': f'File not found {record['full_input']}'})
+
+            record.update({'status': status})
+            logging.info(f"Check source file: {record['full_input']}, for run: {record['program']}, status: {status}")
+
             if 'err' in record:
                 raise CustomException(err=self.logging)
         
@@ -45,19 +45,20 @@ class Convert2File:
             record.update({'function': 'separate_data_from_file'})
             
             try:
-                for full_input in record['full_input']:
-                    types = Path(full_input).suffix
-                    
-                    if ['.xlsx', '.xls'].__contains__(types):
-                        self.read_excel_file(i, full_input)
-                    else:
-                        self.read_file(i, full_input)
+                full_input = record['full_input']
+                types = Path(full_input).suffix
+                
+                if ['.xlsx', '.xls'].__contains__(types):
+                    self.read_excel_file(i, full_input)
+                else:
+                    self.read_file(i, full_input)
                         
             except Exception as err:
                 record.update({'err': err})
             
             if 'err' in record:
                 raise CustomException(err=self.logging)
+            
             
     def read_excel_file(self, i: int, full_input: str) -> any:
 

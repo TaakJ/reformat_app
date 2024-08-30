@@ -48,8 +48,7 @@ class ModuleBOS(CallFunction):
     
     def read_mutiple_file(self, i:int):
         
-        full_depend = self.logging[i]['full_depend']
-        print(full_depend)
+        print(self.logging[i])
         
         
     def collect_user(self, i: int, format_file: any) -> dict:
