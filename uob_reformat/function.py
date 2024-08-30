@@ -113,7 +113,6 @@ class CollectParams(ABC):
             log += [record]
 
         self.logSetter(log)
-        print(self.logging)
 
         if 'err' in record:
             raise CustomException(err=self.logging)
