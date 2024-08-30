@@ -73,11 +73,12 @@ class CollectParams(ABC):
             else:
                 mapping_list = [(input, target) for input in full_input for target in full_target]
             
+            # 0: input file
+            # 1: target file
             for i, files in enumerate(mapping_list,1):
                 for select_num in [n for n in self.select_files if i == n]:
+                    
                     status = 'succeed'
-                    # 0: input file
-                    # 1: target file
                     if set(('full_input', 'full_target')).issubset(record):
                         copy_record = record.copy()
                         copy_record.update(
