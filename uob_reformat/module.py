@@ -23,8 +23,7 @@ class Convert2File:
 
         for record in self.logging:
             record.update({'function': 'check_source_file'})
-
-            # for full_input in record['full_input']:
+            
             if glob.glob(record['full_input'], recursive=True):
                 status = 'found'
             else:
