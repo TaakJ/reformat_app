@@ -91,7 +91,7 @@ class CollectParams(ABC):
                         )
                         if full_depend != []:
                             copy_record.setdefault('full_depend', full_depend)
-                        
+                            
                         log += [copy_record]
                         
                     else:
@@ -105,7 +105,7 @@ class CollectParams(ABC):
                         )
                         if full_depend != []:
                             record.setdefault('full_depend', full_depend)
-                        
+                            
                         log = [record]
                         
         except Exception as err:

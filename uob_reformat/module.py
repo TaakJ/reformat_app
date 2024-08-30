@@ -17,7 +17,7 @@ from .setup import Folder
 
 class Convert2File:
 
-    async def check_source_file(self, key: str) -> None:
+    async def check_source_file(self, key:str) -> None:
         
         logging.info('Check source file')
         
@@ -29,7 +29,7 @@ class Convert2File:
                     status = 'found'
                 else:
                     status = 'not_found'
-                    record.update({'err': f"File not found {full_input}"})
+                    record.update({'err': f'File not found {full_input}'})
                     
                 record.update({'status': status})
                 logging.info(f"Check source file: {full_input}, for run: {record['program']}, status: {status}")
