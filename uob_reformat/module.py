@@ -17,20 +17,20 @@ from .setup import Folder
 
 class Convert2File:
 
-    async def check_source_file(self) -> None:
+    async def check_source_file(self, key: str) -> None:
         
         logging.info('Check source file')
         
         for record in self.logging:
             record.update({'function': 'check_source_file'})
             
-            for full_input in record['full_input']:
+            for full_input in record[key]:
                 if glob.glob(full_input, recursive=True):
                     status = 'found'
                 else:
                     status = 'not_found'
                     record.update({'err': f"File not found {full_input}"})
-            
+                    
                 record.update({'status': status})
                 logging.info(f"Check source file: {full_input}, for run: {record['program']}, status: {status}")
             
