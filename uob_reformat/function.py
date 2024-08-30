@@ -84,7 +84,7 @@ class CollectParams(ABC):
                         copy_record.update(
                             {
                                 'full_input': [files[0]], 
-                                'full_target': [files[1]],
+                                'full_target': files[1],
                                 'program': 'USER' if select_num == 1 else 'PARAM', 
                                 'status': status,
                             }
@@ -98,7 +98,7 @@ class CollectParams(ABC):
                         record.update(
                             {
                                 'full_input': [files[0]], 
-                                'full_target': [files[1]],
+                                'full_target': files[1],
                                 'program': 'USER' if select_num == 1 else 'PARAM',
                                 'status': status,
                             }
