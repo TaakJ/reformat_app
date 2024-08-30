@@ -50,7 +50,6 @@ class ModuleBOS(CallFunction):
         print(self.logging[i])
         
         
-        
     def collect_user(self, i: int, format_file: any) -> dict:
 
         status = 'failed'
