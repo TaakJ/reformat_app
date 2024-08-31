@@ -3,7 +3,7 @@ disable_existing_loggers: false,
 formatters: 
   verbose: 
     class: logging.Formatter
-    format: "%(asctime)s.%(msecs)03d | %(module)10s | %(levelname)8s | %(funcName)20s | %(message)s"
+    format: "%(asctime)s.%(msecs)03d | %(module)15s | %(levelname)8s | %(funcName)20s | %(message)s"
     datefmt: "%Y/%m/%d %H:%M:%S"
 handlers:
   console:

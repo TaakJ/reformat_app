@@ -24,7 +24,7 @@ class CustomException(Exception):
         return next(self.err_msg)
     
     def setup_errorlog(self,
-        log_format="%(asctime)s.%(msecs)03d | %(module)10s | %(levelname)8s | %(funcName)20s | %(message)s",
+        log_format="%(asctime)s.%(msecs)03d | %(module)15s | %(levelname)8s | %(funcName)20s | %(message)s",
         log_name="", 
         file="log_error.log") -> any:
         
