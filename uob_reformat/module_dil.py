@@ -104,11 +104,16 @@ class ModuleDIL(CallFunction):
             user_df.columns = user_df.iloc[0].values
             user_df = user_df.iloc[1:].apply(lambda row: row.str.strip()).reset_index(drop=True)
             
-            ## mapping data to column
+            # filter value 'LNSIGNET'
             user_df = user_df[user_df['APPCODE'] == 'LNSIGNET'].reset_index(drop=True)
+            
+            # apply the split_column function
             user_df[['NAME', 'DEPARTMENT']] = user_df.apply(self.split_column, axis=1, result_type='expand')
+            
+            # apply the attribute_column function
             user_df['ATTRIBUTE'] = user_df.apply(self.attribute_column, axis=1)
             
+            ## mapping data to column
             set_value = dict.fromkeys(self.logging[i]['columns'], 'NA')
             set_value.update(
                 {
@@ -147,10 +152,13 @@ class ModuleDIL(CallFunction):
             param_df.columns = param_df.iloc[0].values
             param_df = param_df.iloc[1:].apply(lambda row: row.str.strip()).reset_index(drop=True)
             
-            ## mapping data to column
+            # filter value 'LNSIGNET'
             param_df = param_df[param_df['APPCODE'] == 'LNSIGNET'].reset_index(drop=True)
+            
+            # apply the split_column function
             param_df[['NAME', 'DEPARTMENT']] = param_df.apply(self.split_column, axis=1, result_type='expand')
             
+            ## mapping data to column
             set_value = [
                 {
                     'Parameter Name': 'Department',

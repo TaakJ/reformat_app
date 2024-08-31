@@ -49,25 +49,28 @@ class ModuleLMT(CallFunction):
 
     def collect_user(self, i: int, format_file: any) -> dict:
 
-        status = "failed"
-        self.logging[i].update({"function": "collect_user", "status": status})
+        status = 'failed'
+        self.logging[i].update({'function': 'collect_user', 'status': status})
 
         try:
             data = []
             for line in format_file:
-                find_word = line.strip().replace('"', "")
-                data += [re.sub(r"(?<!\.),", ",", "".join(find_word)).split(",")]
+                find_word = line.strip().replace('"', '')
+                data += [re.sub(r"(?<!\.),", ',', ''.join(find_word)).split(',')]
 
             ## set dataframe
             user_df = pd.DataFrame(data)
             user_df.columns = user_df.iloc[0].values
             user_df = user_df.iloc[1:].apply(lambda row: row.str.strip()).reset_index(drop=True)
 
-            ## mapping data to column
+            # Extract column
             user_df[['Domain', 'Username']] = user_df['Username'].str.extract(r'^(.*?)\\(.*)$')
+            
+            # group by column
             user_df = user_df.groupby('Username', sort=False)
             user_df = user_df.agg(lambda row: '+'.join(row.unique())).reset_index()
 
+            ## mapping data to column
             set_value = dict.fromkeys(self.logging[i]['columns'], "NA")
             set_value.update(
                 {

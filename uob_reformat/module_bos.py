@@ -71,9 +71,12 @@ class ModuleBOS(CallFunction):
         self.logging[i].update({'function': 'lookup_depend_file', 'status': status})
         
         try:
+            # set dataframe
             param_df = pd.DataFrame(data)
             param_df.columns = param_df.iloc[0].values
             param_df = param_df.iloc[1:].apply(lambda row: row.str.strip()).reset_index(drop=True)
+            
+            # Extract column
             param_df[['Domain', 'username']] = param_df['username'].str.extract(r'^(.*?)\\(.*)$')
             
         except Exception as err:
@@ -94,22 +97,29 @@ class ModuleBOS(CallFunction):
             for line in format_file:
                 data += [re.sub(r'(?<!\.),', '||', line.strip()).split('||')]
             
-            ## FILE: BOSTH
+            ## FILE: BOSTH 
             user_df = pd.DataFrame(data)
             user_df.columns = user_df.iloc[0].values
             user_df =  user_df.iloc[1:].apply(lambda row: row.str.strip()).reset_index(drop=True)
+            
+            # Leading zeros to make it 3 digits
             user_df['branch_code'] = user_df['branch_code'].apply(lambda row: '{:0>3}'.format(row))
+            
+            # Extract column
             user_df[['Domain', 'username']] = user_df['user_name'].str.extract(r'^(.*?)\\(.*)$')
             
             ## FILE: BOSTH_Param
             param_df = self.lookup_depend_file(i)
             
-            ## merge 2 BOSTH / BOSTH_Param
+            ## merge 2 file BOSTH / BOSTH_Param
             self.logging[i].update({'function': 'collect_user', 'status': status})
             merge_df = reduce(lambda left, right: pd.merge(left, right, on='username', how='inner', validate='m:m'), [user_df, param_df])
+            
+            # group by column
             merge_df = merge_df.groupby('username', sort=False)
             merge_df = merge_df.agg(lambda row: '+'.join(row.unique())).reset_index()
             
+            ## mapping data to column
             set_value = dict.fromkeys(self.logging[i]['columns'], 'NA')
             set_value.update(
                 {
@@ -149,14 +159,18 @@ class ModuleBOS(CallFunction):
             user_df = pd.DataFrame(data)
             user_df.columns = user_df.iloc[0].values
             user_df = user_df.iloc[1:].apply(lambda row: row.str.strip()).reset_index(drop=True)
+            
+            # Leading zeros to make it 3 digits
             user_df['branch_code'] = user_df['branch_code'].apply(lambda row: '{:0>3}'.format(row))
+            
+            # group by column
             user_df = user_df.groupby('branch_code', sort=False)
             user_df = user_df.agg(lambda row: '+'.join(row.unique())).reset_index()
             
             ## FILE: BOSTH_Param
             param_df = self.lookup_depend_file(i)
             
-            ## merge 2 file
+            ## mapping data to column
             self.logging[i].update({'function': 'collect_param', 'status': status})
             set_value = [
                 {
@@ -175,7 +189,6 @@ class ModuleBOS(CallFunction):
                     'Decode value': user_df['branch_name'].unique()
                 },
             ]
-            
             merge_df = pd.DataFrame(set_value)
             merge_df = merge_df.explode(['Code value', 'Decode value']).reset_index(drop=True)
             

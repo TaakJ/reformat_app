@@ -57,31 +57,28 @@ class ModuleADM(CallFunction):
             for line in format_file:
                 data += [re.sub(r'(?<!\.)\|\|', '||', line.strip()).split('||')]
 
-            ## mapping data to column
-            # 0: User-ID
-            # 1: User Full Name
-            # 2: Department code
-            # 3: Employee ID
-            # 4: Group
-            # 5: Zone
-            # 6: Role
-            user_df = pd.DataFrame(data)
+            ## set dataframe
+            columns = ['User-ID','User Full Name','Department code','Employee ID','Group','Zone','Role']
+            user_df = pd.DataFrame(data, columns=columns)
             user_df = user_df.apply(lambda row: row.str.strip()).reset_index(drop=True)
-            user_df = user_df.groupby(0, sort=False)
+            
+            # group by column
+            user_df = user_df.groupby('User-ID', sort=False)
             user_df = user_df.agg(lambda row: '+'.join(row.unique())).reset_index()
 
+            ## mapping data to column
             set_value = dict.fromkeys(self.logging[i]['columns'], 'NA')
             set_value.update(
                 {
                     'ApplicationCode': 'ADM',
-                    'AccountOwner': user_df[0],
-                    'AccountName': user_df[0],
+                    'AccountOwner': user_df['User-ID'],
+                    'AccountName': user_df['User-ID'],
                     'AccountType': 'USR',
-                    'EntitlementName': user_df[[4, 6, 5]].apply(lambda row: ';'.join(row), axis=1),
+                    'EntitlementName': user_df[['Group', 'Role', 'Zone']].apply(lambda row: ';'.join(row), axis=1),
                     'AccountStatus': 'A',
                     'IsPrivileged': 'N',
-                    'AccountDescription': user_df[1],
-                    'AdditionalAttribute': user_df[2],
+                    'AccountDescription': user_df['User Full Name'],
+                    'AdditionalAttribute': user_df['Department code'],
                     'Country': 'TH',
                 }
             )
@@ -105,36 +102,32 @@ class ModuleADM(CallFunction):
             for line in format_file:
                 data += [re.sub(r'(?<!\.)\|\|', '||', line.strip()).split('||')]
 
-            ## mapping data to column
-            # 0: User-ID
-            # 1: User Full Name
-            # 2: Department code
-            # 3: Employee ID
-            # 4: Group
-            # 5: Zone
-            # 6: Role
-            param_df = pd.DataFrame(data)
+            ## set dataframe
+            columns = ['User-ID','User Full Name','Department code','Employee ID','Group','Zone','Role']
+            param_df = pd.DataFrame(data, columns=columns)
             param_df = param_df.apply(lambda row: row.str.strip()).reset_index(drop=True)
+            
+            ## mapping data to column
             set_value = [
                 {
                     'Parameter Name': 'GroupDetail', 
-                    'Code value': param_df[4].unique(), 
-                    'Decode value': param_df[4].unique()
+                    'Code value': param_df['Group'].unique(), 
+                    'Decode value': param_df['Group'].unique()
                 },
                 {
                     'Parameter Name': 'RoleDetail', 
-                    'Code value': param_df[6].unique(), 
-                    'Decode value': param_df[6].unique()
+                    'Code value': param_df['Role'].unique(), 
+                    'Decode value': param_df['Role'].unique()
                 },
                 {
                     'Parameter Name': 'Zone', 
-                    'Code value': param_df[5].unique(), 
-                    'Decode value': param_df[5].unique()
+                    'Code value': param_df['Zone'].unique(), 
+                    'Decode value': param_df['Zone'].unique()
                 },
                 {
                     'Parameter Name': 'Department', 
-                    'Code value': param_df[2].unique(), 
-                    'Decode value': param_df[2].unique()
+                    'Code value': param_df['Department code'].unique(), 
+                    'Decode value': param_df['Department code'].unique()
                 }
             ]
             param_df = pd.DataFrame(set_value)

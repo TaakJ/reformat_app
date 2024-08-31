@@ -72,10 +72,11 @@ class ModuleCUM(CallFunction):
             user_df.columns = user_df.iloc[0].values
             user_df =  user_df.iloc[1:].apply(lambda row: row.str.strip()).reset_index(drop=True)
             
-            ## mapping data to column
+            # group by column
             user_df = user_df.groupby('USER_ID', sort=False)
             user_df = user_df.agg(lambda row: '+'.join(row.unique())).reset_index()
             
+            ## mapping data to column
             set_value = dict.fromkeys(self.logging[i]['columns'], 'NA')
             set_value.update(
                 {
