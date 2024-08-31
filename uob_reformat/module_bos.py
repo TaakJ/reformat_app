@@ -18,7 +18,7 @@ class ModuleBOS(CallFunction):
 
         logging.info(f'Module:"{self.module}"; Manual: "{self.manual}"; Run date: "{self.batch_date}"; Store tmp: "{self.store_tmp}"; Write mode: "{self.write_mode}";')
 
-        result = {"module": self.module, "task": "Completed"}
+        result = {'module': self.module, 'task': 'Completed'}
         try:
             self.colloct_setup()
             
@@ -41,7 +41,7 @@ class ModuleBOS(CallFunction):
                 except StopIteration:
                     break
 
-            result.update({"task": "Uncompleted"})
+            result.update({'task': 'Uncompleted'})
 
         logging.info(f'Stop Run Module "{self.module}"\r\n')
         
@@ -103,7 +103,7 @@ class ModuleBOS(CallFunction):
             
             ## mapping data to column (continue function)
             self.logging[i].update({'function': 'collect_user', 'status': status})
-            merge_df = pd.merge(df, depend_df, on='username', how='left', validate="m:m").replace([None],[''])
+            merge_df = pd.merge(df, depend_df, on='username', how='left', validate='m:m').replace([None],[''])
             merge_df = merge_df.groupby('username', sort=False)
             merge_df = merge_df.agg(lambda row: '+'.join(row.unique())).reset_index()
             
