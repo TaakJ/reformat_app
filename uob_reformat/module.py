@@ -107,8 +107,8 @@ class Convert2File:
         full_target = self.logging[i]['full_target']
         
         if re.search(r"PARAMLIST", full_target) is not None:
-            # columns = ['Parameter Name', 'Code value', 'Decode value']
-            # self.logging[i].update({'columns': columns})
+            columns = ['Parameter Name', 'Code value', 'Decode value']
+            self.logging[i].update({'columns': columns})
             
             self.collect_param(i, format_file)
             

@@ -47,30 +47,38 @@ class ModuleBOS(CallFunction):
         
         return result
     
-    def read_depend_file(self, i: int) -> pd.DataFrame:
+    def lookup_depend_file(self, i: int) -> pd.DataFrame:
+        
+        logging.info('Lookup depend file')
         
         data = []
         for full_depend in self.logging[i]['full_depend']:
-            
             if glob.glob(full_depend, recursive=True):
-                logging.info(f"Check depned file: {full_depend}, for run: {self.logging[i]['program']}, status: 'found'")
-                
                 format_file = self.read_file(i, full_depend)
                 for line in format_file:
                     data += [re.sub(r'(?<!\.),', '||', line.strip()).split('||')]
-                    
-                df = pd.DataFrame(data)
-                df.columns = df.iloc[0].values
-                df = df[1:].apply(lambda row: row.str.strip()).reset_index(drop=True)
-                df['rc_code'] = df['rc_code'].apply(lambda row: '{:0>3}'.format(row))
-                df[['Domain', 'username']] = df['username'].str.extract(r'^(.*?)\\(.*)$')
                 
             else:
                 self.logging[i].update({'err': f'File not found {full_depend}'})
                 
             if 'err' in self.logging[i]:
                 raise CustomException(err=self.logging)
-
+        
+        status = 'failed'
+        self.logging[i].update({'function': 'lookup_depend_file', 'status': status})
+        
+        try:
+            df = pd.DataFrame(data)
+            df.columns = df.iloc[0].values
+            df = df[1:].apply(lambda row: row.str.strip()).reset_index(drop=True)
+            df[['Domain', 'username']] = df['username'].str.extract(r'^(.*?)\\(.*)$')
+            
+        except Exception as err:
+            raise Exception(err)
+        
+        status = 'succeed'
+        self.logging[i].update({'status': status})
+        
         return df
         
     def collect_user(self, i: int, format_file: any) -> dict:
@@ -91,7 +99,7 @@ class ModuleBOS(CallFunction):
             df[['Domain', 'username']] = df['user_name'].str.extract(r'^(.*?)\\(.*)$')
             
             ## set dataframe on depned file
-            depend_df = self.read_depend_file(i)
+            depend_df = self.lookup_depend_file(i)
             
             ## mapping data to column
             merge_df = pd.merge(df, depend_df, on='username', how='left', validate="m:m").replace([None],[''])
@@ -113,7 +121,8 @@ class ModuleBOS(CallFunction):
                     'Country': 'TH',
                 }
             )
-            merge_df = merge_df.assign(**set_value).replace([None],['NA'])
+            merge_df = merge_df.assign(**set_value)
+            print(merge_df)
             merge_df = merge_df.drop(merge_df.iloc[:, :14].columns, axis=1)
             
         except Exception as err:
@@ -143,7 +152,7 @@ class ModuleBOS(CallFunction):
             df = df.agg(lambda row: '+'.join(row.unique())).reset_index()
             
             ## set dataframe on depned file
-            depend_df = self.read_depend_file(i)
+            depend_df = self.lookup_depend_file(i)
             
             set_value = [
                 {
@@ -169,6 +178,6 @@ class ModuleBOS(CallFunction):
         except Exception as err:
             raise Exception(err)
         
-        # status = 'succeed'
-        # self.logging[i].update({'data': merge_df.to_dict('list'), 'status': status})
-        # logging.info(f'Collect param data, status: {status}')
+        status = 'succeed'
+        self.logging[i].update({'data': df.to_dict('list'), 'status': status})
+        logging.info(f'Collect param data, status: {status}')
