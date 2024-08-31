@@ -121,7 +121,7 @@ class ModuleICA(CallFunction):
             tbl_user_df = tbl_user_df.iloc[1:-1].apply(lambda row: row.str.strip()).reset_index(drop=True)
             
             ## FILE: ICAS_TBL_USER_GROUP, ICAS_TBL_USER_BANK_BRANCH, ICAS_TBL_GROUP
-            tbl_user_group_df, tbl_user_bank_df, _ = self.lookup_depend_file(i)
+            tbl_user_group_df, tbl_user_bank_df, _ = self.collect_depend_file(i)
             
             # merge 3 file ICAS_TBL_USER / ICAS_TBL_USER_GROUP
             self.logging[i].update({'function': 'collect_user_file', 'status': status})
@@ -178,7 +178,7 @@ class ModuleICA(CallFunction):
             tbl_user_df = tbl_user_df.iloc[1:-1].apply(lambda row: row.str.strip()).reset_index(drop=True)
             
             ## FILE: ICAS_TBL_USER_GROUP, ICAS_TBL_USER_BANK_BRANCH, ICAS_TBL_GROUP
-            _, tbl_user_bank_df, tbl_tbl_group_df = self.lookup_depend_file(i)
+            _, tbl_user_bank_df, tbl_tbl_group_df = self.collect_depend_file(i)
             
             ## mapping data to column
             self.logging[i].update({'function': 'collect_param_file', 'status': status})

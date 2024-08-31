@@ -27,9 +27,9 @@ class ModuleADM(CallFunction):
 
             await self.check_source_file()
             await self.separate_data_file()
-            # if self.store_tmp is True:
-            #     await self.genarate_tmp_file()
-            # await self.genarate_target_file()
+            if self.store_tmp is True:
+                await self.genarate_tmp_file()
+            await self.genarate_target_file()
 
         except CustomException as err:
             logging.error('See Error Details: log_error.log')
@@ -46,16 +46,6 @@ class ModuleADM(CallFunction):
         logging.info(f"Stop Run Module '{self.module}'\r\n")
 
         return result
-
-    async def collect_user_file(self, i: int, format_file: any):
-        print(0)
-        print(i)
-        print(format_file)
-    
-    async def collect_param_file(self, i: int, format_file: any):
-        print(1)
-        print(i)
-        print(format_file)
     
     def collect_user_file(self, i: int, format_file: any) -> dict:
 

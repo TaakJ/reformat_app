@@ -110,16 +110,13 @@ class Convert2File:
             columns = ['Parameter Name', 'Code value', 'Decode value']
             self.logging[i].update({'columns': columns})
             
-            # self.collect_param(i, format_file)
-            
+            self.collect_param_file(i, format_file)
         else:
             columns = ['ApplicationCode', 'AccountOwner', 'AccountName', 'AccountType', 'EntitlementName', 'SecondEntitlementName', 'ThirdEntitlementName','AccountStatus', 
                         'IsPrivileged', 'AccountDescription', 'CreateDate', 'LastLogin', 'LastUpdatedDate', 'AdditionalAttribute', 'Country']
             self.logging[i].update({'columns': columns})
             
             self.collect_user_file(i, format_file)
-            
-            # self.collect_user(i, format_file)
         
     def comparing_dataframes(self, i: int, df: pd.DataFrame, new_df: pd.DataFrame) -> pd.DataFrame:
         

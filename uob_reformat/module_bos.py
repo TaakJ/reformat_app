@@ -168,7 +168,7 @@ class ModuleBOS(CallFunction):
             user_df = user_df.agg(lambda row: '+'.join(row.unique())).reset_index()
             
             ## FILE: BOSTH_Param
-            param_df = self.lookup_depend_file(i)
+            param_df = self.collect_depend_file(i)
             
             ## mapping data to column
             self.logging[i].update({'function': 'collect_param', 'status': status})

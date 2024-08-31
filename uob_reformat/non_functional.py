@@ -116,20 +116,12 @@ class CollectParams(ABC):
         if 'err' in record:
             raise CustomException(err=self.logging)
 
-    # @abstractmethod
-    # def collect_user_file(self, i: int, format_file: any):
-    #     pass
-    
-    # @abstractmethod
-    # def collect_user_file(self, i: int, format_file: any):
-    #     pass
-    
     @abstractmethod
-    async def collect_user_file(self, i: int, format_file: any):
+    def collect_user_file(self, i: int, format_file: any):
         pass
     
     @abstractmethod
-    async def collect_param_file(self, i: int, format_file: any):
+    def collect_param_file(self, i: int, format_file: any):
         pass
 
 class BackupAndClear:
