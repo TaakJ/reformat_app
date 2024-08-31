@@ -78,15 +78,10 @@ class ModuleICA(CallFunction):
         self.logging[i].update({'function': 'lookup_depend_file', 'status': status})
         try:
             ## TABLE: ICAS_TBL_USER_GROUP
-            # 0: Record_Type
-            # 1: GROUP_ID
-            # 2: USER_ID
-            # 3: CREATE_USER_ID
-            # 4: CREATE_DTM
-            # 5: LAST_UPDATE_USER_ID
-            # 6: LAST_UPDATE_DTM
-            tbl_user_group_df = pd.DataFrame(table['ICAS_TBL_USER_GROUP'])
-            tbl_user_group_df = tbl_user_group_df.iloc[1:-1].apply(lambda row: row.str.strip()).reset_index(drop=True)
+            columns = ['Record_Type', 'GROUP_ID','USER_ID','CREATE_USER_ID','CREATE_DTM','LAST_UPDATE_USER_ID','LAST_UPDATE_DTM']
+            tbl_user_group_df = pd.DataFrame(table['ICAS_TBL_USER_GROUP'], columns=columns)
+            print(tbl_user_group_df)
+            # tbl_user_group_df = tbl_user_group_df.iloc[1:-1].apply(lambda row: row.str.strip()).reset_index(drop=True)
             
             ## TABLE: ICAS_TBL_USER_BANK_BRANCH
             # 0: Record_Type
@@ -137,41 +132,21 @@ class ModuleICA(CallFunction):
             for line in format_file:
                 data += [re.sub(r'(?<!\.)\x07', '||', line.strip()).split('||')]
                 
-            ## set dataframe
-            ## TABLE: ICAS_TBL_USER
-            # 0: Record_Type
-            # 1: USER_ID
-            # 2: LOGIN_NAME
-            # 3: FULL_NAME
-            # 4: PASSWORD
-            # 5: LOCKED_FLAG
-            # 6: FIRST_LOGIN_FLAG
-            # 7: LAST_ACTION_TYPE
-            # 8: CREATE_USER_ID
-            # 9: CREATE_DTM
-            # 10:LAST_UPDATE_USER_ID
-            # 11:LAST_UPDATE_DTM
-            # 12:LAST_LOGIN_ATTEMPT
-            # 13:ACCESS_ALL_BRANCH_FLAG
-            # 14:HOME_BRANCH
-            # 15:HOME_BANK
-            # 16:LOGIN_RETRY_COUNT
-            # 17:LAST_CHANGE_PASSWORD
-            # 18:DELETE_FLAG
-            # 19:LAST_LOGIN_SUCCESS
-            # 20:LAST_LOGIN_FAILED
-            tbl_user_df = pd.DataFrame(data)
+            ## FILE: ICAS_TBL_USER
+            columns = ['Record_Type', 'USER_ID', 'LOGIN_NAME', 'FULL_NAME', 'PASSWORD', 'LOCKED_FLAG', 'FIRST_LOGIN_FLAG', 'LAST_ACTION_TYPE', 'CREATE_USER_ID', 'CREATE_DTM', 
+                        'LAST_UPDATE_USER_ID', 'LAST_UPDATE_DTM', 'LAST_LOGIN_ATTEMPT', 'ACCESS_ALL_BRANCH_FLAG', 'HOME_BRANCH',' HOME_BANK', 'LOGIN_RETRY_COUNT' ,'LAST_CHANGE_PASSWORD',
+                        'DELETE_FLAG', 'LAST_LOGIN_SUCCESS', 'LAST_LOGIN_FAILED']
+            tbl_user_df = pd.DataFrame(data, columns=columns)
             tbl_user_df = tbl_user_df.iloc[1:-1].apply(lambda row: row.str.strip()).reset_index(drop=True)
             
-            ## set dataframe on depend dataframe
             tbl_user_group_df, tbl_user_bank_df, tbl_tbl_group_df = self.lookup_depend_file(i)
-            print(tbl_user_df)
-            print()
-            print(tbl_user_group_df)
-            print()
-            print(tbl_user_bank_df)
-            print()
-            print(tbl_tbl_group_df)
+            
+            ## mapping data to column (continue function)
+            # self.logging[i].update({'function': 'collect_user', 'status': status})
+            # merge_user_df = pd.merge(tbl_user_df, tbl_user_group_df, on='USER_ID', how='left', validate='m:m').replace([None],[''])
+            
+            #  print(merge_user_df[1_y])
+
 
         except Exception as err:
             raise Exception(err)

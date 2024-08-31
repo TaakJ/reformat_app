@@ -91,17 +91,17 @@ class ModuleBOS(CallFunction):
             for line in format_file:
                 data += [re.sub(r'(?<!\.),', '||', line.strip()).split('||')]
             
-            ## set dataframe on main dataframe
+            ## FILE: BOSTH
             user_df = pd.DataFrame(data)
             user_df.columns = user_df.iloc[0].values
             user_df =  user_df.iloc[1:].apply(lambda row: row.str.strip()).reset_index(drop=True)
             user_df['branch_code'] = user_df['branch_code'].apply(lambda row: '{:0>3}'.format(row))
             user_df[['Domain', 'username']] = user_df['user_name'].str.extract(r'^(.*?)\\(.*)$')
             
-            ## set dataframe on depend dataframe
+            ## FILE: BOSTH_Param
             param_df = self.lookup_depend_file(i)
             
-            ## mapping data to column (continue function)
+            ## merge 2 file
             self.logging[i].update({'function': 'collect_user', 'status': status})
             merge_df = pd.merge(user_df, param_df, on='username', how='left', validate='m:m').replace([None],[''])
             merge_df = merge_df.groupby('username', sort=False)
@@ -142,7 +142,7 @@ class ModuleBOS(CallFunction):
             for line in format_file:
                 data += [re.sub(r'(?<!\.),', '||', line.strip()).split('||')]
             
-            ## set dataframe on main dataframe
+            ## FILE: BOSTH
             user_df = pd.DataFrame(data)
             user_df.columns = user_df.iloc[0].values
             user_df = user_df.iloc[1:].apply(lambda row: row.str.strip()).reset_index(drop=True)
@@ -150,10 +150,10 @@ class ModuleBOS(CallFunction):
             user_df = user_df.groupby('branch_code', sort=False)
             user_df = user_df.agg(lambda row: '+'.join(row.unique())).reset_index()
             
-            ## set dataframe on depend dataframe
+            ## FILE: BOSTH_Param
             param_df = self.lookup_depend_file(i)
             
-            ## mapping data to column (continue function)
+            ## merge 2 file
             self.logging[i].update({'function': 'collect_param', 'status': status})
             set_value = [
                 {
