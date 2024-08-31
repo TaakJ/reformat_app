@@ -2,6 +2,7 @@ import re
 import glob
 from pathlib import Path
 import pandas as pd
+from functools import reduce
 import logging
 from .non_functional import CallFunction
 from .exception import CustomException
@@ -87,7 +88,7 @@ class ModuleICA(CallFunction):
             tbl_user_bank_df = pd.DataFrame(table['ICAS_TBL_USER_BANK_BRANCH'], columns=columns)
             tbl_user_bank_df = tbl_user_bank_df.iloc[1:-1].apply(lambda row: row.str.strip()).reset_index(drop=True)
             
-            ## TABLE: ICAS_TBL_USER_GROUP
+            ## TABLE: ICAS_TBL_GROUP
             columns = ['Record_Type','GROUP_ID','SUB_SYSTEM_ID','GROUP_NAME','RESTRICTION','ABLE_TO_REVERIFY_FLAG','DESCRIPTION','DEFAULT_FINAL_RESULT','DELETE_FLAG','CREATE_USER_ID',
                         'CREATE_DTM','LAST_UPDATE_USER_ID','LAST_UPDATE_DTM','DELETE_DTM']
             tbl_tbl_group_df = pd.DataFrame(table['ICAS_TBL_GROUP'], columns=columns)
@@ -118,16 +119,20 @@ class ModuleICA(CallFunction):
             tbl_user_df = pd.DataFrame(data, columns=columns)
             tbl_user_df = tbl_user_df.iloc[1:-1].apply(lambda row: row.str.strip()).reset_index(drop=True)
             
-            ## FILE: ICAS_TBL_USER_GROUP, ICAS_TBL_USER_BANK_BRANCH, ICAS_TBL_USER_GROUP
+            ## FILE: ICAS_TBL_USER_GROUP, ICAS_TBL_USER_BANK_BRANCH, ICAS_TBL_GROUP
             tbl_user_group_df, tbl_user_bank_df, tbl_tbl_group_df = self.lookup_depend_file(i)
             
-            ## merge 2 file
+            ## merge 2 file ICAS_TBL_USER / ICAS_TBL_USER_GROUP
             self.logging[i].update({'function': 'collect_user', 'status': status})
-            merge_user_df = pd.merge(tbl_user_df, tbl_user_group_df, on='USER_ID', how='inner', validate='m:m').replace([None],[''])
-            merge_user_df = merge_user_df.groupby('USER_ID', sort=False)
-            merge_user_df = merge_user_df.agg(lambda row: '+'.join(row.unique())).reset_index()
-            print(merge_user_df['GROUP_ID'])
-
+            merge_df = reduce(lambda left, right: pd.merge(left, right, on='USER_ID', how='inner', validate='m:m'), [tbl_user_df, tbl_user_group_df, tbl_user_bank_df])
+            merge_df = merge_df.groupby('USER_ID', sort=False)
+            merge_df = merge_df.agg(lambda row: '+'.join(row.unique())).reset_index()
+            print(merge_df)
+            # print(merge_user_df[['LOGIN_NAME', "GROUP_ID", "LOCKED_FLAG"]])
+            # a =  merge_df['LOCKED_FLAG'].apply(lambda x: 'A' if x == '0' else 'D')
+            # print(a)
+            
+            
 
         except Exception as err:
             raise Exception(err)

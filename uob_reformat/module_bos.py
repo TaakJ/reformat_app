@@ -1,9 +1,11 @@
 import re
 import glob
 import pandas as pd
+from functools import reduce
 import logging
 from .non_functional import CallFunction
 from .exception import CustomException
+
 
 class ModuleBOS(CallFunction):
 
@@ -101,9 +103,9 @@ class ModuleBOS(CallFunction):
             ## FILE: BOSTH_Param
             param_df = self.lookup_depend_file(i)
             
-            ## merge 2 file
+            ## merge 2 BOSTH / BOSTH_Param
             self.logging[i].update({'function': 'collect_user', 'status': status})
-            merge_df = pd.merge(user_df, param_df, on='username', how='inner', validate='m:m').replace([None],[''])
+            merge_df = reduce(lambda left, right: pd.merge(left, right, on='username', how='inner', validate='m:m'), [user_df, param_df])
             merge_df = merge_df.groupby('username', sort=False)
             merge_df = merge_df.agg(lambda row: '+'.join(row.unique())).reset_index()
             
