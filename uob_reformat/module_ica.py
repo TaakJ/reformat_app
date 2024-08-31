@@ -160,11 +160,13 @@ class ModuleICA(CallFunction):
             # 18:DELETE_FLAG
             # 19:LAST_LOGIN_SUCCESS
             # 20:LAST_LOGIN_FAILED
-            df = pd.DataFrame(data)
-            df = df.iloc[1:-1].apply(lambda row: row.str.strip()).reset_index(drop=True)
+            tbl_user_df = pd.DataFrame(data)
+            tbl_user_df = tbl_user_df.iloc[1:-1].apply(lambda row: row.str.strip()).reset_index(drop=True)
             
             ## set dataframe on depend dataframe
             tbl_user_group_df, tbl_user_bank_df, tbl_tbl_group_df = self.lookup_depend_file(i)
+            print(tbl_user_df)
+            print()
             print(tbl_user_group_df)
             print()
             print(tbl_user_bank_df)
