@@ -27,9 +27,9 @@ class ModuleBOS(CallFunction):
             
             await self.check_source_file()
             await self.separate_data_file()
-            # if self.store_tmp is True:
-            #     await self.genarate_tmp_file()
-            # await self.genarate_target_file()
+            if self.store_tmp is True:
+                await self.genarate_tmp_file()
+            await self.genarate_target_file()
 
         except CustomException as err:
             logging.error('See Error Details: log_error.log')
@@ -91,17 +91,18 @@ class ModuleBOS(CallFunction):
             for line in format_file:
                 data += [re.sub(r'(?<!\.),', '||', line.strip()).split('||')]
             
-            ## set dataframe on main file
+            ## set dataframe on main dataframe
             df = pd.DataFrame(data)
             df.columns = df.iloc[0].values
             df = df[1:].apply(lambda row: row.str.strip()).reset_index(drop=True)
             df['branch_code'] = df['branch_code'].apply(lambda row: '{:0>3}'.format(row))
             df[['Domain', 'username']] = df['user_name'].str.extract(r'^(.*?)\\(.*)$')
             
-            ## set dataframe on depned file
+            ## set dataframe on depend dataframe
             depend_df = self.lookup_depend_file(i)
             
-            ## mapping data to column
+            ## mapping data to column (continue function)
+            self.logging[i].update({'function': 'collect_user', 'status': status})
             merge_df = pd.merge(df, depend_df, on='username', how='left', validate="m:m").replace([None],[''])
             merge_df = merge_df.groupby('username', sort=False)
             merge_df = merge_df.agg(lambda row: '+'.join(row.unique())).reset_index()
@@ -122,7 +123,6 @@ class ModuleBOS(CallFunction):
                 }
             )
             merge_df = merge_df.assign(**set_value)
-            print(merge_df)
             merge_df = merge_df.drop(merge_df.iloc[:, :14].columns, axis=1)
             
         except Exception as err:
@@ -142,18 +142,19 @@ class ModuleBOS(CallFunction):
             for line in format_file:
                 data += [re.sub(r'(?<!\.),', '||', line.strip()).split('||')]
             
-            ## set dataframe on main file
+            ## set dataframe on main dataframe
             df = pd.DataFrame(data)
             df.columns = df.iloc[0].values
             df = df[1:].apply(lambda row: row.str.strip()).reset_index(drop=True)
             df['branch_code'] = df['branch_code'].apply(lambda row: '{:0>3}'.format(row))
-            
             df = df.groupby('branch_code', sort=False)
             df = df.agg(lambda row: '+'.join(row.unique())).reset_index()
             
-            ## set dataframe on depned file
+            ## set dataframe on depend dataframe
             depend_df = self.lookup_depend_file(i)
             
+            ## mapping data to column (continue function)
+            self.logging[i].update({'function': 'collect_param', 'status': status})
             set_value = [
                 {
                     'Parameter Name': 'Security roles', 
