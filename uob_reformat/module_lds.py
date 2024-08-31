@@ -83,7 +83,7 @@ class ModuleLDS(CallFunction):
             ## set dataframe
             user_df = pd.DataFrame(clean_data)
             user_df.columns = user_df.iloc[0].values
-            user_df = user_df.iloc[1:-1].apply(lambda row: row.str.strip()).reset_index(drop=True)
+            user_df = user_df.iloc[1:-1, :-1].apply(lambda row: row.str.strip()).reset_index(drop=True)
             
             ## mapping data to column
             set_value = dict.fromkeys(self.logging[i]['columns'], 'NA')
@@ -103,7 +103,7 @@ class ModuleLDS(CallFunction):
                 }
             )
             user_df = user_df.assign(**set_value)
-            user_df = user_df.drop(user_df.iloc[:,:33].columns, axis=1)
+            user_df = user_df.drop(user_df.iloc[:,:32].columns, axis=1)
             
         except Exception as err:
             raise Exception(err)
