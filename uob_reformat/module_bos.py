@@ -103,7 +103,7 @@ class ModuleBOS(CallFunction):
             
             ## merge 2 file
             self.logging[i].update({'function': 'collect_user', 'status': status})
-            merge_df = pd.merge(user_df, param_df, on='username', how='left', validate='m:m').replace([None],[''])
+            merge_df = pd.merge(user_df, param_df, on='username', how='inner', validate='m:m').replace([None],[''])
             merge_df = merge_df.groupby('username', sort=False)
             merge_df = merge_df.agg(lambda row: '+'.join(row.unique())).reset_index()
             

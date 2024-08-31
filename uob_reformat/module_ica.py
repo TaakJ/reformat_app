@@ -77,41 +77,20 @@ class ModuleICA(CallFunction):
         status = 'failed'
         self.logging[i].update({'function': 'lookup_depend_file', 'status': status})
         try:
-            ## TABLE: ICAS_TBL_USER_GROUP
+            ## FILE: ICAS_TBL_USER_GROUP
             columns = ['Record_Type', 'GROUP_ID','USER_ID','CREATE_USER_ID','CREATE_DTM','LAST_UPDATE_USER_ID','LAST_UPDATE_DTM']
             tbl_user_group_df = pd.DataFrame(table['ICAS_TBL_USER_GROUP'], columns=columns)
-            print(tbl_user_group_df)
-            # tbl_user_group_df = tbl_user_group_df.iloc[1:-1].apply(lambda row: row.str.strip()).reset_index(drop=True)
+            tbl_user_group_df = tbl_user_group_df.iloc[1:-1].apply(lambda row: row.str.strip()).reset_index(drop=True)
             
-            ## TABLE: ICAS_TBL_USER_BANK_BRANCH
-            # 0: Record_Type
-            # 1: USER_ID
-            # 2: BANK_CODE
-            # 3: BRANCH_CODE
-            # 4: SUB_SYSTEM_ID
-            # 5: ACCESS_ALL_BRANCH_IN_HUB
-            # 6: DEFAULT_BRANCH_FLAG
-            # 7: CREATE_USER_ID
-            # 8: CREATE_DTM
-            tbl_user_bank_df = pd.DataFrame(table['ICAS_TBL_USER_BANK_BRANCH'])
+            ## FILE: ICAS_TBL_USER_BANK_BRANCH
+            columns = ['Record_Type','USER_ID','BANK_CODE','BRANCH_CODE','SUB_SYSTEM_ID','ACCESS_ALL_BRANCH_IN_HUB','DEFAULT_BRANCH_FLAG','CREATE_USER_ID','CREATE_DTM']
+            tbl_user_bank_df = pd.DataFrame(table['ICAS_TBL_USER_BANK_BRANCH'], columns=columns)
             tbl_user_bank_df = tbl_user_bank_df.iloc[1:-1].apply(lambda row: row.str.strip()).reset_index(drop=True)
             
             ## TABLE: ICAS_TBL_USER_GROUP
-            # 0: Record_Type
-            # 1: GROUP_ID
-            # 2: SUB_SYSTEM_ID
-            # 3: GROUP_NAME
-            # 4: RESTRICTION
-            # 5: ABLE_TO_REVERIFY_FLAG
-            # 6: DESCRIPTION
-            # 7: DEFAULT_FINAL_RESULT
-            # 8: DELETE_FLAG
-            # 9: CREATE_USER_ID
-            # 10:CREATE_DTM
-            # 11:LAST_UPDATE_USER_ID
-            # 12:LAST_UPDATE_DTM
-            # 13:DELETE_DTM
-            tbl_tbl_group_df = pd.DataFrame(table['ICAS_TBL_GROUP'])
+            columns = ['Record_Type','GROUP_ID','SUB_SYSTEM_ID','GROUP_NAME','RESTRICTION','ABLE_TO_REVERIFY_FLAG','DESCRIPTION','DEFAULT_FINAL_RESULT','DELETE_FLAG','CREATE_USER_ID',
+                        'CREATE_DTM','LAST_UPDATE_USER_ID','LAST_UPDATE_DTM','DELETE_DTM']
+            tbl_tbl_group_df = pd.DataFrame(table['ICAS_TBL_GROUP'], columns=columns)
             tbl_tbl_group_df = tbl_tbl_group_df.iloc[1:-1].apply(lambda row: row.str.strip()).reset_index(drop=True)
             
         except Exception as err:
@@ -139,13 +118,15 @@ class ModuleICA(CallFunction):
             tbl_user_df = pd.DataFrame(data, columns=columns)
             tbl_user_df = tbl_user_df.iloc[1:-1].apply(lambda row: row.str.strip()).reset_index(drop=True)
             
+            ## FILE: ICAS_TBL_USER_GROUP, ICAS_TBL_USER_BANK_BRANCH, ICAS_TBL_USER_GROUP
             tbl_user_group_df, tbl_user_bank_df, tbl_tbl_group_df = self.lookup_depend_file(i)
             
-            ## mapping data to column (continue function)
-            # self.logging[i].update({'function': 'collect_user', 'status': status})
-            # merge_user_df = pd.merge(tbl_user_df, tbl_user_group_df, on='USER_ID', how='left', validate='m:m').replace([None],[''])
-            
-            #  print(merge_user_df[1_y])
+            ## merge 2 file
+            self.logging[i].update({'function': 'collect_user', 'status': status})
+            merge_user_df = pd.merge(tbl_user_df, tbl_user_group_df, on='USER_ID', how='inner', validate='m:m').replace([None],[''])
+            merge_user_df = merge_user_df.groupby('USER_ID', sort=False)
+            merge_user_df = merge_user_df.agg(lambda row: '+'.join(row.unique())).reset_index()
+            print(merge_user_df['GROUP_ID'])
 
 
         except Exception as err:
