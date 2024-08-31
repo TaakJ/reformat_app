@@ -84,6 +84,7 @@ class ModuleLDS(CallFunction):
             df = pd.DataFrame(clean_data)
             df.columns = df.iloc[0].values
             df = df.iloc[1:-1].apply(lambda row: row.str.strip()).reset_index(drop=True)
+            
             print(df)
             
             ## mapping data to column

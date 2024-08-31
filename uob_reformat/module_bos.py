@@ -54,10 +54,10 @@ class ModuleBOS(CallFunction):
         data = []
         for full_depend in self.logging[i]['full_depend']:
             if glob.glob(full_depend, recursive=True):
+                
                 format_file = self.read_file(i, full_depend)
                 for line in format_file:
                     data += [re.sub(r'(?<!\.),', '||', line.strip()).split('||')]
-                
             else:
                 self.logging[i].update({'err': f'File not found {full_depend}'})
                 
