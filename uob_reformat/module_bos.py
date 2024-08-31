@@ -51,8 +51,9 @@ class ModuleBOS(CallFunction):
         
         logging.info('Lookup depend file')
         
-        data = []
         for full_depend in self.logging[i]['full_depend']:
+            
+            data = []
             if glob.glob(full_depend, recursive=True):
                 
                 format_file = self.read_file(i, full_depend)

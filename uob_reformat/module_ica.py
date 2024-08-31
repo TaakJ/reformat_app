@@ -54,19 +54,21 @@ class ModuleICA(CallFunction):
         logging.info('Lookup depend file')
         
         table = {}
-        data = []
         for full_depend in self.logging[i]['full_depend']:
+            
+            data = []
             if glob.glob(full_depend, recursive=True):
                 
                 format_file = self.read_file(i, full_depend)
-                for line in format_file:
-                    data += [re.sub(r'(?<!\.)\x07', '||', line.strip()).split('||')]
+                # for line in format_file:
+                    # data += [re.sub(r'(?<!\.)\x07', '||', line.strip()).split('||')]
+                data += [1]
                 
-                filename = Path(full_depend).name
-                if filename in table:
-                    table[filename].extend(data)
+                table_name = Path(full_depend).name
+                if table_name in table:
+                    table[table_name].extend(data)
                 else:
-                    table[filename] = data
+                    table[table_name] = data
             else:
                 self.logging[i].update({'err': f'File not found {full_depend}'})
                 
@@ -77,6 +79,8 @@ class ModuleICA(CallFunction):
         self.logging[i].update({'function': 'lookup_depend_file', 'status': status})
         
         try:
+            print(table.keys())
+            print(table)
             ## TABLE: ICAS_TBL_USER_GROUP
             # 0: Record_Type
             # 1: GROUP_ID
@@ -85,9 +89,9 @@ class ModuleICA(CallFunction):
             # 4: CREATE_DTM
             # 5: LAST_UPDATE_USER_ID
             # 6: LAST_UPDATE_DTM
-            tbl_user_group_df = pd.DataFrame(table['ICAS_TBL_USER_GROUP'])
-            tbl_user_group_df = tbl_user_group_df.iloc[1:-1].apply(lambda row: row.str.strip()).reset_index(drop=True)
-            print(tbl_user_group_df)
+            # tbl_user_group_df = pd.DataFrame(table['ICAS_TBL_USER_GROUP'])
+            #tbl_user_group_df = tbl_user_group_df.iloc[1:-1].apply(lambda row: row.str.strip()).reset_index(drop=True)
+            #print(tbl_user_group_df)
             
             ## TABLE: ICAS_TBL_USER_BANK_BRANCH
             # 0: Record_Type
@@ -99,9 +103,9 @@ class ModuleICA(CallFunction):
             # 6: DEFAULT_BRANCH_FLAG
             # 7: CREATE_USER_ID
             # 8: CREATE_DTM
-            tbl_user_bank_df = pd.DataFrame(table['ICAS_TBL_USER_BANK_BRANCH'])
-            tbl_user_bank_df = tbl_user_bank_df.iloc[1:-1].apply(lambda row: row.str.strip()).reset_index(drop=True)
-            print(tbl_user_bank_df)
+            # tbl_user_bank_df = pd.DataFrame(table['ICAS_TBL_USER_BANK_BRANCH'])
+            # tbl_user_bank_df = tbl_user_bank_df.iloc[1:-1].apply(lambda row: row.str.strip()).reset_index(drop=True)
+            # print(tbl_user_bank_df)
             
             
             ## TABLE: ICAS_TBL_USER_GROUP
