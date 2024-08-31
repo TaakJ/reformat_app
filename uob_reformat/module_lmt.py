@@ -127,7 +127,7 @@ class ModuleLMT(CallFunction):
                     'Decode value': df['ProgramTemplate'].unique(),
                 },
             ]
-            df = pd.DataFrame(set_value).replace([None],['NA'])
+            df = pd.DataFrame(set_value)
             df = df.explode(['Code value', 'Decode value']).reset_index(drop=True)
 
         except Exception as err:
