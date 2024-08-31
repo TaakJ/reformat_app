@@ -117,15 +117,33 @@ class CollectParams(ABC):
             raise CustomException(err=self.logging)
 
     @abstractmethod
-    def collect_user_file(self, i: int, format_file: any):
+    def collect_user_file(self, i: int, format_file: any) -> None:
         pass
     
     @abstractmethod
-    def collect_param_file(self, i: int, format_file: any):
+    def collect_param_file(self, i: int, format_file: any) -> None:
         pass
 
 class BackupAndClear:
+    
+    def clear_target(self) -> None:
+        print("OK")
+        
+    def clear_tmp(self) -> None:
+        try:
+            tmp_dir = join(Folder.TMP, self.module)
 
+            for date_dir in os.listdir(tmp_dir):
+                if date_dir < self.date.strftime('%Y%m%d'):
+                    tmp_file = join(tmp_dir, date_dir)
+                    shutil.rmtree(tmp_file)
+
+                    state = "succeed"
+                    logging.info(f"Clear Tmp file: {tmp_file} status: {state}")
+
+        except OSError:
+            pass
+    
     def achieve_backup(self) -> None:
 
         self.root_dir = join(Folder.BACKUP, self.module)
@@ -161,7 +179,7 @@ class BackupAndClear:
             else:
                 self.genarate_backup_file(record)
             
-    def genarate_backup_file(self, record):
+    def genarate_backup_file(self, record) -> None:
         status = "skipped"
         if glob.glob(record['full_target'], recursive=True):
             try:        
@@ -179,7 +197,7 @@ class BackupAndClear:
         else:
             logging.info(f"No target file {record['full_target']}, status {status}")
 
-    def backup_zip_file(self):
+    def backup_zip_file(self) -> None:
 
         self.bk_date = self.date - timedelta(days=1)
         self._bk_date = self.bk_date.strftime('%Y%m%d')
@@ -208,20 +226,5 @@ class BackupAndClear:
         except OSError:
             pass
         
-    def clear_tmp(self) -> None:
-        try:
-            tmp_dir = join(Folder.TMP, self.module)
-
-            for date_dir in os.listdir(tmp_dir):
-                if date_dir < self.date.strftime('%Y%m%d'):
-                    tmp_file = join(tmp_dir, date_dir)
-                    shutil.rmtree(tmp_file)
-
-                    state = "succeed"
-                    logging.info(f"Clear Tmp file: {tmp_file} status: {state}")
-
-        except OSError:
-            pass
-
 class CallFunction(Convert2File, CollectLog, CollectParams, BackupAndClear):
     pass
