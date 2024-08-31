@@ -95,7 +95,7 @@ class ModuleDOC(CallFunction):
             ## set dataframe
             df = pd.DataFrame(clean_data)
             df.columns = df.iloc[0].values
-            df = df[1:].apply(lambda row: row.str.strip()).reset_index(drop=True)
+            df = df.iloc[1:].apply(lambda row: row.str.strip()).reset_index(drop=True)
             
             ## mapping data to column
             df = df[df['APPCODE'] == 'LOAN'].reset_index(drop=True)

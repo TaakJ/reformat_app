@@ -70,7 +70,7 @@ class ModuleBOS(CallFunction):
         try:
             df = pd.DataFrame(data)
             df.columns = df.iloc[0].values
-            df = df[1:].apply(lambda row: row.str.strip()).reset_index(drop=True)
+            df = df.iloc[1:].apply(lambda row: row.str.strip()).reset_index(drop=True)
             df[['Domain', 'username']] = df['username'].str.extract(r'^(.*?)\\(.*)$')
             
         except Exception as err:
@@ -94,7 +94,7 @@ class ModuleBOS(CallFunction):
             ## set dataframe on main dataframe
             df = pd.DataFrame(data)
             df.columns = df.iloc[0].values
-            df = df[1:].apply(lambda row: row.str.strip()).reset_index(drop=True)
+            df =  df.iloc[1:].apply(lambda row: row.str.strip()).reset_index(drop=True)
             df['branch_code'] = df['branch_code'].apply(lambda row: '{:0>3}'.format(row))
             df[['Domain', 'username']] = df['user_name'].str.extract(r'^(.*?)\\(.*)$')
             

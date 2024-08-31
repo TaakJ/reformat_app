@@ -26,9 +26,9 @@ class ModuleLDS(CallFunction):
             
             await self.check_source_file()
             await self.separate_data_file()
-            if self.store_tmp is True:
-                await self.genarate_tmp_file()
-            await self.genarate_target_file()
+            # if self.store_tmp is True:
+            #     await self.genarate_tmp_file()
+            # await self.genarate_target_file()
 
         except CustomException as err:
             logging.error('See Error Details: log_error.log')
@@ -83,11 +83,8 @@ class ModuleLDS(CallFunction):
             ## set dataframe
             df = pd.DataFrame(clean_data)
             df.columns = df.iloc[0].values
-            df = df[1:].apply(lambda row: row.str.strip()).reset_index(drop=True)
-            
-            
-            # Remove the last record
-            df.drop(df.tail(1).index, inplace=True)
+            df = df.iloc[1:-1].apply(lambda row: row.str.strip()).reset_index(drop=True)
+            print(df)
             
             ## mapping data to column
             set_value = dict.fromkeys(self.logging[i]['columns'], 'NA')

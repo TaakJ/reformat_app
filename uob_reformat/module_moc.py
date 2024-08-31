@@ -60,7 +60,7 @@ class ModuleMOC(CallFunction):
             ## mapping data
             df = pd.DataFrame(data)
             df.columns = df.iloc[0].values
-            df = df[1:].apply(lambda row: row.str.strip()).reset_index(drop=True)
+            df = df.iloc[1:].apply(lambda row: row.str.strip()).reset_index(drop=True)
             
         except Exception as err:
             raise Exception(err)
@@ -83,7 +83,7 @@ class ModuleMOC(CallFunction):
             ## mapping data to column
             df = pd.DataFrame(data)
             df.columns = df.iloc[0].values
-            df = df[1:].apply(lambda row: row.str.strip()).reset_index(drop=True)
+            df = df.iloc[1:].apply(lambda row: row.str.strip()).reset_index(drop=True)
             
         except Exception as err:
             raise Exception(err)

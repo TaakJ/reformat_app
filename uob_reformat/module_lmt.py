@@ -61,7 +61,7 @@ class ModuleLMT(CallFunction):
             ## set dataframe
             df = pd.DataFrame(data)
             df.columns = df.iloc[0].values
-            df = df[1:].apply(lambda row: row.str.strip()).reset_index(drop=True)
+            df = df.iloc[1:].apply(lambda row: row.str.strip()).reset_index(drop=True)
 
             ## mapping data to column
             df[['Domain', 'Username']] = df['Username'].str.extract(r'^(.*?)\\(.*)$')
@@ -107,7 +107,7 @@ class ModuleLMT(CallFunction):
             ## set dataframe
             df = pd.DataFrame(data)
             df.columns = df.iloc[0].values
-            df = df[1:].apply(lambda row: row.str.strip()).reset_index(drop=True)
+            df = df.iloc[1:].apply(lambda row: row.str.strip()).reset_index(drop=True)
             
             ## mapping data to column
             set_value = [
