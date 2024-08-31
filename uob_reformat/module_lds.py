@@ -150,7 +150,7 @@ class ModuleLDS(CallFunction):
                     'Decode value': df['CostCenterName'].unique(),
                 },
             ]
-            df = pd.DataFrame(set_value).replace([None],['NA'])
+            df = pd.DataFrame(set_value)
             df = df.explode(['Code value', 'Decode value']).reset_index(drop=True)
 
         except Exception as err:

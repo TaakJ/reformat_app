@@ -235,7 +235,7 @@ class Convert2File:
                 tmp_df = pd.DataFrame(data, columns=columns).replace([None], [''])
                 
                 ## Set dataframe from raw file      
-                raw_df = pd.DataFrame(record['data'])
+                raw_df = pd.DataFrame(record['data']).replace([None],['NA'])
                 
                 ## Validate data change row by row
                 cmp_df = self.comparing_dataframes(i, tmp_df, raw_df)
@@ -345,7 +345,7 @@ class Convert2File:
                     columns = next(data)[0:]
                     new_df = pd.DataFrame(data, columns=columns).replace([None], [''])
                 else:
-                    new_df = pd.DataFrame(record['data'])
+                    new_df = pd.DataFrame(record['data']).replace([None],['NA'])
                     
                 ## Set dataframe from target file
                 try:

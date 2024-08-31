@@ -81,7 +81,7 @@ class ModuleIIC(CallFunction):
                 data += [re.sub(r'(?<!\.),', ',', ''.join(find_word)).split(',')]
 
             ## mapping data to column
-            df = pd.DataFrame(data).replace([None],['NA'])
+            df = pd.DataFrame(data)
             df.columns = df.iloc[0].values
             df = df[1:].apply(lambda row: row.str.strip()).reset_index(drop=True)
             

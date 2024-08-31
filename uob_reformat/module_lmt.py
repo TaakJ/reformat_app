@@ -83,7 +83,7 @@ class ModuleLMT(CallFunction):
                     'Country': 'TH',
                 }
             )
-            df = df.assign(**set_value).replace([None],['NA'])
+            df = df.assign(**set_value)
             df = df.drop(df.iloc[:, :8].columns, axis=1)
 
         except Exception as err:

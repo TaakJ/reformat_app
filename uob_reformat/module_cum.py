@@ -93,7 +93,7 @@ class ModuleCUM(CallFunction):
                     'Country': 'TH'
                 }
             )
-            df = df.assign(**set_value).replace([None],['NA'])
+            df = df.assign(**set_value)
             df = df.drop(df.iloc[:,:14].columns, axis=1)
             
         except Exception as err:
@@ -130,7 +130,7 @@ class ModuleCUM(CallFunction):
                     'Decode value': df['DEPARTMENT'].unique(),
                 },
             ]
-            df = pd.DataFrame(set_value).replace([None],['NA'])
+            df = pd.DataFrame(set_value)
             df = df.explode(['Code value', 'Decode value']).reset_index(drop=True)
             
         except Exception as err:

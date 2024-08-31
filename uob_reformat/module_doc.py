@@ -116,7 +116,7 @@ class ModuleDOC(CallFunction):
                     'Country': "TH"
                 }
             )
-            df = df.assign(**set_value).replace([None],['NA'])
+            df = df.assign(**set_value)
             df = df.drop(df.iloc[:,:12].columns, axis=1)
             
         except Exception as err:
@@ -145,7 +145,7 @@ class ModuleDOC(CallFunction):
                     "Decode value": ['Inquiry', 'Admin', 'Index + Scan'],
                 },
             ]
-            df = pd.DataFrame(set_value).replace([None],['NA'])
+            df = pd.DataFrame(set_value)
             df = df.explode(['Code value', 'Decode value']).reset_index(drop=True)
             
         except Exception as err:

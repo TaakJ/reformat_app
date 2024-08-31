@@ -95,7 +95,7 @@ class ModuleBOS(CallFunction):
             
             ## mapping data to column
             merge_df = pd.merge(df, depend_df, on='username', how='left', validate="m:m").replace([None],[''])
-            merge_df = merge_df.groupby(['username', 'branch_code'], sort=False)
+            merge_df = merge_df.groupby('username', sort=False)
             merge_df = merge_df.agg(lambda row: '+'.join(row.unique())).reset_index()
             
             set_value = dict.fromkeys(self.logging[i]['columns'], 'NA')
@@ -119,11 +119,56 @@ class ModuleBOS(CallFunction):
         except Exception as err:
             raise Exception(err)
 
-        # status = 'succeed'
-        # self.logging[i].update({'data': df.to_dict('list'), 'status': status})
-        # logging.info(f'Collect user data, status: {status}')
+        status = 'succeed'
+        self.logging[i].update({'data': merge_df.to_dict('list'), 'status': status})
+        logging.info(f'Collect user data, status: {status}')
     
     def collect_param(self, i: int, format_file: any) -> dict:
         
         status = 'failed'
         self.logging[i].update({'function': 'collect_param', 'status': status})
+        
+        try:
+            data = []
+            for line in format_file:
+                data += [re.sub(r'(?<!\.),', '||', line.strip()).split('||')]
+            
+            ## set dataframe on main file
+            df = pd.DataFrame(data)
+            df.columns = df.iloc[0].values
+            df = df[1:].apply(lambda row: row.str.strip()).reset_index(drop=True)
+            df['branch_code'] = df['branch_code'].apply(lambda row: '{:0>3}'.format(row))
+            
+            df = df.groupby('branch_code', sort=False)
+            df = df.agg(lambda row: '+'.join(row.unique())).reset_index()
+            
+            ## set dataframe on depned file
+            depend_df = self.read_depend_file(i)
+            
+            set_value = [
+                {
+                    'Parameter Name': 'Security roles', 
+                    'Code value': depend_df['rolename'].unique(), 
+                    'Decode value': depend_df['rolename'].unique()
+                },
+                {
+                    'Parameter Name': 'Application roles', 
+                    'Code value': df['rolename'].unique(), 
+                    'Decode value': df['rolename'].unique()
+                },
+                {
+                    'Parameter Name': 'Department Code', 
+                    'Code value': df['branch_code'].unique(),  
+                    'Decode value': df['branch_name'].unique()
+                },
+            ]
+            
+            df = pd.DataFrame(set_value)
+            df = df.explode(['Code value', 'Decode value']).reset_index(drop=True)
+            
+        except Exception as err:
+            raise Exception(err)
+        
+        # status = 'succeed'
+        # self.logging[i].update({'data': merge_df.to_dict('list'), 'status': status})
+        # logging.info(f'Collect param data, status: {status}')
