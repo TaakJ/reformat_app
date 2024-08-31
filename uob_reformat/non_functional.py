@@ -84,7 +84,7 @@ class CollectParams(ABC):
                             {
                                 'full_input': files[0], 
                                 'full_target': files[1],
-                                'program': 'USER' if select_num == 1 else 'PARAM', 
+                                'package': 'USER' if select_num == 1 else 'PARAM', 
                                 'status': status,
                             }
                         )
@@ -98,7 +98,7 @@ class CollectParams(ABC):
                             {
                                 'full_input': files[0], 
                                 'full_target': files[1],
-                                'program': 'USER' if select_num == 1 else 'PARAM',
+                                'package': 'USER' if select_num == 1 else 'PARAM',
                                 'status': status,
                             }
                         )
