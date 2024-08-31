@@ -1,6 +1,6 @@
 import re
 import logging
-from .function import CallFunction
+from .non_functional import CallFunction
 from .exception import CustomException
 import pandas as pd
 

@@ -2,7 +2,7 @@ import re
 import glob
 import pandas as pd
 import logging
-from .function import CallFunction
+from .non_functional import CallFunction
 from .exception import CustomException
 
 class ModuleBOS(CallFunction):

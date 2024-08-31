@@ -1,7 +1,7 @@
 import re
 import pandas as pd
 import logging
-from .function import CallFunction
+from .non_functional import CallFunction
 from .exception import CustomException
 
 class ModuleLDS(CallFunction):
@@ -84,6 +84,7 @@ class ModuleLDS(CallFunction):
             df = pd.DataFrame(clean_data)
             df.columns = df.iloc[0].values
             df = df[1:].apply(lambda row: row.str.strip()).reset_index(drop=True)
+            
             
             # Remove the last record
             df.drop(df.tail(1).index, inplace=True)
