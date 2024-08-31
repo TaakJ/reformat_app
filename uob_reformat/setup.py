@@ -118,7 +118,7 @@ class SetupParser:
             {
                 ArgumentParams.SHORT_NAME: "-t",
                 ArgumentParams.NAME: "--store_tmp",
-                ArgumentParams.DESCRIPTION: "-t: clear tmp",
+                ArgumentParams.DESCRIPTION: "-t: run with tmp",
                 ArgumentParams.REQUIRED: False,
                 ArgumentParams.ISFLAG: True,
                 ArgumentParams.DEFAULT: False,
