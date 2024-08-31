@@ -77,6 +77,7 @@ class ModuleICA(CallFunction):
         
         status = 'failed'
         self.logging[i].update({'function': 'lookup_depend_file', 'status': status})
+        
         try:
             ## FILE: ICAS_TBL_USER_GROUP
             columns = ['Record_Type', 'GROUP_ID','USER_ID','CREATE_USER_ID','CREATE_DTM','LAST_UPDATE_USER_ID','LAST_UPDATE_DTM']
@@ -113,33 +114,48 @@ class ModuleICA(CallFunction):
                 data += [re.sub(r'(?<!\.)\x07', '||', line.strip()).split('||')]
                 
             ## FILE: ICAS_TBL_USER
-            columns = ['Record_Type', 'USER_ID', 'LOGIN_NAME', 'FULL_NAME', 'PASSWORD', 'LOCKED_FLAG', 'FIRST_LOGIN_FLAG', 'LAST_ACTION_TYPE', 'CREATE_USER_ID', 'CREATE_DTM', 
-                        'LAST_UPDATE_USER_ID', 'LAST_UPDATE_DTM', 'LAST_LOGIN_ATTEMPT', 'ACCESS_ALL_BRANCH_FLAG', 'HOME_BRANCH',' HOME_BANK', 'LOGIN_RETRY_COUNT' ,'LAST_CHANGE_PASSWORD',
-                        'DELETE_FLAG', 'LAST_LOGIN_SUCCESS', 'LAST_LOGIN_FAILED']
+            columns = ['Record_Type','USER_ID','LOGIN_NAME','FULL_NAME','PASSWORD','LOCKED_FLAG','FIRST_LOGIN_FLAG','LAST_ACTION_TYPE','CREATE_USER_ID','CREATE_DTM','LAST_UPDATE_USER_ID',
+                        'LAST_UPDATE_DTM','LAST_LOGIN_ATTEMPT','ACCESS_ALL_BRANCH_FLAG','HOME_BRANCH','HOME_BANK','LOGIN_RETRY_COUNT','LAST_CHANGE_PASSWORD','DELETE_FLAG',
+                        'LAST_LOGIN_SUCCESS','LAST_LOGIN_FAILED']
             tbl_user_df = pd.DataFrame(data, columns=columns)
             tbl_user_df = tbl_user_df.iloc[1:-1].apply(lambda row: row.str.strip()).reset_index(drop=True)
             
             ## FILE: ICAS_TBL_USER_GROUP, ICAS_TBL_USER_BANK_BRANCH, ICAS_TBL_GROUP
-            tbl_user_group_df, tbl_user_bank_df, tbl_tbl_group_df = self.lookup_depend_file(i)
+            tbl_user_group_df, tbl_user_bank_df, _ = self.lookup_depend_file(i)
             
-            ## merge 2 file ICAS_TBL_USER / ICAS_TBL_USER_GROUP
+            ## merge 3 file ICAS_TBL_USER / ICAS_TBL_USER_GROUP
             self.logging[i].update({'function': 'collect_user', 'status': status})
             merge_df = reduce(lambda left, right: pd.merge(left, right, on='USER_ID', how='inner', validate='m:m'), [tbl_user_df, tbl_user_group_df, tbl_user_bank_df])
             merge_df = merge_df.groupby('USER_ID', sort=False)
             merge_df = merge_df.agg(lambda row: '+'.join(row.unique())).reset_index()
-            print(merge_df)
-            # print(merge_user_df[['LOGIN_NAME', "GROUP_ID", "LOCKED_FLAG"]])
-            # a =  merge_df['LOCKED_FLAG'].apply(lambda x: 'A' if x == '0' else 'D')
-            # print(a)
             
+            set_value = dict.fromkeys(self.logging[i]['columns'], 'NA')
+            set_value.update(
+                {
+                    'ApplicationCode': 'ICA',
+                    'AccountOwner': merge_df['LOGIN_NAME'],
+                    'AccountName': merge_df['LOGIN_NAME'],
+                    'AccountType': 'USR',
+                    'EntitlementName': merge_df['GROUP_ID'],
+                    'AccountStatus': merge_df['LOCKED_FLAG'].apply(lambda x: 'A' if x == '0' else 'D'),
+                    'IsPrivileged': 'N',
+                    'AccountDescription': merge_df['FULL_NAME'],
+                    'CreateDate': pd.to_datetime(merge_df['CREATE_DTM'], errors='coerce').dt.strftime('%Y%m%d%H%M%S'), 
+                    'LastLogin': pd.to_datetime(merge_df['LAST_LOGIN_ATTEMPT'], errors='coerce').dt.strftime('%Y%m%d%H%M%S'),
+                    'LastUpdatedDate': pd.to_datetime(merge_df['LAST_UPDATE_DTM_x'], errors='coerce').dt.strftime('%Y%m%d%H%M%S'),
+                    'AdditionalAttribute': merge_df[['HOME_BANK', 'HOME_BRANCH', 'BRANCH_CODE']].apply(lambda row: '#'.join(row), axis=1),
+                    'Country': 'TH',
+                }
+            )
+            merge_df = merge_df.assign(**set_value)
+            merge_df = merge_df.drop(merge_df.iloc[:, :35].columns, axis=1)
             
-
         except Exception as err:
             raise Exception(err)
 
-        status = "succeed"
-        # self.logging[i].update({'data': df.to_dict('list'), 'status': status})
-        # logging.info(f"Collect user data, status: {status}")
+        status = 'succeed'
+        self.logging[i].update({'data': merge_df.to_dict('list'), 'status': status})
+        logging.info(f'Collect user data, status: {status}')
 
     def collect_param(self, i: int, format_file: any) -> dict:
 

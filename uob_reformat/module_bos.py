@@ -69,6 +69,7 @@ class ModuleBOS(CallFunction):
         
         status = 'failed'
         self.logging[i].update({'function': 'lookup_depend_file', 'status': status})
+        
         try:
             param_df = pd.DataFrame(data)
             param_df.columns = param_df.iloc[0].values
