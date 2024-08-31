@@ -30,9 +30,9 @@ class ModuleICA(CallFunction):
 
             await self.check_source_file()
             await self.separate_data_file()
-            # if self.store_tmp is True:
-            #     await self.genarate_tmp_file()
-            # await self.genarate_target_file()
+            if self.store_tmp is True:
+                await self.genarate_tmp_file()
+            await self.genarate_target_file()
 
         except CustomException as err:
             logging.error('See Error Details: log_error.log')
@@ -161,3 +161,52 @@ class ModuleICA(CallFunction):
 
         status = 'failed'
         self.logging[i].update({'function': 'collect_param', 'status': status})
+        
+        try:
+            data = []
+            for line in format_file:
+                data += [re.sub(r'(?<!\.)\x07', '||', line.strip()).split('||')]
+                
+            ## FILE: ICAS_TBL_USER
+            columns = ['Record_Type','USER_ID','LOGIN_NAME','FULL_NAME','PASSWORD','LOCKED_FLAG','FIRST_LOGIN_FLAG','LAST_ACTION_TYPE','CREATE_USER_ID','CREATE_DTM','LAST_UPDATE_USER_ID',
+                        'LAST_UPDATE_DTM','LAST_LOGIN_ATTEMPT','ACCESS_ALL_BRANCH_FLAG','HOME_BRANCH','HOME_BANK','LOGIN_RETRY_COUNT','LAST_CHANGE_PASSWORD','DELETE_FLAG',
+                        'LAST_LOGIN_SUCCESS','LAST_LOGIN_FAILED']
+            tbl_user_df = pd.DataFrame(data, columns=columns)
+            tbl_user_df = tbl_user_df.iloc[1:-1].apply(lambda row: row.str.strip()).reset_index(drop=True)
+            
+            ## FILE: ICAS_TBL_USER_GROUP, ICAS_TBL_USER_BANK_BRANCH, ICAS_TBL_GROUP
+            _, tbl_user_bank_df, tbl_tbl_group_df = self.lookup_depend_file(i)
+            
+            self.logging[i].update({'function': 'collect_param', 'status': status})
+            set_value = [
+                {
+                    'Parameter Name': 'User Group',
+                    'Code value': tbl_tbl_group_df['GROUP_ID'].unique(),
+                    'Decode value': tbl_tbl_group_df['GROUP_NAME'].unique(),
+                },
+                {
+                    'Parameter Name': 'HOME_BANK',
+                    'Code value': '024',
+                    'Decode value': 'UOBT',
+                },
+                {
+                    'Parameter Name': 'HOME_BRANCH',
+                    'Code value': tbl_user_df['HOME_BRANCH'].unique(),
+                    'Decode value': tbl_user_df['HOME_BRANCH'].unique(),
+                },
+                {
+                    'Parameter Name': 'Department',
+                    'Code value': tbl_user_bank_df['BRANCH_CODE'].unique(),
+                    'Decode value': tbl_user_bank_df['BRANCH_CODE'].unique(),
+                },
+            ]
+            
+            merge_df = pd.DataFrame(set_value)
+            merge_df = merge_df.explode(['Code value', 'Decode value']).reset_index(drop=True)
+            
+        except Exception as err:
+            raise Exception(err)
+        
+        status = 'succeed'
+        self.logging[i].update({'data': merge_df.to_dict('list'), 'status': status})
+        logging.info(f'Collect param data, status: {status}')
