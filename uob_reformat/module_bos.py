@@ -49,7 +49,7 @@ class ModuleBOS(CallFunction):
         
         return result
     
-    def lookup_depend_file(self, i: int) -> pd.DataFrame:
+    def collect_depend_file(self, i: int) -> pd.DataFrame:
         
         logging.info('Lookup depend file')
         
@@ -68,7 +68,7 @@ class ModuleBOS(CallFunction):
                 raise CustomException(err=self.logging)
         
         status = 'failed'
-        self.logging[i].update({'function': 'lookup_depend_file', 'status': status})
+        self.logging[i].update({'function': 'collect_depend_file', 'status': status})
         
         try:
             # set dataframe
@@ -76,7 +76,7 @@ class ModuleBOS(CallFunction):
             param_df.columns = param_df.iloc[0].values
             param_df = param_df.iloc[1:].apply(lambda row: row.str.strip()).reset_index(drop=True)
             
-            # Extract column
+            # extract column
             param_df[['Domain', 'username']] = param_df['username'].str.extract(r'^(.*?)\\(.*)$')
             
         except Exception as err:
@@ -87,10 +87,10 @@ class ModuleBOS(CallFunction):
         
         return param_df
         
-    def collect_user(self, i: int, format_file: any) -> dict:
+    def collect_user_file(self, i: int, format_file: any) -> dict:
 
         status = 'failed'
-        self.logging[i].update({'function': 'collect_user', 'status': status})
+        self.logging[i].update({'function': 'collect_user_file', 'status': status})
 
         try:
             data = []
@@ -102,17 +102,17 @@ class ModuleBOS(CallFunction):
             user_df.columns = user_df.iloc[0].values
             user_df =  user_df.iloc[1:].apply(lambda row: row.str.strip()).reset_index(drop=True)
             
-            # Leading zeros to make it 3 digits
+            # leading zeros to make it 3 digits
             user_df['branch_code'] = user_df['branch_code'].apply(lambda row: '{:0>3}'.format(row))
             
-            # Extract column
+            # extract column
             user_df[['Domain', 'username']] = user_df['user_name'].str.extract(r'^(.*?)\\(.*)$')
             
             ## FILE: BOSTH_Param
-            param_df = self.lookup_depend_file(i)
+            param_df = self.collect_depend_file(i)
             
             ## merge 2 file BOSTH / BOSTH_Param
-            self.logging[i].update({'function': 'collect_user', 'status': status})
+            self.logging[i].update({'function': 'collect_user_file', 'status': status})
             merge_df = reduce(lambda left, right: pd.merge(left, right, on='username', how='inner', validate='m:m'), [user_df, param_df])
             
             # group by column
@@ -145,10 +145,10 @@ class ModuleBOS(CallFunction):
         self.logging[i].update({'data': merge_df.to_dict('list'), 'status': status})
         logging.info(f'Collect user data, status: {status}')
     
-    def collect_param(self, i: int, format_file: any) -> dict:
+    def collect_param_file(self, i: int, format_file: any) -> dict:
         
         status = 'failed'
-        self.logging[i].update({'function': 'collect_param', 'status': status})
+        self.logging[i].update({'function': 'collect_param_file', 'status': status})
         
         try:
             data = []
@@ -160,7 +160,7 @@ class ModuleBOS(CallFunction):
             user_df.columns = user_df.iloc[0].values
             user_df = user_df.iloc[1:].apply(lambda row: row.str.strip()).reset_index(drop=True)
             
-            # Leading zeros to make it 3 digits
+            # leading zeros to make it 3 digits
             user_df['branch_code'] = user_df['branch_code'].apply(lambda row: '{:0>3}'.format(row))
             
             # group by column

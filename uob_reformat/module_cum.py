@@ -58,10 +58,10 @@ class ModuleCUM(CallFunction):
                     
         return data
 
-    def collect_user(self, i: int, format_file: any) -> dict:
+    def collect_user_file(self, i: int, format_file: any) -> dict:
 
         status = 'failed'
-        self.logging[i].update({'function': 'collect_user', 'status': status})
+        self.logging[i].update({'function': 'collect_user_file', 'status': status})
         
         try:
             
@@ -104,10 +104,10 @@ class ModuleCUM(CallFunction):
         self.logging[i].update({'data': user_df.to_dict('list'), 'status': status})
         logging.info(f"Collect user data, status: {status}")
 
-    def collect_param(self, i: int, format_file: any) -> dict:
+    def collect_param_file(self, i: int, format_file: any) -> dict:
 
         status = 'failed'
-        self.logging[i].update({'function': 'collect_param', 'status': status})
+        self.logging[i].update({'function': 'collect_param_file', 'status': status})
         
         try:
             

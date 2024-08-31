@@ -50,7 +50,7 @@ class ModuleICA(CallFunction):
 
         return result
     
-    def lookup_depend_file(self, i: int) -> pd.DataFrame:
+    def collect_depend_file(self, i: int) -> pd.DataFrame:
         
         logging.info('Lookup depend file')
         
@@ -76,7 +76,7 @@ class ModuleICA(CallFunction):
                 raise CustomException(err=self.logging)
         
         status = 'failed'
-        self.logging[i].update({'function': 'lookup_depend_file', 'status': status})
+        self.logging[i].update({'function': 'collect_depend_file', 'status': status})
         
         try:
             ## FILE: ICAS_TBL_USER_GROUP
@@ -103,10 +103,10 @@ class ModuleICA(CallFunction):
         
         return tbl_user_group_df, tbl_user_bank_df, tbl_tbl_group_df
 
-    def collect_user(self, i: int, format_file: any) -> str:
+    def collect_user_file(self, i: int, format_file: any) -> str:
 
         status = 'failed'
-        self.logging[i].update({'function': 'collect_user', 'status': status})
+        self.logging[i].update({'function': 'collect_user_file', 'status': status})
 
         try:
             data = []
@@ -123,12 +123,15 @@ class ModuleICA(CallFunction):
             ## FILE: ICAS_TBL_USER_GROUP, ICAS_TBL_USER_BANK_BRANCH, ICAS_TBL_GROUP
             tbl_user_group_df, tbl_user_bank_df, _ = self.lookup_depend_file(i)
             
-            ## merge 3 file ICAS_TBL_USER / ICAS_TBL_USER_GROUP
-            self.logging[i].update({'function': 'collect_user', 'status': status})
+            # merge 3 file ICAS_TBL_USER / ICAS_TBL_USER_GROUP
+            self.logging[i].update({'function': 'collect_user_file', 'status': status})
             merge_df = reduce(lambda left, right: pd.merge(left, right, on='USER_ID', how='inner', validate='m:m'), [tbl_user_df, tbl_user_group_df, tbl_user_bank_df])
+            
+            # group by column
             merge_df = merge_df.groupby('USER_ID', sort=False)
             merge_df = merge_df.agg(lambda row: '+'.join(row.unique())).reset_index()
             
+            ## mapping data to column
             set_value = dict.fromkeys(self.logging[i]['columns'], 'NA')
             set_value.update(
                 {
@@ -157,10 +160,10 @@ class ModuleICA(CallFunction):
         self.logging[i].update({'data': merge_df.to_dict('list'), 'status': status})
         logging.info(f'Collect user data, status: {status}')
 
-    def collect_param(self, i: int, format_file: any) -> dict:
+    def collect_param_file(self, i: int, format_file: any) -> dict:
 
         status = 'failed'
-        self.logging[i].update({'function': 'collect_param', 'status': status})
+        self.logging[i].update({'function': 'collect_param_file', 'status': status})
         
         try:
             data = []
@@ -177,7 +180,8 @@ class ModuleICA(CallFunction):
             ## FILE: ICAS_TBL_USER_GROUP, ICAS_TBL_USER_BANK_BRANCH, ICAS_TBL_GROUP
             _, tbl_user_bank_df, tbl_tbl_group_df = self.lookup_depend_file(i)
             
-            self.logging[i].update({'function': 'collect_param', 'status': status})
+            ## mapping data to column
+            self.logging[i].update({'function': 'collect_param_file', 'status': status})
             set_value = [
                 {
                     'Parameter Name': 'User Group',
