@@ -93,37 +93,37 @@ class ModuleDOC(CallFunction):
                     continue
             
             ## set dataframe
-            df = pd.DataFrame(clean_data)
-            df.columns = df.iloc[0].values
-            df = df.iloc[1:].apply(lambda row: row.str.strip()).reset_index(drop=True)
+            user_df = pd.DataFrame(clean_data)
+            user_df.columns = user_df.iloc[0].values
+            user_df = user_df.iloc[1:].apply(lambda row: row.str.strip()).reset_index(drop=True)
             
             ## mapping data to column
-            df = df[df['APPCODE'] == 'LOAN'].reset_index(drop=True)
-            df[['NAME', 'DEPARTMENT']] = df.apply(self.split_column, axis=1, result_type='expand')
-            df['ATTRIBUTE'] = df.apply(self.attribute_column, axis=1)
+            user_df = user_df[user_df['APPCODE'] == 'LOAN'].reset_index(drop=True)
+            user_df[['NAME', 'DEPARTMENT']] = user_df.apply(self.split_column, axis=1, result_type='expand')
+            user_df['ATTRIBUTE'] = user_df.apply(self.attribute_column, axis=1)
             
             set_value = dict.fromkeys(self.logging[i]['columns'], 'NA')
             set_value.update(
                 {
                     'ApplicationCode': 'DOC',
-                    'AccountOwner': df['USERNAME'],
-                    'AccountName': df['USERNAME'],
+                    'AccountOwner': user_df['USERNAME'],
+                    'AccountName': user_df['USERNAME'],
                     'AccountType': 'USR',
                     'AccountStatus': 'A',
                     'IsPrivileged': 'N',
-                    'AccountDescription': df['NAME'],
-                    'AdditionalAttribute': df[['APPCODE', 'ATTRIBUTE']].apply(lambda row: '#'.join(row), axis=1),
+                    'AccountDescription': user_df['NAME'],
+                    'AdditionalAttribute': user_df[['APPCODE', 'ATTRIBUTE']].apply(lambda row: '#'.join(row), axis=1),
                     'Country': "TH"
                 }
             )
-            df = df.assign(**set_value)
-            df = df.drop(df.iloc[:,:12].columns, axis=1)
+            user_df = user_df.assign(**set_value)
+            user_df = user_df.drop(user_df.iloc[:,:12].columns, axis=1)
             
         except Exception as err:
             raise Exception(err)
         
         status = 'succeed'
-        self.logging[i].update({'data': df.to_dict('list'), 'status': status})
+        self.logging[i].update({'data': user_df.to_dict('list'), 'status': status})
         logging.info(f"Collect user data, status: {status}")
 
     def collect_param(self, i: int, format_file: any) -> dict:
@@ -145,12 +145,12 @@ class ModuleDOC(CallFunction):
                     "Decode value": ['Inquiry', 'Admin', 'Index + Scan'],
                 },
             ]
-            df = pd.DataFrame(set_value)
-            df = df.explode(['Code value', 'Decode value']).reset_index(drop=True)
+            param_df = pd.DataFrame(set_value)
+            param_df = param_df.explode(['Code value', 'Decode value']).reset_index(drop=True)
             
         except Exception as err:
             raise Exception(err)
         
         status = 'succeed'
-        self.logging[i].update({'data': df.to_dict('list'), 'status': status})
+        self.logging[i].update({'data': param_df.to_dict('list'), 'status': status})
         logging.info(f'Collect param data, status: {status}')

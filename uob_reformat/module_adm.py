@@ -57,10 +57,6 @@ class ModuleADM(CallFunction):
             for line in format_file:
                 data += [re.sub(r'(?<!\.)\|\|', '||', line.strip()).split('||')]
 
-            ## set dataframe
-            df = pd.DataFrame(data)
-            df = df.apply(lambda row: row.str.strip()).reset_index(drop=True)
-
             ## mapping data to column
             # 0: User-ID
             # 1: User Full Name
@@ -69,32 +65,34 @@ class ModuleADM(CallFunction):
             # 4: Group
             # 5: Zone
             # 6: Role
-            df = df.groupby(0, sort=False)
-            df = df.agg(lambda row: '+'.join(row.unique())).reset_index()
+            user_df = pd.DataFrame(data)
+            user_df = user_df.apply(lambda row: row.str.strip()).reset_index(drop=True)
+            user_df = user_df.groupby(0, sort=False)
+            user_df = user_df.agg(lambda row: '+'.join(row.unique())).reset_index()
 
             set_value = dict.fromkeys(self.logging[i]['columns'], 'NA')
             set_value.update(
                 {
                     'ApplicationCode': 'ADM',
-                    'AccountOwner': df[0],
-                    'AccountName': df[0],
+                    'AccountOwner': user_df[0],
+                    'AccountName': user_df[0],
                     'AccountType': 'USR',
-                    'EntitlementName': df[[4, 6, 5]].apply(lambda row: ';'.join(row), axis=1),
+                    'EntitlementName': user_df[[4, 6, 5]].apply(lambda row: ';'.join(row), axis=1),
                     'AccountStatus': 'A',
                     'IsPrivileged': 'N',
-                    'AccountDescription': df[1],
-                    'AdditionalAttribute': df[2],
+                    'AccountDescription': user_df[1],
+                    'AdditionalAttribute': user_df[2],
                     'Country': 'TH',
                 }
             )
-            df = df.assign(**set_value)
-            df = df.drop(df.iloc[:, :7].columns, axis=1)
+            user_df = user_df.assign(**set_value)
+            user_df = user_df.drop(user_df.iloc[:, :7].columns, axis=1)
 
         except Exception as err:
             raise Exception(err)
 
         status = 'succeed'
-        self.logging[i].update({'data': df.to_dict('list'), 'status': status})
+        self.logging[i].update({'data': user_df.to_dict('list'), 'status': status})
         logging.info(f'Collect user data, status: {status}')
 
     def collect_param(self, i: int, format_file: any) -> dict:
@@ -107,10 +105,6 @@ class ModuleADM(CallFunction):
             for line in format_file:
                 data += [re.sub(r'(?<!\.)\|\|', '||', line.strip()).split('||')]
 
-            ## set dataframe
-            df = pd.DataFrame(data)
-            df = df.apply(lambda row: row.str.strip()).reset_index(drop=True)
-
             ## mapping data to column
             # 0: User-ID
             # 1: User Full Name
@@ -119,34 +113,36 @@ class ModuleADM(CallFunction):
             # 4: Group
             # 5: Zone
             # 6: Role
+            param_df = pd.DataFrame(data)
+            param_df = param_df.apply(lambda row: row.str.strip()).reset_index(drop=True)
             set_value = [
                 {
                     'Parameter Name': 'GroupDetail', 
-                    'Code value': df[4].unique(), 
-                    'Decode value': df[4].unique()
+                    'Code value': param_df[4].unique(), 
+                    'Decode value': param_df[4].unique()
                 },
                 {
                     'Parameter Name': 'RoleDetail', 
-                    'Code value': df[6].unique(), 
-                    'Decode value': df[6].unique()
+                    'Code value': param_df[6].unique(), 
+                    'Decode value': param_df[6].unique()
                 },
                 {
                     'Parameter Name': 'Zone', 
-                    'Code value': df[5].unique(), 
-                    'Decode value': df[5].unique()
+                    'Code value': param_df[5].unique(), 
+                    'Decode value': param_df[5].unique()
                 },
                 {
                     'Parameter Name': 'Department', 
-                    'Code value': df[2].unique(), 
-                    'Decode value': df[2].unique()
+                    'Code value': param_df[2].unique(), 
+                    'Decode value': param_df[2].unique()
                 }
             ]
-            df = pd.DataFrame(set_value)
-            df = df.explode(['Code value', 'Decode value']).reset_index(drop=True)
+            param_df = pd.DataFrame(set_value)
+            param_df = param_df.explode(['Code value', 'Decode value']).reset_index(drop=True)
             
         except Exception as err:
             raise Exception(err)
 
         status = 'succeed'
-        self.logging[i].update({'data': df.to_dict('list'), 'status': status})
+        self.logging[i].update({'data': param_df.to_dict('list'), 'status': status})
         logging.info(f'Collect param data, status: {status}')

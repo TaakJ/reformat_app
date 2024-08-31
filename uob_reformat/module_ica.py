@@ -60,10 +60,9 @@ class ModuleICA(CallFunction):
             if glob.glob(full_depend, recursive=True):
                 
                 format_file = self.read_file(i, full_depend)
-                # for line in format_file:
-                    # data += [re.sub(r'(?<!\.)\x07', '||', line.strip()).split('||')]
-                data += [1]
-                
+                for line in format_file:
+                    data += [re.sub(r'(?<!\.)\x07', '||', line.strip()).split('||')]
+                    
                 table_name = Path(full_depend).name
                 if table_name in table:
                     table[table_name].extend(data)
@@ -77,10 +76,7 @@ class ModuleICA(CallFunction):
         
         status = 'failed'
         self.logging[i].update({'function': 'lookup_depend_file', 'status': status})
-        
         try:
-            print(table.keys())
-            print(table)
             ## TABLE: ICAS_TBL_USER_GROUP
             # 0: Record_Type
             # 1: GROUP_ID
@@ -89,9 +85,8 @@ class ModuleICA(CallFunction):
             # 4: CREATE_DTM
             # 5: LAST_UPDATE_USER_ID
             # 6: LAST_UPDATE_DTM
-            # tbl_user_group_df = pd.DataFrame(table['ICAS_TBL_USER_GROUP'])
-            #tbl_user_group_df = tbl_user_group_df.iloc[1:-1].apply(lambda row: row.str.strip()).reset_index(drop=True)
-            #print(tbl_user_group_df)
+            tbl_user_group_df = pd.DataFrame(table['ICAS_TBL_USER_GROUP'])
+            tbl_user_group_df = tbl_user_group_df.iloc[1:-1].apply(lambda row: row.str.strip()).reset_index(drop=True)
             
             ## TABLE: ICAS_TBL_USER_BANK_BRANCH
             # 0: Record_Type
@@ -103,10 +98,8 @@ class ModuleICA(CallFunction):
             # 6: DEFAULT_BRANCH_FLAG
             # 7: CREATE_USER_ID
             # 8: CREATE_DTM
-            # tbl_user_bank_df = pd.DataFrame(table['ICAS_TBL_USER_BANK_BRANCH'])
-            # tbl_user_bank_df = tbl_user_bank_df.iloc[1:-1].apply(lambda row: row.str.strip()).reset_index(drop=True)
-            # print(tbl_user_bank_df)
-            
+            tbl_user_bank_df = pd.DataFrame(table['ICAS_TBL_USER_BANK_BRANCH'])
+            tbl_user_bank_df = tbl_user_bank_df.iloc[1:-1].apply(lambda row: row.str.strip()).reset_index(drop=True)
             
             ## TABLE: ICAS_TBL_USER_GROUP
             # 0: Record_Type
@@ -123,11 +116,8 @@ class ModuleICA(CallFunction):
             # 11:LAST_UPDATE_USER_ID
             # 12:LAST_UPDATE_DTM
             # 13:DELETE_DTM
-            
-            # df = pd.DataFrame(data)
-            # df.columns = df.iloc[0].values
-            # df = df.iloc[1:].apply(lambda row: row.str.strip()).reset_index(drop=True)
-            # df[['Domain', 'username']] = df['username'].str.extract(r'^(.*?)\\(.*)$')
+            tbl_tbl_group_df = pd.DataFrame(table['ICAS_TBL_GROUP'])
+            tbl_tbl_group_df = tbl_tbl_group_df.iloc[1:-1].apply(lambda row: row.str.strip()).reset_index(drop=True)
             
         except Exception as err:
             raise Exception(err)
@@ -135,7 +125,7 @@ class ModuleICA(CallFunction):
         status = 'succeed'
         self.logging[i].update({'status': status})
         
-        return 'df'
+        return tbl_user_group_df, tbl_user_bank_df, tbl_tbl_group_df
 
     def collect_user(self, i: int, format_file: any) -> str:
 
@@ -174,7 +164,12 @@ class ModuleICA(CallFunction):
             df = df.iloc[1:-1].apply(lambda row: row.str.strip()).reset_index(drop=True)
             
             ## set dataframe on depend dataframe
-            depend_df = self.lookup_depend_file(i)
+            tbl_user_group_df, tbl_user_bank_df, tbl_tbl_group_df = self.lookup_depend_file(i)
+            print(tbl_user_group_df)
+            print()
+            print(tbl_user_bank_df)
+            print()
+            print(tbl_tbl_group_df)
 
         except Exception as err:
             raise Exception(err)

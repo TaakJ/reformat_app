@@ -67,12 +67,11 @@ class ModuleBOS(CallFunction):
         
         status = 'failed'
         self.logging[i].update({'function': 'lookup_depend_file', 'status': status})
-        
         try:
-            df = pd.DataFrame(data)
-            df.columns = df.iloc[0].values
-            df = df.iloc[1:].apply(lambda row: row.str.strip()).reset_index(drop=True)
-            df[['Domain', 'username']] = df['username'].str.extract(r'^(.*?)\\(.*)$')
+            param_df = pd.DataFrame(data)
+            param_df.columns = param_df.iloc[0].values
+            param_df = param_df.iloc[1:].apply(lambda row: row.str.strip()).reset_index(drop=True)
+            param_df[['Domain', 'username']] = param_df['username'].str.extract(r'^(.*?)\\(.*)$')
             
         except Exception as err:
             raise Exception(err)
@@ -80,7 +79,7 @@ class ModuleBOS(CallFunction):
         status = 'succeed'
         self.logging[i].update({'status': status})
         
-        return df
+        return param_df
         
     def collect_user(self, i: int, format_file: any) -> dict:
 
@@ -93,18 +92,18 @@ class ModuleBOS(CallFunction):
                 data += [re.sub(r'(?<!\.),', '||', line.strip()).split('||')]
             
             ## set dataframe on main dataframe
-            df = pd.DataFrame(data)
-            df.columns = df.iloc[0].values
-            df =  df.iloc[1:].apply(lambda row: row.str.strip()).reset_index(drop=True)
-            df['branch_code'] = df['branch_code'].apply(lambda row: '{:0>3}'.format(row))
-            df[['Domain', 'username']] = df['user_name'].str.extract(r'^(.*?)\\(.*)$')
+            user_df = pd.DataFrame(data)
+            user_df.columns = user_df.iloc[0].values
+            user_df =  user_df.iloc[1:].apply(lambda row: row.str.strip()).reset_index(drop=True)
+            user_df['branch_code'] = user_df['branch_code'].apply(lambda row: '{:0>3}'.format(row))
+            user_df[['Domain', 'username']] = user_df['user_name'].str.extract(r'^(.*?)\\(.*)$')
             
             ## set dataframe on depend dataframe
-            depend_df = self.lookup_depend_file(i)
+            param_df = self.lookup_depend_file(i)
             
             ## mapping data to column (continue function)
             self.logging[i].update({'function': 'collect_user', 'status': status})
-            merge_df = pd.merge(df, depend_df, on='username', how='left', validate='m:m').replace([None],[''])
+            merge_df = pd.merge(user_df, param_df, on='username', how='left', validate='m:m').replace([None],[''])
             merge_df = merge_df.groupby('username', sort=False)
             merge_df = merge_df.agg(lambda row: '+'.join(row.unique())).reset_index()
             
@@ -144,42 +143,42 @@ class ModuleBOS(CallFunction):
                 data += [re.sub(r'(?<!\.),', '||', line.strip()).split('||')]
             
             ## set dataframe on main dataframe
-            df = pd.DataFrame(data)
-            df.columns = df.iloc[0].values
-            df = df[1:].apply(lambda row: row.str.strip()).reset_index(drop=True)
-            df['branch_code'] = df['branch_code'].apply(lambda row: '{:0>3}'.format(row))
-            df = df.groupby('branch_code', sort=False)
-            df = df.agg(lambda row: '+'.join(row.unique())).reset_index()
+            user_df = pd.DataFrame(data)
+            user_df.columns = user_df.iloc[0].values
+            user_df = user_df.iloc[1:].apply(lambda row: row.str.strip()).reset_index(drop=True)
+            user_df['branch_code'] = user_df['branch_code'].apply(lambda row: '{:0>3}'.format(row))
+            user_df = user_df.groupby('branch_code', sort=False)
+            user_df = user_df.agg(lambda row: '+'.join(row.unique())).reset_index()
             
             ## set dataframe on depend dataframe
-            depend_df = self.lookup_depend_file(i)
+            param_df = self.lookup_depend_file(i)
             
             ## mapping data to column (continue function)
             self.logging[i].update({'function': 'collect_param', 'status': status})
             set_value = [
                 {
                     'Parameter Name': 'Security roles', 
-                    'Code value': depend_df['rolename'].unique(), 
-                    'Decode value': depend_df['rolename'].unique()
+                    'Code value': param_df['rolename'].unique(), 
+                    'Decode value': param_df['rolename'].unique()
                 },
                 {
                     'Parameter Name': 'Application roles', 
-                    'Code value': df['rolename'].unique(), 
-                    'Decode value': df['rolename'].unique()
+                    'Code value': user_df['rolename'].unique(), 
+                    'Decode value': user_df['rolename'].unique()
                 },
                 {
                     'Parameter Name': 'Department Code', 
-                    'Code value': df['branch_code'].unique(),  
-                    'Decode value': df['branch_name'].unique()
+                    'Code value': user_df['branch_code'].unique(),  
+                    'Decode value': user_df['branch_name'].unique()
                 },
             ]
             
-            df = pd.DataFrame(set_value)
-            df = df.explode(['Code value', 'Decode value']).reset_index(drop=True)
+            merge_df = pd.DataFrame(set_value)
+            merge_df = merge_df.explode(['Code value', 'Decode value']).reset_index(drop=True)
             
         except Exception as err:
             raise Exception(err)
         
         status = 'succeed'
-        self.logging[i].update({'data': df.to_dict('list'), 'status': status})
+        self.logging[i].update({'data': merge_df.to_dict('list'), 'status': status})
         logging.info(f'Collect param data, status: {status}')

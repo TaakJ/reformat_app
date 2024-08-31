@@ -68,39 +68,39 @@ class ModuleCUM(CallFunction):
             clean_data = self.read_format_file(format_file)
             
             ## set dataframe  
-            df = pd.DataFrame(clean_data)
-            df.columns = df.iloc[0].values
-            df =  df.iloc[1:].apply(lambda row: row.str.strip()).reset_index(drop=True)
+            user_df = pd.DataFrame(clean_data)
+            user_df.columns = user_df.iloc[0].values
+            user_df =  user_df.iloc[1:].apply(lambda row: row.str.strip()).reset_index(drop=True)
             
             ## mapping data to column
-            df = df.groupby('USER_ID', sort=False)
-            df = df.agg(lambda row: '+'.join(row.unique())).reset_index()
+            user_df = user_df.groupby('USER_ID', sort=False)
+            user_df = user_df.agg(lambda row: '+'.join(row.unique())).reset_index()
             
             set_value = dict.fromkeys(self.logging[i]['columns'], 'NA')
             set_value.update(
                 {
                     'ApplicationCode': 'CUM', 
-                    'AccountOwner': df['USER_ID'], 
-                    'AccountName': df['USER_ID'],
+                    'AccountOwner': user_df['USER_ID'], 
+                    'AccountName': user_df['USER_ID'],
                     'AccountType': 'USR',
-                    'EntitlementName': df['GROUP_NO'],
+                    'EntitlementName': user_df['GROUP_NO'],
                     'AccountStatus': 'A',
                     'IsPrivileged': 'N',
-                    'AccountDescription': df[['NAME','SURNAME']].apply(lambda row: row['NAME'] + ' ' + row['SURNAME'], axis=1),
-                    'CreateDate': pd.to_datetime(df['VALID_FROM'], dayfirst=True).dt.strftime('%Y%m%d%H%M%S'), 
-                    'LastLogin': pd.to_datetime(df['Last Usage'], dayfirst=True).dt.strftime('%Y%m%d%H%M%S'),
-                    'AdditionalAttribute': df['DEPARTMENT'],
+                    'AccountDescription': user_df[['NAME','SURNAME']].apply(lambda row: row['NAME'] + ' ' + row['SURNAME'], axis=1),
+                    'CreateDate': pd.to_datetime(user_df['VALID_FROM'], dayfirst=True).dt.strftime('%Y%m%d%H%M%S'), 
+                    'LastLogin': pd.to_datetime(user_df['Last Usage'], dayfirst=True).dt.strftime('%Y%m%d%H%M%S'),
+                    'AdditionalAttribute': user_df['DEPARTMENT'],
                     'Country': 'TH'
                 }
             )
-            df = df.assign(**set_value)
-            df = df.drop(df.iloc[:,:14].columns, axis=1)
+            user_df = user_df.assign(**set_value)
+            user_df = user_df.drop(user_df.iloc[:,:14].columns, axis=1)
             
         except Exception as err:
             raise Exception(err)
 
         status = 'succeed'
-        self.logging[i].update({'data': df.to_dict('list'), 'status': status})
+        self.logging[i].update({'data': user_df.to_dict('list'), 'status': status})
         logging.info(f"Collect user data, status: {status}")
 
     def collect_param(self, i: int, format_file: any) -> dict:
@@ -113,29 +113,29 @@ class ModuleCUM(CallFunction):
             clean_data = self.read_format_file(format_file)
             
             ## set dataframe  
-            df = pd.DataFrame(clean_data)
-            df.columns = df.iloc[0].values
-            df =  df.iloc[1:].apply(lambda row: row.str.strip()).reset_index(drop=True)
+            param_df = pd.DataFrame(clean_data)
+            param_df.columns = param_df.iloc[0].values
+            param_df =  param_df.iloc[1:].apply(lambda row: row.str.strip()).reset_index(drop=True)
             
             ## mapping data to column
             set_value = [
                 {
                     'Parameter Name': 'Group_No',
-                    'Code value': df['GROUP_NO'].unique(),
-                    'Decode value': df['GROUP_NO'].unique(),
+                    'Code value': param_df['GROUP_NO'].unique(),
+                    'Decode value': param_df['GROUP_NO'].unique(),
                 },
                 {
                     'Parameter Name': 'Department',
-                    'Code value': df['DEPARTMENT'].unique(),
-                    'Decode value': df['DEPARTMENT'].unique(),
+                    'Code value': param_df['DEPARTMENT'].unique(),
+                    'Decode value': param_df['DEPARTMENT'].unique(),
                 },
             ]
-            df = pd.DataFrame(set_value)
-            df = df.explode(['Code value', 'Decode value']).reset_index(drop=True)
+            param_df = pd.DataFrame(set_value)
+            param_df = param_df.explode(['Code value', 'Decode value']).reset_index(drop=True)
             
         except Exception as err:
             raise Exception(err)
         
         status = 'succeed'
-        self.logging[i].update({'data': df.to_dict('list'), 'status': status})
+        self.logging[i].update({'data': param_df.to_dict('list'), 'status': status})
         logging.info(f'Collect param data, status: {status}')

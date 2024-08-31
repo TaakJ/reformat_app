@@ -58,15 +58,15 @@ class ModuleMOC(CallFunction):
                 data += [re.sub(r'(?<!\.),', ',', find_word).split(',')]
             
             ## mapping data
-            df = pd.DataFrame(data)
-            df.columns = df.iloc[0].values
-            df = df.iloc[1:].apply(lambda row: row.str.strip()).reset_index(drop=True)
+            user_df = pd.DataFrame(data)
+            user_df.columns = user_df.iloc[0].values
+            user_df = user_df.iloc[1:].apply(lambda row: row.str.strip()).reset_index(drop=True)
             
         except Exception as err:
             raise Exception(err)
 
         status = 'succeed'
-        self.logging[i].update({'data': df.to_dict('list'), 'status': status})
+        self.logging[i].update({'data': user_df.to_dict('list'), 'status': status})
         logging.info(f'Collect user data, status: {status}')
         
     def collect_param(self, i: int, format_file: any) -> dict:
@@ -81,13 +81,13 @@ class ModuleMOC(CallFunction):
                 data += [re.sub(r'(?<!\.),', ',', find_word).split(',')]
             
             ## mapping data to column
-            df = pd.DataFrame(data)
-            df.columns = df.iloc[0].values
-            df = df.iloc[1:].apply(lambda row: row.str.strip()).reset_index(drop=True)
+            param_df = pd.DataFrame(data)
+            param_df.columns = param_df.iloc[0].values
+            param_df = param_df.iloc[1:].apply(lambda row: row.str.strip()).reset_index(drop=True)
             
         except Exception as err:
             raise Exception(err)
 
         status = 'succeed'
-        self.logging[i].update({'data': df.to_dict('list'), 'status': status})
+        self.logging[i].update({'data': param_df.to_dict('list'), 'status': status})
         logging.info(f'Collect param data, status: {status}')
