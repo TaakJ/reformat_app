@@ -51,9 +51,7 @@ class ModuleADM(CallFunction):
 
         try:
             ## clean and split the data
-            data = []
-            for line in format_file:
-                data += [re.sub(r'(?<!\.)\|\|', '||', line.strip()).split('||')]
+            data = [re.sub(r'(?<!\.)\|\|', '||', line.strip()).split('||') for line in format_file]
 
             ## set dataframe
             columns = ['User-ID','User Full Name','Department code','Employee ID','Group','Zone','Role']
@@ -96,9 +94,7 @@ class ModuleADM(CallFunction):
 
         try:
             ## clean and split the data
-            data = []
-            for line in format_file:
-                data += [re.sub(r'(?<!\.)\|\|', '||', line.strip()).split('||')]
+            data = [re.sub(r'(?<!\.)\|\|', '||', line.strip()).split('||') for line in format_file]
 
             ## set dataframe
             columns = ['User-ID','User Full Name','Department code','Employee ID','Group','Zone','Role']

@@ -51,10 +51,7 @@ class ModuleIIC(CallFunction):
 
         try:
             ## clean and split the data
-            data = []
-            for line in format_file:
-                find_word = line.strip().replace('"', '')
-                data += [re.sub(r'(?<!\.),', ',', ''.join(find_word)).split(',')]
+            data = [re.sub(r'(?<!\.),', ',', line.strip().replace('"', '')).split(',') for line in format_file]
 
             ## set dataframe
             user_df = pd.DataFrame(data)
@@ -75,10 +72,7 @@ class ModuleIIC(CallFunction):
         
         try:
             ## clean and split the data
-            data = []
-            for line in format_file:
-                find_word = line.strip().replace('"', '')
-                data += [re.sub(r'(?<!\.),', ',', ''.join(find_word)).split(',')]
+            data = [re.sub(r'(?<!\.),', ',', line.strip().replace('"', '')).split(',') for line in format_file]
 
             ## set dataframe
             param_df = pd.DataFrame(data)

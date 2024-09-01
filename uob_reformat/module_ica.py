@@ -108,9 +108,7 @@ class ModuleICA(CallFunction):
 
         try:
             ## clean and split the data
-            data = []
-            for line in format_file:
-                data += [re.sub(r'(?<!\.)\x07', '||', line.strip()).split('||')]
+            data = [re.sub(r'(?<!\.)\x07', '||', line.strip()).split('||') for line in format_file]
                 
             ## FILE: ICAS_TBL_USER
             columns = ['Record_Type','USER_ID','LOGIN_NAME','FULL_NAME','PASSWORD','LOCKED_FLAG','FIRST_LOGIN_FLAG','LAST_ACTION_TYPE','CREATE_USER_ID','CREATE_DTM','LAST_UPDATE_USER_ID',
@@ -165,9 +163,7 @@ class ModuleICA(CallFunction):
         
         try:
             ## clean and split the data
-            data = []
-            for line in format_file:
-                data += [re.sub(r'(?<!\.)\x07', '||', line.strip()).split('||')]
+            data = [re.sub(r'(?<!\.)\x07', '||', line.strip()).split('||') for line in format_file]
                 
             ## FILE: ICAS_TBL_USER
             columns = ['Record_Type','USER_ID','LOGIN_NAME','FULL_NAME','PASSWORD','LOCKED_FLAG','FIRST_LOGIN_FLAG','LAST_ACTION_TYPE','CREATE_USER_ID','CREATE_DTM','LAST_UPDATE_USER_ID',

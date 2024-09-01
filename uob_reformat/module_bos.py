@@ -58,8 +58,8 @@ class ModuleBOS(CallFunction):
                 format_file = self.read_file(i, full_depend)
                 
                 ## clean and split the data
-                for line in format_file:
-                    data += [re.sub(r'(?<!\.),', '||', line.strip()).split('||')]
+                data = [re.sub(r'(?<!\.),', '||', line.strip()).split('||') for line in format_file]
+                
             else:
                 self.logging[i].update({'err': f'File not found {full_depend}'})
                 
@@ -93,9 +93,7 @@ class ModuleBOS(CallFunction):
 
         try:
             ## clean and split the data
-            data = []
-            for line in format_file:
-                data += [re.sub(r'(?<!\.),', '||', line.strip()).split('||')]
+            data = [re.sub(r'(?<!\.),', '||', line.strip()).split('||') for line in format_file]
             
             ## FILE: BOSTH 
             user_df = pd.DataFrame(data)
@@ -151,9 +149,7 @@ class ModuleBOS(CallFunction):
         
         try:
             ## clean and split the data
-            data = []
-            for line in format_file:
-                data += [re.sub(r'(?<!\.),', '||', line.strip()).split('||')]
+            data = [re.sub(r'(?<!\.),', '||', line.strip()).split('||') for line in format_file]
             
             ## FILE: BOSTH
             user_df = pd.DataFrame(data)
