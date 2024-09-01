@@ -50,6 +50,7 @@ class ModuleADM(CallFunction):
         self.logging[i].update({'function': 'collect_user_file', 'status': status})
 
         try:
+            ## clean and split the data
             data = []
             for line in format_file:
                 data += [re.sub(r'(?<!\.)\|\|', '||', line.strip()).split('||')]
@@ -60,8 +61,7 @@ class ModuleADM(CallFunction):
             user_df = user_df.apply(lambda row: row.str.strip()).reset_index(drop=True)
             
             # group by column
-            user_df = user_df.groupby('User-ID', sort=False)
-            user_df = user_df.agg(lambda row: '+'.join(row.unique())).reset_index()
+            user_df = user_df.groupby('User-ID', sort=False).agg(lambda row: '+'.join(row.unique())).reset_index()
 
             ## mapping data to column
             set_value = dict.fromkeys(self.logging[i]['columns'], 'NA')
@@ -95,6 +95,7 @@ class ModuleADM(CallFunction):
         self.logging[i].update({'function': 'collect_param_file', 'status': status})
 
         try:
+            ## clean and split the data
             data = []
             for line in format_file:
                 data += [re.sub(r'(?<!\.)\|\|', '||', line.strip()).split('||')]

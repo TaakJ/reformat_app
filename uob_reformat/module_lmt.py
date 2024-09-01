@@ -50,6 +50,7 @@ class ModuleLMT(CallFunction):
         self.logging[i].update({'function': 'collect_user_file', 'status': status})
 
         try:
+            ## clean and split the data
             data = []
             for line in format_file:
                 find_word = line.strip().replace('"', '')
@@ -99,6 +100,7 @@ class ModuleLMT(CallFunction):
         self.logging[i].update({'function': 'collect_param_file', 'status': status})
 
         try:
+            ## clean and split the data
             data = []
             for line in format_file:
                 find_word = line.strip().replace('"', '')

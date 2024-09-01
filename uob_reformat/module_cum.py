@@ -45,6 +45,7 @@ class ModuleCUM(CallFunction):
     
     def read_format_file(self, format_file) -> list:
         
+        ## clean and split the data
         data = []
         sheet_list = [sheet for sheet in format_file.sheet_names()]
         for sheets in sheet_list:
@@ -71,8 +72,7 @@ class ModuleCUM(CallFunction):
             user_df =  user_df.iloc[1:].apply(lambda row: row.str.strip()).reset_index(drop=True)
             
             # group by column
-            user_df = user_df.groupby('USER_ID', sort=False)
-            user_df = user_df.agg(lambda row: '+'.join(row.unique())).reset_index()
+            user_df = user_df.groupby('USER_ID', sort=False).agg(lambda row: '+'.join(row.unique())).reset_index()
             
             ## mapping data to column
             set_value = dict.fromkeys(self.logging[i]['columns'], 'NA')

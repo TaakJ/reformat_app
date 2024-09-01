@@ -107,6 +107,7 @@ class ModuleICA(CallFunction):
         self.logging[i].update({'function': 'collect_user_file', 'status': status})
 
         try:
+            ## clean and split the data
             data = []
             for line in format_file:
                 data += [re.sub(r'(?<!\.)\x07', '||', line.strip()).split('||')]
@@ -126,8 +127,7 @@ class ModuleICA(CallFunction):
             merge_df = reduce(lambda left, right: pd.merge(left, right, on='USER_ID', how='inner', validate='m:m'), [tbl_user_df, tbl_user_group_df, tbl_user_bank_df])
             
             # group by column
-            merge_df = merge_df.groupby('USER_ID', sort=False)
-            merge_df = merge_df.agg(lambda row: '+'.join(row.unique())).reset_index()
+            merge_df = merge_df.groupby('USER_ID', sort=False).agg(lambda row: '+'.join(row.unique())).reset_index()
             
             ## mapping data to column
             set_value = dict.fromkeys(self.logging[i]['columns'], 'NA')
@@ -164,6 +164,7 @@ class ModuleICA(CallFunction):
         self.logging[i].update({'function': 'collect_param_file', 'status': status})
         
         try:
+            ## clean and split the data
             data = []
             for line in format_file:
                 data += [re.sub(r'(?<!\.)\x07', '||', line.strip()).split('||')]

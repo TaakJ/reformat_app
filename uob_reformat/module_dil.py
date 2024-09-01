@@ -63,13 +63,14 @@ class ModuleDIL(CallFunction):
         
     def read_format_file(self, format_file) -> list:
         
+        ## clean and split the data
         data = []
         for line in format_file:
             regex = re.compile(r'\w+.*')
             find_word = regex.findall(line.strip())
             if find_word != []:
                 data += [re.sub(r'(?<!\.)\s{2,}', '||', ''.join(find_word)).split('||')]
-
+        
         clean_data = []
         for rows, _data in enumerate(data):
             if rows == 1:

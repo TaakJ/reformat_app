@@ -56,6 +56,8 @@ class ModuleBOS(CallFunction):
             if glob.glob(full_depend, recursive=True):
                 
                 format_file = self.read_file(i, full_depend)
+                
+                ## clean and split the data
                 for line in format_file:
                     data += [re.sub(r'(?<!\.),', '||', line.strip()).split('||')]
             else:
@@ -90,6 +92,7 @@ class ModuleBOS(CallFunction):
         self.logging[i].update({'function': 'collect_user_file', 'status': status})
 
         try:
+            ## clean and split the data
             data = []
             for line in format_file:
                 data += [re.sub(r'(?<!\.),', '||', line.strip()).split('||')]
@@ -113,8 +116,7 @@ class ModuleBOS(CallFunction):
             merge_df = reduce(lambda left, right: pd.merge(left, right, on='username', how='inner', validate='m:m'), [user_df, param_df])
             
             # group by column
-            merge_df = merge_df.groupby('username', sort=False)
-            merge_df = merge_df.agg(lambda row: '+'.join(row.unique())).reset_index()
+            merge_df = merge_df.groupby('username', sort=False).agg(lambda row: '+'.join(row.unique())).reset_index()
             
             ## mapping data to column
             set_value = dict.fromkeys(self.logging[i]['columns'], 'NA')
@@ -148,6 +150,7 @@ class ModuleBOS(CallFunction):
         self.logging[i].update({'function': 'collect_param_file', 'status': status})
         
         try:
+            ## clean and split the data
             data = []
             for line in format_file:
                 data += [re.sub(r'(?<!\.),', '||', line.strip()).split('||')]
@@ -161,8 +164,7 @@ class ModuleBOS(CallFunction):
             user_df['branch_code'] = user_df['branch_code'].apply(lambda row: '{:0>3}'.format(row))
             
             # group by column
-            user_df = user_df.groupby('branch_code', sort=False)
-            user_df = user_df.agg(lambda row: '+'.join(row.unique())).reset_index()
+            user_df = user_df.groupby('branch_code', sort=False).agg(lambda row: '+'.join(row.unique())).reset_index()
             
             ## FILE: BOSTH_Param
             param_df = self.collect_depend_file(i)

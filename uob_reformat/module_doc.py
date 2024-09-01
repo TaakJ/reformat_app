@@ -67,6 +67,7 @@ class ModuleDOC(CallFunction):
         self.logging[i].update({'function': 'collect_user_file', 'status': status})
     
         try:
+            ## clean and split the data
             data = []
             for line in format_file:
                 regex = re.compile(r'\w+.*')
