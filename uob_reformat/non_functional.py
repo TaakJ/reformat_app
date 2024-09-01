@@ -126,9 +126,6 @@ class CollectParams(ABC):
 
 class BackupAndClear:
     
-    def clear_target(self) -> None:
-        print("OK")
-        
     def clear_tmp(self) -> None:
         try:
             tmp_dir = join(Folder.TMP, self.module)
@@ -144,87 +141,68 @@ class BackupAndClear:
         except OSError:
             pass
     
-    def achieve_backup(self) -> None:
-
-        self.root_dir = join(Folder.BACKUP, self.module)
-        self._date = self.date.strftime('%Y%m%d')
-        self.time = time.strftime('%H%M%S')
-
-        logging.info("Genarate backup file")
-        self.backup_zip_file()
-        self.backup_dir = join(self.root_dir, self._date)
-        if not os.path.exists(self.backup_dir):
-            os.makedirs(self.backup_dir)
+    def clear_target(self) -> None:
         
-        list_of_files = glob.glob(f'{self.backup_dir}/*')
+        logging.info('Clear target file')
+        
         for i, record in enumerate(self.logging):
-            if list_of_files != []:
-                try:
-                    ## read target file
-                    df  = self.read_csv_file(i, record['full_target'])
-                    
-                    ## read backup file
-                    full_backup = join(self.backup_dir, f"BK_{Path(record['full_target']).stem}.csv")
-                    bk_df = self.read_csv_file(i, full_backup)
-                    
-                    # Validate data change row by row
-                    cmp_df = self.comparing_dataframes(i, bk_df, df)
-                    if (cmp_df['count'] >= 1).any():
-                        self.genarate_backup_file(record)
-                    else:
-                        logging.info("No backup file because no data was changed")
-                        
-                except FileNotFoundError:
-                    self.genarate_backup_file(record)
-            else:
-                self.genarate_backup_file(record)
+            full_target = record['full_target']
             
-    def genarate_backup_file(self, record) -> None:
-        status = "skipped"
-        if glob.glob(record['full_target'], recursive=True):
-            try:        
-                backup_file = f"BK_{Path(record['full_target']).stem}.csv"
-                full_backup = join(self.backup_dir, backup_file)
-                shutil.copy2(record['full_target'], full_backup)
+            if os.path.exists(full_target):    
+                self.achieve_backup(i, full_target)
+            else:
+                print("File does not exist")
+    
+    def achieve_backup(self, i, full_target:str) -> None:
+        
+        if self.backup is True:
+            try:
+                logging.info("Genarate backup file")
                 
-                record.update({'full_backup': full_backup})
+                root_dir = join(Folder.BACKUP, self.module)
+                self.backup_dir = join(root_dir, self.date.strftime('%Y%m%d'))
+                if not os.path.exists(self.backup_dir):
+                    os.makedirs(self.backup_dir)
                 
-                status = "succeed"
-                logging.info(f"Backup file from {record['full_target']} to {full_backup}, status {status}")
+                ## read backup file
+                full_backup = join(self.backup_dir, f"BK_{Path(full_target).stem}.csv")
+                backup_df = self.read_csv_file(i, full_backup)
                 
-            except Exception:
-                pass
+                ## read target file
+                target_df  = self.read_csv_file(i, full_target)
+                
+            except FileNotFoundError:
+                self.genarate_backup_file(full_backup, full_target)
         else:
-            logging.info(f"No target file {record['full_target']}, status {status}")
-
-    def backup_zip_file(self) -> None:
-
-        self.bk_date = self.date - timedelta(days=1)
-        self._bk_date = self.bk_date.strftime('%Y%m%d')
+            print('ok')
+            
+            
+    def genarate_backup_file(self, full_backup, full_target) -> None:
+        
+        status = "skipped"
         try:
-            for date_dir in os.listdir(self.root_dir):
-                zip_dir = join(self.root_dir, date_dir)
-                
-                if self._bk_date < date_dir:
-                    ## zip backup file
-                    if date_dir < self._date and not zip_dir.endswith(".zip"):
-                        zip_name = join(self.root_dir, f"{date_dir}.zip")
-                        with zipfile.ZipFile(zip_name, "w", zipfile.ZIP_DEFLATED) as zf:
-                            for file in Path(zip_dir).rglob("*"):
-                                zf.write(file, file.relative_to(self.root_dir))
-                        
-                        shutil.rmtree(zip_dir)
-                        logging.info(f"Zip file: {zip_name}")
-                else:
-                    ## clear backup file
-                    if os.path.isfile(zip_dir):
-                        os.remove(zip_dir)
-                    else:
-                        shutil.rmtree(zip_dir)
-                    logging.info(f"Clear Zip file: {zip_dir}")
-                    
-        except OSError:
+            print(full_backup)
+            print(full_target)
+            
+        except Exception:
             pass
+        
+        # status = "skipped"
+        # if glob.glob(record['full_target'], recursive=True):
+        #     try:        
+        #         backup_file = f"BK_{Path(record['full_target']).stem}.csv"
+        #         full_backup = join(self.backup_dir, backup_file)
+        #         shutil.copy2(record['full_target'], full_backup)
+                
+        #         record.update({'full_backup': full_backup})
+                
+        #         status = "succeed"
+        #         logging.info(f"Backup file from {record['full_target']} to {full_backup}, status {status}")
+                
+        #     except Exception:
+        #         pass
+        # else:
+        #     logging.info(f"No target file {record['full_target']}, status {status}")
         
 class CallFunction(Convert2File, CollectLog, CollectParams, BackupAndClear):
     pass
