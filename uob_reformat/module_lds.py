@@ -125,7 +125,7 @@ class ModuleLDS(CallFunction):
             ## set dataframe
             param_df = pd.DataFrame(clean_data)
             param_df.columns = param_df.iloc[0].values
-            param_df = param_df.iloc[1:-1].apply(lambda row: row.str.strip()).reset_index(drop=True)
+            param_df = param_df.iloc[1:-1, :-1].apply(lambda row: row.str.strip()).reset_index(drop=True)
             
             ## mapping data to column
             set_value = [
