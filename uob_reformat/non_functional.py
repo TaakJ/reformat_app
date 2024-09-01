@@ -172,37 +172,21 @@ class BackupAndClear:
                 target_df  = self.read_csv_file(i, full_target)
                 
             except FileNotFoundError:
-                self.genarate_backup_file(full_backup, full_target)
+                self.genarate_backup_file(full_target, full_backup)
         else:
             print('ok')
             
-            
-    def genarate_backup_file(self, full_backup, full_target) -> None:
+    def genarate_backup_file(self, full_target, full_backup) -> None:
         
         status = "skipped"
         try:
-            print(full_backup)
-            print(full_target)
+            shutil.copy2(full_target, full_backup)
+            status = "succeed"
+            logging.info(f"Backup file from {full_target} to {full_backup}, status {status}")
             
         except Exception:
-            pass
+            logging.info(f"No target file {full_target}, status {status}")
         
-        # status = "skipped"
-        # if glob.glob(record['full_target'], recursive=True):
-        #     try:        
-        #         backup_file = f"BK_{Path(record['full_target']).stem}.csv"
-        #         full_backup = join(self.backup_dir, backup_file)
-        #         shutil.copy2(record['full_target'], full_backup)
-                
-        #         record.update({'full_backup': full_backup})
-                
-        #         status = "succeed"
-        #         logging.info(f"Backup file from {record['full_target']} to {full_backup}, status {status}")
-                
-        #     except Exception:
-        #         pass
-        # else:
-        #     logging.info(f"No target file {record['full_target']}, status {status}")
         
 class CallFunction(Convert2File, CollectLog, CollectParams, BackupAndClear):
     pass
