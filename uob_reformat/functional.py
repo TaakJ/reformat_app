@@ -213,7 +213,7 @@ class Convert2File:
 
     async def genarate_tmp_file(self) -> None:
         
-        self.clear_tmp()
+        self.clear_tmp_file()
         
         logging.info('Genarate data to tmp file')
         

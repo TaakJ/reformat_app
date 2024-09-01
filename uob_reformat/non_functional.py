@@ -123,7 +123,7 @@ class CollectParams(ABC):
 
 class BackupAndClear:
                 
-    def clear_target(self) -> None:
+    def clear_target_file(self) -> None:
         
         status = "skipped"
         for i, record in enumerate(self.logging):
@@ -190,7 +190,7 @@ class BackupAndClear:
             logging.info(f"No target file {full_target}, status {status}")
             
             
-    def clear_tmp(self) -> None:
+    def clear_tmp_file(self) -> None:
         try:
             tmp_dir = join(Folder.TMP, self.module)
             for date_dir in os.listdir(tmp_dir):

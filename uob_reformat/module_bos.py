@@ -22,7 +22,7 @@ class ModuleBOS(CallFunction):
         result = {'module': self.module, 'task': 'Completed'}
         try:
             self.colloct_setup()
-            self.clear_target()
+            self.clear_target_file()
             
             await self.check_source_file()
             await self.separate_data_file()
