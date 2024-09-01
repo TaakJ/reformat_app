@@ -1,11 +1,8 @@
 from abc import ABC, abstractmethod
 import os
-import glob
 import shutil
-import zipfile
 import logging
 from datetime import timedelta
-import time
 from pathlib import Path
 from os.path import join
 from .functional import Convert2File
@@ -127,6 +124,7 @@ class CollectParams(ABC):
 class BackupAndClear:
                 
     def clear_target(self) -> None:
+        
         status = "skipped"
         for i, record in enumerate(self.logging):
             
@@ -134,35 +132,32 @@ class BackupAndClear:
                 try:
                     if self.backup is True:
                         self.achieve_backup(i, record["full_target"])
-                    
+                        
                     os.remove(record["full_target"])
                     status = "succeed"
                     
-                except Exception as err:
+                except Exception:
                     pass
                 
             logging.info(f"Clear target file {record["full_target"]}, status {status}")
     
-    def clear_tmp(self) -> None:
-        try:
-            tmp_dir = join(Folder.TMP, self.module)
-            for date_dir in os.listdir(tmp_dir):
-                
-                if date_dir < self.date.strftime('%Y%m%d'):
-                    full_tmp = join(tmp_dir, date_dir)
-                    
-                    shutil.rmtree(full_tmp)
-                    status = "succeed"
-                    
-                    logging.info(f"Clear Tmp file: {full_tmp} status: {status}")
-                    
-        except OSError:
-            pass
-    
     def achieve_backup(self, i, full_target:str) -> None:
         
         try:
-            backup_dir = join(join(Folder.BACKUP, self.module), self.date.strftime('%Y%m%d'))
+            try:
+                root_dir = join(Folder.BACKUP, self.module)
+                bk_date = self.date - timedelta(days=1) 
+                
+                for date_dir in os.listdir(root_dir):
+                    if date_dir <= bk_date.strftime('%Y%m%d'):
+                        
+                        del_backup = join(root_dir, date_dir)
+                        shutil.rmtree(del_backup)
+                        
+            except OSError:
+                pass
+            
+            backup_dir = join(root_dir, self.date.strftime('%Y%m%d'))
             if not os.path.exists(backup_dir):
                 os.makedirs(backup_dir)
             
@@ -173,7 +168,7 @@ class BackupAndClear:
             ## read target file
             target_df  = self.read_csv_file(i, full_target)
             
-            # Validate data change row by row
+            ## Validate data change row by row
             cmp_df = self.comparing_dataframes(i, backup_df, target_df)
             if (cmp_df['count'] >= 1).any():
                 self.genarate_backup_file(full_target, full_backup)
@@ -184,6 +179,7 @@ class BackupAndClear:
             self.genarate_backup_file(full_target, full_backup)
             
     def genarate_backup_file(self, full_target, full_backup) -> None:
+        
         status = "skipped"
         try:
             shutil.copy2(full_target, full_backup)
@@ -192,6 +188,23 @@ class BackupAndClear:
             
         except Exception:
             logging.info(f"No target file {full_target}, status {status}")
+            
+            
+    def clear_tmp(self) -> None:
+        try:
+            tmp_dir = join(Folder.TMP, self.module)
+            for date_dir in os.listdir(tmp_dir):
+                
+                if date_dir < self.date.strftime('%Y%m%d'):
+                    full_tmp = join(tmp_dir, date_dir)
+                    
+                    shutil.rmtree(full_tmp)
+                    status = 'succeed'
+                    
+                    logging.info(f'Clear Tmp file: {full_tmp} status: {status}')
+                    
+        except OSError:
+            pass
         
         
 class CallFunction(Convert2File, CollectLog, CollectParams, BackupAndClear):

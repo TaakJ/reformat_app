@@ -4,7 +4,6 @@ import logging
 from .non_functional import CallFunction
 from .exception import CustomException
 
-
 class ModuleADM(CallFunction):
 
     def __init__(self, params: any) -> None:

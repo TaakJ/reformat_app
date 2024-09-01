@@ -312,7 +312,7 @@ class Convert2File:
                             record = f"{cdc[rows][col]} rows: ({rows}) in tmp file, Updating records: ({self.update_rows[rows]})"
                         else:
                             continue
-                        logging.info(record)
+                        #logging.info(record)
                 rows += 1
                 
         except KeyError as err:
@@ -426,7 +426,7 @@ class Convert2File:
                 for idx, value in cdc.items():
                     if value.get('remark') is not None:
                         if idx in self.update_rows.keys():
-                            logging.info(f"{value['remark']} rows: ({idx}) in target file, Updating records: ({self.update_rows[idx]})")
+                            # logging.info(f"{value['remark']} rows: ({idx}) in target file, Updating records: ({self.update_rows[idx]})")
                             value.popitem()
                             rows.update({idx: value})
                             

@@ -6,7 +6,6 @@ import logging
 from .non_functional import CallFunction
 from .exception import CustomException
 
-
 class ModuleBOS(CallFunction):
 
     def __init__(self, params) -> None:
