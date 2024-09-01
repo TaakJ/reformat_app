@@ -46,8 +46,15 @@ class ModuleLDS(CallFunction):
     
     def read_format_file(self, format_file) -> list:
         
+        # data = []
+        # for line in format_file:
+        #     regex = re.compile(r'\w+.*')
+        #     find_word = regex.findall(line.strip())
+        #     if find_word != []:
+        #         data += [re.sub(r'(?<!\.),', '||', ''.join(find_word)).split('||')]
+        
         ## clean and split the data
-        data = [re.sub(r'(?<!\.),', '||', ''.join(re.findall(r'\w+.*', line.strip()))).split('||') for line in format_file]
+        data = [re.sub(r'(?<!\.),', '||', ''.join(re.findall(r'\w+.*', line.strip()))).split('||')for line in format_file if re.findall(r'\w+.*', line.strip())]
         
         clean_data = []
         for rows, _data in enumerate(data):
@@ -118,7 +125,7 @@ class ModuleLDS(CallFunction):
             ## set dataframe
             param_df = pd.DataFrame(clean_data)
             param_df.columns = param_df.iloc[0].values
-            param_df = param_df.iloc[1:-1, :-1].apply(lambda row: row.str.strip()).reset_index(drop=True)
+            param_df = param_df.iloc[1:-1].apply(lambda row: row.str.strip()).reset_index(drop=True)
             
             ## mapping data to column
             set_value = [

@@ -67,8 +67,15 @@ class ModuleDOC(CallFunction):
         self.logging[i].update({'function': 'collect_user_file', 'status': status})
     
         try:
-            ## clean and split the data
-            data = [re.sub(r'(?<!\.)\s{2,}', '||', ''.join(re.findall(r'\w+.*', line.strip()))).split('||') for line in format_file]
+            # data = []
+            # for line in format_file:
+            #     regex = re.compile(r'\w+.*')
+            #     find_word = regex.findall(line.strip())
+            #     if find_word != []:
+            #         data += [re.sub(r'(?<!\.)\s{2,}', '||', ''.join(find_word)).split('||')]
+            
+            ## clean and split the data        
+            data = [re.sub(r'(?<!\.)\s{2,}', '||', ''.join(re.findall(r'\w+.*', line.strip()))).split('||') for line in format_file if re.findall(r'\w+.*', line.strip())]
             
             clean_data = []
             for rows, _data in enumerate(data):
