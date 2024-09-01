@@ -24,9 +24,7 @@ class ModuleICA(CallFunction):
         result = {'module': self.module, 'task': 'Completed'}
         try:
             self.colloct_setup()
-
-            if self.backup is True:
-                self.achieve_backup()
+            self.clear_target()
 
             await self.check_source_file()
             await self.separate_data_file()

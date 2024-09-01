@@ -125,59 +125,65 @@ class CollectParams(ABC):
         pass
 
 class BackupAndClear:
+                
+    def clear_target(self) -> None:
+        status = "skipped"
+        for i, record in enumerate(self.logging):
+            
+            if os.path.exists(record["full_target"]):
+                try:
+                    if self.backup is True:
+                        self.achieve_backup(i, record["full_target"])
+                    
+                    os.remove(record["full_target"])
+                    status = "succeed"
+                    
+                except Exception as err:
+                    pass
+                
+            logging.info(f"Clear target file {record["full_target"]}, status {status}")
     
     def clear_tmp(self) -> None:
         try:
             tmp_dir = join(Folder.TMP, self.module)
-
             for date_dir in os.listdir(tmp_dir):
+                
                 if date_dir < self.date.strftime('%Y%m%d'):
-                    tmp_file = join(tmp_dir, date_dir)
-                    shutil.rmtree(tmp_file)
-
-                    state = "succeed"
-                    logging.info(f"Clear Tmp file: {tmp_file} status: {state}")
-
+                    full_tmp = join(tmp_dir, date_dir)
+                    
+                    shutil.rmtree(full_tmp)
+                    status = "succeed"
+                    
+                    logging.info(f"Clear Tmp file: {full_tmp} status: {status}")
+                    
         except OSError:
             pass
     
-    def clear_target(self) -> None:
-        
-        logging.info('Clear target file')
-        
-        for i, record in enumerate(self.logging):
-            full_target = record['full_target']
-            
-            if os.path.exists(full_target):    
-                self.achieve_backup(i, full_target)
-            else:
-                print("File does not exist")
-    
     def achieve_backup(self, i, full_target:str) -> None:
         
-        if self.backup is True:
-            try:
-                logging.info("Genarate backup file")
-                
-                root_dir = join(Folder.BACKUP, self.module)
-                self.backup_dir = join(root_dir, self.date.strftime('%Y%m%d'))
-                if not os.path.exists(self.backup_dir):
-                    os.makedirs(self.backup_dir)
-                
-                ## read backup file
-                full_backup = join(self.backup_dir, f"BK_{Path(full_target).stem}.csv")
-                backup_df = self.read_csv_file(i, full_backup)
-                
-                ## read target file
-                target_df  = self.read_csv_file(i, full_target)
-                
-            except FileNotFoundError:
+        try:
+            backup_dir = join(join(Folder.BACKUP, self.module), self.date.strftime('%Y%m%d'))
+            if not os.path.exists(backup_dir):
+                os.makedirs(backup_dir)
+            
+            ## read backup file
+            full_backup = join(backup_dir, f"BK_{Path(full_target).stem}.csv")
+            backup_df = self.read_csv_file(i, full_backup)
+            
+            ## read target file
+            target_df  = self.read_csv_file(i, full_target)
+            
+            # Validate data change row by row
+            cmp_df = self.comparing_dataframes(i, backup_df, target_df)
+            if (cmp_df['count'] >= 1).any():
                 self.genarate_backup_file(full_target, full_backup)
-        else:
-            print('ok')
+            else:
+                logging.info(f"No backup file {full_target} because no data was changed")
+            
+        except FileNotFoundError:
+            self.genarate_backup_file(full_target, full_backup)
             
     def genarate_backup_file(self, full_target, full_backup) -> None:
-        
         status = "skipped"
         try:
             shutil.copy2(full_target, full_backup)

@@ -21,17 +21,13 @@ class ModuleADM(CallFunction):
         result = {'module': self.module, 'task': 'Completed'}
         try:
             self.colloct_setup()
-
-            # if self.backup is True:
-            #     self.achieve_backup()
-            
             self.clear_target()
 
-            # await self.check_source_file()
-            # await self.separate_data_file()
-            # if self.store_tmp is True:
-            #     await self.genarate_tmp_file()
-            # await self.genarate_target_file()
+            await self.check_source_file()
+            await self.separate_data_file()
+            if self.store_tmp is True:
+                await self.genarate_tmp_file()
+            await self.genarate_target_file()
 
         except CustomException as err:
             logging.error('See Error Details: log_error.log')
