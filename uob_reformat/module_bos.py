@@ -111,9 +111,11 @@ class ModuleBOS(CallFunction):
             
             ## merge 2 file BOSTH / BOSTH_Param
             self.logging[i].update({'function': 'collect_user_file', 'status': status})
+            # merge_df = reduce(lambda left, right: pd.merge(left, right, on='username', how='left', validate='m:m'), [user_df, param_df]).fillna('NA')
             merge_df = reduce(lambda left, right: pd.merge(left, right, on='username', how='left', validate='m:m'), [user_df, param_df])
             
             # group by column
+            # merge_df = merge_df.groupby('username', sort=False).agg(lambda row: '+'.join(row.unique())).reset_index()
             merge_df = merge_df.groupby('username', sort=False).agg(lambda row: '+'.join(map(str, row.replace([None], ['NA']).unique()))).reset_index()
             
             ## mapping data to column
