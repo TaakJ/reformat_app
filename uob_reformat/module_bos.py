@@ -114,7 +114,7 @@ class ModuleBOS(CallFunction):
             merge_df = reduce(lambda left, right: pd.merge(left, right, on='username', how='inner', validate='m:m'), [user_df, param_df])
             
             # group by column
-            merge_df = merge_df.groupby('username', sort=False).agg(lambda row: '+'.join(row.unique())).reset_index()
+            merge_df = merge_df.groupby('username', sort=False).agg(lambda row: '+'.join(map(str, row.replace([None], ['NA']).unique()))).reset_index()
             
             ## mapping data to column
             set_value = dict.fromkeys(self.logging[i]['columns'], 'NA')
@@ -160,7 +160,7 @@ class ModuleBOS(CallFunction):
             user_df['branch_code'] = user_df['branch_code'].apply(lambda row: '{:0>3}'.format(row))
             
             # group by column
-            user_df = user_df.groupby('branch_code', sort=False).agg(lambda row: '+'.join(map(str, row.unique()))).reset_index()
+            user_df = user_df.groupby('branch_code', sort=False).agg(lambda row: '+'.join(map(str, row.replace([None], ['NA']).unique()))).reset_index()
             
             ## FILE: BOSTH_Param
             param_df = self.collect_depend_file(i)

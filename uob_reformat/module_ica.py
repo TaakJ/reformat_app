@@ -123,15 +123,12 @@ class ModuleICA(CallFunction):
             # merge 3 file ICAS_TBL_USER / ICAS_TBL_USER_GROUP
             self.logging[i].update({'function': 'collect_user_file', 'status': status})
             # merge_df = reduce(lambda left, right: pd.merge(left, right, on='USER_ID', how='inner', validate='m:m'), [tbl_user_df, tbl_user_group_df, tbl_user_bank_df])
-            # merge_df = merge_df.groupby('USER_ID', sort=False).agg(lambda row: '+'.join(map(str, row.unique()))).reset_index()
             
-            merge_df = reduce(lambda left, right: pd.merge(left, right, on='USER_ID', how='left', validate='m:m'), [tbl_user_df, tbl_user_group_df, tbl_user_bank_df]).fillna('NA')
-            merge_df = merge_df.groupby('USER_ID', sort=False).agg(lambda row: '+'.join(map(str, row.unique()))).reset_index()
-            print(merge_df)
+            merge_df = reduce(lambda left, right: pd.merge(left, right, on='USER_ID', how='left', validate='m:m'), [tbl_user_df, tbl_user_group_df, tbl_user_bank_df])
             
             # group by column
-            # merge_df = merge_df.groupby('USER_ID', sort=False).agg(lambda row: '+'.join(row.unique())).reset_index()
-            #print(merge_df)
+            merge_df = merge_df.groupby('USER_ID', sort=False).agg(lambda row: '+'.join(map(str, row.replace([None], ['NA']).unique()))).reset_index()
+            print(merge_df)
             
             ## mapping data to column
             # set_value = dict.fromkeys(self.logging[i]['columns'], 'NA')
