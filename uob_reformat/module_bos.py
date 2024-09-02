@@ -46,6 +46,15 @@ class ModuleBOS(CallFunction):
         
         return result
     
+    def split_column(self, row: any) -> any:
+        comma = row['NAME'].count(',')
+        if comma == 2:
+            name, department, _ = row['NAME'].split(',')
+        else:
+            name, department = row['NAME'].split(',')
+            
+        return name, department
+    
     def collect_depend_file(self, i: int) -> pd.DataFrame:
         
         logging.info('Lookup depend file')
@@ -75,8 +84,9 @@ class ModuleBOS(CallFunction):
             param_df.columns = param_df.iloc[0].values
             param_df = param_df.iloc[1:].apply(lambda row: row.str.strip()).reset_index(drop=True)
             
-            # extract column
-            param_df[['Domain', 'username']] = param_df['username'].str.extract(r'^(.*?)\\(.*)$')
+            # extracting column
+            split_column = param_df['username'].str.extract(r'^(.*?)\\(.*)$', expand=False)
+            param_df['username'] = split_column[1].fillna(param_df['username'])
             
         except Exception as err:
             raise Exception(err)
@@ -103,15 +113,16 @@ class ModuleBOS(CallFunction):
             # leading zeros to make it 3 digits
             user_df['branch_code'] = user_df['branch_code'].apply(lambda row: '{:0>3}'.format(row))
             
-            # extract column
-            user_df[['Domain', 'username']] = user_df['user_name'].str.extract(r'^(.*?)\\(.*)$')
+            # extracting column
+            split_column = user_df['user_name'].str.extract(r'^(.*?)\\(.*)$', expand=False)
+            user_df['username'] = split_column[1].fillna(user_df['user_name'])
             
             ## FILE: BOSTH_Param
             param_df = self.collect_depend_file(i)
             
             ## merge 2 file BOSTH / BOSTH_Param
             self.logging[i].update({'function': 'collect_user_file', 'status': status})
-            # merge_df = reduce(lambda left, right: pd.merge(left, right, on='username', how='left', validate='m:m'), [user_df, param_df]).fillna('NA')
+            # merge_df = reduce(lambda left, right: pd.merge(left, right, on='username', how='inner', validate='m:m'), [user_df, param_df])
             merge_df = reduce(lambda left, right: pd.merge(left, right, on='username', how='left', validate='m:m'), [user_df, param_df])
             
             # group by column
@@ -135,7 +146,7 @@ class ModuleBOS(CallFunction):
                 }
             )
             merge_df = merge_df.assign(**set_value)
-            merge_df = merge_df.drop(merge_df.iloc[:, :14].columns, axis=1)
+            merge_df = merge_df.drop(merge_df.iloc[:, :12].columns, axis=1)
             
         except Exception as err:
             raise Exception(err)
