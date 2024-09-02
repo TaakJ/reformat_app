@@ -28,9 +28,9 @@ class ModuleICA(CallFunction):
 
             await self.check_source_file()
             await self.separate_data_file()
-            # if self.store_tmp is True:
-            #     await self.genarate_tmp_file()
-            # await self.genarate_target_file()
+            if self.store_tmp is True:
+                await self.genarate_tmp_file()
+            await self.genarate_target_file()
 
         except CustomException as err:
             logging.error('See Error Details: log_error.log')
@@ -123,34 +123,32 @@ class ModuleICA(CallFunction):
             # merge 3 file ICAS_TBL_USER / ICAS_TBL_USER_GROUP
             self.logging[i].update({'function': 'collect_user_file', 'status': status})
             # merge_df = reduce(lambda left, right: pd.merge(left, right, on='USER_ID', how='inner', validate='m:m'), [tbl_user_df, tbl_user_group_df, tbl_user_bank_df])
-            
             merge_df = reduce(lambda left, right: pd.merge(left, right, on='USER_ID', how='left', validate='m:m'), [tbl_user_df, tbl_user_group_df, tbl_user_bank_df])
             
             # group by column
             merge_df = merge_df.groupby('USER_ID', sort=False).agg(lambda row: '+'.join(map(str, row.replace([None], ['NA']).unique()))).reset_index()
-            print(merge_df)
             
             ## mapping data to column
-            # set_value = dict.fromkeys(self.logging[i]['columns'], 'NA')
-            # set_value.update(
-            #     {
-            #         'ApplicationCode': 'ICA',
-            #         'AccountOwner': merge_df['LOGIN_NAME'],
-            #         'AccountName': merge_df['LOGIN_NAME'],
-            #         'AccountType': 'USR',
-            #         'EntitlementName': merge_df['GROUP_ID'],
-            #         'AccountStatus': merge_df['LOCKED_FLAG'].apply(lambda x: 'A' if x == '0' else 'D'),
-            #         'IsPrivileged': 'N',
-            #         'AccountDescription': merge_df['FULL_NAME'],
-            #         'CreateDate': pd.to_datetime(merge_df['CREATE_DTM'], errors='coerce').dt.strftime('%Y%m%d%H%M%S'), 
-            #         'LastLogin': pd.to_datetime(merge_df['LAST_LOGIN_ATTEMPT'], errors='coerce').dt.strftime('%Y%m%d%H%M%S'),
-            #         'LastUpdatedDate': pd.to_datetime(merge_df['LAST_UPDATE_DTM_x'], errors='coerce').dt.strftime('%Y%m%d%H%M%S'),
-            #         'AdditionalAttribute': merge_df[['HOME_BANK', 'HOME_BRANCH', 'BRANCH_CODE']].apply(lambda row: '#'.join(row), axis=1),
-            #         'Country': 'TH',
-            #     }
-            # )
-            # merge_df = merge_df.assign(**set_value)
-            # merge_df = merge_df.drop(merge_df.iloc[:, :35].columns, axis=1)
+            set_value = dict.fromkeys(self.logging[i]['columns'], 'NA')
+            set_value.update(
+                {
+                    'ApplicationCode': 'ICA',
+                    'AccountOwner': merge_df['LOGIN_NAME'],
+                    'AccountName': merge_df['LOGIN_NAME'],
+                    'AccountType': 'USR',
+                    'EntitlementName': merge_df['GROUP_ID'],
+                    'AccountStatus': merge_df['LOCKED_FLAG'].apply(lambda x: 'A' if x == '0' else 'D'),
+                    'IsPrivileged': 'N',
+                    'AccountDescription': merge_df['FULL_NAME'],
+                    'CreateDate': pd.to_datetime(merge_df['CREATE_DTM_x'], errors='coerce').dt.strftime('%Y%m%d%H%M%S'),  # CREATE_DTM
+                    'LastLogin': pd.to_datetime(merge_df['LAST_LOGIN_ATTEMPT'], errors='coerce').dt.strftime('%Y%m%d%H%M%S'),
+                    'LastUpdatedDate': pd.to_datetime(merge_df['LAST_UPDATE_DTM_x'], errors='coerce').dt.strftime('%Y%m%d%H%M%S'),
+                    'AdditionalAttribute': merge_df[['HOME_BANK', 'HOME_BRANCH', 'BRANCH_CODE']].apply(lambda row: '#'.join(row), axis=1),
+                    'Country': 'TH',
+                }
+            )
+            merge_df = merge_df.assign(**set_value)
+            merge_df = merge_df.drop(merge_df.iloc[:, :35].columns, axis=1)
             
         except Exception as err:
             raise Exception(err)
