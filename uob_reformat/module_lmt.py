@@ -63,7 +63,7 @@ class ModuleLMT(CallFunction):
             
             # group by column
             user_df = user_df.groupby('Username', sort=False)
-            user_df = user_df.agg(lambda row: '+'.join(row.unique())).reset_index()
+            user_df = user_df.agg(lambda row: '+'.join(map(str,row.unique()))).reset_index()
 
             ## mapping data to column
             set_value = dict.fromkeys(self.logging[i]['columns'], "NA")

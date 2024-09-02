@@ -160,7 +160,7 @@ class ModuleBOS(CallFunction):
             user_df['branch_code'] = user_df['branch_code'].apply(lambda row: '{:0>3}'.format(row))
             
             # group by column
-            user_df = user_df.groupby('branch_code', sort=False).agg(lambda row: '+'.join(row.unique())).reset_index()
+            user_df = user_df.groupby('branch_code', sort=False).agg(lambda row: '+'.join(map(str, row.unique()))).reset_index()
             
             ## FILE: BOSTH_Param
             param_df = self.collect_depend_file(i)
