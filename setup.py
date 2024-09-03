@@ -1,19 +1,19 @@
 from setuptools import setup, find_packages
 
 setup(
-    name="uob_reformat",
-    version="0.1",
-    description="build package reformat uob app",
+    name='uob_reformat',
+    version='0.2',
+    description='build package reformat uob app',
     long_description=open('README.md').read() + '\n\n' + open('CHANGELOG.txt').read(),
     long_description_content_type='text/markdown',
     url='',
-    author='mfec',
+    author='MFEC',
     author_email='',
     license='MIT',
     classifiers=[
-        "Programming Language :: Python :: 3",
-        "License :: OSI Approved :: MIT License",
-        "Operating System :: OS Independent",
+        'Programming Language :: Python :: 3',
+        'License :: OSI Approved :: MIT License',
+        'Operating System :: OS Independent',
     ],
     keywords='',
     packages=find_packages(),
