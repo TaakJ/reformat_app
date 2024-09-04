@@ -126,7 +126,7 @@ class ModuleICA(CallFunction):
             # group by column
             merge_df = merge_df.groupby('USER_ID', sort=False).agg(lambda row: '+'.join(map(str, row.replace([None], ['NA']).unique()))).reset_index()
             
-            ## mapping data to column
+            # mapping data to column
             set_value = dict.fromkeys(self.logging[i]['columns'], 'NA')
             set_value.update(
                 {
