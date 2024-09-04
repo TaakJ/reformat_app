@@ -51,7 +51,7 @@ class ModuleICA(CallFunction):
         
         logging.info('Lookup depend file')
         
-        table = {}
+        tbl = {}
         for full_depend in self.logging[i]['full_depend']:
             
             data = []
@@ -61,11 +61,11 @@ class ModuleICA(CallFunction):
                 for line in format_file:
                     data += [re.sub(r'(?<!\.)\x07', '||', line.strip()).split('||')]
                     
-                table_name = Path(full_depend).name
-                if table_name in table:
-                    table[table_name].extend(data)
+                tbl_name = Path(full_depend).name
+                if tbl_name in tbl:
+                    tbl[tbl_name].extend(data)
                 else:
-                    table[table_name] = data
+                    tbl[tbl_name] = data
             else:
                 self.logging[i].update({'err': f'File not found {full_depend}'})
                 
@@ -78,19 +78,19 @@ class ModuleICA(CallFunction):
         try:
             # FILE: ICAS_TBL_USER_GROUP
             columns = ['Record_Type', 'GROUP_ID','USER_ID','CREATE_USER_ID','CREATE_DTM','LAST_UPDATE_USER_ID','LAST_UPDATE_DTM']
-            tbl_user_group_df = pd.DataFrame(table['ICAS_TBL_USER_GROUP'], columns=columns)
+            tbl_user_group_df = pd.DataFrame(tbl['ICAS_TBL_USER_GROUP'], columns=columns)
             tbl_user_group_df = tbl_user_group_df.iloc[1:-1].apply(lambda row: row.str.strip()).reset_index(drop=True)
             
             # FILE: ICAS_TBL_USER_BANK_BRANCH
             columns = ['Record_Type','USER_ID','BANK_CODE','BRANCH_CODE','SUB_SYSTEM_ID','ACCESS_ALL_BRANCH_IN_HUB','DEFAULT_BRANCH_FLAG','CREATE_USER_ID','CREATE_DTM']
-            tbl_user_bank_df = pd.DataFrame(table['ICAS_TBL_USER_BANK_BRANCH'], columns=columns)
+            tbl_user_bank_df = pd.DataFrame(tbl['ICAS_TBL_USER_BANK_BRANCH'], columns=columns)
             tbl_user_bank_df = tbl_user_bank_df.iloc[1:-1].apply(lambda row: row.str.strip()).reset_index(drop=True)
             
             # FILE: ICAS_TBL_GROUP
             columns = ['Record_Type','GROUP_ID','SUB_SYSTEM_ID','GROUP_NAME','RESTRICTION','ABLE_TO_REVERIFY_FLAG','DESCRIPTION','DEFAULT_FINAL_RESULT','DELETE_FLAG','CREATE_USER_ID',
                         'CREATE_DTM','LAST_UPDATE_USER_ID','LAST_UPDATE_DTM','DELETE_DTM']
-            tbl_tbl_group_df = pd.DataFrame(table['ICAS_TBL_GROUP'], columns=columns)
-            tbl_tbl_group_df = tbl_tbl_group_df.iloc[1:-1].apply(lambda row: row.str.strip()).reset_index(drop=True)
+            tbl_group_df = pd.DataFrame(tbl['ICAS_TBL_GROUP'], columns=columns)
+            tbl_group_df = tbl_group_df.iloc[1:-1].apply(lambda row: row.str.strip()).reset_index(drop=True)
             
         except Exception as err:
             raise Exception(err)
@@ -98,7 +98,7 @@ class ModuleICA(CallFunction):
         status = 'succeed'
         self.logging[i].update({'status': status})
         
-        return tbl_user_group_df, tbl_user_bank_df, tbl_tbl_group_df
+        return tbl_user_group_df, tbl_user_bank_df, tbl_group_df
 
     def collect_user_file(self, i: int, format_file: any) -> str:
 
@@ -121,7 +121,6 @@ class ModuleICA(CallFunction):
             
             # merge 3 file ICAS_TBL_USER / ICAS_TBL_USER_GROUP
             self.logging[i].update({'function': 'collect_user_file', 'status': status})
-            # merge_df = reduce(lambda left, right: pd.merge(left, right, on='USER_ID', how='inner', validate='m:m'), [tbl_user_df, tbl_user_group_df, tbl_user_bank_df])
             merge_df = reduce(lambda left, right: pd.merge(left, right, on='USER_ID', how='left', validate='m:m'), [tbl_user_df, tbl_user_group_df, tbl_user_bank_df])
             
             # group by column
@@ -173,15 +172,15 @@ class ModuleICA(CallFunction):
             tbl_user_df = tbl_user_df.iloc[1:-1].apply(lambda row: row.str.strip()).reset_index(drop=True)
             
             # FILE: ICAS_TBL_USER_GROUP, ICAS_TBL_USER_BANK_BRANCH, ICAS_TBL_GROUP
-            _, tbl_user_bank_df, tbl_tbl_group_df = self.collect_depend_file(i)
+            _, tbl_user_bank_df, tbl_group_df = self.collect_depend_file(i)
             
             # mapping data to column
             self.logging[i].update({'function': 'collect_param_file', 'status': status})
             set_value = [
                 {
                     'Parameter Name': 'User Group',
-                    'Code value': tbl_tbl_group_df['GROUP_ID'].unique(),
-                    'Decode value': tbl_tbl_group_df['GROUP_NAME'].unique(),
+                    'Code value': tbl_group_df['GROUP_ID'].unique(),
+                    'Decode value': tbl_group_df['GROUP_NAME'].unique(),
                 },
                 {
                     'Parameter Name': 'HOME_BANK',
