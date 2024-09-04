@@ -63,10 +63,9 @@ class ModuleBOS(CallFunction):
             
             data = []
             if glob.glob(full_depend, recursive=True):
-                
                 format_file = self.read_file(i, full_depend)
                 
-                ## clean and split the data
+                # clean and split the data
                 data = [re.sub(r'(?<!\.),', '||', line.strip()).split('||') for line in format_file]
                 
             else:
@@ -102,10 +101,10 @@ class ModuleBOS(CallFunction):
         self.logging[i].update({'function': 'collect_user_file', 'status': status})
 
         try:
-            ## clean and split the data
+            # clean and split the data
             data = [re.sub(r'(?<!\.),', '||', line.strip()).split('||') for line in format_file]
             
-            ## FILE: BOSTH 
+            # FILE: BOSTH 
             user_df = pd.DataFrame(data)
             user_df.columns = user_df.iloc[0].values
             user_df =  user_df.iloc[1:].apply(lambda row: row.str.strip()).reset_index(drop=True)
@@ -117,10 +116,10 @@ class ModuleBOS(CallFunction):
             split_column = user_df['user_name'].str.extract(r'^(.*?)\\(.*)$', expand=False)
             user_df['username'] = split_column[1].fillna(user_df['user_name'])
             
-            ## FILE: BOSTH_Param
+            # FILE: BOSTH_Param
             param_df = self.collect_depend_file(i)
             
-            ## merge 2 file BOSTH / BOSTH_Param
+            # merge 2 file BOSTH / BOSTH_Param
             self.logging[i].update({'function': 'collect_user_file', 'status': status})
             # merge_df = reduce(lambda left, right: pd.merge(left, right, on='username', how='inner', validate='m:m'), [user_df, param_df])
             merge_df = reduce(lambda left, right: pd.merge(left, right, on='username', how='left', validate='m:m'), [user_df, param_df])
@@ -129,7 +128,7 @@ class ModuleBOS(CallFunction):
             # merge_df = merge_df.groupby('username', sort=False).agg(lambda row: '+'.join(row.unique())).reset_index()
             merge_df = merge_df.groupby('username', sort=False).agg(lambda row: '+'.join(map(str, row.replace([None], ['NA']).unique()))).reset_index()
             
-            ## mapping data to column
+            # mapping data to column
             set_value = dict.fromkeys(self.logging[i]['columns'], 'NA')
             set_value.update(
                 {
@@ -161,10 +160,10 @@ class ModuleBOS(CallFunction):
         self.logging[i].update({'function': 'collect_param_file', 'status': status})
         
         try:
-            ## clean and split the data
+            # clean and split the data
             data = [re.sub(r'(?<!\.),', '||', line.strip()).split('||') for line in format_file]
             
-            ## FILE: BOSTH
+            # FILE: BOSTH
             user_df = pd.DataFrame(data)
             user_df.columns = user_df.iloc[0].values
             user_df = user_df.iloc[1:].apply(lambda row: row.str.strip()).reset_index(drop=True)
@@ -175,10 +174,10 @@ class ModuleBOS(CallFunction):
             # group by column
             user_df = user_df.groupby('branch_code', sort=False).agg(lambda row: '+'.join(map(str, row.replace([None], ['NA']).unique()))).reset_index()
             
-            ## FILE: BOSTH_Param
+            # FILE: BOSTH_Param
             param_df = self.collect_depend_file(i)
             
-            ## mapping data to column
+            # mapping data to column
             self.logging[i].update({'function': 'collect_param', 'status': status})
             set_value = [
                 {

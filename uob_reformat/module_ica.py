@@ -106,17 +106,17 @@ class ModuleICA(CallFunction):
         self.logging[i].update({'function': 'collect_user_file', 'status': status})
 
         try:
-            ## clean and split the data
+            # clean and split the data
             data = [re.sub(r'(?<!\.)\x07', '||', line.strip()).split('||') for line in format_file]
                 
-            ## FILE: ICAS_TBL_USER
+            # FILE: ICAS_TBL_USER
             columns = ['Record_Type','USER_ID','LOGIN_NAME','FULL_NAME','PASSWORD','LOCKED_FLAG','FIRST_LOGIN_FLAG','LAST_ACTION_TYPE','CREATE_USER_ID','CREATE_DTM','LAST_UPDATE_USER_ID',
                         'LAST_UPDATE_DTM','LAST_LOGIN_ATTEMPT','ACCESS_ALL_BRANCH_FLAG','HOME_BRANCH','HOME_BANK','LOGIN_RETRY_COUNT','LAST_CHANGE_PASSWORD','DELETE_FLAG',
                         'LAST_LOGIN_SUCCESS','LAST_LOGIN_FAILED']
             tbl_user_df = pd.DataFrame(data, columns=columns)
             tbl_user_df = tbl_user_df.iloc[1:-1].apply(lambda row: row.str.strip()).reset_index(drop=True)
             
-            ## FILE: ICAS_TBL_USER_GROUP, ICAS_TBL_USER_BANK_BRANCH, ICAS_TBL_GROUP
+            # FILE: ICAS_TBL_USER_GROUP, ICAS_TBL_USER_BANK_BRANCH, ICAS_TBL_GROUP
             tbl_user_group_df, tbl_user_bank_df, _ = self.collect_depend_file(i)
             
             # merge 3 file ICAS_TBL_USER / ICAS_TBL_USER_GROUP
@@ -162,20 +162,20 @@ class ModuleICA(CallFunction):
         self.logging[i].update({'function': 'collect_param_file', 'status': status})
         
         try:
-            ## clean and split the data
+            # clean and split the data
             data = [re.sub(r'(?<!\.)\x07', '||', line.strip()).split('||') for line in format_file]
                 
-            ## FILE: ICAS_TBL_USER
+            # FILE: ICAS_TBL_USER
             columns = ['Record_Type','USER_ID','LOGIN_NAME','FULL_NAME','PASSWORD','LOCKED_FLAG','FIRST_LOGIN_FLAG','LAST_ACTION_TYPE','CREATE_USER_ID','CREATE_DTM','LAST_UPDATE_USER_ID',
                         'LAST_UPDATE_DTM','LAST_LOGIN_ATTEMPT','ACCESS_ALL_BRANCH_FLAG','HOME_BRANCH','HOME_BANK','LOGIN_RETRY_COUNT','LAST_CHANGE_PASSWORD','DELETE_FLAG',
                         'LAST_LOGIN_SUCCESS','LAST_LOGIN_FAILED']
             tbl_user_df = pd.DataFrame(data, columns=columns)
             tbl_user_df = tbl_user_df.iloc[1:-1].apply(lambda row: row.str.strip()).reset_index(drop=True)
             
-            ## FILE: ICAS_TBL_USER_GROUP, ICAS_TBL_USER_BANK_BRANCH, ICAS_TBL_GROUP
+            # FILE: ICAS_TBL_USER_GROUP, ICAS_TBL_USER_BANK_BRANCH, ICAS_TBL_GROUP
             _, tbl_user_bank_df, tbl_tbl_group_df = self.collect_depend_file(i)
             
-            ## mapping data to column
+            # mapping data to column
             self.logging[i].update({'function': 'collect_param_file', 'status': status})
             set_value = [
                 {
