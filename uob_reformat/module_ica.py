@@ -7,7 +7,6 @@ import logging
 from .non_functional import CallFunction
 from .exception import CustomException
 
-
 class ModuleICA(CallFunction):
 
     def __init__(self, params: any) -> None:
@@ -77,17 +76,17 @@ class ModuleICA(CallFunction):
         self.logging[i].update({'function': 'collect_depend_file', 'status': status})
         
         try:
-            ## FILE: ICAS_TBL_USER_GROUP
+            # FILE: ICAS_TBL_USER_GROUP
             columns = ['Record_Type', 'GROUP_ID','USER_ID','CREATE_USER_ID','CREATE_DTM','LAST_UPDATE_USER_ID','LAST_UPDATE_DTM']
             tbl_user_group_df = pd.DataFrame(table['ICAS_TBL_USER_GROUP'], columns=columns)
             tbl_user_group_df = tbl_user_group_df.iloc[1:-1].apply(lambda row: row.str.strip()).reset_index(drop=True)
             
-            ## FILE: ICAS_TBL_USER_BANK_BRANCH
+            # FILE: ICAS_TBL_USER_BANK_BRANCH
             columns = ['Record_Type','USER_ID','BANK_CODE','BRANCH_CODE','SUB_SYSTEM_ID','ACCESS_ALL_BRANCH_IN_HUB','DEFAULT_BRANCH_FLAG','CREATE_USER_ID','CREATE_DTM']
             tbl_user_bank_df = pd.DataFrame(table['ICAS_TBL_USER_BANK_BRANCH'], columns=columns)
             tbl_user_bank_df = tbl_user_bank_df.iloc[1:-1].apply(lambda row: row.str.strip()).reset_index(drop=True)
             
-            ## TABLE: ICAS_TBL_GROUP
+            # FILE: ICAS_TBL_GROUP
             columns = ['Record_Type','GROUP_ID','SUB_SYSTEM_ID','GROUP_NAME','RESTRICTION','ABLE_TO_REVERIFY_FLAG','DESCRIPTION','DEFAULT_FINAL_RESULT','DELETE_FLAG','CREATE_USER_ID',
                         'CREATE_DTM','LAST_UPDATE_USER_ID','LAST_UPDATE_DTM','DELETE_DTM']
             tbl_tbl_group_df = pd.DataFrame(table['ICAS_TBL_GROUP'], columns=columns)

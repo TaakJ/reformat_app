@@ -146,7 +146,7 @@ class ModuleBOS(CallFunction):
                 }
             )
             merge_df = merge_df.assign(**set_value)
-            merge_df = merge_df.drop(merge_df.iloc[:, :12].columns, axis=1)
+            merge_df = merge_df.drop(merge_df.iloc[:,:12].columns, axis=1)
             
         except Exception as err:
             raise Exception(err)
