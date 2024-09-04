@@ -39,7 +39,7 @@ class ModuleCUM(CallFunction):
 
             result.update({'task': 'Uncompleted'})
 
-        logging.info(f"Stop Run Module '{self.module}'\r\n")
+        logging.info(f"Stop Run Module '{self.module}'\n")
 
         return result
     
