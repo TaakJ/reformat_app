@@ -121,7 +121,7 @@ class ModuleICA(CallFunction):
             
             # merge 3 file ICAS_TBL_USER / ICAS_TBL_USER_GROUP
             self.logging[i].update({'function': 'collect_user_file', 'status': status})
-            merge_df = reduce(lambda left, right: pd.merge(left, right, on='USER_ID', how='left', validate='m:m'), [tbl_user_df, tbl_user_group_df, tbl_user_bank_df])
+            merge_df = reduce(lambda left, right: pd.merge(left, right, on='USER_ID', how='left', validate='m:m' ,suffixes=('_user','_param')), [tbl_user_df, tbl_user_group_df, tbl_user_bank_df])
             
             # group by column
             merge_df = merge_df.groupby('USER_ID', sort=False).agg(lambda row: '+'.join(x for x in row.unique() if pd.notna(x))).reset_index()
@@ -138,9 +138,9 @@ class ModuleICA(CallFunction):
                     'AccountStatus': merge_df['LOCKED_FLAG'].apply(lambda x: 'A' if x == '0' else 'D'),
                     'IsPrivileged': 'N',
                     'AccountDescription': merge_df['FULL_NAME'],
-                    'CreateDate': pd.to_datetime(merge_df['CREATE_DTM_x'], errors='coerce').dt.strftime('%Y%m%d%H%M%S'),  # CREATE_DTM
+                    'CreateDate': pd.to_datetime(merge_df['CREATE_DTM_user'], errors='coerce').dt.strftime('%Y%m%d%H%M%S'),
                     'LastLogin': pd.to_datetime(merge_df['LAST_LOGIN_ATTEMPT'], errors='coerce').dt.strftime('%Y%m%d%H%M%S'),
-                    'LastUpdatedDate': pd.to_datetime(merge_df['LAST_UPDATE_DTM_x'], errors='coerce').dt.strftime('%Y%m%d%H%M%S'),
+                    'LastUpdatedDate': pd.to_datetime(merge_df['LAST_UPDATE_DTM_user'], errors='coerce').dt.strftime('%Y%m%d%H%M%S'),
                     'AdditionalAttribute': merge_df[['HOME_BANK', 'HOME_BRANCH', 'BRANCH_CODE']].apply(lambda row: '#'.join(row), axis=1),
                     'Country': 'TH',
                 }
