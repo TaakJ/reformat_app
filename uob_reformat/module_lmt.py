@@ -58,12 +58,10 @@ class ModuleLMT(CallFunction):
             user_df.columns = user_df.iloc[0].values
             user_df = user_df.iloc[1:].apply(lambda row: row.str.strip()).reset_index(drop=True)
 
-            # Extract column
+            # adjust column
             user_df[['Domain', 'Username']] = user_df['Username'].str.extract(r'^(.*?)\\(.*)$')
+            user_df = user_df.groupby('Username', sort=False).agg(lambda row: '+'.join(filter(pd.notna, row.unique()))).reset_index()
             
-            # group by column
-            user_df = user_df.groupby('Username', sort=False).agg(lambda row: '+'.join(x for x in row.unique() if pd.notna(x))).reset_index()
-
             # mapping data to column
             set_value = dict.fromkeys(self.logging[i]['columns'], "NA")
             set_value.update(

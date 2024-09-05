@@ -50,6 +50,7 @@ class ModuleMOC(CallFunction):
         self.logging[i].update({'function': 'collect_user_file', 'status': status})
         
         try:
+            # clean and split the data
             data = [re.sub(r'(?<!\.),', ',', line.strip().replace('"', '')).split(',') for line in format_file]
             
             ## set dataframe

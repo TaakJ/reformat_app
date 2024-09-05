@@ -45,7 +45,6 @@ class ModuleLDS(CallFunction):
         return result
     
     def read_format_file(self, format_file) -> list:
-        
         # clean and split the data
         data = [re.sub(r'(?<!\.),', '||', ''.join(re.findall(r'\w+.*', line.strip()))).split('||') for line in format_file if re.findall(r'\w+.*', line.strip())]
         
@@ -71,6 +70,7 @@ class ModuleLDS(CallFunction):
         self.logging[i].update({'function': 'collect_user_file', 'status': status})
         
         try:
+            # clean and split the data
             clean_data = self.read_format_file(format_file)
             
             # set dataframe
@@ -111,6 +111,7 @@ class ModuleLDS(CallFunction):
         self.logging[i].update({'function': 'collect_param_file', 'status': status})
         
         try:
+            # clean and split the data
             clean_data = self.read_format_file(format_file)
             
             # set dataframe

@@ -44,7 +44,6 @@ class ModuleCUM(CallFunction):
         return result
     
     def read_format_file(self, format_file) -> list:
-        
         # clean and split the data
         data = []
         sheet_list = [sheet for sheet in format_file.sheet_names()]
@@ -63,6 +62,7 @@ class ModuleCUM(CallFunction):
         self.logging[i].update({'function': 'collect_user_file', 'status': status})
         
         try:
+            # clean and split the data
             clean_data = self.read_format_file(format_file)
             
             # set dataframe  
@@ -71,7 +71,7 @@ class ModuleCUM(CallFunction):
             user_df =  user_df.iloc[1:].apply(lambda row: row.str.strip()).reset_index(drop=True)
             
             # group by column
-            user_df = user_df.groupby('USER_ID', sort=False).agg(lambda row: '+'.join(x for x in row.unique() if pd.notna(x))).reset_index()
+            user_df = user_df.groupby('USER_ID', sort=False).agg(lambda row: '+'.join(filter(pd.notna, row.unique()))).reset_index()
             
             # mapping data to column
             set_value = dict.fromkeys(self.logging[i]['columns'], 'NA')
@@ -107,6 +107,7 @@ class ModuleCUM(CallFunction):
         self.logging[i].update({'function': 'collect_param_file', 'status': status})
         
         try:
+            # clean and split the data
             clean_data = self.read_format_file(format_file)
             
             # set dataframe  

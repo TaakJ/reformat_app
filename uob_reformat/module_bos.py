@@ -64,10 +64,8 @@ class ModuleBOS(CallFunction):
             data = []
             if glob.glob(full_depend, recursive=True):
                 format_file = self.read_file(i, full_depend)
-                
                 # clean and split the data
                 data = [re.sub(r'(?<!\.),', '||', line.strip()).split('||') for line in format_file]
-                
             else:
                 self.logging[i].update({'err': f'File not found {full_depend}'})
                 
@@ -108,10 +106,8 @@ class ModuleBOS(CallFunction):
             user_df.columns = user_df.iloc[0].values
             user_df = user_df.iloc[1:].apply(lambda row: row.str.strip()).reset_index(drop=True)
             
-            # leading zeros to make it 3 digits
-            user_df['branch_code'] = user_df['branch_code'].apply(lambda row: '{:0>3}'.format(row))
-            
             # adjsut column
+            user_df['branch_code'] = user_df['branch_code'].apply(lambda row: '{:0>3}'.format(row))
             user_df[['Domain', 'username']] = user_df['user_name'].str.extract(r'^(.*?)\\(.*)$', expand=False)
             
             # FILE: BOSTH_Param
@@ -122,7 +118,7 @@ class ModuleBOS(CallFunction):
             merge_df = reduce(lambda left, right: pd.merge(left, right, on='username', how='left', validate='m:m',suffixes=('_user','_param')), [user_df, param_df])
             
             # group by column
-            merge_df = merge_df.groupby('username', sort=False).agg(lambda row: '+'.join(x for x in row.unique() if pd.notna(x))).reset_index()
+            merge_df = merge_df.groupby('username', sort=False).agg(lambda row: '+'.join(filter(pd.notna, row.unique()))).reset_index()
             
             # mapping data to column
             set_value = dict.fromkeys(self.logging[i]['columns'], 'NA')
@@ -164,11 +160,11 @@ class ModuleBOS(CallFunction):
             user_df.columns = user_df.iloc[0].values
             user_df = user_df.iloc[1:].apply(lambda row: row.str.strip()).reset_index(drop=True)
             
-            # leading zeros to make it 3 digits
+            # adjsut column
             user_df['branch_code'] = user_df['branch_code'].apply(lambda row: '{:0>3}'.format(row))
             
             # group by column
-            user_df = user_df.groupby('branch_code', sort=False).agg(lambda row: '+'.join(x for x in row.unique() if pd.notna(x))).reset_index()
+            user_df = user_df.groupby('branch_code', sort=False).agg(lambda row: '+'.join(filter(pd.notna, row.unique()))).reset_index()
             
             # FILE: BOSTH_Param
             param_df = self.collect_depend_file(i)

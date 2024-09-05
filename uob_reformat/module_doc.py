@@ -67,7 +67,7 @@ class ModuleDOC(CallFunction):
         self.logging[i].update({'function': 'collect_user_file', 'status': status})
     
         try:
-            ## clean and split the data        
+            # clean and split the data       
             data = [re.sub(r'(?<!\.)\s{2,}', '||', ''.join(re.findall(r'\w+.*', line.strip()))).split('||') for line in format_file if re.findall(r'\w+.*', line.strip())]
             
             clean_data = []
@@ -91,13 +91,9 @@ class ModuleDOC(CallFunction):
             user_df.columns = user_df.iloc[0].values
             user_df = user_df.iloc[1:].apply(lambda row: row.str.strip()).reset_index(drop=True)
             
-            # filter value 'LOAN'
+            # adjust column
             user_df = user_df[user_df['APPCODE'] == 'LOAN'].reset_index(drop=True)
-            
-            # apply the split_column function
             user_df[['NAME', 'DEPARTMENT']] = user_df.apply(self.split_column, axis=1, result_type='expand')
-            
-            # apply the attribute_column function
             user_df['ATTRIBUTE'] = user_df.apply(self.attribute_column, axis=1)
             
             # mapping data to column
