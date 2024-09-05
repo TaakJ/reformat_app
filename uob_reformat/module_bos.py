@@ -85,7 +85,6 @@ class ModuleBOS(CallFunction):
             
             # adjsut column
             param_df[['Domain', 'username']] = param_df['username'].str.extract(r'^(.*?)\\(.*)$', expand=False)
-            param_df['rolename'] = param_df['rolename'].apply(lambda row: 'sec_' + row)
             
         except Exception as err:
             raise Exception(err)
@@ -114,10 +113,11 @@ class ModuleBOS(CallFunction):
             
             # adjsut column
             user_df[['Domain', 'username']] = user_df['user_name'].str.extract(r'^(.*?)\\(.*)$', expand=False)
-            user_df['rolename'] = user_df['rolename'].apply(lambda row: 'app_' + row)
+            ## user_df['rolename'] = user_df['rolename'].apply(lambda row: 'app_' + row)
             
             # FILE: BOSTH_Param
             param_df = self.collect_depend_file(i)
+            ## param_df['rolename'] = param_df['rolename'].apply(lambda row: 'sec_' + row)
             
             # merge 2 file BOSTH / BOSTH_Param
             self.logging[i].update({'function': 'collect_user_file', 'status': status})
