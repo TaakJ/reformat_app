@@ -45,7 +45,7 @@ class ModuleCUM(CallFunction):
     
     def read_format_file(self, format_file) -> list:
         
-        ## clean and split the data
+        # clean and split the data
         data = []
         sheet_list = [sheet for sheet in format_file.sheet_names()]
         for sheets in sheet_list:
@@ -63,10 +63,9 @@ class ModuleCUM(CallFunction):
         self.logging[i].update({'function': 'collect_user_file', 'status': status})
         
         try:
-            
             clean_data = self.read_format_file(format_file)
             
-            ## set dataframe  
+            # set dataframe  
             user_df = pd.DataFrame(clean_data)
             user_df.columns = user_df.iloc[0].values
             user_df =  user_df.iloc[1:].apply(lambda row: row.str.strip()).reset_index(drop=True)
@@ -74,7 +73,7 @@ class ModuleCUM(CallFunction):
             # group by column
             user_df = user_df.groupby('USER_ID', sort=False).agg(lambda row: '+'.join(x for x in row.unique() if pd.notna(x))).reset_index()
             
-            ## mapping data to column
+            # mapping data to column
             set_value = dict.fromkeys(self.logging[i]['columns'], 'NA')
             set_value.update(
                 {
@@ -108,15 +107,14 @@ class ModuleCUM(CallFunction):
         self.logging[i].update({'function': 'collect_param_file', 'status': status})
         
         try:
-            
             clean_data = self.read_format_file(format_file)
             
-            ## set dataframe  
+            # set dataframe  
             param_df = pd.DataFrame(clean_data)
             param_df.columns = param_df.iloc[0].values
             param_df =  param_df.iloc[1:].apply(lambda row: row.str.strip()).reset_index(drop=True)
             
-            ## mapping data to column
+            # mapping data to column
             set_value = [
                 {
                     'Parameter Name': 'Group_No',
