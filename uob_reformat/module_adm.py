@@ -61,7 +61,7 @@ class ModuleADM(CallFunction):
             # group by column
             user_df = user_df.groupby('User-ID', sort=False).agg(lambda row: '+'.join(x for x in row.unique() if pd.notna(x))).reset_index()
 
-            ## mapping data to column
+            # mapping data to column
             set_value = dict.fromkeys(self.logging[i]['columns'], 'NA')
             set_value.update(
                 {
