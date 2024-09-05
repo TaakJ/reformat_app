@@ -50,10 +50,10 @@ class ModuleLMT(CallFunction):
         self.logging[i].update({'function': 'collect_user_file', 'status': status})
 
         try:
-            ## clean and split the data
+            # clean and split the data
             data = [re.sub(r'(?<!\.),', ',', line.strip().replace('"', '')).split(',') for line in format_file]
 
-            ## set dataframe
+            # set dataframe
             user_df = pd.DataFrame(data)
             user_df.columns = user_df.iloc[0].values
             user_df = user_df.iloc[1:].apply(lambda row: row.str.strip()).reset_index(drop=True)
@@ -64,7 +64,7 @@ class ModuleLMT(CallFunction):
             # group by column
             user_df = user_df.groupby('Username', sort=False).agg(lambda row: '+'.join(x for x in row.unique() if pd.notna(x))).reset_index()
 
-            ## mapping data to column
+            # mapping data to column
             set_value = dict.fromkeys(self.logging[i]['columns'], "NA")
             set_value.update(
                 {
@@ -96,15 +96,15 @@ class ModuleLMT(CallFunction):
         self.logging[i].update({'function': 'collect_param_file', 'status': status})
 
         try:
-            ## clean and split the data
+            # clean and split the data
             data = [re.sub(r'(?<!\.),', ',', line.strip().replace('"', '')).split(',') for line in format_file]
 
-            ## set dataframe
+            # set dataframe
             param_df = pd.DataFrame(data)
             param_df.columns = param_df.iloc[0].values
             param_df = param_df.iloc[1:].apply(lambda row: row.str.strip()).reset_index(drop=True)
             
-            ## mapping data to column
+            # mapping data to column
             set_value = [
                 {
                     'Parameter Name': 'Security Roles',
@@ -120,6 +120,11 @@ class ModuleLMT(CallFunction):
                     'Parameter Name': 'Program Template',
                     'Code value': param_df['ProgramTemplate'].unique(),
                     'Decode value': param_df['ProgramTemplate'].unique(),
+                },
+                {
+                    'Parameter Name': 'Department',
+                    'Code value': param_df['Department'].unique(),
+                    'Decode value': param_df['Department'].unique(),
                 },
             ]
             param_df = pd.DataFrame(set_value)
