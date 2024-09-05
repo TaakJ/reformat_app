@@ -198,7 +198,6 @@ class ModuleICA(CallFunction):
                     'Decode value': tbl_user_bank_df['BRANCH_CODE'].unique(),
                 },
             ]
-            
             merge_df = pd.DataFrame(set_value)
             merge_df = merge_df.explode(['Code value', 'Decode value']).reset_index(drop=True)
             
