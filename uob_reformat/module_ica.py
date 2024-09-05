@@ -174,6 +174,9 @@ class ModuleICA(CallFunction):
             # FILE: ICAS_TBL_USER_GROUP, ICAS_TBL_USER_BANK_BRANCH, ICAS_TBL_GROUP
             _, tbl_user_bank_df, tbl_group_df = self.collect_depend_file(i)
             
+            # group by column (tbl_group_df)
+            tbl_group_df = tbl_group_df.groupby('GROUP_ID', sort=False).agg(lambda row: '+'.join(x for x in row.unique() if pd.notna(x))).reset_index()
+            
             # mapping data to column
             self.logging[i].update({'function': 'collect_param_file', 'status': status})
             set_value = [
