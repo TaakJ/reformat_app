@@ -63,7 +63,7 @@ class ModuleDIL(CallFunction):
         
     def read_format_file(self, format_file) -> list:
         
-        ## clean and split the data        
+        # clean and split the data        
         data = [re.sub(r'(?<!\.)\s{2,}', '||', ''.join(re.findall(r'\w+.*', line.strip()))).split('||') for line in format_file if re.findall(r'\w+.*', line.strip())]
         
         clean_data = []
@@ -90,10 +90,9 @@ class ModuleDIL(CallFunction):
         self.logging[i].update({'function': 'collect_user_file', 'status': status})
     
         try:
-            
             clean_data = self.read_format_file(format_file)
             
-            ## set dataframe
+            # set dataframe
             user_df = pd.DataFrame(clean_data)
             user_df.columns = user_df.iloc[0].values
             user_df = user_df.iloc[1:].apply(lambda row: row.str.strip()).reset_index(drop=True)
@@ -107,7 +106,7 @@ class ModuleDIL(CallFunction):
             # apply the attribute_column function
             user_df['ATTRIBUTE'] = user_df.apply(self.attribute_column, axis=1)
             
-            ## mapping data to column
+            # mapping data to column
             set_value = dict.fromkeys(self.logging[i]['columns'], 'NA')
             set_value.update(
                 {
@@ -138,10 +137,9 @@ class ModuleDIL(CallFunction):
         self.logging[i].update({'function': 'collect_param_file', 'status': status})
         
         try:
-            
             clean_data = self.read_format_file(format_file)
             
-            ## set dataframe
+            # set dataframe
             param_df = pd.DataFrame(clean_data)
             param_df.columns = param_df.iloc[0].values
             param_df = param_df.iloc[1:].apply(lambda row: row.str.strip()).reset_index(drop=True)
@@ -152,7 +150,7 @@ class ModuleDIL(CallFunction):
             # apply the split_column function
             param_df[['NAME', 'DEPARTMENT']] = param_df.apply(self.split_column, axis=1, result_type='expand')
             
-            ## mapping data to column
+            # mapping data to column
             set_value = [
                 {
                     'Parameter Name': 'Department',
