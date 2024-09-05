@@ -86,7 +86,7 @@ class ModuleDOC(CallFunction):
                 else:
                     continue
             
-            ## set dataframe
+            # set dataframe
             user_df = pd.DataFrame(clean_data)
             user_df.columns = user_df.iloc[0].values
             user_df = user_df.iloc[1:].apply(lambda row: row.str.strip()).reset_index(drop=True)
@@ -100,7 +100,7 @@ class ModuleDOC(CallFunction):
             # apply the attribute_column function
             user_df['ATTRIBUTE'] = user_df.apply(self.attribute_column, axis=1)
             
-            ## mapping data to column
+            # mapping data to column
             set_value = dict.fromkeys(self.logging[i]['columns'], 'NA')
             set_value.update(
                 {
@@ -131,7 +131,7 @@ class ModuleDOC(CallFunction):
         self.logging[i].update({'function': 'collect_param_file', 'status': status})
 
         try:
-            ## mapping data to column
+            # mapping data to column
             set_value = [
                 {
                     "Parameter Name": 'AppCode',
