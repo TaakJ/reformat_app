@@ -62,7 +62,7 @@ class ModuleLMT(CallFunction):
             user_df[['Domain', 'Username']] = user_df['Username'].str.extract(r'^(.*?)\\(.*)$')
             
             # group by column
-            user_df = user_df.groupby('Username', sort=False).agg(lambda row: '+'.join(map(str, row.replace([None], ['NA']).unique()))).reset_index()
+            user_df = user_df.groupby('Username', sort=False).agg(lambda row: '+'.join(x for x in row.unique() if pd.notna(x))).reset_index()
 
             ## mapping data to column
             set_value = dict.fromkeys(self.logging[i]['columns'], "NA")

@@ -124,7 +124,7 @@ class ModuleICA(CallFunction):
             merge_df = reduce(lambda left, right: pd.merge(left, right, on='USER_ID', how='left', validate='m:m'), [tbl_user_df, tbl_user_group_df, tbl_user_bank_df])
             
             # group by column
-            merge_df = merge_df.groupby('USER_ID', sort=False).agg(lambda row: '+'.join(map(str, row.replace([None], ['NA']).unique()))).reset_index()
+            merge_df = merge_df.groupby('USER_ID', sort=False).agg(lambda row: '+'.join(x for x in row.unique() if pd.notna(x))).reset_index()
             
             # mapping data to column
             set_value = dict.fromkeys(self.logging[i]['columns'], 'NA')
