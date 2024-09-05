@@ -50,10 +50,10 @@ class ModuleADM(CallFunction):
         self.logging[i].update({'function': 'collect_user_file', 'status': status})
 
         try:
-            ## clean and split the data
+            # clean and split the data
             data = [re.sub(r'(?<!\.)\|\|', '||', line.strip()).split('||') for line in format_file]
 
-            ## set dataframe
+            # set dataframe
             columns = ['User-ID','User Full Name','Department code','Employee ID','Group','Zone','Role']
             user_df = pd.DataFrame(data, columns=columns)
             user_df = user_df.apply(lambda row: row.str.strip()).reset_index(drop=True)
@@ -93,15 +93,15 @@ class ModuleADM(CallFunction):
         self.logging[i].update({'function': 'collect_param_file', 'status': status})
 
         try:
-            ## clean and split the data
+            # clean and split the data
             data = [re.sub(r'(?<!\.)\|\|', '||', line.strip()).split('||') for line in format_file]
 
-            ## set dataframe
+            # set dataframe
             columns = ['User-ID','User Full Name','Department code','Employee ID','Group','Zone','Role']
             param_df = pd.DataFrame(data, columns=columns)
             param_df = param_df.apply(lambda row: row.str.strip()).reset_index(drop=True)
             
-            ## mapping data to column
+            # mapping data to column
             set_value = [
                 {
                     'Parameter Name': 'GroupDetail', 
