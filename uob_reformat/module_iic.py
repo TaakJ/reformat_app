@@ -54,8 +54,8 @@ class ModuleIIC(CallFunction):
             data = [re.sub(r'(?<!\.),', ',', line.strip().replace('"', '')).split(',') for line in format_file]
 
             # set dataframe
-            user_df = pd.DataFrame(data)
-            user_df.columns = user_df.iloc[0].values
+            columns = self.logging[i]['columns']
+            user_df = pd.DataFrame(data, columns=columns)
             user_df = user_df.iloc[1:].apply(lambda row: row.str.strip()).reset_index(drop=True)
             
         except Exception as err:
@@ -75,7 +75,6 @@ class ModuleIIC(CallFunction):
             data = [re.sub(r'(?<!\.),', ',', line.strip().replace('"', '')).split(',') for line in format_file]
 
             # set dataframe
-            param_df = pd.DataFrame(data)
             columns = self.logging[i]['columns']
             param_df = pd.DataFrame(data, columns=columns)
             param_df = param_df.iloc[1:].apply(lambda row: row.str.strip()).reset_index(drop=True)
