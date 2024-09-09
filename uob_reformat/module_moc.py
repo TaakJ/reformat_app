@@ -56,7 +56,6 @@ class ModuleMOC(CallFunction):
             ## set dataframe
             columns = self.logging[i]['columns']
             user_df = pd.DataFrame(data, columns=columns)
-
             user_df = user_df.iloc[1:].apply(lambda row: row.str.strip()).reset_index(drop=True)
             
         except Exception as err:
