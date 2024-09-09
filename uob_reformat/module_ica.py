@@ -47,6 +47,21 @@ class ModuleICA(CallFunction):
 
         return result
     
+    def parse_and_format_datetime(self, date_str):
+        formats = ['%y/%m/%d %H:%M', '%Y-%m-%d %H:%M:%S', '%Y-%m-%d %H:%M', '%d/%m/%y %H:%M']
+        for fmt in formats:
+            try:
+                return pd.to_datetime(date_str, format=fmt).strftime('%Y%m%d%H%M%S')
+            except ValueError:
+                continue
+        return 'Invalid Format'  # In case none of the formats match
+
+    def clean_fullname(self, name):
+        name = name.replace(',', '')
+        name = re.sub(r'\d+', '', name)
+        name = name.strip()
+        return name
+    
     def collect_depend_file(self, i: int) -> pd.DataFrame:
         
         logging.info('Lookup depend file')
@@ -120,34 +135,62 @@ class ModuleICA(CallFunction):
             # FILE: ICAS_TBL_USER_GROUP, ICAS_TBL_USER_BANK_BRANCH, ICAS_TBL_GROUP
             tbl_user_group_df, tbl_user_bank_df, _ = self.collect_depend_file(i)
             
-            # merge 3 file ICAS_TBL_USER / ICAS_TBL_USER_GROUP
-            self.logging[i].update({'function': 'collect_user_file', 'status': status})
-            merge_df = reduce(lambda left, right: pd.merge(left, right, on='USER_ID', how='left', validate='m:m' ,suffixes=('_user','_param')), [tbl_user_df, tbl_user_group_df, tbl_user_bank_df])
+            entitlement_name = pd.merge(tbl_user_df, tbl_user_group_df,on='USER_ID',how='left')
+            entitlement_name = entitlement_name.fillna('NA')
+            entitlement_name_group = entitlement_name.groupby('USER_ID')['GROUP_ID'].apply(lambda x: '+'.join(map(str, sorted(set(x))))).reset_index()
             
-            # group by column
-            merge_df = merge_df.groupby('USER_ID', sort=False).agg(lambda row: '+'.join(filter(pd.notna, row.unique()))).reset_index()
+            # merge file: ICAS_TBL_USER with ICAS_TBL_USER_GROUP
+            result_ica = pd.merge(entitlement_name_group, tbl_user_df,on='USER_ID')
+            result_ica = result_ica[['USER_ID','LOGIN_NAME','GROUP_ID','LOCKED_FLAG','FULL_NAME','CREATE_DTM','LAST_LOGIN_ATTEMPT','LAST_UPDATE_DTM']]
             
-            # mapping data to column
-            set_value = dict.fromkeys(self.logging[i]['columns'], 'NA')
-            set_value.update(
-                {
-                    'ApplicationCode': 'ICA',
-                    'AccountOwner': merge_df['LOGIN_NAME'],
-                    'AccountName': merge_df['LOGIN_NAME'],
-                    'AccountType': 'USR',
-                    'EntitlementName': merge_df['GROUP_ID'],
-                    'AccountStatus': merge_df['LOCKED_FLAG'].apply(lambda x: 'A' if x == '0' else 'D'),
-                    'IsPrivileged': 'N',
-                    'AccountDescription': merge_df['FULL_NAME'],
-                    'CreateDate': pd.to_datetime(merge_df['CREATE_DTM_user'], errors='coerce').dt.strftime('%Y%m%d%H%M%S'),
-                    'LastLogin': pd.to_datetime(merge_df['LAST_LOGIN_ATTEMPT'], errors='coerce').dt.strftime('%Y%m%d%H%M%S'),
-                    'LastUpdatedDate': pd.to_datetime(merge_df['LAST_UPDATE_DTM_user'], errors='coerce').dt.strftime('%Y%m%d%H%M%S'),
-                    'AdditionalAttribute': merge_df[['HOME_BANK', 'HOME_BRANCH', 'BRANCH_CODE']].apply(lambda row: '#'.join(row), axis=1),
-                    'Country': 'TH',
-                }
-            )
-            merge_df = merge_df.assign(**set_value)
-            merge_df = merge_df.drop(merge_df.iloc[:, :35].columns, axis=1)
+            # merge file: ICAS_TBL_USER with ICAS_TBL_USER_BANK_BRANCH
+            branch_code = pd.merge(tbl_user_df, tbl_user_bank_df,on='USER_ID',how='left')
+            branch_code = branch_code[['USER_ID','HOME_BANK','HOME_BRANCH','BRANCH_CODE']]
+            branch_code['HOME_BANK'] = branch_code['HOME_BANK'].fillna('NA')
+            branch_code['HOME_BRANCH'] = branch_code['HOME_BRANCH'].fillna('NA')
+            branch_code['BRANCH_CODE'] = branch_code['BRANCH_CODE'].fillna('NA')
+            branch_code['BANK+BRANCH'] = branch_code[['HOME_BANK','HOME_BRANCH','BRANCH_CODE']].astype(str).agg('#'.join, axis=1)
+            final_branch_code = branch_code[['USER_ID','BANK+BRANCH']]
+            final_ica = pd.merge(result_ica,final_branch_code,on='USER_ID',how='left')
+            
+            
+            date_time_col = ['CREATE_DTM','LAST_LOGIN_ATTEMPT','LAST_UPDATE_DTM']
+            for col in date_time_col:
+                final_ica[col] = final_ica[col].apply(self.parse_and_format_datetime)
+                
+            final_ica['FULL_NAME'] = final_ica['FULL_NAME'].apply(self.clean_fullname)
+            final_ica['LOCKED_FLAG'] = final_ica['LOCKED_FLAG'].apply(lambda x: 'D' if x == '1' else 'A')
+            
+            ## merge dataframe
+            columns = self.logging[i]['columns']
+            merge_df = pd.DataFrame(columns=columns)
+            static_value = {
+                'ApplicationCode': 'ICA',
+                'AccountType': 'USR',
+                'SecondEntitlementName': 'NA',
+                'ThirdEntitlementName': 'NA',
+                'IsPrivileged' : 'N',
+                'Country' : 'TH'
+            }
+            
+            column_mapping = {
+                'LOGIN_NAME' : 'AccountOwner',
+                'GROUP_ID' : 'EntitlementName',
+                'LOCKED_FLAG' : 'AccountStatus',
+                'FULL_NAME' : 'AccountDescription',
+                'CREATE_DTM' : 'CreateDate',
+                'LAST_LOGIN_ATTEMPT' : 'LastLogin',
+                'LAST_UPDATE_DTM' : 'LastUpdatedDate',
+                'BANK+BRANCH' : 'AdditionalAttribute'
+            }
+            final_ica = final_ica.rename(columns=column_mapping)
+            merge_df = pd.concat([merge_df,final_ica],ignore_index=True)
+            merge_df = merge_df.drop(columns='USER_ID')
+            merge_df['AccountName'] = merge_df['AccountOwner']
+            merge_df = merge_df.fillna(static_value)
+            merge_df['CreateDate'] = merge_df['CreateDate'].astype(str)
+            merge_df['LastLogin'] = merge_df['LastLogin'].astype(str)
+            merge_df['LastUpdatedDate'] = merge_df['LastUpdatedDate'].astype(str)
             
         except Exception as err:
             raise Exception(err)
@@ -175,35 +218,44 @@ class ModuleICA(CallFunction):
             # FILE: ICAS_TBL_USER_GROUP, ICAS_TBL_USER_BANK_BRANCH, ICAS_TBL_GROUP
             _, tbl_user_bank_df, tbl_group_df = self.collect_depend_file(i)
             
-            # group by column
-            tbl_group_df = tbl_group_df.groupby('GROUP_ID', sort=False).agg(lambda row: '+'.join(filter(pd.notna, row.unique()))).reset_index()
+            # merge dataframe
+            columns = self.logging[i]['columns']
+            merge_df = pd.DataFrame(columns=columns)
             
-            # mapping data to column
-            self.logging[i].update({'function': 'collect_param_file', 'status': status})
-            set_value = [
-                {
-                    'Parameter Name': 'User Group',
-                    'Code values': tbl_group_df['GROUP_ID'].unique(),
-                    'Decode value': tbl_group_df['GROUP_NAME'].unique(),
-                },
-                {
-                    'Parameter Name': 'HOME_BANK',
-                    'Code values': '024',
-                    'Decode value': 'UOBT',
-                },
-                {
-                    'Parameter Name': 'HOME_BRANCH',
-                    'Code values': tbl_user_df['HOME_BRANCH'].unique(),
-                    'Decode value': tbl_user_df['HOME_BRANCH'].unique(),
-                },
-                {
-                    'Parameter Name': 'Department',
-                    'Code values': tbl_user_bank_df['BRANCH_CODE'].unique(),
-                    'Decode value': tbl_user_bank_df['BRANCH_CODE'].unique(),
-                },
-            ]
-            merge_df = pd.DataFrame(set_value)
-            merge_df = merge_df.explode(['Code values', 'Decode value']).reset_index(drop=True)
+            home_bank = {'Parameter Name':'HOME_BANK','Code values':'024','Decode value': 'UOBT'}
+            param_home_bank = pd.DataFrame([home_bank])
+            
+            # merge column: home_bank
+            merge_df = pd.concat([merge_df, param_home_bank],ignore_index=True)
+            
+            # merge column: group_id
+            param_group_unique = tbl_group_df['GROUP_ID'].unique()
+            filter_param_group = tbl_group_df[tbl_group_df['GROUP_ID'].isin(param_group_unique)]
+            filter_param_group = filter_param_group[['GROUP_ID','GROUP_NAME']]
+            filter_param_group.insert(0,'Parameter Name','User Group')
+            filter_param_group.rename(columns={
+                'GROUP_ID' : 'Code values',
+                'GROUP_NAME' : 'Decode value'
+            },inplace=True)
+            merge_df = pd.concat([merge_df, filter_param_group],ignore_index=True)
+            
+            # merge column: home_branch
+            param_home_branch_list = pd.DataFrame(columns=('Parameter Name','Code values','Decode value'))
+            param_home_branch_uni = tbl_user_df['HOME_BRANCH'].unique()
+            param_home_branch_list['Code values'] = param_home_branch_uni
+            param_home_branch_list['Decode value'] = param_home_branch_uni
+            param_home_branch_list['Parameter Name'] = 'HOME_BRANCH'
+            merge_df = pd.concat([merge_df, param_home_branch_list],ignore_index=True)
+            
+            # merge column: home_branch
+            param_dept_list = pd.DataFrame(columns=('Parameter Name','Code values','Decode value'))
+            param_dept_uni = tbl_user_bank_df['BRANCH_CODE'].unique()
+            param_dept_list['Code values'] = param_dept_uni
+            param_dept_list['Decode value'] = param_dept_uni
+            param_dept_list['Parameter Name'] = 'Department'
+            merge_df = pd.concat([merge_df,param_dept_list],ignore_index=True)
+            
+            merge_df = merge_df.sort_values(by=['Parameter Name','Code values'],ignore_index=True)
             
         except Exception as err:
             raise Exception(err)
