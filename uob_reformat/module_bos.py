@@ -111,14 +111,14 @@ class ModuleBOS(CallFunction):
             group_param_df = param_df.groupby(['employee_no','username',])['rolename'].agg(lambda x: '+'.join(f"sec_{value}" for value in x)).reset_index()
             
             # merge 2 file BOSTH_Param / BOSTH
-            adjust_column = pd.merge(group_param_df,group_user_df,on="employee_no",how="right",suffixes=('_param','_user'))
+            merge_group_df = pd.merge(group_param_df,group_user_df,on="employee_no",how="right",suffixes=('_param','_user'))
             
             # adjust column
-            adjust_column['rolename'] = adjust_column[['rolename_param', 'rolename_user']].apply(lambda x: ';'.join([str(val) for val in x if pd.notna(val)]), axis=1)
-            adjust_column = adjust_column[['employee_no','user_name','employee_display_name','branch_code','rolename']]
-            adjust_column['branch_code'] = adjust_column['branch_code'].astype(str).str.zfill(3)
-            adjust_column['user_name'] = adjust_column['user_name'].apply(lambda x: x.replace('NTTHPDOM\\', '') if isinstance(x, str) else x) 
-            adjust_column = adjust_column.rename(columns={
+            merge_group_df['rolename'] = merge_group_df[['rolename_param', 'rolename_user']].apply(lambda x: ';'.join([str(val) for val in x if pd.notna(val)]), axis=1)
+            merge_group_df = merge_group_df[['employee_no','user_name','employee_display_name','branch_code','rolename']]
+            merge_group_df['branch_code'] = merge_group_df['branch_code'].astype(str).str.zfill(3)
+            merge_group_df['user_name'] = merge_group_df['user_name'].apply(lambda x: x.replace('NTTHPDOM\\', '') if isinstance(x, str) else x) 
+            merge_group_df = merge_group_df.rename(columns={
                 'user_name' : 'AccountName',
                 'employee_display_name' : 'AccountDescription',
                 'branch_code' : 'AdditionalAttribute',
@@ -140,7 +140,7 @@ class ModuleBOS(CallFunction):
                 'LastUpdatedDate' : 'NA',
                 'Country' : 'TH',
             }
-            merge_df = pd.concat([adjust_column, merge_df],ignore_index=True)
+            merge_df = pd.concat([merge_group_df, merge_df],ignore_index=True)
             merge_df['AccountOwner'] = merge_df['AccountName']
             merge_df = merge_df.fillna(static_value)
             merge_df = merge_df.drop(columns='employee_no')
