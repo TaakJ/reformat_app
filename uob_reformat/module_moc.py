@@ -76,7 +76,8 @@ class ModuleMOC(CallFunction):
             
             ## set dataframe
             param_df = pd.DataFrame(data)
-            param_df.columns = param_df.iloc[0].values
+            columns = self.logging[i]['columns']
+            param_df = pd.DataFrame(data, columns=columns)
             param_df = param_df.iloc[1:].apply(lambda row: row.str.strip()).reset_index(drop=True)
             
         except Exception as err:

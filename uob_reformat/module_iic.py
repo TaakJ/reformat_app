@@ -24,9 +24,9 @@ class ModuleIIC(CallFunction):
 
             await self.check_source_file()
             await self.separate_data_file()
-            if self.store_tmp is True:
-                await self.genarate_tmp_file()
-            await self.genarate_target_file()
+            # if self.store_tmp is True:
+            #     await self.genarate_tmp_file()
+            # await self.genarate_target_file()
 
         except CustomException as err:
             logging.error('See Error Details: log_error.log')
@@ -76,7 +76,8 @@ class ModuleIIC(CallFunction):
 
             # set dataframe
             param_df = pd.DataFrame(data)
-            param_df.columns = param_df.iloc[0].values
+            columns = self.logging[i]['columns']
+            param_df = pd.DataFrame(data, columns=columns)
             param_df = param_df.iloc[1:].apply(lambda row: row.str.strip()).reset_index(drop=True)
             
         except Exception as err:
