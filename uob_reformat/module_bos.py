@@ -81,9 +81,6 @@ class ModuleBOS(CallFunction):
             param_df.columns = param_df.iloc[0].values
             param_df = param_df.iloc[1:].apply(lambda row: row.str.strip()).reset_index(drop=True)
             
-            # adjsut column
-            param_df[['Domain', 'username']] = param_df['username'].str.extract(r'^(.*?)\\(.*)$', expand=False)
-            
         except Exception as err:
             raise Exception(err)
         
@@ -107,37 +104,47 @@ class ModuleBOS(CallFunction):
             user_df = user_df.iloc[1:].apply(lambda row: row.str.strip()).reset_index(drop=True)
             
             # adjsut column
-            user_df['branch_code'] = user_df['branch_code'].apply(lambda row: '{:0>3}'.format(row))
-            user_df[['Domain', 'username']] = user_df['user_name'].str.extract(r'^(.*?)\\(.*)$', expand=False)
+            group_user_df = user_df.groupby(['employee_no','user_name','branch_code','employee_display_name'])['rolename'].agg(lambda x: '+'.join(f"app_{value}" for value in x)).reset_index()
             
             # FILE: BOSTH_Param
             param_df = self.collect_depend_file(i)
+            group_param_df = param_df.groupby(['employee_no','username',])['rolename'].agg(lambda x: '+'.join(f"sec_{value}" for value in x)).reset_index()
             
-            # merge 2 file BOSTH / BOSTH_Param
-            self.logging[i].update({'function': 'collect_user_file', 'status': status})
-            merge_df = reduce(lambda left, right: pd.merge(left, right, on='username', how='left', validate='m:m',suffixes=('_user','_param')), [user_df, param_df])
+            # merge 2 file BOSTH_Param / BOSTH
+            adjust_column = pd.merge(group_param_df,group_user_df,on="employee_no",how="right",suffixes=('_param','_user'))
             
-            # group by column
-            merge_df = merge_df.groupby('username', sort=False).agg(lambda row: '+'.join(filter(pd.notna, row.unique()))).reset_index()
+            # adjust column
+            adjust_column['rolename'] = adjust_column[['rolename_param', 'rolename_user']].apply(lambda x: ';'.join([str(val) for val in x if pd.notna(val)]), axis=1)
+            adjust_column = adjust_column[['employee_no','user_name','employee_display_name','branch_code','rolename']]
+            adjust_column['branch_code'] = adjust_column['branch_code'].astype(str).str.zfill(3)
+            adjust_column['user_name'] = adjust_column['user_name'].apply(lambda x: x.replace('NTTHPDOM\\', '') if isinstance(x, str) else x) 
+            adjust_column = adjust_column.rename(columns={
+                'user_name' : 'AccountName',
+                'employee_display_name' : 'AccountDescription',
+                'branch_code' : 'AdditionalAttribute',
+                'rolename' : 'EntitlementName'
+            })
             
-            # mapping data to column
-            set_value = dict.fromkeys(self.logging[i]['columns'], 'NA')
-            set_value.update(
-                {
-                    'ApplicationCode': 'BOS',
-                    'AccountOwner': merge_df['username'],
-                    'AccountName': merge_df['username'],
-                    'AccountType': 'USR',
-                    'EntitlementName': merge_df[['rolename_param', 'rolename_user']].apply(lambda row: ';'.join(row), axis=1),
-                    'AccountStatus': 'A',
-                    'IsPrivileged': 'N',
-                    'AccountDescription': merge_df['employee_display_name'],
-                    'AdditionalAttribute': merge_df['branch_code'],
-                    'Country': 'TH',
-                }
-            )
-            merge_df = merge_df.assign(**set_value)
-            merge_df = merge_df.drop(merge_df.iloc[:,:14].columns, axis=1)
+            # merge dataframe
+            columns = self.logging[i]['columns']
+            merge_df = pd.DataFrame(columns=columns)
+            static_value = {
+                'ApplicationCode' : 'BOS',
+                'AccountType' : 'USR',
+                'SecondEntitlementName' : 'NA',
+                'ThirdEntitlementName' : 'NA',
+                'AccountStatus' : 'A',
+                'IsPrivileged' : 'N',
+                'CreateDate' : 'NA',
+                'LastLogin' : 'NA',
+                'LastUpdatedDate' : 'NA',
+                'Country' : 'TH',
+            }
+            merge_df = pd.concat([adjust_column, merge_df],ignore_index=True)
+            merge_df['AccountOwner'] = merge_df['AccountName']
+            merge_df = merge_df.fillna(static_value)
+            merge_df = merge_df.drop(columns='employee_no')
+            merge_df = merge_df[columns].sort_values(by='AccountOwner',ignore_index=True)
             
         except Exception as err:
             raise Exception(err)
@@ -160,36 +167,33 @@ class ModuleBOS(CallFunction):
             user_df.columns = user_df.iloc[0].values
             user_df = user_df.iloc[1:].apply(lambda row: row.str.strip()).reset_index(drop=True)
             
-            # adjsut column
-            user_df['branch_code'] = user_df['branch_code'].apply(lambda row: '{:0>3}'.format(row))
-            
-            # group by column
-            user_df = user_df.groupby('branch_code', sort=False).agg(lambda row: '+'.join(filter(pd.notna, row.unique()))).reset_index()
-            
             # FILE: BOSTH_Param
             param_df = self.collect_depend_file(i)
             
-            # mapping data to column
-            self.logging[i].update({'function': 'collect_param', 'status': status})
-            set_value = [
-                {
-                    'Parameter Name': 'Security roles', 
-                    'Code values': param_df['rolename'].unique(), 
-                    'Decode value': param_df['rolename'].unique()
-                },
-                {
-                    'Parameter Name': 'Application roles', 
-                    'Code values': user_df['rolename'].unique(), 
-                    'Decode value': user_df['rolename'].unique()
-                },
-                {
-                    'Parameter Name': 'Department Code', 
-                    'Code values': user_df['branch_code'].unique(),  
-                    'Decode value': user_df['branch_name'].unique()
-                },
-            ]
-            merge_df = pd.DataFrame(set_value)
-            merge_df = merge_df.explode(['Code values', 'Decode value']).reset_index(drop=True)
+            # merge dataframe
+            columns = self.logging[i]['columns']
+            sec_param_list = pd.DataFrame(columns=columns)
+            sec_parm_uni = param_df['rolename'].unique()
+            sec_param_list['Code values'] = sec_parm_uni
+            sec_param_list['Decode value'] = sec_parm_uni
+            sec_param_list['Parameter Name'] = 'Security roles'
+            
+            app_param_list = user_df.iloc[:,[1,2]]
+            app_param_list = app_param_list.drop_duplicates()
+            app_param_list.insert(0,'Parameter Name','Application roles')
+            app_param_list = app_param_list.rename(columns={
+                'branch_code' : 'Code values',
+                'branch_name' : 'Decode value'
+            })
+            
+            dept_param_list = pd.DataFrame(columns=columns)
+            dept_param_uni = param_df['rolename'].unique()
+            dept_param_list['Code values'] = dept_param_uni
+            dept_param_list['Decode value'] = dept_param_uni
+            dept_param_list['Parameter Name'] = 'Department roles'
+            
+            merge_df = pd.concat([app_param_list,sec_param_list],ignore_index=True)
+            merge_df = pd.concat([merge_df, dept_param_list],ignore_index=True)
             
         except Exception as err:
             raise Exception(err)
