@@ -105,27 +105,27 @@ class ModuleADM(CallFunction):
             set_value = [
                 {
                     'Parameter Name': 'GroupDetail', 
-                    'Code value': param_df['Group'].unique(), 
+                    'Code values': param_df['Group'].unique(), 
                     'Decode value': param_df['Group'].unique()
                 },
                 {
                     'Parameter Name': 'RoleDetail', 
-                    'Code value': param_df['Role'].unique(), 
+                    'Code values': param_df['Role'].unique(), 
                     'Decode value': param_df['Role'].unique()
                 },
                 {
                     'Parameter Name': 'Zone', 
-                    'Code value': param_df['Zone'].unique(), 
+                    'Code values': param_df['Zone'].unique(), 
                     'Decode value': param_df['Zone'].unique()
                 },
                 {
                     'Parameter Name': 'Department', 
-                    'Code value': param_df['Department code'].unique(), 
+                    'Code values': param_df['Department code'].unique(), 
                     'Decode value': param_df['Department code'].unique()
                 }
             ]
             param_df = pd.DataFrame(set_value)
-            param_df = param_df.explode(['Code value', 'Decode value']).reset_index(drop=True)
+            param_df = param_df.explode(['Code values', 'Decode value']).reset_index(drop=True)
             
         except Exception as err:
             raise Exception(err)

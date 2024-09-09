@@ -106,27 +106,27 @@ class ModuleLMT(CallFunction):
             set_value = [
                 {
                     'Parameter Name': 'Security Roles',
-                    'Code value': param_df['SecurityRoles'].unique(),
+                    'Code values': param_df['SecurityRoles'].unique(),
                     'Decode value': param_df['SecurityRoles'].unique(),
                 },
                 {
                     'Parameter Name': 'Application Roles',
-                    'Code value': param_df['ApplicationRoles'].unique(),
+                    'Code values': param_df['ApplicationRoles'].unique(),
                     'Decode value': param_df['ApplicationRoles'].unique(),
                 },
                 {
                     'Parameter Name': 'Program Template',
-                    'Code value': param_df['ProgramTemplate'].unique(),
+                    'Code values': param_df['ProgramTemplate'].unique(),
                     'Decode value': param_df['ProgramTemplate'].unique(),
                 },
                 {
                     'Parameter Name': 'Department',
-                    'Code value': param_df['Department'].unique(),
+                    'Code values': param_df['Department'].unique(),
                     'Decode value': param_df['Department'].unique(),
                 },
             ]
             param_df = pd.DataFrame(set_value)
-            param_df = param_df.explode(['Code value', 'Decode value']).reset_index(drop=True)
+            param_df = param_df.explode(['Code values', 'Decode value']).reset_index(drop=True)
 
         except Exception as err:
             raise Exception(err)

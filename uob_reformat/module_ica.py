@@ -183,27 +183,27 @@ class ModuleICA(CallFunction):
             set_value = [
                 {
                     'Parameter Name': 'User Group',
-                    'Code value': tbl_group_df['GROUP_ID'].unique(),
+                    'Code values': tbl_group_df['GROUP_ID'].unique(),
                     'Decode value': tbl_group_df['GROUP_NAME'].unique(),
                 },
                 {
                     'Parameter Name': 'HOME_BANK',
-                    'Code value': '024',
+                    'Code values': '024',
                     'Decode value': 'UOBT',
                 },
                 {
                     'Parameter Name': 'HOME_BRANCH',
-                    'Code value': tbl_user_df['HOME_BRANCH'].unique(),
+                    'Code values': tbl_user_df['HOME_BRANCH'].unique(),
                     'Decode value': tbl_user_df['HOME_BRANCH'].unique(),
                 },
                 {
                     'Parameter Name': 'Department',
-                    'Code value': tbl_user_bank_df['BRANCH_CODE'].unique(),
+                    'Code values': tbl_user_bank_df['BRANCH_CODE'].unique(),
                     'Decode value': tbl_user_bank_df['BRANCH_CODE'].unique(),
                 },
             ]
             merge_df = pd.DataFrame(set_value)
-            merge_df = merge_df.explode(['Code value', 'Decode value']).reset_index(drop=True)
+            merge_df = merge_df.explode(['Code values', 'Decode value']).reset_index(drop=True)
             
         except Exception as err:
             raise Exception(err)

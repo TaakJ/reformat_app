@@ -123,22 +123,22 @@ class ModuleLDS(CallFunction):
             set_value = [
                 {
                     'Parameter Name': 'Role',
-                    'Code value': param_df['RoleID'].unique(),
+                    'Code values': param_df['RoleID'].unique(),
                     'Decode value': param_df['RoleName'].unique(),
                 },
                 {
                     'Parameter Name': 'Department',
-                    'Code value': param_df['CostCenterName'].unique(),
+                    'Code values': param_df['CostCenterName'].unique(),
                     'Decode value': param_df['CostCenterName'].unique(),
                 },
                 {
                     'Parameter Name': 'Costcenter',
-                    'Code value': param_df['CostCenterCode'].unique(),
+                    'Code values': param_df['CostCenterCode'].unique(),
                     'Decode value': param_df['CostCenterName'].unique(),
                 },
             ]
             param_df = pd.DataFrame(set_value)
-            param_df = param_df.explode(['Code value', 'Decode value']).reset_index(drop=True)
+            param_df = param_df.explode(['Code values', 'Decode value']).reset_index(drop=True)
 
         except Exception as err:
             raise Exception(err)

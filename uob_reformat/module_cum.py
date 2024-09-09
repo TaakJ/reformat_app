@@ -119,17 +119,17 @@ class ModuleCUM(CallFunction):
             set_value = [
                 {
                     'Parameter Name': 'Group_No',
-                    'Code value': param_df['GROUP_NO'].unique(),
+                    'Code values': param_df['GROUP_NO'].unique(),
                     'Decode value': param_df['GROUP_NO'].unique(),
                 },
                 {
                     'Parameter Name': 'Department',
-                    'Code value': param_df['DEPARTMENT'].unique(),
+                    'Code values': param_df['DEPARTMENT'].unique(),
                     'Decode value': param_df['DEPARTMENT'].unique(),
                 },
             ]
             param_df = pd.DataFrame(set_value)
-            param_df = param_df.explode(['Code value', 'Decode value']).reset_index(drop=True)
+            param_df = param_df.explode(['Code values', 'Decode value']).reset_index(drop=True)
             
         except Exception as err:
             raise Exception(err)

@@ -174,22 +174,22 @@ class ModuleBOS(CallFunction):
             set_value = [
                 {
                     'Parameter Name': 'Security roles', 
-                    'Code value': param_df['rolename'].unique(), 
+                    'Code values': param_df['rolename'].unique(), 
                     'Decode value': param_df['rolename'].unique()
                 },
                 {
                     'Parameter Name': 'Application roles', 
-                    'Code value': user_df['rolename'].unique(), 
+                    'Code values': user_df['rolename'].unique(), 
                     'Decode value': user_df['rolename'].unique()
                 },
                 {
                     'Parameter Name': 'Department Code', 
-                    'Code value': user_df['branch_code'].unique(),  
+                    'Code values': user_df['branch_code'].unique(),  
                     'Decode value': user_df['branch_name'].unique()
                 },
             ]
             merge_df = pd.DataFrame(set_value)
-            merge_df = merge_df.explode(['Code value', 'Decode value']).reset_index(drop=True)
+            merge_df = merge_df.explode(['Code values', 'Decode value']).reset_index(drop=True)
             
         except Exception as err:
             raise Exception(err)

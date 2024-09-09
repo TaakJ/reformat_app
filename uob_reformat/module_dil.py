@@ -149,22 +149,22 @@ class ModuleDIL(CallFunction):
             set_value = [
                 {
                     'Parameter Name': 'Department',
-                    'Code value': param_df['DEPARTMENT'].unique(),
+                    'Code values': param_df['DEPARTMENT'].unique(),
                     'Decode value': param_df['DEPARTMENT'].unique(),
                 },
                 {
                     'Parameter Name': 'AppCode',
-                    'Code value': 'LNSIGNET',
+                    'Code values': 'LNSIGNET',
                     'Decode value': 'LNSIGNET',
                 },
                 {
                     "Parameter Name": 'Role',
-                    "Code value": ['Inquiry', 'Admin', 'Index + Scan'],
+                    "Code values": ['Inquiry', 'Admin', 'Index + Scan'],
                     "Decode value": ['Inquiry', 'Admin', 'Index + Scan'],
                 },
             ]
             param_df = pd.DataFrame(set_value)
-            param_df = param_df.explode(['Code value', 'Decode value']).reset_index(drop=True)
+            param_df = param_df.explode(['Code values', 'Decode value']).reset_index(drop=True)
             
         except Exception as err:
             raise Exception(err)
