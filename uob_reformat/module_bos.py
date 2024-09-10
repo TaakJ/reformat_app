@@ -1,7 +1,6 @@
 import re
 import glob
 import pandas as pd
-from functools import reduce
 import logging
 from .non_functional import CallFunction
 from .exception import CustomException
@@ -104,21 +103,31 @@ class ModuleBOS(CallFunction):
             user_df = user_df.iloc[1:].apply(lambda row: row.str.strip()).reset_index(drop=True)
             
             # adjsut column
-            group_user_df = user_df.groupby(['employee_no','user_name','branch_code','employee_display_name'])['rolename'].agg(lambda x: '+'.join(f"app_{value}" for value in x)).reset_index()
+            group_user_df = user_df.groupby(['employee_no','user_name','branch_code','employee_display_name'])['rolename']\
+                .agg(lambda row: '+'.join(f'app_{x}' for x in row.unique())).reset_index()
             
             # FILE: BOSTH_Param
             param_df = self.collect_depend_file(i)
-            group_param_df = param_df.groupby(['employee_no','username',])['rolename'].agg(lambda x: '+'.join(f"sec_{value}" for value in x)).reset_index()
+            group_param_df = param_df.groupby(['employee_no','username',])['rolename']\
+                .agg(lambda row: '+'.join(f'sec_{x}' for x in row.unique())).reset_index()
             
             # merge 2 file BOSTH_Param / BOSTH
-            merge_group_df = pd.merge(group_param_df,group_user_df,on="employee_no",how="right",suffixes=('_param','_user'))
+            group_merge_df = pd.merge(group_param_df,group_user_df,on='employee_no',how='right',suffixes=('_param','_user'))
             
-            # adjust column
-            merge_group_df['rolename'] = merge_group_df[['rolename_param', 'rolename_user']].apply(lambda x: ';'.join([str(val) for val in x if pd.notna(val)]), axis=1)
-            merge_group_df = merge_group_df[['employee_no','user_name','employee_display_name','branch_code','rolename']]
-            merge_group_df['branch_code'] = merge_group_df['branch_code'].astype(str).str.zfill(3)
-            merge_group_df['user_name'] = merge_group_df['user_name'].apply(lambda x: x.replace('NTTHPDOM\\', '') if isinstance(x, str) else x) 
-            merge_group_df = merge_group_df.rename(columns={
+            # adjust column: rolename
+            group_merge_df['rolename'] = group_merge_df[['rolename_param', 'rolename_user']]\
+                .apply(lambda row: ';'.join([str(x) for x in row if pd.notna(x)]), axis=1)
+            group_merge_df = group_merge_df[['employee_no','user_name','employee_display_name','branch_code','rolename']]
+            
+            # adjust column: user_name
+            group_merge_df['user_name'] = group_merge_df['user_name'].apply(lambda row: row.replace('NTTHPDOM\\', '') if isinstance(row, str) else row)
+            group_merge_df = group_merge_df[group_merge_df['user_name'] != '']
+            
+            # adjust column: branch_code
+            group_merge_df['branch_code'] = group_merge_df['branch_code'].astype(str).str.zfill(3)
+            
+            # rename column
+            group_merge_df = group_merge_df.rename(columns={
                 'user_name' : 'AccountName',
                 'employee_display_name' : 'AccountDescription',
                 'branch_code' : 'AdditionalAttribute',
@@ -140,17 +149,17 @@ class ModuleBOS(CallFunction):
                 'LastUpdatedDate' : 'NA',
                 'Country' : 'TH',
             }
-            merge_df = pd.concat([merge_group_df, merge_df],ignore_index=True)
-            merge_df['AccountOwner'] = merge_df['AccountName']
-            merge_df = merge_df.fillna(static_value)
-            merge_df = merge_df.drop(columns='employee_no')
-            merge_df = merge_df[columns].sort_values(by='AccountOwner',ignore_index=True)
+            final_bos = pd.concat([group_merge_df, merge_df],ignore_index=True)
+            final_bos['AccountOwner'] = final_bos['AccountName']
+            final_bos = final_bos.fillna(static_value)
+            final_bos = final_bos.drop(columns='employee_no')
+            final_bos = final_bos[columns].sort_values(by='AccountOwner',ignore_index=True)
             
         except Exception as err:
             raise Exception(err)
 
         status = 'succeed'
-        self.logging[i].update({'data': merge_df.to_dict('list'), 'status': status})
+        self.logging[i].update({'data': final_bos.to_dict('list'), 'status': status})
         logging.info(f'Collect user data, status: {status}')
     
     def collect_param_file(self, i: int, format_file: any) -> dict:

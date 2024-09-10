@@ -61,9 +61,9 @@ class ModuleLMT(CallFunction):
             user_df = user_df.drop_duplicates().reset_index()
             
             # group by column
-            group_user_df = user_df.groupby(['DisplayName','EmployeeNo','Username','Department']).agg(lambda x: '+'.join(map(str, sorted(set(x))))).reset_index()
-            group_user_df['Roles'] = group_user_df.iloc[:,[4,5,6]].apply(lambda x: ';'.join([str(val) for val in x if pd.notna(val)]), axis=1)
-            group_user_df['Username'] = group_user_df['Username'].apply(lambda x: x.replace('NTTHPDOM\\', '') if isinstance(x, str) else x)
+            group_user_df = user_df.groupby(['DisplayName','EmployeeNo','Username','Department']).agg(lambda row: '+'.join(map(str, sorted(set(row))))).reset_index()
+            group_user_df['Roles'] = group_user_df.iloc[:,[4,5,6]].apply(lambda row: ';'.join([str(val) for val in row if pd.notna(val)]), axis=1)
+            group_user_df['Username'] = group_user_df['Username'].apply(lambda row: row.replace('NTTHPDOM\\', '') if isinstance(row, str) else row)
             group_user_df = group_user_df.drop(group_user_df.iloc[:,[4,5,6]],axis=1)
             group_user_df = group_user_df.rename(columns={
                 'Username' : 'AccountOwner',

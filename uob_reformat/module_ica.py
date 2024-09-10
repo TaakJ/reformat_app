@@ -137,7 +137,7 @@ class ModuleICA(CallFunction):
             
             entitlement_name = pd.merge(tbl_user_df, tbl_user_group_df,on='USER_ID',how='left')
             entitlement_name = entitlement_name.fillna('NA')
-            entitlement_name_group = entitlement_name.groupby('USER_ID')['GROUP_ID'].apply(lambda x: '+'.join(map(str, sorted(set(x))))).reset_index()
+            entitlement_name_group = entitlement_name.groupby('USER_ID')['GROUP_ID'].apply(lambda row: '+'.join(map(str, sorted(set(row))))).reset_index()
             
             # merge file: ICAS_TBL_USER with ICAS_TBL_USER_GROUP
             result_ica = pd.merge(entitlement_name_group, tbl_user_df,on='USER_ID')
@@ -159,7 +159,7 @@ class ModuleICA(CallFunction):
                 final_ica[col] = final_ica[col].apply(self.parse_and_format_datetime)
                 
             final_ica['FULL_NAME'] = final_ica['FULL_NAME'].apply(self.clean_fullname)
-            final_ica['LOCKED_FLAG'] = final_ica['LOCKED_FLAG'].apply(lambda x: 'D' if x == '1' else 'A')
+            final_ica['LOCKED_FLAG'] = final_ica['LOCKED_FLAG'].apply(lambda row: 'D' if row == '1' else 'A')
             
             ## merge dataframe
             columns = self.logging[i]['columns']
