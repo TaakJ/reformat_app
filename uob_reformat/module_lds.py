@@ -24,9 +24,9 @@ class ModuleLDS(CallFunction):
             
             await self.check_source_file()
             await self.separate_data_file()
-            if self.store_tmp is True:
-                await self.genarate_tmp_file()
-            await self.genarate_target_file()
+            # if self.store_tmp is True:
+            #     await self.genarate_tmp_file()
+            # await self.genarate_target_file()
 
         except CustomException as err:
             logging.error('See Error Details: log_error.log')
@@ -86,6 +86,7 @@ class ModuleLDS(CallFunction):
                     'AccountOwner': user_df['UserName'], 
                     'AccountName': user_df['UserName'],
                     'AccountType': 'USR',
+                    'EntitlementName': user_df['RoleID'],
                     'AccountStatus': 'A',
                     'IsPrivileged': 'N',
                     'AccountDescription': user_df['FullName'],
@@ -97,6 +98,7 @@ class ModuleLDS(CallFunction):
             )
             user_df = user_df.assign(**set_value)
             user_df = user_df.drop(user_df.iloc[:,:32].columns, axis=1)
+            print(user_df)
             
         except Exception as err:
             raise Exception(err)
