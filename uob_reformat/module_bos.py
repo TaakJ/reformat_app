@@ -101,22 +101,20 @@ class ModuleBOS(CallFunction):
             user_df = pd.DataFrame(data)
             user_df.columns = user_df.iloc[0].values
             user_df = user_df.iloc[1:].apply(lambda row: row.str.strip()).reset_index(drop=True)
-            
-            # adjsut column
             group_user_df = user_df.groupby(['employee_no','user_name','branch_code','employee_display_name'])['rolename']\
-                .agg(lambda row: '+'.join(f'app_{x}' for x in row.unique())).reset_index()
+                .agg(lambda row: '+'.join(row.unique())).reset_index()
             
-            # FILE: BOSTH_Param
+            # # FILE: BOSTH_Param
             param_df = self.collect_depend_file(i)
             group_param_df = param_df.groupby(['employee_no','username',])['rolename']\
-                .agg(lambda row: '+'.join(f'sec_{x}' for x in row.unique())).reset_index()
+                .agg(lambda row: '+'.join(row.unique())).reset_index()
             
             # merge 2 file BOSTH_Param / BOSTH
             group_merge_df = pd.merge(group_param_df,group_user_df,on='employee_no',how='right',suffixes=('_param','_user'))
             
             # adjust column: rolename
-            group_merge_df['rolename'] = group_merge_df[['rolename_param', 'rolename_user']]\
-                .apply(lambda row: ';'.join([str(x) for x in row if pd.notna(x)]), axis=1)
+            group_merge_df[['rolename_param', 'rolename_user']] = group_merge_df[['rolename_param', 'rolename_user']].fillna('NA')
+            group_merge_df['rolename'] = group_merge_df[['rolename_param', 'rolename_user']].apply(lambda row: ';'.join(row), axis=1)
             group_merge_df = group_merge_df[['employee_no','user_name','employee_display_name','branch_code','rolename']]
             
             # adjust column: user_name
@@ -175,6 +173,7 @@ class ModuleBOS(CallFunction):
             user_df = pd.DataFrame(data)
             user_df.columns = user_df.iloc[0].values
             user_df = user_df.iloc[1:].apply(lambda row: row.str.strip()).reset_index(drop=True)
+            user_df['branch_code'] = user_df['branch_code'].astype(str).str.zfill(3)
             
             # FILE: BOSTH_Param
             param_df = self.collect_depend_file(i)
@@ -189,20 +188,21 @@ class ModuleBOS(CallFunction):
             
             app_param_list = user_df.iloc[:,[1,2]]
             app_param_list = app_param_list.drop_duplicates()
-            app_param_list.insert(0,'Parameter Name','Application roles')
+            app_param_list.insert(0,'Parameter Name','Department code')
             app_param_list = app_param_list.rename(columns={
                 'branch_code' : 'Code values',
                 'branch_name' : 'Decode value'
             })
             
             dept_param_list = pd.DataFrame(columns=columns)
-            dept_param_uni = param_df['rolename'].unique()
+            dept_param_uni = user_df['rolename'].unique()
             dept_param_list['Code values'] = dept_param_uni
             dept_param_list['Decode value'] = dept_param_uni
-            dept_param_list['Parameter Name'] = 'Department roles'
+            dept_param_list['Parameter Name'] = 'Application roles'
             
-            merge_df = pd.concat([app_param_list,sec_param_list],ignore_index=True)
-            merge_df = pd.concat([merge_df, dept_param_list],ignore_index=True)
+            merge_df = pd.concat([sec_param_list,dept_param_list],ignore_index=True)
+            merge_df = pd.concat([merge_df, app_param_list],ignore_index=True)
+            
             
         except Exception as err:
             raise Exception(err)
