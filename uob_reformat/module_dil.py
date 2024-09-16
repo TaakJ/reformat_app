@@ -24,9 +24,9 @@ class ModuleDIL(CallFunction):
 
             await self.check_source_file()
             await self.separate_data_file()
-            # if self.store_tmp is True:
-            #     await self.genarate_tmp_file()
-            # await self.genarate_target_file()
+            if self.store_tmp is True:
+                await self.genarate_tmp_file()
+            await self.genarate_target_file()
 
         except CustomException as err:
             logging.error('See Error Details: log_error.log')
@@ -92,44 +92,42 @@ class ModuleDIL(CallFunction):
         self.logging[i].update({'function': 'collect_user_file', 'status': status})
     
         try:
-            # clean and split the data
             clean_data = self.read_format_file(format_file)
             
             # set dataframe
             user_df = pd.DataFrame(clean_data)
             user_df.columns = user_df.iloc[0].values
             user_df = user_df.iloc[1:].apply(lambda row: row.str.strip()).reset_index(drop=True)
-            print(user_df)
             
             # adjust column
-            # user_df = user_df[user_df['APPCODE'] == 'LNSIGNET'].reset_index(drop=True)
-            # user_df[['NAME', 'DEPARTMENT']] = user_df.apply(self.split_column, axis=1, result_type='expand')
-            # user_df['ATTRIBUTE'] = user_df.apply(self.attribute_column, axis=1)
+            user_df = user_df[user_df['APPCODE'] == 'LNSIGNET'].reset_index(drop=True)
+            user_df[['NAME', 'DEPARTMENT']] = user_df.apply(self.split_column, axis=1, result_type='expand')
+            user_df['ATTRIBUTE'] = user_df.apply(self.attribute_column, axis=1)
             
-            # # mapping data to column
-            # set_value = dict.fromkeys(self.logging[i]['columns'], 'NA')
-            # set_value.update(
-            #     {
-            #         'ApplicationCode': 'DIL',
-            #         'AccountOwner': user_df['USERNAME'],
-            #         'AccountName': user_df['USERNAME'],
-            #         'AccountType': 'USR',
-            #         'AccountStatus': 'A',
-            #         'IsPrivileged': 'N',
-            #         'AccountDescription': user_df['NAME'],
-            #         'AdditionalAttribute': user_df[['DEPARTMENT', 'APPCODE', 'ATTRIBUTE']].apply(lambda row: '#'.join(row), axis=1),
-            #         'Country': "TH"
-            #     }
-            # )
-            # user_df = user_df.assign(**set_value)
-            # user_df = user_df.drop(user_df.iloc[:,:12].columns, axis=1)
+            # mapping data to column
+            set_value = dict.fromkeys(self.logging[i]['columns'], 'NA')
+            set_value.update(
+                {
+                    'ApplicationCode': 'DIL',
+                    'AccountOwner': user_df['USERNAME'],
+                    'AccountName': user_df['USERNAME'],
+                    'AccountType': 'USR',
+                    'AccountStatus': 'A',
+                    'IsPrivileged': 'N',
+                    'AccountDescription': user_df['NAME'],
+                    'AdditionalAttribute': user_df[['DEPARTMENT', 'APPCODE', 'ATTRIBUTE']].apply(lambda row: '#'.join(row), axis=1),
+                    'Country': "TH"
+                }
+            )
+            user_df = user_df.assign(**set_value)
+            user_df = user_df.drop(user_df.iloc[:,:12].columns, axis=1)
             
         except Exception as err:
             raise Exception(err)
 
-        # status = 'succeed'
-        # self.logging[i].update({'data': user_df.to_dict('list'), 'status': status})
-        # logging.info(f'Collect user data, status: {status}')
+        status = 'succeed'
+        self.logging[i].update({'data': user_df.to_dict('list'), 'status': status})
+        logging.info(f'Collect user data, status: {status}')
 
     def collect_param_file(self, i: int, format_file: any) -> dict:
 

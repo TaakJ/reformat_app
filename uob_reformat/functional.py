@@ -91,26 +91,15 @@ class Convert2File:
                 file = f.read()
                 encoding_result = chardet.detect(file)
             detected_encoding = encoding_result['encoding']
+            content = file.decode(detected_encoding)
             
             match_encoding = re.findall(r'utf|ascii', detected_encoding, re.IGNORECASE)
             if match_encoding == []:
-                # read file with original encoding
-                with open(full_input, 'r', encoding=detected_encoding) as f:
+                # change encoding tis-620
+                with open(full_input, 'r', encoding='tis-620') as f:
                     content = f.read()
-                
-                # convert encoding to utf-8
-                input_dir, input_file = os.path.split(full_input)
-                full_input = join(input_dir, f'{Path(input_file).stem}_utf8.txt')
-                with open(full_input, 'w', encoding='utf-8') as f:
-                    f.write(content)
-                
-                # re-read the newly created utf-8 file
-                with open(full_input, 'rb') as f:
-                    file = f.read()
-                    encoding_result = chardet.detect(file)
-                detected_encoding = encoding_result['encoding']
             
-            format_file = StringIO(file.decode(detected_encoding))
+            format_file = StringIO(content)
             
         except (LookupError, UnicodeDecodeError, TypeError) as err:
             raise Exception(err)
