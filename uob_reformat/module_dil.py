@@ -104,7 +104,6 @@ class ModuleDIL(CallFunction):
             user_df = user_df[user_df['APPCODE'] == 'LNSIGNET'].reset_index(drop=True)
             user_df[['NAME', 'DEPARTMENT']] = user_df.apply(self.split_column, axis=1, result_type='expand')
             user_df['ATTRIBUTE'] = user_df.apply(self.attribute_column, axis=1)
-            print(user_df)
             
             # mapping data to column
             set_value = dict.fromkeys(self.logging[i]['columns'], 'NA')
