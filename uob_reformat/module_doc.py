@@ -54,7 +54,7 @@ class ModuleDOC(CallFunction):
             name = row['NAME']
             department = 'NA'
             
-        return name, department
+        return name.strip(), department.strip()
     
     def attribute_column(self, row: any) -> str:
         if row['ADD_ID'] == '0' and row['EDIT_ID'] == '0' and row['ADD_DOC'] == '0' and row['EDIT_DOC'] == '0' and row['SCAN'] == '0' and row['ADD_USER'] == '1':
