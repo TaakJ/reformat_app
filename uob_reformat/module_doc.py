@@ -75,9 +75,9 @@ class ModuleDOC(CallFunction):
             
             clean_data = []
             for rows, _data in enumerate(data):
-                if rows == 1:
+                if rows == 4:
                     clean_data += [re.sub(r'\s+', ',', ','.join(_data)).split(',')]
-                elif rows != 0:
+                elif rows >= 5:
                     fix_value = []
                     for idx, value in enumerate(_data, 1):
                         if idx == 4:

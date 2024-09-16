@@ -70,9 +70,9 @@ class ModuleDIL(CallFunction):
         
         clean_data = []
         for rows, _data in enumerate(data):
-            if rows == 1:
+            if rows == 4:
                 clean_data += [re.sub(r'\s+', ',', ','.join(_data)).split(',')]
-            elif rows != 0:
+            elif rows >= 5:
                 fix_value = []
                 for idx, value in enumerate(_data, 1):
                     if idx == 4:
@@ -92,14 +92,14 @@ class ModuleDIL(CallFunction):
         self.logging[i].update({'function': 'collect_user_file', 'status': status})
     
         try:
-            print(format_file.getvalue())
             # clean and split the data
-            # clean_data = self.read_format_file(format_file)
+            clean_data = self.read_format_file(format_file)
             
             # set dataframe
-            # user_df = pd.DataFrame(clean_data)
-            # user_df.columns = user_df.iloc[0].values
-            # user_df = user_df.iloc[1:].apply(lambda row: row.str.strip()).reset_index(drop=True)
+            user_df = pd.DataFrame(clean_data)
+            user_df.columns = user_df.iloc[0].values
+            user_df = user_df.iloc[1:].apply(lambda row: row.str.strip()).reset_index(drop=True)
+            print(user_df)
             
             # adjust column
             # user_df = user_df[user_df['APPCODE'] == 'LNSIGNET'].reset_index(drop=True)

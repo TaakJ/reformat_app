@@ -91,30 +91,32 @@ class Convert2File:
                 file = f.read()
                 encoding_result = chardet.detect(file)
             detected_encoding = encoding_result['encoding']
-            # format_file = StringIO(file.decode(detected_encoding))
             
-            # Check if the detected encoding is UTF
-            match_encoding =  re.search(r'utf', detected_encoding, re.IGNORECASE)
-            if match_encoding is None:
+            match_encoding = re.findall(r'utf|ascii', detected_encoding, re.IGNORECASE)
+            if match_encoding == []:
+                # read file with original encoding
                 with open(full_input, 'r', encoding=detected_encoding) as f:
                     content = f.read()
                 
+                # convert encoding to utf-8
                 input_dir, input_file = os.path.split(full_input)
                 full_input = join(input_dir, f'{Path(input_file).stem}_utf8.txt')
-                
-                ## convert encoding to utf-8
                 with open(full_input, 'w', encoding='utf-8') as f:
                     f.write(content)
                 
-                format_file = StringIO(content)
-            else:
-                format_file = StringIO(file.decode(detected_encoding))
+                # re-read the newly created utf-8 file
+                with open(full_input, 'rb') as f:
+                    file = f.read()
+                    encoding_result = chardet.detect(file)
+                detected_encoding = encoding_result['encoding']
+            
+            format_file = StringIO(file.decode(detected_encoding))
             
         except (LookupError, UnicodeDecodeError, TypeError) as err:
             raise Exception(err)
         
         status = 'succeed'
-        self.logging[i].update({'full_input': full_input, 'status': status})
+        self.logging[i].update({'status': status})
         
         return format_file
         
