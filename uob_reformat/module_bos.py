@@ -186,23 +186,22 @@ class ModuleBOS(CallFunction):
             sec_param_list['Decode value'] = sec_parm_uni
             sec_param_list['Parameter Name'] = 'Security roles'
             
-            app_param_list = user_df.iloc[:,[1,2]]
-            app_param_list = app_param_list.drop_duplicates()
-            app_param_list.insert(0,'Parameter Name','Department code')
-            app_param_list = app_param_list.rename(columns={
+            app_param_list = pd.DataFrame(columns=columns)
+            app_param_uni = user_df['rolename'].unique()
+            app_param_list['Code values'] = app_param_uni
+            app_param_list['Decode value'] = app_param_uni
+            app_param_list['Parameter Name'] = 'Application roles'
+            
+            dept_param_list = user_df.iloc[:,[1,2]]
+            dept_param_list = dept_param_list.drop_duplicates()
+            dept_param_list.insert(0,'Parameter Name','Department code')
+            dept_param_list = dept_param_list.rename(columns={
                 'branch_code' : 'Code values',
                 'branch_name' : 'Decode value'
             })
             
-            dept_param_list = pd.DataFrame(columns=columns)
-            dept_param_uni = user_df['rolename'].unique()
-            dept_param_list['Code values'] = dept_param_uni
-            dept_param_list['Decode value'] = dept_param_uni
-            dept_param_list['Parameter Name'] = 'Application roles'
-            
-            merge_df = pd.concat([sec_param_list,dept_param_list],ignore_index=True)
-            merge_df = pd.concat([merge_df, app_param_list],ignore_index=True)
-            
+            merge_df = pd.concat([sec_param_list,app_param_list],ignore_index=True)
+            merge_df = pd.concat([merge_df, dept_param_list],ignore_index=True)
             
         except Exception as err:
             raise Exception(err)

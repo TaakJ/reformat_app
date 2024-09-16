@@ -14,6 +14,7 @@ import xlrd
 import csv
 from .exception import CustomException
 from .setup import Folder
+from unicodedata import normalize
 
 class Convert2File:
             
@@ -91,6 +92,20 @@ class Convert2File:
             encoding_result = chardet.detect(file)
             encoding = encoding_result['encoding']
             format_file = StringIO(file.decode(encoding))
+            
+            # encoding = 'utf-8'
+            # with open(full_input, 'rb') as f:
+            #     input_bytes = f.read()
+            #     result = chardet.detect(input_bytes)
+            #     try:
+            #         expected_unicode = input_bytes.decode(encoding)
+            #     except LookupError:
+            #         expected_unicode = ""
+                    
+            #     try:
+            #         detected_unicode = input_bytes.decode(result["encoding"])  # type: ignore[reportArgumentType]
+            #     except (LookupError, UnicodeDecodeError, TypeError):
+            #         detected_unicode = ""
             
         except Exception as err:
             raise Exception(err)

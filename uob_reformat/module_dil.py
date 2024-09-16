@@ -102,26 +102,27 @@ class ModuleDIL(CallFunction):
             
             # adjust column
             user_df = user_df[user_df['APPCODE'] == 'LNSIGNET'].reset_index(drop=True)
-            user_df[['NAME', 'DEPARTMENT']] = user_df.apply(self.split_column, axis=1, result_type='expand')
-            user_df['ATTRIBUTE'] = user_df.apply(self.attribute_column, axis=1)
+            print(user_df)
+            # user_df[['NAME', 'DEPARTMENT']] = user_df.apply(self.split_column, axis=1, result_type='expand')
+            # user_df['ATTRIBUTE'] = user_df.apply(self.attribute_column, axis=1)
             
-            # mapping data to column
-            set_value = dict.fromkeys(self.logging[i]['columns'], 'NA')
-            set_value.update(
-                {
-                    'ApplicationCode': 'DIL',
-                    'AccountOwner': user_df['USERNAME'],
-                    'AccountName': user_df['USERNAME'],
-                    'AccountType': 'USR',
-                    'AccountStatus': 'A',
-                    'IsPrivileged': 'N',
-                    'AccountDescription': user_df['NAME'],
-                    'AdditionalAttribute': user_df[['DEPARTMENT', 'APPCODE', 'ATTRIBUTE']].apply(lambda row: '#'.join(row), axis=1),
-                    'Country': "TH"
-                }
-            )
-            user_df = user_df.assign(**set_value)
-            user_df = user_df.drop(user_df.iloc[:,:12].columns, axis=1)
+            # # mapping data to column
+            # set_value = dict.fromkeys(self.logging[i]['columns'], 'NA')
+            # set_value.update(
+            #     {
+            #         'ApplicationCode': 'DIL',
+            #         'AccountOwner': user_df['USERNAME'],
+            #         'AccountName': user_df['USERNAME'],
+            #         'AccountType': 'USR',
+            #         'AccountStatus': 'A',
+            #         'IsPrivileged': 'N',
+            #         'AccountDescription': user_df['NAME'],
+            #         'AdditionalAttribute': user_df[['DEPARTMENT', 'APPCODE', 'ATTRIBUTE']].apply(lambda row: '#'.join(row), axis=1),
+            #         'Country': "TH"
+            #     }
+            # )
+            # user_df = user_df.assign(**set_value)
+            # user_df = user_df.drop(user_df.iloc[:,:12].columns, axis=1)
             
         except Exception as err:
             raise Exception(err)
