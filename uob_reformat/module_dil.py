@@ -24,9 +24,9 @@ class ModuleDIL(CallFunction):
 
             await self.check_source_file()
             await self.separate_data_file()
-            if self.store_tmp is True:
-                await self.genarate_tmp_file()
-            await self.genarate_target_file()
+            # if self.store_tmp is True:
+            #     await self.genarate_tmp_file()
+            # await self.genarate_target_file()
 
         except CustomException as err:
             logging.error('See Error Details: log_error.log')
@@ -92,17 +92,17 @@ class ModuleDIL(CallFunction):
         self.logging[i].update({'function': 'collect_user_file', 'status': status})
     
         try:
+            print(format_file.getvalue())
             # clean and split the data
-            clean_data = self.read_format_file(format_file)
+            # clean_data = self.read_format_file(format_file)
             
             # set dataframe
-            user_df = pd.DataFrame(clean_data)
-            user_df.columns = user_df.iloc[0].values
-            user_df = user_df.iloc[1:].apply(lambda row: row.str.strip()).reset_index(drop=True)
+            # user_df = pd.DataFrame(clean_data)
+            # user_df.columns = user_df.iloc[0].values
+            # user_df = user_df.iloc[1:].apply(lambda row: row.str.strip()).reset_index(drop=True)
             
             # adjust column
-            user_df = user_df[user_df['APPCODE'] == 'LNSIGNET'].reset_index(drop=True)
-            print(user_df)
+            # user_df = user_df[user_df['APPCODE'] == 'LNSIGNET'].reset_index(drop=True)
             # user_df[['NAME', 'DEPARTMENT']] = user_df.apply(self.split_column, axis=1, result_type='expand')
             # user_df['ATTRIBUTE'] = user_df.apply(self.attribute_column, axis=1)
             
@@ -127,9 +127,9 @@ class ModuleDIL(CallFunction):
         except Exception as err:
             raise Exception(err)
 
-        status = 'succeed'
-        self.logging[i].update({'data': user_df.to_dict('list'), 'status': status})
-        logging.info(f'Collect user data, status: {status}')
+        # status = 'succeed'
+        # self.logging[i].update({'data': user_df.to_dict('list'), 'status': status})
+        # logging.info(f'Collect user data, status: {status}')
 
     def collect_param_file(self, i: int, format_file: any) -> dict:
 
