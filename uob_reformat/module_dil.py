@@ -63,7 +63,7 @@ class ModuleDIL(CallFunction):
         
     def read_format_file(self, format_file) -> list:
         # clean and split the data
-        data = [re.sub(r'(?<!\.)\s{2,}', '||', ''.join(re.findall(r'\w+.*', line.strip()))).split('||') for line in format_file if re.findall(r'\w+.*', line.strip())]
+        data = [re.sub(r'(?<!\.)\s{3,}', '||', ''.join(re.findall(r'\w+.*', line.strip()))).split('||') for line in format_file if re.findall(r'\w+.*', line.strip())]
         
         clean_data = []
         for rows, _data in enumerate(data):
