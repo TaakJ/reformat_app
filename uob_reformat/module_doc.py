@@ -45,14 +45,14 @@ class ModuleDOC(CallFunction):
         return result
     
     def split_column(self, row: any) -> any:
-        comma = row['NAME'].split(",")
+        comma = row['NAME'].split(',')
         if len(comma) == 3:
             name, department, _ = comma
         elif len(comma) == 2:
             name, department = comma
         else:
             name = row['NAME']
-            department = "NA"
+            department = 'NA'
             
         return name, department
     
