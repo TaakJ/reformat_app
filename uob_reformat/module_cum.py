@@ -71,7 +71,7 @@ class ModuleCUM(CallFunction):
             user_df =  user_df.iloc[1:].apply(lambda row: row.str.strip()).reset_index(drop=True)
             
             # Replace 'null' with 'NA' for all string values
-            user_df = user_df.map(lambda row: 'NA' if isinstance(row, str) and (row.strip().lower() == 'null' or row.strip() == '') else row)
+            user_df = user_df.map(lambda row: 'NA' if isinstance(row, str) and (row.lower() == 'null' or row == '') else row)
             
             # group by column
             user_df = user_df.groupby('USER_ID', sort=False).agg(lambda row: '+'.join(filter(pd.notna, row.unique()))).reset_index()
@@ -88,8 +88,8 @@ class ModuleCUM(CallFunction):
                     'AccountStatus': 'A',
                     'IsPrivileged': 'N',
                     'AccountDescription': user_df[['NAME','SURNAME']].apply(lambda row: row['NAME'] + ' ' + row['SURNAME'], axis=1),
-                    'CreateDate': pd.to_datetime(user_df['VALID_FROM'], dayfirst=True).dt.strftime('%Y%m%d%H%M%S'), 
-                    'LastLogin': pd.to_datetime(user_df['Last Usage'], dayfirst=True).dt.strftime('%Y%m%d%H%M%S'),
+                    'CreateDate': pd.to_datetime(user_df['VALID_FROM'], dayfirst=True, errors='coerce').dt.strftime('%Y%m%d%H%M%S'), 
+                    'LastLogin': pd.to_datetime(user_df['Last Usage'], dayfirst=True, errors='coerce').dt.strftime('%Y%m%d%H%M%S'),
                     'AdditionalAttribute': user_df['DEPARTMENT'],
                     'Country': 'TH'
                 }
@@ -119,7 +119,7 @@ class ModuleCUM(CallFunction):
             param_df =  param_df.iloc[1:].apply(lambda row: row.str.strip()).reset_index(drop=True)
             
             # Replace 'null' with 'NA' for all string values
-            param_df = param_df.map(lambda row: 'NA' if isinstance(row, str) and (row.strip().lower() == 'null' or row.strip() == '') else row)
+            param_df = param_df.map(lambda row: 'NA' if isinstance(row, str) and (row.lower() == 'null' or row == '') else row)
             
             # mapping data to column
             set_value = [
