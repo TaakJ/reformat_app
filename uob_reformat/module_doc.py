@@ -95,10 +95,10 @@ class ModuleDOC(CallFunction):
             user_df = user_df.iloc[1:].apply(lambda row: row.str.strip()).reset_index(drop=True)
             
             # Replace 'null' with 'NA' for all string values
-            user_df = user_df.map(lambda row: 'NA' if isinstance(row, str) and (row.strip().lower() == 'null' or row.strip() == '') else row)
+            user_df = user_df[user_df['APPCODE'] == 'LOAN'].reset_index(drop=True)
+            user_df = user_df.map(lambda row: 'NA' if isinstance(row, str) and (row.lower() == 'null' or row == '') else row)
             
             # adjust column
-            user_df = user_df[user_df['APPCODE'] == 'LOAN'].reset_index(drop=True)
             user_df[['NAME', 'DEPARTMENT']] = user_df.apply(self.split_column, axis=1, result_type='expand')
             user_df['ATTRIBUTE'] = user_df.apply(self.attribute_column, axis=1)
             
