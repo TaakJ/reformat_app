@@ -44,6 +44,14 @@ class ModuleLDS(CallFunction):
         
         return result
     
+    def parse_datetime(self, date_str):
+        for fmt in ('%Y-%m-%d %H:%M:%S.%f', '%Y-%m-%d %H:%M:%S', '%Y-%m-%d'):
+            try:
+                return pd.to_datetime(date_str, format=fmt)
+            except ValueError:
+                continue
+        return pd.NaT
+    
     def read_format_file(self, format_file) -> list:
         # clean and split the data
         data = [re.sub(r'(?<!\.),', '||', ''.join(re.findall(r'\w+.*', line.strip()))).split('||') for line in format_file if re.findall(r'\w+.*', line.strip())]
@@ -70,7 +78,6 @@ class ModuleLDS(CallFunction):
         self.logging[i].update({'function': 'collect_user_file', 'status': status})
         
         try:
-            # clean and split the data
             clean_data = self.read_format_file(format_file)
             
             # set dataframe
@@ -78,8 +85,8 @@ class ModuleLDS(CallFunction):
             user_df.columns = user_df.iloc[0].values
             user_df = user_df.iloc[1:-1, :-1].apply(lambda row: row.str.strip()).reset_index(drop=True)
             
-            # Replace 'null' with 'NA' for all string values
-            user_df = user_df.map(lambda row: 'NA' if isinstance(row, str) and (row.strip().lower() == 'null' or row.strip() == '') else row)
+            # replace 'null' with 'NA' for all string values
+            user_df = user_df.map(lambda row: 'NA' if isinstance(row, str) and (row.lower() == 'null' or row == '') else row)
             
             # mapping data to column
             set_value = dict.fromkeys(self.logging[i]['columns'], 'NA')
@@ -93,8 +100,8 @@ class ModuleLDS(CallFunction):
                     'AccountStatus': 'A',
                     'IsPrivileged': 'N',
                     'AccountDescription': user_df['FullName'],
-                    'LastLogin': pd.to_datetime(user_df['LastLogin_Date'].apply(lambda row: row[:19]), errors='coerce').dt.strftime('%Y%m%d%H%M%S'),
-                    'LastUpdatedDate': pd.to_datetime(user_df['edit_date'].apply(lambda row: row[:19]), errors='coerce').dt.strftime('%Y%m%d%H%M%S'),
+                    'LastLogin':  user_df['LastLogin_Date'].apply(self.parse_datetime).dt.strftime('%Y%m%d%H%M%S'),
+                    'LastUpdatedDate': user_df['edit_date'].apply(self.parse_datetime).dt.strftime('%Y%m%d%H%M%S'),
                     'AdditionalAttribute': user_df[['CostCenterName','CostCenterCode']].apply(lambda row: '#'.join(row), axis=1),
                     'Country': "TH"
                 }
@@ -115,7 +122,6 @@ class ModuleLDS(CallFunction):
         self.logging[i].update({'function': 'collect_param_file', 'status': status})
         
         try:
-            # clean and split the data
             clean_data = self.read_format_file(format_file)
             
             # set dataframe
@@ -123,7 +129,7 @@ class ModuleLDS(CallFunction):
             param_df.columns = param_df.iloc[0].values
             param_df = param_df.iloc[1:-1, :-1].apply(lambda row: row.str.strip()).reset_index(drop=True)
             
-            # Replace 'null' with 'NA' for all string values
+            # replace 'null' with 'NA' for all string values
             param_df = param_df.map(lambda row: 'NA' if isinstance(row, str) and (row.strip().lower() == 'null' or row.strip() == '') else row)
             
             # mapping data to column
