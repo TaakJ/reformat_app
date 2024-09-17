@@ -65,7 +65,7 @@ class ModuleDIL(CallFunction):
             return 'Inquiry'
         
     def read_format_file(self, format_file) -> list:
-        # clean and split the data
+        
         data = [re.sub(r'(?<!\.)\s{3,}', '||', ''.join(re.findall(r'\w+.*', line.strip()))).split('||') for line in format_file if re.findall(r'\w+.*', line.strip())]
         
         clean_data = []
@@ -99,7 +99,7 @@ class ModuleDIL(CallFunction):
             user_df.columns = user_df.iloc[0].values
             user_df = user_df.iloc[1:].apply(lambda row: row.str.strip()).reset_index(drop=True)
             
-            # Replace 'null' with 'NA' for all string values
+            # replace 'null' with 'NA' for all string values
             user_df = user_df[user_df['APPCODE'] == 'LNSIGNET'].reset_index(drop=True)
             user_df = user_df.map(lambda row: 'NA' if isinstance(row, str) and (row.lower() == 'null' or row == '') else row)
             
@@ -146,7 +146,7 @@ class ModuleDIL(CallFunction):
             param_df.columns = param_df.iloc[0].values
             param_df = param_df.iloc[1:].apply(lambda row: row.str.strip()).reset_index(drop=True)
             
-            # Replace 'null' with 'NA' for all string values
+            # replace 'null' with 'NA' for all string values
             param_df = param_df[param_df['APPCODE'] == 'LNSIGNET'].reset_index(drop=True)
             param_df = param_df.map(lambda row: 'NA' if isinstance(row, str) and (row.lower() == 'null' or row == '') else row)
             

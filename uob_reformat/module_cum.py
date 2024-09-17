@@ -44,7 +44,6 @@ class ModuleCUM(CallFunction):
         return result
     
     def read_format_file(self, format_file) -> list:
-        # clean and split the data
         data = []
         sheet_list = [sheet for sheet in format_file.sheet_names()]
         for sheets in sheet_list:

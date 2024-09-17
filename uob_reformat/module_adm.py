@@ -50,7 +50,6 @@ class ModuleADM(CallFunction):
         self.logging[i].update({'function': 'collect_user_file', 'status': status})
 
         try:
-            # clean and split the data
             data = [re.sub(r'(?<!\.)\|\|', '||', line.strip()).split('||') for line in format_file]
 
             # set dataframe
@@ -58,7 +57,7 @@ class ModuleADM(CallFunction):
             user_df = pd.DataFrame(data, columns=columns)
             user_df = user_df.apply(lambda row: row.str.strip()).reset_index(drop=True)
             
-            # Replace 'null' with 'NA' for all string values
+            # replace 'null' with 'NA' for all string values
             user_df = user_df.map(lambda row: 'NA' if isinstance(row, str) and (row.lower() == 'null' or row == '') else row)
             
             # Group by 'User-ID' and aggregate
@@ -96,7 +95,6 @@ class ModuleADM(CallFunction):
         self.logging[i].update({'function': 'collect_param_file', 'status': status})
 
         try:
-            # clean and split the data
             data = [re.sub(r'(?<!\.)\|\|', '||', line.strip()).split('||') for line in format_file]
 
             # set dataframe
@@ -104,7 +102,7 @@ class ModuleADM(CallFunction):
             param_df = pd.DataFrame(data, columns=columns)
             param_df = param_df.apply(lambda row: row.str.strip()).reset_index(drop=True)
             
-            # Replace 'null' with 'NA' for all string values
+            # replace 'null' with 'NA' for all string values
             param_df = param_df.map(lambda row: 'NA' if isinstance(row, str) and (row.lower() == 'null' or row == '') else row)
             
             # mapping data to column
