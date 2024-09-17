@@ -43,9 +43,27 @@ class ModuleCUM(CallFunction):
 
         return result
     
+    def parse_datetime(self, date_str):
+        for fmt in ('%Y-%m-%d %H:%M:%S.%f', 
+                    '%Y-%m-%d %H:%M:%S',
+                    '%d/%m/%Y %H:%M:%S.%f', 
+                    '%d/%m/%Y %H:%M:%S',
+                    '%Y-%m-%d',
+                    '%d-%m-%Y',
+                    '%Y/%m/%d',
+                    '%d/%m/%Y',
+                    '%m/%d/%Y'):
+            try:
+                return pd.to_datetime(date_str, format=fmt)
+            except ValueError:
+                continue
+        return pd.NaT
+    
     def read_format_file(self, format_file) -> list:
+        
         data = []
         sheet_list = [sheet for sheet in format_file.sheet_names()]
+        
         for sheets in sheet_list:
             cells = format_file.sheet_by_name(sheets)
             for row in range(0, cells.nrows):
@@ -61,7 +79,6 @@ class ModuleCUM(CallFunction):
         self.logging[i].update({'function': 'collect_user_file', 'status': status})
         
         try:
-            # clean and split the data
             clean_data = self.read_format_file(format_file)
             
             # set dataframe  
@@ -69,7 +86,7 @@ class ModuleCUM(CallFunction):
             user_df.columns = user_df.iloc[0].values
             user_df =  user_df.iloc[1:].apply(lambda row: row.str.strip()).reset_index(drop=True)
             
-            # Replace 'null' with 'NA' for all string values
+            # replace 'null' with 'NA' for all string values
             user_df = user_df.map(lambda row: 'NA' if isinstance(row, str) and (row.lower() == 'null' or row == '') else row)
             
             # group by column
@@ -87,8 +104,8 @@ class ModuleCUM(CallFunction):
                     'AccountStatus': 'A',
                     'IsPrivileged': 'N',
                     'AccountDescription': user_df[['NAME','SURNAME']].apply(lambda row: row['NAME'] + ' ' + row['SURNAME'], axis=1),
-                    'CreateDate': pd.to_datetime(user_df['VALID_FROM'], dayfirst=True, errors='coerce').dt.strftime('%Y%m%d%H%M%S'), 
-                    'LastLogin': pd.to_datetime(user_df['Last Usage'], dayfirst=True, errors='coerce').dt.strftime('%Y%m%d%H%M%S'),
+                    'CreateDate': user_df['VALID_FROM'].apply(self.parse_datetime).dt.strftime('%Y%m%d%H%M%S'), 
+                    'LastLogin': user_df['Last Usage'].apply(self.parse_datetime).dt.strftime('%Y%m%d%H%M%S'),
                     'AdditionalAttribute': user_df['DEPARTMENT'],
                     'Country': 'TH'
                 }
@@ -109,7 +126,6 @@ class ModuleCUM(CallFunction):
         self.logging[i].update({'function': 'collect_param_file', 'status': status})
         
         try:
-            # clean and split the data
             clean_data = self.read_format_file(format_file)
             
             # set dataframe  
@@ -117,7 +133,7 @@ class ModuleCUM(CallFunction):
             param_df.columns = param_df.iloc[0].values
             param_df =  param_df.iloc[1:].apply(lambda row: row.str.strip()).reset_index(drop=True)
             
-            # Replace 'null' with 'NA' for all string values
+            # replace 'null' with 'NA' for all string values
             param_df = param_df.map(lambda row: 'NA' if isinstance(row, str) and (row.lower() == 'null' or row == '') else row)
             
             # mapping data to column
