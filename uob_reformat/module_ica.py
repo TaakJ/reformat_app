@@ -23,13 +23,13 @@ class ModuleICA(CallFunction):
         result = {'module': self.module, 'task': 'Completed'}
         try:
             self.colloct_setup()
-            # self.clear_target_file()
+            self.clear_target_file()
 
             await self.check_source_file()
             await self.separate_data_file()
-            # if self.store_tmp is True:
-            #     await self.genarate_tmp_file()
-            # await self.genarate_target_file()
+            if self.store_tmp is True:
+                await self.genarate_tmp_file()
+            await self.genarate_target_file()
 
         except CustomException as err:
             logging.error('See Error Details: log_error.log')
@@ -74,7 +74,6 @@ class ModuleICA(CallFunction):
                 
                 format_file = self.read_file(i, full_depend)
                 for line in format_file:
-                    # clean and split the data
                     data += [re.sub(r'(?<!\.)\x07', '||', line.strip()).split('||')]
                     
                 tbl_name = Path(full_depend).name
@@ -225,9 +224,6 @@ class ModuleICA(CallFunction):
             home_bank = {'Parameter Name':'HOME_BANK','Code values':'024','Decode value': 'UOBT'}
             param_home_bank = pd.DataFrame([home_bank])
             
-            # merge column: home_bank
-            merge_df = pd.concat([merge_df, param_home_bank],ignore_index=True)
-            
             # merge column: group_id
             param_group_unique = tbl_group_df['GROUP_ID'].unique()
             filter_param_group = tbl_group_df[tbl_group_df['GROUP_ID'].isin(param_group_unique)]
@@ -238,6 +234,10 @@ class ModuleICA(CallFunction):
                 'GROUP_NAME' : 'Decode value'
             },inplace=True)
             merge_df = pd.concat([merge_df, filter_param_group],ignore_index=True)
+            
+            
+            # merge column: home_bank
+            merge_df = pd.concat([merge_df, param_home_bank],ignore_index=True)
             
             # merge column: home_branch
             param_home_branch_list = pd.DataFrame(columns=('Parameter Name','Code values','Decode value'))
@@ -254,8 +254,7 @@ class ModuleICA(CallFunction):
             param_dept_list['Decode value'] = param_dept_uni
             param_dept_list['Parameter Name'] = 'Department'
             merge_df = pd.concat([merge_df,param_dept_list],ignore_index=True)
-            
-            merge_df = merge_df.sort_values(by=['Parameter Name','Code values'],ignore_index=True)
+            # merge_df = merge_df.sort_values(by=['Parameter Name','Code values'],ignore_index=True)
             
         except Exception as err:
             raise Exception(err)
