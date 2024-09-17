@@ -50,21 +50,30 @@ class ModuleLMT(CallFunction):
         self.logging[i].update({'function': 'collect_user_file', 'status': status})
 
         try:
-            # clean and split the data
             data = [re.sub(r'(?<!\.),', ',', line.strip().replace('"', '')).split(',') for line in format_file]
 
             # set dataframe
             user_df = pd.DataFrame(data)
             user_df.columns = user_df.iloc[0].values
             user_df = user_df.iloc[1:].apply(lambda row: row.str.strip()).reset_index(drop=True)
-            user_df.iloc[:,[4,5,6]] = user_df.iloc[:,[4,5,6]].fillna('NA')
-            user_df = user_df.drop_duplicates().reset_index()
+            user_df = user_df.map(lambda row: 'NA' if isinstance(row, str) and (row.lower() == 'null' or row == '') else row)
+            
+            # clean column: SecurityRoles, ApplicationRoles, ProgramTemplate
+            user_df.loc[:,['SecurityRoles', 'ApplicationRoles', 'ProgramTemplate']] = user_df.loc[:,['SecurityRoles', 'ApplicationRoles', 'ProgramTemplate']].fillna('NA')
+            user_df = user_df.drop_duplicates().reset_index(drop=True)
             
             # group by column
             group_user_df = user_df.groupby(['DisplayName','EmployeeNo','Username','Department']).agg(lambda row: '+'.join(map(str, sorted(set(row))))).reset_index()
-            group_user_df['Roles'] = group_user_df.iloc[:,[4,5,6]].apply(lambda row: ';'.join([str(val) for val in row if pd.notna(val)]), axis=1)
+            
+            # adjust column: Username
             group_user_df['Username'] = group_user_df['Username'].apply(lambda row: row.replace('NTTHPDOM\\', '') if isinstance(row, str) else row)
-            group_user_df = group_user_df.drop(group_user_df.iloc[:,[4,5,6]],axis=1)
+            
+            # adjust column: SecurityRoles, ApplicationRoles, ProgramTemplate
+            group_user_df['Roles'] = group_user_df[['SecurityRoles', 'ApplicationRoles', 'ProgramTemplate']]\
+                .apply(lambda row: ';'.join(filter(pd.notna, map(str, row))), axis=1)
+            group_user_df = group_user_df.drop(group_user_df.loc[:,['SecurityRoles', 'ApplicationRoles', 'ProgramTemplate']],axis=1)
+            
+            # rename column
             group_user_df = group_user_df.rename(columns={
                 'Username' : 'AccountOwner',
                 'Roles' : 'EntitlementName',
@@ -75,8 +84,6 @@ class ModuleLMT(CallFunction):
             # merge dataframe
             columns = self.logging[i]['columns']
             merge_df = pd.DataFrame(columns=columns)
-            merge_df = pd.merge(group_user_df, merge_df, on=['AccountOwner','EntitlementName','AccountDescription','AdditionalAttribute'],how='left')
-            merge_df['AccountName'] = merge_df['AccountOwner']
             static_values = {
                 'ApplicationCode' : 'LMT',
                 'AccountType' : 'USR',
@@ -89,14 +96,16 @@ class ModuleLMT(CallFunction):
                 'LastUpdatedDate' : 'NA',
                 'Country' : 'TH'
             }
-            merge_df = merge_df.fillna(static_values)
-            merge_df = merge_df[columns]
+            final_lmt = pd.merge(group_user_df, merge_df, on=['AccountOwner','EntitlementName','AccountDescription','AdditionalAttribute'], how='left')
+            final_lmt['AccountName'] = final_lmt['AccountOwner']
+            final_lmt = final_lmt.fillna(static_values)
+            final_lmt = final_lmt[columns]
             
         except Exception as err:
             raise Exception(err)
 
         status = 'succeed'
-        self.logging[i].update({'data': merge_df.to_dict('list'), 'status': status})
+        self.logging[i].update({'data': final_lmt.to_dict('list'), 'status': status})
         logging.info(f'Collect user data, status: {status}')
 
     def collect_param_file(self, i: int, format_file: any) -> dict:
@@ -105,29 +114,43 @@ class ModuleLMT(CallFunction):
         self.logging[i].update({'function': 'collect_param_file', 'status': status})
 
         try:
-            # clean and split the data
             data = [re.sub(r'(?<!\.),', ',', line.strip().replace('"', '')).split(',') for line in format_file]
-
+            
             # set dataframe
             param_df = pd.DataFrame(data)
             param_df.columns = param_df.iloc[0].values
             param_df = param_df.iloc[1:].apply(lambda row: row.str.strip()).reset_index(drop=True)
-            param_df = param_df.iloc[:,[4,5,6]]
+            param_df = param_df.map(lambda row: 'NA' if isinstance(row, str) and (row.lower() == 'null' or row == '') else row)
             
-            # adjust dataframe
-            param_transpose = param_df.T
-            merge_df = param_transpose.reset_index().melt(id_vars='index')
-            merge_df.columns = ['Parameter Name', 'Value', 'Code values']            
-            merge_df = merge_df.drop(columns=['Value'])
-            merge_df = merge_df.drop_duplicates(subset=['Code values'])
-            merge_df = merge_df.dropna().reset_index(drop=True)
-            merge_df = merge_df[merge_df["Code values"] != 'NA']
-            merge_df['Decode value'] = merge_df['Code values']
-            merge_df = merge_df.sort_values(by=['Parameter Name','Code values']).reset_index(drop=True)
+            # mapping data to column
+            set_value = [
+                {
+                    'Parameter Name': 'Security Roles', 
+                    'Code values': param_df['SecurityRoles'].unique(), 
+                    'Decode value': param_df['SecurityRoles'].unique()
+                },
+                {
+                    'Parameter Name': 'Application Roles', 
+                    'Code values': param_df['ApplicationRoles'].unique(), 
+                    'Decode value': param_df['ApplicationRoles'].unique()
+                },
+                {
+                    'Parameter Name': 'Program Template', 
+                    'Code values': param_df['ProgramTemplate'].unique(), 
+                    'Decode value': param_df['ProgramTemplate'].unique()
+                },
+                {
+                    'Parameter Name': 'Department', 
+                    'Code values': param_df['Department'].unique(), 
+                    'Decode value': param_df['Department'].unique()
+                }
+            ]
+            merge_df = pd.DataFrame(set_value)
+            merge_df = merge_df.explode(['Code values', 'Decode value']).reset_index(drop=True)
             
         except Exception as err:
             raise Exception(err)
-
+        
         status = 'succeed'
         self.logging[i].update({'data': merge_df.to_dict('list'), 'status': status})
         logging.info(f'Collect user param, status: {status}')

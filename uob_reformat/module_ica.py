@@ -23,13 +23,13 @@ class ModuleICA(CallFunction):
         result = {'module': self.module, 'task': 'Completed'}
         try:
             self.colloct_setup()
-            self.clear_target_file()
+            # self.clear_target_file()
 
             await self.check_source_file()
             await self.separate_data_file()
-            if self.store_tmp is True:
-                await self.genarate_tmp_file()
-            await self.genarate_target_file()
+            # if self.store_tmp is True:
+            #     await self.genarate_tmp_file()
+            # await self.genarate_target_file()
 
         except CustomException as err:
             logging.error('See Error Details: log_error.log')

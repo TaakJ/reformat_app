@@ -63,7 +63,6 @@ class ModuleBOS(CallFunction):
             data = []
             if glob.glob(full_depend, recursive=True):
                 format_file = self.read_file(i, full_depend)
-                # clean and split the data
                 data = [re.sub(r'(?<!\.),', '||', line.strip()).split('||') for line in format_file]
             else:
                 self.logging[i].update({'err': f'File not found {full_depend}'})
@@ -104,7 +103,7 @@ class ModuleBOS(CallFunction):
             group_user_df = user_df.groupby(['employee_no','user_name','branch_code','employee_display_name'])['rolename']\
                 .agg(lambda row: '+'.join(row.unique())).reset_index()
             
-            # # FILE: BOSTH_Param
+            # FILE: BOSTH_Param
             param_df = self.collect_depend_file(i)
             group_param_df = param_df.groupby(['employee_no','username',])['rolename']\
                 .agg(lambda row: '+'.join(row.unique())).reset_index()

@@ -59,7 +59,7 @@ class ModuleADM(CallFunction):
             user_df = user_df.apply(lambda row: row.str.strip()).reset_index(drop=True)
             
             # Replace 'null' with 'NA' for all string values
-            user_df = user_df.map(lambda x: 'NA' if isinstance(x, str) and x.lower() == 'null' else x)
+            user_df = user_df.map(lambda row: 'NA' if isinstance(row, str) and (row.lower() == 'null' or row == '') else row)
             
             # Group by 'User-ID' and aggregate
             user_df = user_df.groupby('User-ID', sort=False).agg(lambda row: '+'.join(filter(pd.notna, row.unique()))).reset_index()
@@ -103,7 +103,7 @@ class ModuleADM(CallFunction):
             columns = ['User-ID','User Full Name','Department code','Employee ID','Group','Zone','Role']
             param_df = pd.DataFrame(data, columns=columns)
             param_df = param_df.apply(lambda row: row.str.strip()).reset_index(drop=True)
-            param_df = param_df.map(lambda x: 'NA' if isinstance(x, str) and x.lower() == 'null' else x)
+            param_df = param_df.map(lambda row: 'NA' if isinstance(row, str) and (row.lower() == 'null' or row == '') else row)
             
             # mapping data to column
             set_value = [
