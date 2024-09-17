@@ -103,6 +103,8 @@ class ModuleADM(CallFunction):
             columns = ['User-ID','User Full Name','Department code','Employee ID','Group','Zone','Role']
             param_df = pd.DataFrame(data, columns=columns)
             param_df = param_df.apply(lambda row: row.str.strip()).reset_index(drop=True)
+            
+            # Replace 'null' with 'NA' for all string values
             param_df = param_df.map(lambda row: 'NA' if isinstance(row, str) and (row.lower() == 'null' or row == '') else row)
             
             # mapping data to column

@@ -99,6 +99,9 @@ class ModuleDIL(CallFunction):
             user_df.columns = user_df.iloc[0].values
             user_df = user_df.iloc[1:].apply(lambda row: row.str.strip()).reset_index(drop=True)
             
+            # Replace 'null' with 'NA' for all string values
+            user_df = user_df.map(lambda row: 'NA' if isinstance(row, str) and (row.strip().lower() == 'null' or row.strip() == '') else row)
+            
             # adjust column
             user_df = user_df[user_df['APPCODE'] == 'LNSIGNET'].reset_index(drop=True)
             user_df[['NAME', 'DEPARTMENT']] = user_df.apply(self.split_column, axis=1, result_type='expand')
@@ -142,6 +145,9 @@ class ModuleDIL(CallFunction):
             param_df = pd.DataFrame(clean_data)
             param_df.columns = param_df.iloc[0].values
             param_df = param_df.iloc[1:].apply(lambda row: row.str.strip()).reset_index(drop=True)
+            
+            # Replace 'null' with 'NA' for all string values
+            param_df = param_df.map(lambda row: 'NA' if isinstance(row, str) and (row.strip().lower() == 'null' or row.strip() == '') else row)
             
             # adjust column
             param_df = param_df[param_df['APPCODE'] == 'LNSIGNET'].reset_index(drop=True)

@@ -70,6 +70,9 @@ class ModuleCUM(CallFunction):
             user_df.columns = user_df.iloc[0].values
             user_df =  user_df.iloc[1:].apply(lambda row: row.str.strip()).reset_index(drop=True)
             
+            # Replace 'null' with 'NA' for all string values
+            user_df = user_df.map(lambda row: 'NA' if isinstance(row, str) and (row.strip().lower() == 'null' or row.strip() == '') else row)
+            
             # group by column
             user_df = user_df.groupby('USER_ID', sort=False).agg(lambda row: '+'.join(filter(pd.notna, row.unique()))).reset_index()
             
@@ -114,6 +117,9 @@ class ModuleCUM(CallFunction):
             param_df = pd.DataFrame(clean_data)
             param_df.columns = param_df.iloc[0].values
             param_df =  param_df.iloc[1:].apply(lambda row: row.str.strip()).reset_index(drop=True)
+            
+            # Replace 'null' with 'NA' for all string values
+            param_df = param_df.map(lambda row: 'NA' if isinstance(row, str) and (row.strip().lower() == 'null' or row.strip() == '') else row)
             
             # mapping data to column
             set_value = [

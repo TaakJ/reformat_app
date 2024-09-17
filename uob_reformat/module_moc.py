@@ -56,7 +56,10 @@ class ModuleMOC(CallFunction):
             ## set dataframe
             columns = self.logging[i]['columns']
             user_df = pd.DataFrame(data, columns=columns)
-            user_df = user_df.iloc[1:].apply(lambda row: row.str.strip()).reset_index(drop=True)
+            user_df = user_df.iloc[1:].reset_index(drop=True)
+            
+            # Replace 'null' with 'NA' for all string values
+            user_df = user_df.map(lambda row: 'NA' if isinstance(row, str) and (row.strip().lower() == 'null' or row.strip() == '') else row)
             
         except Exception as err:
             raise Exception(err)
@@ -78,6 +81,9 @@ class ModuleMOC(CallFunction):
             columns = self.logging[i]['columns']
             param_df = pd.DataFrame(data, columns=columns)
             param_df = param_df.iloc[1:].apply(lambda row: row.str.strip()).reset_index(drop=True)
+            
+            # Replace 'null' with 'NA' for all string values
+            param_df = param_df.map(lambda row: 'NA' if isinstance(row, str) and (row.strip().lower() == 'null' or row.strip() == '') else row)
             
         except Exception as err:
             raise Exception(err)
