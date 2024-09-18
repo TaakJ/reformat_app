@@ -105,7 +105,7 @@ class ModuleLDS(CallFunction):
                     'AccountName': user_df['UserName'],
                     'AccountType': 'USR',
                     'EntitlementName': user_df['RoleID'],
-                    'AccountStatus': 'A',
+                    'AccountStatus': user_df['User_Active'].apply(lambda row: 'A' if row.lower() == 'active' else 'D'),
                     'IsPrivileged': 'N',
                     'AccountDescription': user_df['FullName'],
                     'LastLogin':  user_df['LastLogin_Date'].apply(self.parse_datetime).dt.strftime('%Y%m%d%H%M%S'),
