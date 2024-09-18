@@ -72,7 +72,6 @@ class ModuleLMT(CallFunction):
             group_user_df['Roles'] = group_user_df[['SecurityRoles', 'ApplicationRoles', 'ProgramTemplate']]\
                 .apply(lambda row: ';'.join(filter(pd.notna, map(str, row))), axis=1)
             group_user_df['Roles'] = group_user_df['Roles'].replace(to_replace=r'NA\+|\+NA(?!;)', value='', regex=True)
-            
             group_user_df = group_user_df.drop(group_user_df.loc[:,['SecurityRoles', 'ApplicationRoles', 'ProgramTemplate']],axis=1)
             
             # rename column

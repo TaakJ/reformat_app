@@ -137,6 +137,7 @@ class ModuleICA(CallFunction):
             entitlement_name = pd.merge(tbl_user_df, tbl_user_group_df,on='USER_ID',how='left')
             entitlement_name = entitlement_name.fillna('NA')
             entitlement_name_group = entitlement_name.groupby('USER_ID')['GROUP_ID'].apply(lambda row: '+'.join(map(str, sorted(set(row))))).reset_index()
+            entitlement_name_group = entitlement_name_group.replace(to_replace=r'NA\+|\+NA(?!;)', value='', regex=True)
             
             # merge file: ICAS_TBL_USER with ICAS_TBL_USER_GROUP
             result_ica = pd.merge(entitlement_name_group, tbl_user_df,on='USER_ID')
