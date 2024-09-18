@@ -24,9 +24,9 @@ class ModuleLMT(CallFunction):
 
             await self.check_source_file()
             await self.separate_data_file()
-            if self.store_tmp is True:
-                await self.genarate_tmp_file()
-            await self.genarate_target_file()
+            # if self.store_tmp is True:
+            #     await self.genarate_tmp_file()
+            # await self.genarate_target_file()
 
         except CustomException as err:
             logging.error("See Error Details: log_error.log")
@@ -71,6 +71,8 @@ class ModuleLMT(CallFunction):
             # adjust column: SecurityRoles, ApplicationRoles, ProgramTemplate
             group_user_df['Roles'] = group_user_df[['SecurityRoles', 'ApplicationRoles', 'ProgramTemplate']]\
                 .apply(lambda row: ';'.join(filter(pd.notna, map(str, row))), axis=1)
+            group_user_df['Roles'] = group_user_df['Roles'].replace(to_replace=r'NA\+|\+NA', value='', regex=True)
+            
             group_user_df = group_user_df.drop(group_user_df.loc[:,['SecurityRoles', 'ApplicationRoles', 'ProgramTemplate']],axis=1)
             
             # rename column

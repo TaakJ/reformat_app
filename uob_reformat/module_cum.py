@@ -91,6 +91,7 @@ class ModuleCUM(CallFunction):
             
             # group by column
             user_df = user_df.groupby('USER_ID', sort=False).agg(lambda row: '+'.join(filter(pd.notna, row.unique()))).reset_index()
+            user_df = user_df.replace(to_replace=r'NA\+|\+NA', value='', regex=True)
             
             # mapping data to column
             set_value = dict.fromkeys(self.logging[i]['columns'], 'NA')
