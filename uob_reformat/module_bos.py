@@ -102,11 +102,13 @@ class ModuleBOS(CallFunction):
             user_df = user_df.iloc[1:].apply(lambda row: row.str.strip()).reset_index(drop=True)
             group_user_df = user_df.groupby(['employee_no','user_name','branch_code','employee_display_name'])['rolename']\
                 .agg(lambda row: '+'.join(row.unique())).reset_index()
+            group_user_df = group_user_df.replace(to_replace=r'NA\+|\+NA(?!;)', value='', regex=True)
             
             # FILE: BOSTH_Param
             param_df = self.collect_depend_file(i)
             group_param_df = param_df.groupby(['employee_no','username',])['rolename']\
                 .agg(lambda row: '+'.join(row.unique())).reset_index()
+            group_param_df = group_param_df.replace(to_replace=r'NA\+|\+NA(?!;)', value='', regex=True)
             
             # merge 2 file BOSTH_Param / BOSTH
             group_merge_df = pd.merge(group_param_df,group_user_df,on='employee_no',how='right',suffixes=('_param','_user'))

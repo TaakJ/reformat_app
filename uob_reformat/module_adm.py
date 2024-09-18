@@ -62,7 +62,7 @@ class ModuleADM(CallFunction):
             
             # Group by 'User-ID' and aggregate
             user_df = user_df.groupby('User-ID', sort=False).agg(lambda row: '+'.join(filter(pd.notna, row.unique()))).reset_index()
-            user_df = user_df.replace(to_replace=r'NA\+|\+NA', value='', regex=True)
+            user_df = user_df.replace(to_replace=r'NA\+|\+NA(?!;)', value='', regex=True)
 
             # mapping data to column
             set_value = dict.fromkeys(self.logging[i]['columns'], 'NA')

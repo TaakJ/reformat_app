@@ -152,7 +152,6 @@ class ModuleICA(CallFunction):
             final_branch_code = branch_code[['USER_ID','BANK+BRANCH']]
             final_ica = pd.merge(result_ica,final_branch_code,on='USER_ID',how='left')
             
-            
             date_time_col = ['CREATE_DTM','LAST_LOGIN_ATTEMPT','LAST_UPDATE_DTM']
             for col in date_time_col:
                 final_ica[col] = final_ica[col].apply(self.parse_and_format_datetime)
