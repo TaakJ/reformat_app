@@ -60,11 +60,11 @@ class ModuleLDS(CallFunction):
                 continue
         return pd.NaT
     
-    def validate_row_length(self, rows_list: list[list], min_length: int = 32, max_length: int = 33) -> None:
+    def validate_row_length(self, rows_list: list[list], valid_lengths: list[int] = [3,32,33]) -> None:
         errors = []
-        for i, row in enumerate(rows_list, 2):
+        for i, rows in enumerate(rows_list, 2):
             try:
-                assert len(row) > min_length or len(row) < max_length, f"Row {i} does not have 32 elements {row}"
+                assert len(rows) in valid_lengths, f"Row {i} does not match elements: {rows}"
             except AssertionError as err:
                 errors.append(str(err))
                     

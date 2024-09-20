@@ -62,14 +62,14 @@ class ModuleICA(CallFunction):
         name = name.strip()
         return name
     
-    def validate_row_length(self, rows_list: list[list], expected_length: int = 19) -> None:
+    def validate_row_length(self, rows_list: list[list], valid_lengths: list[int]) -> None:
         errors = []
-        for i, rows in enumerate(rows_list, 1):
+        for i, rows in enumerate(rows_list):
             try:
-                assert len(rows) == expected_length, f"Row {i} does not have {expected_length} elements: {rows}"
+                assert len(rows) in valid_lengths, f"Row {i} does not match elements: {rows}"
             except AssertionError as err:
                 errors.append(str(err))
-                
+                    
         if errors:
             raise Exception("Assertion errors:\n" + "\n".join(errors))
     
@@ -103,16 +103,19 @@ class ModuleICA(CallFunction):
         
         try:
             # FILE: ICAS_TBL_USER_GROUP
+            self.validate_row_length(tbl['ICAS_TBL_USER_GROUP'], [3, 5, 7])
             columns = ['Record_Type', 'GROUP_ID','USER_ID','CREATE_USER_ID','CREATE_DTM','LAST_UPDATE_USER_ID','LAST_UPDATE_DTM']
             tbl_user_group_df = pd.DataFrame(tbl['ICAS_TBL_USER_GROUP'], columns=columns)
             tbl_user_group_df = tbl_user_group_df.iloc[1:-1].apply(lambda row: row.str.strip()).reset_index(drop=True)
             
             # FILE: ICAS_TBL_USER_BANK_BRANCH
+            self.validate_row_length(tbl['ICAS_TBL_USER_BANK_BRANCH'], [3,5,9])
             columns = ['Record_Type','USER_ID','BANK_CODE','BRANCH_CODE','SUB_SYSTEM_ID','ACCESS_ALL_BRANCH_IN_HUB','DEFAULT_BRANCH_FLAG','CREATE_USER_ID','CREATE_DTM']
             tbl_user_bank_df = pd.DataFrame(tbl['ICAS_TBL_USER_BANK_BRANCH'], columns=columns)
             tbl_user_bank_df = tbl_user_bank_df.iloc[1:-1].apply(lambda row: row.str.strip()).reset_index(drop=True)
             
             # FILE: ICAS_TBL_GROUP
+            self.validate_row_length(tbl['ICAS_TBL_GROUP'], [3, 5,14])
             columns = ['Record_Type','GROUP_ID','SUB_SYSTEM_ID','GROUP_NAME','RESTRICTION','ABLE_TO_REVERIFY_FLAG','DESCRIPTION','DEFAULT_FINAL_RESULT','DELETE_FLAG','CREATE_USER_ID',
                         'CREATE_DTM','LAST_UPDATE_USER_ID','LAST_UPDATE_DTM','DELETE_DTM']
             tbl_group_df = pd.DataFrame(tbl['ICAS_TBL_GROUP'], columns=columns)
@@ -134,9 +137,9 @@ class ModuleICA(CallFunction):
         try:
             # clean and split the data
             data = [re.sub(r'(?<!\.)\x07', '||', line.strip()).split('||') for line in format_file]
-            self.validate_row_length(data)
                 
             # FILE: ICAS_TBL_USER
+            self.validate_row_length(data, [3,5, 21])
             columns = ['Record_Type','USER_ID','LOGIN_NAME','FULL_NAME','PASSWORD','LOCKED_FLAG','FIRST_LOGIN_FLAG','LAST_ACTION_TYPE','CREATE_USER_ID','CREATE_DTM','LAST_UPDATE_USER_ID',
                         'LAST_UPDATE_DTM','LAST_LOGIN_ATTEMPT','ACCESS_ALL_BRANCH_FLAG','HOME_BRANCH','HOME_BANK','LOGIN_RETRY_COUNT','LAST_CHANGE_PASSWORD','DELETE_FLAG',
                         'LAST_LOGIN_SUCCESS','LAST_LOGIN_FAILED']

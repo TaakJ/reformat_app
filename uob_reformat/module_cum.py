@@ -59,14 +59,14 @@ class ModuleCUM(CallFunction):
                 continue
         return pd.NaT
     
-    def validate_row_length(self, rows_list: list[list], expected_length: int = 14) -> None:
+    def validate_row_length(self, rows_list: list[list], valid_lengths: list[int] = [1,14]) -> None:
         errors = []
-        for i, rows in enumerate(rows_list, 5):
+        for i, rows in enumerate(rows_list, 2):
             try:
-                assert len(rows) == expected_length or len(rows) == 1, f"Row {i} does not have {expected_length} elements: {rows}"
+                assert len(rows) in valid_lengths, f"Row {i} does not match elements: {rows}"
             except AssertionError as err:
                 errors.append(str(err))
-                
+                    
         if errors:
             raise Exception("Assertion errors:\n" + "\n".join(errors))
     
