@@ -54,7 +54,7 @@ class Convert2File:
                     format_file = self.read_file(i, full_input)
                     
                 self.get_extract_file(i, format_file)
-                        
+            
             except Exception as err:
                 record.update({'err': err})
             

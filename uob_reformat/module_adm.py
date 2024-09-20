@@ -30,11 +30,10 @@ class ModuleADM(CallFunction):
 
         except CustomException as err:
             logging.error('See Error Details: log_error.log')
-
             logger = err.setup_errorlog(log_name=__name__)
             while True:
                 try:
-                    logger.exception(next(err))
+                    logger.error(next(err))
                 except StopIteration:
                     break
 
@@ -44,6 +43,18 @@ class ModuleADM(CallFunction):
 
         return result
     
+    def validate_row_length(self, data) -> None:
+        
+        errors = []
+        for i, rows in enumerate(data, 1):
+            try:
+                assert len(rows) == 7, f"Row {i} does not have 7 elements: {rows}"
+            except AssertionError as err:
+                errors.append(str(err))
+                
+        if errors:
+            raise Exception("Assertion errors:\n" + "\n".join(errors))
+        
     def collect_user_file(self, i: int, format_file: any) -> dict:
 
         status = 'failed'
@@ -51,7 +62,8 @@ class ModuleADM(CallFunction):
 
         try:
             data = [re.sub(r'(?<!\.)\|\|', '||', line.strip()).split('||') for line in format_file]
-
+            self.validate_row_length(data)
+            
             # set dataframe
             columns = ['User-ID','User Full Name','Department code','Employee ID','Group','Zone','Role']
             user_df = pd.DataFrame(data, columns=columns)
@@ -83,8 +95,8 @@ class ModuleADM(CallFunction):
             user_df = user_df.assign(**set_value)
             user_df = user_df.drop(user_df.iloc[:, :7].columns, axis=1)
 
-        except Exception as err:
-            raise Exception(err)
+        except:
+            raise
 
         status = 'succeed'
         self.logging[i].update({'data': user_df.to_dict('list'), 'status': status})
@@ -97,7 +109,8 @@ class ModuleADM(CallFunction):
 
         try:
             data = [re.sub(r'(?<!\.)\|\|', '||', line.strip()).split('||') for line in format_file]
-
+            self.validate_row_length(data)
+            
             # set dataframe
             columns = ['User-ID','User Full Name','Department code','Employee ID','Group','Zone','Role']
             param_df = pd.DataFrame(data, columns=columns)
@@ -132,8 +145,8 @@ class ModuleADM(CallFunction):
             param_df = pd.DataFrame(set_value)
             param_df = param_df.explode(['Code values', 'Decode value']).reset_index(drop=True)
             
-        except Exception as err:
-            raise Exception(err)
+        except:
+            raise
 
         status = 'succeed'
         self.logging[i].update({'data': param_df.to_dict('list'), 'status': status})

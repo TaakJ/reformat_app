@@ -35,8 +35,8 @@ class CustomException(Exception):
                 os.makedirs(os.path.dirname(filename))
             except OSError:
                 pass
-        
-        file_handler = logging.FileHandler(filename, mode='a')
+            
+        file_handler = logging.FileHandler(filename, mode='a', encoding='utf-8')
         file_handler.setLevel(logging.ERROR)
         formatter = logging.Formatter(fmt=log_format,datefmt='%Y/%m/%d %H:%M:%S')
         file_handler.setFormatter(formatter)
