@@ -34,7 +34,7 @@ class ModuleDIL(CallFunction):
             logger = err.setup_errorlog(log_name=__name__)
             while True:
                 try:
-                    logger.exception(next(err))
+                    logger.error(next(err))
                 except StopIteration:
                     break
 
@@ -63,6 +63,17 @@ class ModuleDIL(CallFunction):
             return 'Index+Scan'
         else:
             return 'Inquiry'
+    
+    def validate_row_length(self, rows_list: list[list], expected_length: int = 10) -> None:
+        errors = []
+        for i, rows in enumerate(rows_list, 7):
+            try:
+                assert len(rows) == expected_length or len(rows) == 4, f"Row {i} does not have {expected_length} elements: {rows}"
+            except AssertionError as err:
+                errors.append(str(err))
+                
+        if errors:
+            raise Exception("Assertion errors:\n" + "\n".join(errors))
         
     def read_format_file(self, format_file) -> list:
         
@@ -93,6 +104,7 @@ class ModuleDIL(CallFunction):
     
         try:
             clean_data = self.read_format_file(format_file)
+            self.validate_row_length(clean_data)
             
             # set dataframe
             user_df = pd.DataFrame(clean_data)
@@ -125,8 +137,8 @@ class ModuleDIL(CallFunction):
             user_df = user_df.assign(**set_value)
             user_df = user_df.drop(user_df.iloc[:,:12].columns, axis=1)
             
-        except Exception as err:
-            raise Exception(err)
+        except:
+            raise
 
         status = 'succeed'
         self.logging[i].update({'data': user_df.to_dict('list'), 'status': status})
@@ -138,8 +150,8 @@ class ModuleDIL(CallFunction):
         self.logging[i].update({'function': 'collect_param_file', 'status': status})
         
         try:
-            # clean and split the data
             clean_data = self.read_format_file(format_file)
+            self.validate_row_length(clean_data)
             
             # set dataframe
             param_df = pd.DataFrame(clean_data)
@@ -174,8 +186,8 @@ class ModuleDIL(CallFunction):
             param_df = pd.DataFrame(set_value)
             param_df = param_df.explode(['Code values', 'Decode value']).reset_index(drop=True)
             
-        except Exception as err:
-            raise Exception(err)
+        except:
+            raise
 
         status = 'succeed'
         self.logging[i].update({'data': param_df.to_dict('list'), 'status': status})

@@ -35,7 +35,7 @@ class ModuleBOS(CallFunction):
             logger = err.setup_errorlog(log_name=__name__)
             while True:
                 try:
-                    logger.exception(next(err))
+                    logger.error(next(err))
                 except StopIteration:
                     break
 
@@ -45,14 +45,16 @@ class ModuleBOS(CallFunction):
         
         return result
     
-    def split_column(self, row: any) -> any:
-        comma = row['NAME'].count(',')
-        if comma == 2:
-            name, department, _ = row['NAME'].split(',')
-        else:
-            name, department = row['NAME'].split(',')
-            
-        return name, department
+    def validate_row_length(self, rows_list: list[list], expected_length: int = 6) -> None:
+        errors = []
+        for i, rows in enumerate(rows_list, 1):
+            try:
+                assert len(rows) == expected_length, f"Row {i} does not have {expected_length} elements: {rows}"
+            except AssertionError as err:
+                errors.append(str(err))
+                
+        if errors:
+            raise Exception("Assertion errors:\n" + "\n".join(errors))
     
     def collect_depend_file(self, i: int) -> pd.DataFrame:
         
@@ -64,6 +66,7 @@ class ModuleBOS(CallFunction):
             if glob.glob(full_depend, recursive=True):
                 format_file = self.read_file(i, full_depend)
                 data = [re.sub(r'(?<!\.),', '||', line.strip()).split('||') for line in format_file]
+                self.validate_row_length(data)
             else:
                 self.logging[i].update({'err': f'File not found {full_depend}'})
                 
@@ -95,6 +98,7 @@ class ModuleBOS(CallFunction):
         try:
             # clean and split the data
             data = [re.sub(r'(?<!\.),', '||', line.strip()).split('||') for line in format_file]
+            self.validate_row_length(data)
             
             # FILE: BOSTH 
             user_df = pd.DataFrame(data)
@@ -169,6 +173,7 @@ class ModuleBOS(CallFunction):
         try:
             # clean and split the data
             data = [re.sub(r'(?<!\.),', '||', line.strip()).split('||') for line in format_file]
+            self.validate_row_length(data)
             
             # FILE: BOSTH
             user_df = pd.DataFrame(data)

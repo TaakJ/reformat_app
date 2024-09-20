@@ -34,7 +34,7 @@ class ModuleIIC(CallFunction):
             logger = err.setup_errorlog(log_name=__name__)
             while True:
                 try:
-                    logger.exception(next(err))
+                    logger.error(next(err))
                 except StopIteration:
                     break
 
@@ -43,6 +43,17 @@ class ModuleIIC(CallFunction):
         logging.info(f"Stop Run Module '{self.module}'\r\n")
 
         return result
+    
+    def validate_row_length(self, rows_list: list[list], expected_length: int = 15) -> None:
+        errors = []
+        for i, rows in enumerate(rows_list, 1):
+            try:
+                assert len(rows) == expected_length, f"Row {i} does not have {expected_length} elements: {rows}"
+            except AssertionError as err:
+                errors.append(str(err))
+                
+        if errors:
+            raise Exception("Assertion errors:\n" + "\n".join(errors))
 
     def collect_user_file(self, i: int, format_file: any) -> dict:
 
@@ -51,7 +62,8 @@ class ModuleIIC(CallFunction):
 
         try:
             data = [re.sub(r'(?<!\.),', ',', line.strip().replace('"', '')).split(',') for line in format_file]
-
+            self.validate_row_length(data)
+            
             # set dataframe
             columns = self.logging[i]['columns']
             user_df = pd.DataFrame(data, columns=columns)
@@ -74,7 +86,8 @@ class ModuleIIC(CallFunction):
         
         try:
             data = [re.sub(r'(?<!\.),', ',', line.strip().replace('"', '')).split(',') for line in format_file]
-
+            self.validate_row_length(data, 3)
+            
             # set dataframe
             columns = self.logging[i]['columns']
             param_df = pd.DataFrame(data, columns=columns)

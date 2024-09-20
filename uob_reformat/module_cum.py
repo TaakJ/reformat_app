@@ -33,7 +33,7 @@ class ModuleCUM(CallFunction):
             logger = err.setup_errorlog(log_name=__name__)
             while True:
                 try:
-                    logger.exception(next(err))
+                    logger.error(next(err))
                 except StopIteration:
                     break
 
@@ -59,6 +59,17 @@ class ModuleCUM(CallFunction):
                 continue
         return pd.NaT
     
+    def validate_row_length(self, rows_list: list[list], expected_length: int = 14) -> None:
+        errors = []
+        for i, rows in enumerate(rows_list, 5):
+            try:
+                assert len(rows) == expected_length or len(rows) == 1, f"Row {i} does not have {expected_length} elements: {rows}"
+            except AssertionError as err:
+                errors.append(str(err))
+                
+        if errors:
+            raise Exception("Assertion errors:\n" + "\n".join(errors))
+    
     def read_format_file(self, format_file) -> list:
         
         data = []
@@ -80,6 +91,7 @@ class ModuleCUM(CallFunction):
         
         try:
             clean_data = self.read_format_file(format_file)
+            self.validate_row_length(clean_data)
             
             # set dataframe  
             user_df = pd.DataFrame(clean_data)
@@ -128,6 +140,7 @@ class ModuleCUM(CallFunction):
         
         try:
             clean_data = self.read_format_file(format_file)
+            self.validate_row_length(clean_data)
             
             # set dataframe  
             param_df = pd.DataFrame(clean_data)

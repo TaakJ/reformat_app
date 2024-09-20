@@ -34,7 +34,7 @@ class ModuleDOC(CallFunction):
             logger = err.setup_errorlog(log_name=__name__)
             while True:
                 try:
-                    logger.exception(next(err))
+                    logger.error(next(err))
                 except StopIteration:
                     break
 
@@ -63,6 +63,17 @@ class ModuleDOC(CallFunction):
             return 'Index+Scan'
         else:
             return 'Inquiry'
+        
+    def validate_row_length(self, rows_list: list[list], expected_length: int = 10) -> None:
+        errors = []
+        for i, rows in enumerate(rows_list, 7):
+            try:
+                assert len(rows) == expected_length or len(rows) == 1, f"Row {i} does not have 10 elements: {rows}"
+            except AssertionError as err:
+                errors.append(str(err))
+                
+        if errors:
+            raise Exception("Assertion errors:\n" + "\n".join(errors))
 
     def collect_user_file(self, i: int, format_file: any) -> dict:
 
@@ -87,6 +98,7 @@ class ModuleDOC(CallFunction):
                     clean_data.append(fix_value)
                 else:
                     continue
+            self.validate_row_length(clean_data)
             
             # set dataframe
             user_df = pd.DataFrame(clean_data)
@@ -119,8 +131,8 @@ class ModuleDOC(CallFunction):
             user_df = user_df.assign(**set_value)
             user_df = user_df.drop(user_df.iloc[:,:12].columns, axis=1)
             
-        except Exception as err:
-            raise Exception(err)
+        except:
+            raise
         
         status = 'succeed'
         self.logging[i].update({'data': user_df.to_dict('list'), 'status': status})

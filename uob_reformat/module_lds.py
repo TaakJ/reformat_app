@@ -34,7 +34,7 @@ class ModuleLDS(CallFunction):
             logger = err.setup_errorlog(log_name=__name__)
             while True:
                 try:
-                    logger.exception(next(err))
+                    logger.error(next(err))
                 except StopIteration:
                     break
 
@@ -59,6 +59,17 @@ class ModuleLDS(CallFunction):
             except ValueError:
                 continue
         return pd.NaT
+    
+    def validate_row_length(self, rows_list: list[list], min_length: int = 32, max_length: int = 33) -> None:
+        errors = []
+        for i, row in enumerate(rows_list, 2):
+            try:
+                assert len(row) > min_length or len(row) < max_length, f"Row {i} does not have 32 elements {row}"
+            except AssertionError as err:
+                errors.append(str(err))
+                    
+        if errors:
+            raise Exception("Assertion errors:\n" + "\n".join(errors))
     
     def read_format_file(self, format_file) -> list:
         
@@ -87,6 +98,7 @@ class ModuleLDS(CallFunction):
         
         try:
             clean_data = self.read_format_file(format_file)
+            self.validate_row_length(clean_data)
             
             # set dataframe
             user_df = pd.DataFrame(clean_data)
@@ -131,6 +143,7 @@ class ModuleLDS(CallFunction):
         
         try:
             clean_data = self.read_format_file(format_file)
+            self.validate_row_length(clean_data)
             
             # set dataframe
             param_df = pd.DataFrame(clean_data)

@@ -37,7 +37,7 @@ class ModuleICA(CallFunction):
             logger = err.setup_errorlog(log_name=__name__)
             while True:
                 try:
-                    logger.exception(next(err))
+                    logger.error(next(err))
                 except StopIteration:
                     break
 
@@ -61,6 +61,17 @@ class ModuleICA(CallFunction):
         name = re.sub(r'\d+', '', name)
         name = name.strip()
         return name
+    
+    def validate_row_length(self, rows_list: list[list], expected_length: int = 19) -> None:
+        errors = []
+        for i, rows in enumerate(rows_list, 1):
+            try:
+                assert len(rows) == expected_length, f"Row {i} does not have {expected_length} elements: {rows}"
+            except AssertionError as err:
+                errors.append(str(err))
+                
+        if errors:
+            raise Exception("Assertion errors:\n" + "\n".join(errors))
     
     def collect_depend_file(self, i: int) -> pd.DataFrame:
         
@@ -123,6 +134,7 @@ class ModuleICA(CallFunction):
         try:
             # clean and split the data
             data = [re.sub(r'(?<!\.)\x07', '||', line.strip()).split('||') for line in format_file]
+            self.validate_row_length(data)
                 
             # FILE: ICAS_TBL_USER
             columns = ['Record_Type','USER_ID','LOGIN_NAME','FULL_NAME','PASSWORD','LOCKED_FLAG','FIRST_LOGIN_FLAG','LAST_ACTION_TYPE','CREATE_USER_ID','CREATE_DTM','LAST_UPDATE_USER_ID',

@@ -43,12 +43,11 @@ class ModuleADM(CallFunction):
 
         return result
     
-    def validate_row_length(self, data) -> None:
-        
+    def validate_row_length(self, rows_list: list[list], expected_length: int = 7) -> None:
         errors = []
-        for i, rows in enumerate(data, 1):
+        for i, rows in enumerate(rows_list, 1):
             try:
-                assert len(rows) == 7, f"Row {i} does not have 7 elements: {rows}"
+                assert len(rows) == expected_length, f"Row {i} does not have {expected_length} elements: {rows}"
             except AssertionError as err:
                 errors.append(str(err))
                 
