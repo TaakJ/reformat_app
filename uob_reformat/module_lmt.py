@@ -114,8 +114,8 @@ class ModuleLMT(CallFunction):
             final_lmt = final_lmt.fillna(static_values)
             final_lmt = final_lmt[columns]
             
-        except Exception as err:
-            raise Exception(err)
+        except:
+            raise
 
         status = 'succeed'
         self.logging[i].update({'data': final_lmt.to_dict('list'), 'status': status})

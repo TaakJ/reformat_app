@@ -118,8 +118,8 @@ class ModuleICA(CallFunction):
             tbl_group_df = pd.DataFrame(tbl['ICAS_TBL_GROUP'], columns=columns)
             tbl_group_df = tbl_group_df.iloc[1:-1].apply(lambda row: row.str.strip()).reset_index(drop=True)
             
-        except Exception as err:
-            raise Exception(err)
+        except:
+            raise
         
         status = 'succeed'
         self.logging[i].update({'status': status})
@@ -203,8 +203,8 @@ class ModuleICA(CallFunction):
             merge_df['LastLogin'] = merge_df['LastLogin'].astype(str)
             merge_df['LastUpdatedDate'] = merge_df['LastUpdatedDate'].astype(str)
             
-        except Exception as err:
-            raise Exception(err)
+        except:
+            raise
 
         status = 'succeed'
         self.logging[i].update({'data': merge_df.to_dict('list'), 'status': status})

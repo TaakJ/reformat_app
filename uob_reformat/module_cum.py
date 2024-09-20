@@ -126,8 +126,8 @@ class ModuleCUM(CallFunction):
             user_df = user_df.assign(**set_value)
             user_df = user_df.drop(user_df.iloc[:,:14].columns, axis=1)
             
-        except Exception as err:
-            raise Exception(err)
+        except:
+            raise
 
         status = 'succeed'
         self.logging[i].update({'data': user_df.to_dict('list'), 'status': status})
@@ -166,8 +166,8 @@ class ModuleCUM(CallFunction):
             param_df = pd.DataFrame(set_value)
             param_df = param_df.explode(['Code values', 'Decode value']).reset_index(drop=True)
             
-        except Exception as err:
-            raise Exception(err)
+        except:
+            raise
         
         status = 'succeed'
         self.logging[i].update({'data': param_df.to_dict('list'), 'status': status})

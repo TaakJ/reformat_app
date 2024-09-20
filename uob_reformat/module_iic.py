@@ -72,8 +72,8 @@ class ModuleIIC(CallFunction):
             # replace 'null' with 'NA' for all string values
             user_df = user_df.map(lambda row: 'NA' if isinstance(row, str) and (row.lower() == 'null' or row == '') else row)
             
-        except Exception as err:
-            raise Exception(err)
+        except:
+            raise
 
         status = 'succeed'
         self.logging[i].update({'data': user_df.to_dict('list'), 'status': status})
@@ -96,8 +96,8 @@ class ModuleIIC(CallFunction):
             # replace 'null' with 'NA' for all string values
             param_df = param_df.map(lambda row: 'NA' if isinstance(row, str) and (row.lower() == 'null' or row == '') else row)
             
-        except Exception as err:
-            raise Exception(err)
+        except:
+            raise
 
         status = 'succeed'
         self.logging[i].update({'data': param_df.to_dict('list'), 'status': status})

@@ -129,8 +129,8 @@ class ModuleLDS(CallFunction):
             user_df = user_df.assign(**set_value)
             user_df = user_df.drop(user_df.iloc[:,:32].columns, axis=1)
             
-        except Exception as err:
-            raise Exception(err)
+        except:
+            raise
         
         status = 'succeed'
         self.logging[i].update({'data': user_df.to_dict('list'), 'status': status})

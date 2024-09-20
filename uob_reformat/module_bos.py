@@ -158,8 +158,8 @@ class ModuleBOS(CallFunction):
             final_bos = final_bos.drop(columns='employee_no')
             final_bos = final_bos[columns].sort_values(by='AccountOwner',ignore_index=True)
             
-        except Exception as err:
-            raise Exception(err)
+        except:
+            raise
 
         status = 'succeed'
         self.logging[i].update({'data': final_bos.to_dict('list'), 'status': status})
@@ -209,8 +209,8 @@ class ModuleBOS(CallFunction):
             merge_df = pd.concat([sec_param_list,app_param_list],ignore_index=True)
             merge_df = pd.concat([merge_df, dept_param_list],ignore_index=True)
             
-        except Exception as err:
-            raise Exception(err)
+        except:
+            raise
         
         status = 'succeed'
         self.logging[i].update({'data': merge_df.to_dict('list'), 'status': status})
