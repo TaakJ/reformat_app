@@ -60,6 +60,9 @@ class ModuleBOS(CallFunction):
         
         logging.info('Lookup depend file')
         
+        status = 'failed'
+        self.logging[i].update({'function': 'collect_depend_file', 'status': status})
+        
         for full_depend in self.logging[i]['full_depend']:
             
             data = []
@@ -70,14 +73,11 @@ class ModuleBOS(CallFunction):
             else:
                 self.logging[i].update({'err': f'File not found {full_depend}'})
                 
-            if 'err' in self.logging[i]:
-                raise CustomException(err=self.logging)
-        
-        status = 'failed'
-        self.logging[i].update({'function': 'collect_depend_file', 'status': status})
+        if 'err' in self.logging[i]:
+            raise CustomException(err=self.logging)
         
         try:
-            # set dataframe
+            # Creating DataFrame
             param_df = pd.DataFrame(data)
             param_df.columns = param_df.iloc[0].values
             param_df = param_df.iloc[1:].apply(lambda row: row.str.strip()).reset_index(drop=True)
@@ -96,7 +96,6 @@ class ModuleBOS(CallFunction):
         self.logging[i].update({'function': 'collect_user_file', 'status': status})
 
         try:
-            # clean and split the data
             data = [re.sub(r'(?<!\.),', '||', line.strip()).split('||') for line in format_file]
             self.validate_row_length(data)
             
@@ -114,22 +113,22 @@ class ModuleBOS(CallFunction):
                 .agg(lambda row: '+'.join(row.unique())).reset_index()
             group_param_df = group_param_df.replace(to_replace=r'NA\+|\+NA(?!;)', value='', regex=True)
             
-            # merge 2 file BOSTH_Param / BOSTH
+            # Merge 2 file BOSTH_Param / BOSTH
             group_merge_df = pd.merge(group_param_df,group_user_df,on='employee_no',how='right',suffixes=('_param','_user'))
             
-            # adjust column: rolename
+            # Adjust column: rolename
             group_merge_df[['rolename_param', 'rolename_user']] = group_merge_df[['rolename_param', 'rolename_user']].fillna('NA')
             group_merge_df['rolename'] = group_merge_df[['rolename_param', 'rolename_user']].apply(lambda row: ';'.join(row), axis=1)
             group_merge_df = group_merge_df[['employee_no','user_name','employee_display_name','branch_code','rolename']]
             
-            # adjust column: user_name
+            # Adjust column: user_name
             group_merge_df['user_name'] = group_merge_df['user_name'].apply(lambda row: row.replace('NTTHPDOM\\', '') if isinstance(row, str) else row)
             group_merge_df = group_merge_df[group_merge_df['user_name'] != '']
             
-            # adjust column: branch_code
+            # Adjust column: branch_code
             group_merge_df['branch_code'] = group_merge_df['branch_code'].astype(str).str.zfill(3)
             
-            # rename column
+            # Rename column
             group_merge_df = group_merge_df.rename(columns={
                 'user_name' : 'AccountName',
                 'employee_display_name' : 'AccountDescription',
@@ -137,7 +136,7 @@ class ModuleBOS(CallFunction):
                 'rolename' : 'EntitlementName'
             })
             
-            # merge dataframe
+            # Mapping Data to Target Columns
             columns = self.logging[i]['columns']
             merge_df = pd.DataFrame(columns=columns)
             static_value = {
@@ -171,7 +170,6 @@ class ModuleBOS(CallFunction):
         self.logging[i].update({'function': 'collect_param_file', 'status': status})
         
         try:
-            # clean and split the data
             data = [re.sub(r'(?<!\.),', '||', line.strip()).split('||') for line in format_file]
             self.validate_row_length(data)
             
@@ -184,7 +182,7 @@ class ModuleBOS(CallFunction):
             # FILE: BOSTH_Param
             param_df = self.collect_depend_file(i)
             
-            # merge dataframe
+            # Mapping Data to Target Columns
             columns = self.logging[i]['columns']
             sec_param_list = pd.DataFrame(columns=columns)
             sec_parm_uni = param_df['rolename'].unique()

@@ -95,7 +95,6 @@ class Convert2File:
             
             match_encoding = re.findall(r'utf|ascii', detected_encoding, re.IGNORECASE)
             if match_encoding == []:
-                # change encoding tis-620
                 detected_encoding = 'tis-620'
                 with open(full_input, 'r', encoding=detected_encoding) as f:
                     content = f.read()

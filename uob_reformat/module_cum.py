@@ -93,19 +93,19 @@ class ModuleCUM(CallFunction):
             clean_data = self.read_format_file(format_file)
             self.validate_row_length(clean_data)
             
-            # set dataframe  
+            # Creating DataFrame
             user_df = pd.DataFrame(clean_data)
             user_df.columns = user_df.iloc[0].values
             user_df =  user_df.iloc[1:].apply(lambda row: row.str.strip()).reset_index(drop=True)
             
-            # replace 'null' with 'NA' for all string values
+            # Replacing ‘null’ or Empty Strings with ‘NA’
             user_df = user_df.map(lambda row: 'NA' if isinstance(row, str) and (row.lower() == 'null' or row == '') else row)
             
-            # group by column
+            # Grouping by ‘USER_ID’ and Aggregating
             user_df = user_df.groupby('USER_ID', sort=False).agg(lambda row: '+'.join(filter(pd.notna, row.unique()))).reset_index()
             user_df = user_df.replace(to_replace=r'NA\+|\+NA(?!;)', value='', regex=True)
             
-            # mapping data to column
+            # Mapping Data to Target Columns
             set_value = dict.fromkeys(self.logging[i]['columns'], 'NA')
             set_value.update(
                 {
@@ -142,15 +142,15 @@ class ModuleCUM(CallFunction):
             clean_data = self.read_format_file(format_file)
             self.validate_row_length(clean_data)
             
-            # set dataframe  
+            # Creating DataFrame
             param_df = pd.DataFrame(clean_data)
             param_df.columns = param_df.iloc[0].values
             param_df =  param_df.iloc[1:].apply(lambda row: row.str.strip()).reset_index(drop=True)
             
-            # replace 'null' with 'NA' for all string values
+            # Replacing ‘null’ or Empty Strings with ‘NA’
             param_df = param_df.map(lambda row: 'NA' if isinstance(row, str) and (row.lower() == 'null' or row == '') else row)
             
-            # mapping data to column
+            # Mapping Data to Target Columns
             set_value = [
                 {
                     'Parameter Name': 'Group_No',

@@ -135,10 +135,8 @@ class ModuleICA(CallFunction):
         self.logging[i].update({'function': 'collect_user_file', 'status': status})
 
         try:
-            # clean and split the data
-            data = [re.sub(r'(?<!\.)\x07', '||', line.strip()).split('||') for line in format_file]
-                
             # FILE: ICAS_TBL_USER
+            data = [re.sub(r'(?<!\.)\x07', '||', line.strip()).split('||') for line in format_file]
             self.validate_row_length(data, [3,5, 21])
             columns = ['Record_Type','USER_ID','LOGIN_NAME','FULL_NAME','PASSWORD','LOCKED_FLAG','FIRST_LOGIN_FLAG','LAST_ACTION_TYPE','CREATE_USER_ID','CREATE_DTM','LAST_UPDATE_USER_ID',
                         'LAST_UPDATE_DTM','LAST_LOGIN_ATTEMPT','ACCESS_ALL_BRANCH_FLAG','HOME_BRANCH','HOME_BANK','LOGIN_RETRY_COUNT','LAST_CHANGE_PASSWORD','DELETE_FLAG',
@@ -154,11 +152,11 @@ class ModuleICA(CallFunction):
             entitlement_name_group = entitlement_name.groupby('USER_ID')['GROUP_ID'].apply(lambda row: '+'.join(map(str, sorted(set(row))))).reset_index()
             entitlement_name_group = entitlement_name_group.replace(to_replace=r'NA\+|\+NA(?!;)', value='', regex=True)
             
-            # merge file: ICAS_TBL_USER with ICAS_TBL_USER_GROUP
+            # Merge file: ICAS_TBL_USER with ICAS_TBL_USER_GROUP
             result_ica = pd.merge(entitlement_name_group, tbl_user_df,on='USER_ID')
             result_ica = result_ica[['USER_ID','LOGIN_NAME','GROUP_ID','LOCKED_FLAG','FULL_NAME','CREATE_DTM','LAST_LOGIN_ATTEMPT','LAST_UPDATE_DTM']]
             
-            # merge file: ICAS_TBL_USER with ICAS_TBL_USER_BANK_BRANCH
+            # Merge file: ICAS_TBL_USER with ICAS_TBL_USER_BANK_BRANCH
             branch_code = pd.merge(tbl_user_df, tbl_user_bank_df,on='USER_ID',how='left')
             branch_code = branch_code[['USER_ID','HOME_BANK','HOME_BRANCH','BRANCH_CODE']]
             branch_code['HOME_BANK'] = branch_code['HOME_BANK'].fillna('NA')
@@ -175,7 +173,7 @@ class ModuleICA(CallFunction):
             final_ica['FULL_NAME'] = final_ica['FULL_NAME'].apply(self.clean_fullname)
             final_ica['LOCKED_FLAG'] = final_ica['LOCKED_FLAG'].apply(lambda row: 'D' if row == '1' else 'A')
             
-            ## merge dataframe
+            # Mapping Data to Target Columns
             columns = self.logging[i]['columns']
             merge_df = pd.DataFrame(columns=columns)
             static_value = {
@@ -219,10 +217,9 @@ class ModuleICA(CallFunction):
         self.logging[i].update({'function': 'collect_param_file', 'status': status})
         
         try:
-            # clean and split the data
-            data = [re.sub(r'(?<!\.)\x07', '||', line.strip()).split('||') for line in format_file]
-                
             # FILE: ICAS_TBL_USER
+            data = [re.sub(r'(?<!\.)\x07', '||', line.strip()).split('||') for line in format_file]
+            self.validate_row_length(data, [3,5, 21])
             columns = ['Record_Type','USER_ID','LOGIN_NAME','FULL_NAME','PASSWORD','LOCKED_FLAG','FIRST_LOGIN_FLAG','LAST_ACTION_TYPE','CREATE_USER_ID','CREATE_DTM','LAST_UPDATE_USER_ID',
                         'LAST_UPDATE_DTM','LAST_LOGIN_ATTEMPT','ACCESS_ALL_BRANCH_FLAG','HOME_BRANCH','HOME_BANK','LOGIN_RETRY_COUNT','LAST_CHANGE_PASSWORD','DELETE_FLAG',
                         'LAST_LOGIN_SUCCESS','LAST_LOGIN_FAILED']
@@ -232,14 +229,14 @@ class ModuleICA(CallFunction):
             # FILE: ICAS_TBL_USER_GROUP, ICAS_TBL_USER_BANK_BRANCH, ICAS_TBL_GROUP
             _, tbl_user_bank_df, tbl_group_df = self.collect_depend_file(i)
             
-            # merge dataframe
+            # Mapping Data to Target Columns
             columns = self.logging[i]['columns']
             merge_df = pd.DataFrame(columns=columns)
             
             home_bank = {'Parameter Name':'HOME_BANK','Code values':'024','Decode value': 'UOBT'}
             param_home_bank = pd.DataFrame([home_bank])
             
-            # merge column: group_id
+            # Adjusting Column: group_id
             param_group_unique = tbl_group_df['GROUP_ID'].unique()
             filter_param_group = tbl_group_df[tbl_group_df['GROUP_ID'].isin(param_group_unique)]
             filter_param_group = filter_param_group[['GROUP_ID','GROUP_NAME']]
@@ -250,11 +247,10 @@ class ModuleICA(CallFunction):
             },inplace=True)
             merge_df = pd.concat([merge_df, filter_param_group],ignore_index=True)
             
-            
-            # merge column: home_bank
+            # Adjusting Column: home_bank
             merge_df = pd.concat([merge_df, param_home_bank],ignore_index=True)
             
-            # merge column: home_branch
+            # Adjusting Column: home_branch
             param_home_branch_list = pd.DataFrame(columns=('Parameter Name','Code values','Decode value'))
             param_home_branch_uni = tbl_user_df['HOME_BRANCH'].unique()
             param_home_branch_list['Code values'] = param_home_branch_uni
@@ -262,17 +258,16 @@ class ModuleICA(CallFunction):
             param_home_branch_list['Parameter Name'] = 'HOME_BRANCH'
             merge_df = pd.concat([merge_df, param_home_branch_list],ignore_index=True)
             
-            # merge column: home_branch
+            # Adjusting Column: department
             param_dept_list = pd.DataFrame(columns=('Parameter Name','Code values','Decode value'))
             param_dept_uni = tbl_user_bank_df['BRANCH_CODE'].unique()
             param_dept_list['Code values'] = param_dept_uni
             param_dept_list['Decode value'] = param_dept_uni
             param_dept_list['Parameter Name'] = 'Department'
             merge_df = pd.concat([merge_df,param_dept_list],ignore_index=True)
-            # merge_df = merge_df.sort_values(by=['Parameter Name','Code values'],ignore_index=True)
             
-        except Exception as err:
-            raise Exception(err)
+        except:
+            raise
         
         status = 'succeed'
         self.logging[i].update({'data': merge_df.to_dict('list'), 'status': status})

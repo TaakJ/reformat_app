@@ -63,19 +63,19 @@ class ModuleADM(CallFunction):
             data = [re.sub(r'(?<!\.)\|\|', '||', line.strip()).split('||') for line in format_file]
             self.validate_row_length(data)
             
-            # set dataframe
+            # Creating DataFrame
             columns = ['User-ID','User Full Name','Department code','Employee ID','Group','Zone','Role']
             user_df = pd.DataFrame(data, columns=columns)
             user_df = user_df.apply(lambda row: row.str.strip()).reset_index(drop=True)
             
-            # replace 'null' with 'NA' for all string values
+            # Replacing ‘null’ or Empty Strings with ‘NA’
             user_df = user_df.map(lambda row: 'NA' if isinstance(row, str) and (row.lower() == 'null' or row == '') else row)
             
-            # Group by 'User-ID' and aggregate
+            # Grouping by ‘User-ID’ and Aggregating
             user_df = user_df.groupby('User-ID', sort=False).agg(lambda row: '+'.join(filter(pd.notna, row.unique()))).reset_index()
             user_df = user_df.replace(to_replace=r'NA\+|\+NA(?!;)', value='', regex=True)
-
-            # mapping data to column
+            
+            # Mapping Data to Target Columns
             set_value = dict.fromkeys(self.logging[i]['columns'], 'NA')
             set_value.update(
                 {
@@ -110,15 +110,15 @@ class ModuleADM(CallFunction):
             data = [re.sub(r'(?<!\.)\|\|', '||', line.strip()).split('||') for line in format_file]
             self.validate_row_length(data)
             
-            # set dataframe
+            # Creating DataFrame
             columns = ['User-ID','User Full Name','Department code','Employee ID','Group','Zone','Role']
             param_df = pd.DataFrame(data, columns=columns)
             param_df = param_df.apply(lambda row: row.str.strip()).reset_index(drop=True)
             
-            # replace 'null' with 'NA' for all string values
+            # Replacing ‘null’ or Empty Strings with ‘NA’
             param_df = param_df.map(lambda row: 'NA' if isinstance(row, str) and (row.lower() == 'null' or row == '') else row)
             
-            # mapping data to column
+            # Mapping Data to Target Columns
             set_value = [
                 {
                     'Parameter Name': 'GroupDetail', 

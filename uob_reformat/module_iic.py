@@ -64,12 +64,12 @@ class ModuleIIC(CallFunction):
             data = [re.sub(r'(?<!\.),', ',', line.strip().replace('"', '')).split(',') for line in format_file]
             self.validate_row_length(data)
             
-            # set dataframe
+            # Creating DataFrame
             columns = self.logging[i]['columns']
             user_df = pd.DataFrame(data, columns=columns)
             user_df = user_df.iloc[1:].apply(lambda row: row.str.strip()).reset_index(drop=True)
             
-            # replace 'null' with 'NA' for all string values
+            # Replacing ‘null’ or Empty Strings with ‘NA’
             user_df = user_df.map(lambda row: 'NA' if isinstance(row, str) and (row.lower() == 'null' or row == '') else row)
             
         except:
@@ -88,12 +88,12 @@ class ModuleIIC(CallFunction):
             data = [re.sub(r'(?<!\.),', ',', line.strip().replace('"', '')).split(',') for line in format_file]
             self.validate_row_length(data, 3)
             
-            # set dataframe
+            # Creating DataFrame
             columns = self.logging[i]['columns']
             param_df = pd.DataFrame(data, columns=columns)
             param_df = param_df.iloc[1:].apply(lambda row: row.str.strip()).reset_index(drop=True)
             
-            # replace 'null' with 'NA' for all string values
+            # Replacing ‘null’ or Empty Strings with ‘NA’
             param_df = param_df.map(lambda row: 'NA' if isinstance(row, str) and (row.lower() == 'null' or row == '') else row)
             
         except:

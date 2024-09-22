@@ -68,7 +68,7 @@ class ModuleDOC(CallFunction):
         errors = []
         for i, rows in enumerate(rows_list, 7):
             try:
-                assert len(rows) == expected_length or len(rows) == 1, f"Row {i} does not have 10 elements: {rows}"
+                assert len(rows) == expected_length or len(rows) == 1, f"Row {i} does not have {expected_length} elements: {rows}"
             except AssertionError as err:
                 errors.append(str(err))
                 
@@ -100,20 +100,20 @@ class ModuleDOC(CallFunction):
                     continue
             self.validate_row_length(clean_data)
             
-            # set dataframe
+            # Creating DataFrame
             user_df = pd.DataFrame(clean_data)
             user_df.columns = user_df.iloc[0].values
             user_df = user_df.iloc[1:].apply(lambda row: row.str.strip()).reset_index(drop=True)
             
-            # replace 'null' with 'NA' for all string values
+            # Replacing ‘null’ or Empty Strings with ‘NA’
             user_df = user_df[user_df['APPCODE'] == 'LOAN'].reset_index(drop=True)
             user_df = user_df.map(lambda row: 'NA' if isinstance(row, str) and (row.lower() == 'null' or row == '') else row)
             
-            # adjust column
+            # Adjusting Columns
             user_df[['NAME', 'DEPARTMENT']] = user_df.apply(self.split_column, axis=1, result_type='expand')
             user_df['ATTRIBUTE'] = user_df.apply(self.attribute_column, axis=1)
             
-            # mapping data to column
+            # Mapping Data to Target Columns
             set_value = dict.fromkeys(self.logging[i]['columns'], 'NA')
             set_value.update(
                 {
@@ -144,7 +144,7 @@ class ModuleDOC(CallFunction):
         self.logging[i].update({'function': 'collect_param_file', 'status': status})
 
         try:
-            # mapping data to column
+            # Mapping Data to Target Columns
             set_value = [
                 {
                     "Parameter Name": 'AppCode',
@@ -160,8 +160,8 @@ class ModuleDOC(CallFunction):
             param_df = pd.DataFrame(set_value)
             param_df = param_df.explode(['Code values', 'Decode value']).reset_index(drop=True)
             
-        except Exception as err:
-            raise Exception(err)
+        except:
+            raise
         
         status = 'succeed'
         self.logging[i].update({'data': param_df.to_dict('list'), 'status': status})
