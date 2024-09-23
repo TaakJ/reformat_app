@@ -54,7 +54,7 @@ class ModuleBOS(CallFunction):
                 errors.append(str(err))
                 
         if errors:
-            raise Exception("Assertion errors:\n" + "\n".join(errors))
+            raise Exception("Column not match" + "\n".join(errors))
     
     def collect_depend_file(self, i: int) -> pd.DataFrame:
         
