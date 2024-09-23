@@ -129,8 +129,6 @@ class Convert2File:
         
     def comparing_dataframes(self, i: int, df: pd.DataFrame, new_df: pd.DataFrame) -> pd.DataFrame:
         
-        # logging.info('Comparing two dataframes and getting the differences')
-        
         status = "failed"
         self.logging[i].update({'function': 'compare_data', 'status': status})
         
@@ -162,8 +160,6 @@ class Convert2File:
         return df
     
     def change_data_capture(self, i: int, df: pd.DataFrame) -> dict:
-        
-        # logging.info('Change data capture')
         
         status = 'failed'
         self.logging[i].update({'function': 'data_change_capture', 'status': status})
@@ -409,8 +405,6 @@ class Convert2File:
         return df
     
     def write_csv(self, i: int, cdc: dict) -> str:
-        
-        # logging.info(f'Write mode: {self.write_mode}')
 
         status = 'failed'
         self.logging[i].update({'function': 'write_csv', 'status': status})

@@ -49,12 +49,12 @@ class ModuleBOS(CallFunction):
         errors = []
         for i, rows in enumerate(rows_list, 1):
             try:
-                assert len(rows) == expected_length, f"Row {i} does not have {expected_length} elements: {rows}"
+                assert len(rows) == expected_length, f"row {i} does not have {expected_length} elements: {rows}"
             except AssertionError as err:
                 errors.append(str(err))
                 
         if errors:
-            raise Exception("Column not match" + "\n".join(errors))
+            raise Exception("Data issue: " + "\n".join(errors))
     
     def collect_depend_file(self, i: int) -> pd.DataFrame:
         

@@ -63,12 +63,12 @@ class ModuleCUM(CallFunction):
         errors = []
         for i, rows in enumerate(rows_list, 2):
             try:
-                assert len(rows) in valid_lengths, f"Row {i} does not match elements: {rows}"
+                assert len(rows) in valid_lengths, f"row {i} does not match elements: {rows}"
             except AssertionError as err:
                 errors.append(str(err))
                     
         if errors:
-            raise Exception("Column not match" + "\n".join(errors))
+            raise Exception("Data issue: " + "\n".join(errors))
     
     def read_format_file(self, format_file) -> list:
         

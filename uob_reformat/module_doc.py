@@ -68,12 +68,12 @@ class ModuleDOC(CallFunction):
         errors = []
         for i, rows in enumerate(rows_list, 7):
             try:
-                assert len(rows) == expected_length or len(rows) == 1, f"Row {i} does not have {expected_length} elements: {rows}"
+                assert len(rows) == expected_length or len(rows) == 1, f"row {i} does not have {expected_length} elements: {rows}"
             except AssertionError as err:
                 errors.append(str(err))
                 
         if errors:
-            raise Exception("Column not match" + "\n".join(errors))
+            raise Exception("Data issue: " + "\n".join(errors))
 
     def collect_user_file(self, i: int, format_file: any) -> dict:
 
