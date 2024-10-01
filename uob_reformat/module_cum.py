@@ -44,15 +44,8 @@ class ModuleCUM(CallFunction):
         return result
     
     def parse_datetime(self, date_str):
-        for fmt in ('%Y-%m-%d %H:%M:%S.%f', 
-                    '%Y-%m-%d %H:%M:%S',
-                    '%d/%m/%Y %H:%M:%S.%f', 
-                    '%d/%m/%Y %H:%M:%S',
-                    '%Y-%m-%d',
-                    '%d-%m-%Y',
-                    '%Y/%m/%d',
-                    '%d/%m/%Y',
-                    '%m/%d/%Y'):
+        formats = ["%Y-%m-%d %H:%M:%S.%f","%Y-%m-%d %H:%M:%S","%d/%m/%Y %H:%M:%S.%f","%d/%m/%Y %H:%M:%S","%Y-%m-%d","%d-%m-%Y","%Y/%m/%d","%d/%m/%Y","%m/%d/%Y",]
+        for fmt in formats:
             try:
                 return pd.to_datetime(date_str, format=fmt)
             except ValueError:

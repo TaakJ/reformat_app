@@ -16,13 +16,11 @@ class ModuleDIL(CallFunction):
 
     async def run_process(self) -> dict:
 
-        logging.info(
-            f"Module:'{self.module}'; Manual: '{self.manual}'; Run date: '{self.batch_date}'; Store tmp: '{self.store_tmp}'; Write mode: '{self.write_mode}';"
-        )
+        logging.info(f"Module:'{self.module}'; Manual: '{self.manual}'; Run date: '{self.batch_date}'; Store tmp: '{self.store_tmp}'; Write mode: '{self.write_mode}';")
 
         result = {"module": self.module, "task": "Completed"}
         try:
-            self.colloct_setup()
+            self.collect_setup()
             self.clear_target_file()
 
             await self.check_source_file()
@@ -60,36 +58,18 @@ class ModuleDIL(CallFunction):
         return name.strip(), department.strip()
 
     def attribute_column(self, row: any) -> str:
-        if (
-            row["ADD_ID"] == "0"
-            and row["EDIT_ID"] == "0"
-            and row["ADD_DOC"] == "0"
-            and row["EDIT_DOC"] == "0"
-            and row["SCAN"] == "0"
-            and row["ADD_USER"] == "1"
-        ):
+        if (row["ADD_ID"] == "0" and row["EDIT_ID"] == "0" and row["ADD_DOC"] == "0" and row["EDIT_DOC"] == "0" and row["SCAN"] == "0" and row["ADD_USER"] == "1"):
             return "Admin"
-        elif (
-            row["ADD_ID"] == "1"
-            and row["EDIT_ID"] == "1"
-            and row["ADD_DOC"] == "1"
-            and row["EDIT_DOC"] == "1"
-            and row["SCAN"] == "1"
-            and row["ADD_USER"] == "0"
-        ):
+        elif (row["ADD_ID"] == "1" and row["EDIT_ID"] == "1" and row["ADD_DOC"] == "1" and row["EDIT_DOC"] == "1" and row["SCAN"] == "1" and row["ADD_USER"] == "0"):
             return "Index+Scan"
         else:
             return "Inquiry"
 
-    def validate_row_length(
-        self, rows_list: list[list], expected_length: int = 10
-    ) -> None:
+    def validate_row_length(self, rows_list: list[list], expected_length: int = 10) -> None:
         errors = []
         for i, rows in enumerate(rows_list, 7):
             try:
-                assert (
-                    len(rows) == expected_length or len(rows) == 1
-                ), f"row {i} does not have {expected_length} elements: {rows}"
+                assert (len(rows) == expected_length or len(rows) == 1), f"row {i} does not have {expected_length} elements: {rows}"
             except AssertionError as err:
                 errors.append(str(err))
 
@@ -98,13 +78,7 @@ class ModuleDIL(CallFunction):
 
     def read_format_file(self, format_file) -> list:
 
-        data = [
-            re.sub(
-                r"(?<!\.)\s{3,}", "||", "".join(re.findall(r"\w+.*", line.strip()))
-            ).split("||")
-            for line in format_file
-            if re.findall(r"\w+.*", line.strip())
-        ]
+        data = [re.sub(r"(?<!\.)\s{3,}", "||", "".join(re.findall(r"\w+.*", line.strip()))).split("||") for line in format_file if re.findall(r"\w+.*", line.strip())]
 
         clean_data = []
         for rows, _data in enumerate(data):
@@ -136,26 +110,14 @@ class ModuleDIL(CallFunction):
             # Creating DataFrame
             user_df = pd.DataFrame(clean_data)
             user_df.columns = user_df.iloc[0].values
-            user_df = (
-                user_df.iloc[1:]
-                .apply(lambda row: row.str.strip())
-                .reset_index(drop=True)
-            )
+            user_df = (user_df.iloc[1:].apply(lambda row: row.str.strip()).reset_index(drop=True))
             user_df = user_df[user_df["APPCODE"] == "LNSIGNET"].reset_index(drop=True)
 
             # Replacing ‘null’ or Empty Strings with ‘NA’
-            user_df = user_df.map(
-                lambda row: (
-                    "NA"
-                    if isinstance(row, str) and (row.lower() == "null" or row == "")
-                    else row
-                )
-            )
+            user_df = user_df.map(lambda row: ("NA" if isinstance(row, str) and (row.lower() == "null" or row == "") else row))
 
             # Adjusting Columns
-            user_df[["NAME", "DEPARTMENT"]] = user_df.apply(
-                self.split_column, axis=1, result_type="expand"
-            )
+            user_df[["NAME", "DEPARTMENT"]] = user_df.apply(self.split_column, axis=1, result_type="expand")
             user_df["ATTRIBUTE"] = user_df.apply(self.attribute_column, axis=1)
 
             # Mapping Data to Target Columns
@@ -169,9 +131,7 @@ class ModuleDIL(CallFunction):
                     "AccountStatus": "A",
                     "IsPrivileged": "N",
                     "AccountDescription": user_df["NAME"],
-                    "AdditionalAttribute": user_df[
-                        ["DEPARTMENT", "APPCODE", "ATTRIBUTE"]
-                    ].apply(lambda row: "#".join(row), axis=1),
+                    "AdditionalAttribute": user_df[["DEPARTMENT", "APPCODE", "ATTRIBUTE"]].apply(lambda row: "#".join(row), axis=1),
                     "Country": "TH",
                 }
             )
@@ -197,28 +157,14 @@ class ModuleDIL(CallFunction):
             # Creating DataFrame
             param_df = pd.DataFrame(clean_data)
             param_df.columns = param_df.iloc[0].values
-            param_df = (
-                param_df.iloc[1:]
-                .apply(lambda row: row.str.strip())
-                .reset_index(drop=True)
-            )
-            param_df = param_df[param_df["APPCODE"] == "LNSIGNET"].reset_index(
-                drop=True
-            )
+            param_df = (param_df.iloc[1:].apply(lambda row: row.str.strip()).reset_index(drop=True))
+            param_df = param_df[param_df["APPCODE"] == "LNSIGNET"].reset_index(drop=True)
 
             # Replacing ‘null’ or Empty Strings with ‘NA’
-            param_df = param_df.map(
-                lambda row: (
-                    "NA"
-                    if isinstance(row, str) and (row.lower() == "null" or row == "")
-                    else row
-                )
-            )
+            param_df = param_df.map(lambda row: ("NA"if isinstance(row, str) and (row.lower() == "null" or row == "") else row))
 
             # Adjusting Columns
-            param_df[["NAME", "DEPARTMENT"]] = param_df.apply(
-                self.split_column, axis=1, result_type="expand"
-            )
+            param_df[["NAME", "DEPARTMENT"]] = param_df.apply(self.split_column, axis=1, result_type="expand")
 
             # Mapping Data to Target Columns
             set_value = [
@@ -239,9 +185,7 @@ class ModuleDIL(CallFunction):
                 },
             ]
             param_df = pd.DataFrame(set_value)
-            param_df = param_df.explode(["Code values", "Decode value"]).reset_index(
-                drop=True
-            )
+            param_df = param_df.explode(["Code values", "Decode value"]).reset_index(drop=True)
 
         except:
             raise

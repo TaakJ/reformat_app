@@ -114,7 +114,8 @@ class ModuleBOS(CallFunction):
             group_param_df = group_param_df.replace(to_replace=r'NA\+|\+NA(?!;)', value='', regex=True)
             
             # Merge 2 file BOSTH_Param / BOSTH
-            group_merge_df = pd.merge(group_param_df,group_user_df,on='employee_no',how='right',suffixes=('_param','_user'), validate='1:m')
+            group_merge_df = pd.merge(group_param_df, group_user_df, on='employee_no', how='right', suffixes=('_param', '_user'), validate='1:1')
+            ## group_merge_df = pd.merge(group_param_df,group_user_df,on='employee_no',how='right',suffixes=('_param','_user'))
             
             # Adjust column: rolename
             group_merge_df[['rolename_param', 'rolename_user']] = group_merge_df[['rolename_param', 'rolename_user']].fillna('NA')

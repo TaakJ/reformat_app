@@ -16,13 +16,11 @@ class ModuleIIC(CallFunction):
 
     async def run_process(self) -> dict:
 
-        logging.info(
-            f"Module:'{self.module}'; Manual: '{self.manual}'; Run date: '{self.batch_date}'; Store tmp: '{self.store_tmp}'; Write mode: '{self.write_mode}';"
-        )
+        logging.info(f"Module:'{self.module}'; Manual: '{self.manual}'; Run date: '{self.batch_date}'; Store tmp: '{self.store_tmp}'; Write mode: '{self.write_mode}';")
 
         result = {"module": self.module, "task": "Completed"}
         try:
-            self.colloct_setup()
+            self.collect_setup()
             self.clear_target_file()
 
             await self.check_source_file()
@@ -47,15 +45,11 @@ class ModuleIIC(CallFunction):
 
         return result
 
-    def validate_row_length(
-        self, rows_list: list[list], expected_length: int = 15
-    ) -> None:
+    def validate_row_length(self, rows_list: list[list], expected_length: int = 15) -> None:
         errors = []
         for i, rows in enumerate(rows_list, 1):
             try:
-                assert (
-                    len(rows) == expected_length
-                ), f"row {i} does not have {expected_length} elements: {rows}"
+                assert (len(rows) == expected_length), f"row {i} does not have {expected_length} elements: {rows}"
             except AssertionError as err:
                 errors.append(str(err))
 
@@ -68,29 +62,16 @@ class ModuleIIC(CallFunction):
         self.logging[i].update({"function": "collect_user_file", "status": status})
 
         try:
-            data = [
-                re.sub(r"(?<!\.),", ",", line.strip().replace('"', "")).split(",")
-                for line in format_file
-            ]
+            data = [re.sub(r"(?<!\.),", ",", line.strip().replace('"', "")).split(",") for line in format_file]
             self.validate_row_length(data)
 
             # Creating DataFrame
             columns = self.logging[i]["columns"]
             user_df = pd.DataFrame(data, columns=columns)
-            user_df = (
-                user_df.iloc[1:]
-                .apply(lambda row: row.str.strip())
-                .reset_index(drop=True)
-            )
+            user_df = (user_df.iloc[1:].apply(lambda row: row.str.strip()).reset_index(drop=True))
 
             # Replacing ‘null’ or Empty Strings with ‘NA’
-            user_df = user_df.map(
-                lambda row: (
-                    "NA"
-                    if isinstance(row, str) and (row.lower() == "null" or row == "")
-                    else row
-                )
-            )
+            user_df = user_df.map(lambda row: ("NA" if isinstance(row, str) and (row.lower() == "null" or row == "") else row))
 
         except:
             raise
@@ -105,29 +86,16 @@ class ModuleIIC(CallFunction):
         self.logging[i].update({"function": "collect_param_file", "status": status})
 
         try:
-            data = [
-                re.sub(r"(?<!\.),", ",", line.strip().replace('"', "")).split(",")
-                for line in format_file
-            ]
+            data = [re.sub(r"(?<!\.),", ",", line.strip().replace('"', "")).split(",") for line in format_file]
             self.validate_row_length(data, 3)
 
             # Creating DataFrame
             columns = self.logging[i]["columns"]
             param_df = pd.DataFrame(data, columns=columns)
-            param_df = (
-                param_df.iloc[1:]
-                .apply(lambda row: row.str.strip())
-                .reset_index(drop=True)
-            )
+            param_df = (param_df.iloc[1:].apply(lambda row: row.str.strip()).reset_index(drop=True))
 
             # Replacing ‘null’ or Empty Strings with ‘NA’
-            param_df = param_df.map(
-                lambda row: (
-                    "NA"
-                    if isinstance(row, str) and (row.lower() == "null" or row == "")
-                    else row
-                )
-            )
+            param_df = param_df.map(lambda row: ("NA" if isinstance(row, str) and (row.lower() == "null" or row == "") else row))
 
         except:
             raise

@@ -19,13 +19,11 @@ class ModuleICA(CallFunction):
 
     async def run_process(self) -> dict:
 
-        logging.info(
-            f"Module:'{self.module}'; Manual: '{self.manual}'; Run date: '{self.batch_date}'; Store tmp: '{self.store_tmp}'; Write mode: '{self.write_mode}';"
-        )
+        logging.info(f"Module:'{self.module}'; Manual: '{self.manual}'; Run date: '{self.batch_date}'; Store tmp: '{self.store_tmp}'; Write mode: '{self.write_mode}';")
 
         result = {"module": self.module, "task": "Completed"}
         try:
-            self.colloct_setup()
+            self.collect_setup()
             self.clear_target_file()
 
             await self.check_source_file()
@@ -51,12 +49,7 @@ class ModuleICA(CallFunction):
         return result
 
     def parse_and_format_datetime(self, date_str):
-        formats = [
-            "%y/%m/%d %H:%M",
-            "%Y-%m-%d %H:%M:%S",
-            "%Y-%m-%d %H:%M",
-            "%d/%m/%y %H:%M",
-        ]
+        formats = ["%y/%m/%d %H:%M","%Y-%m-%d %H:%M:%S","%Y-%m-%d %H:%M","%d/%m/%y %H:%M",]
         for fmt in formats:
             try:
                 return pd.to_datetime(date_str, format=fmt).strftime("%Y%m%d%H%M%S")
@@ -70,15 +63,11 @@ class ModuleICA(CallFunction):
         name = name.strip()
         return name
 
-    def validate_row_length(
-        self, rows_list: list[list], valid_lengths: list[int]
-    ) -> None:
+    def validate_row_length(self, rows_list: list[list], valid_lengths: list[int]) -> None:
         errors = []
         for i, rows in enumerate(rows_list):
             try:
-                assert (
-                    len(rows) in valid_lengths
-                ), f"row {i} does not match elements: {rows}"
+                assert (len(rows) in valid_lengths), f"row {i} does not match elements: {rows}"
             except AssertionError as err:
                 errors.append(str(err))
 
@@ -116,70 +105,22 @@ class ModuleICA(CallFunction):
         try:
             # FILE: ICAS_TBL_USER_GROUP
             self.validate_row_length(tbl["ICAS_TBL_USER_GROUP"], [3, 5, 7])
-            columns = [
-                "Record_Type",
-                "GROUP_ID",
-                "USER_ID",
-                "CREATE_USER_ID",
-                "CREATE_DTM",
-                "LAST_UPDATE_USER_ID",
-                "LAST_UPDATE_DTM",
-            ]
-            tbl_user_group_df = pd.DataFrame(
-                tbl["ICAS_TBL_USER_GROUP"], columns=columns
-            )
-            tbl_user_group_df = (
-                tbl_user_group_df.iloc[1:-1]
-                .apply(lambda row: row.str.strip())
-                .reset_index(drop=True)
-            )
+            columns = ["Record_Type","GROUP_ID","USER_ID","CREATE_USER_ID","CREATE_DTM","LAST_UPDATE_USER_ID","LAST_UPDATE_DTM"]
+            tbl_user_group_df = pd.DataFrame(tbl["ICAS_TBL_USER_GROUP"], columns=columns)
+            tbl_user_group_df = (tbl_user_group_df.iloc[1:-1].apply(lambda row: row.str.strip()).reset_index(drop=True))
 
             # FILE: ICAS_TBL_USER_BANK_BRANCH
             self.validate_row_length(tbl["ICAS_TBL_USER_BANK_BRANCH"], [3, 5, 9])
-            columns = [
-                "Record_Type",
-                "USER_ID",
-                "BANK_CODE",
-                "BRANCH_CODE",
-                "SUB_SYSTEM_ID",
-                "ACCESS_ALL_BRANCH_IN_HUB",
-                "DEFAULT_BRANCH_FLAG",
-                "CREATE_USER_ID",
-                "CREATE_DTM",
-            ]
-            tbl_user_bank_df = pd.DataFrame(
-                tbl["ICAS_TBL_USER_BANK_BRANCH"], columns=columns
-            )
-            tbl_user_bank_df = (
-                tbl_user_bank_df.iloc[1:-1]
-                .apply(lambda row: row.str.strip())
-                .reset_index(drop=True)
-            )
+            columns = ["Record_Type","USER_ID","BANK_CODE","BRANCH_CODE","SUB_SYSTEM_ID","ACCESS_ALL_BRANCH_IN_HUB","DEFAULT_BRANCH_FLAG","CREATE_USER_ID","CREATE_DTM"]
+            tbl_user_bank_df = pd.DataFrame(tbl["ICAS_TBL_USER_BANK_BRANCH"], columns=columns)
+            tbl_user_bank_df = (tbl_user_bank_df.iloc[1:-1].apply(lambda row: row.str.strip()).reset_index(drop=True))
 
             # FILE: ICAS_TBL_GROUP
             self.validate_row_length(tbl["ICAS_TBL_GROUP"], [3, 5, 14])
-            columns = [
-                "Record_Type",
-                "GROUP_ID",
-                "SUB_SYSTEM_ID",
-                "GROUP_NAME",
-                "RESTRICTION",
-                "ABLE_TO_REVERIFY_FLAG",
-                "DESCRIPTION",
-                "DEFAULT_FINAL_RESULT",
-                "DELETE_FLAG",
-                "CREATE_USER_ID",
-                "CREATE_DTM",
-                "LAST_UPDATE_USER_ID",
-                "LAST_UPDATE_DTM",
-                "DELETE_DTM",
-            ]
+            columns = ["Record_Type","GROUP_ID","SUB_SYSTEM_ID","GROUP_NAME","RESTRICTION","ABLE_TO_REVERIFY_FLAG","DESCRIPTION","DEFAULT_FINAL_RESULT","DELETE_FLAG","CREATE_USER_ID",
+                    "CREATE_DTM","LAST_UPDATE_USER_ID","LAST_UPDATE_DTM","DELETE_DTM"]
             tbl_group_df = pd.DataFrame(tbl["ICAS_TBL_GROUP"], columns=columns)
-            tbl_group_df = (
-                tbl_group_df.iloc[1:-1]
-                .apply(lambda row: row.str.strip())
-                .reset_index(drop=True)
-            )
+            tbl_group_df = (tbl_group_df.iloc[1:-1].apply(lambda row: row.str.strip()).reset_index(drop=True))
 
         except:
             raise
@@ -196,100 +137,46 @@ class ModuleICA(CallFunction):
 
         try:
             # FILE: ICAS_TBL_USER
-            data = [
-                re.sub(r"(?<!\.)\x07", "||", line.strip()).split("||")
-                for line in format_file
-            ]
+            data = [re.sub(r"(?<!\.)\x07", "||", line.strip()).split("||")for line in format_file]
             self.validate_row_length(data, [3, 5, 21])
-            columns = [
-                "Record_Type",
-                "USER_ID",
-                "LOGIN_NAME",
-                "FULL_NAME",
-                "PASSWORD",
-                "LOCKED_FLAG",
-                "FIRST_LOGIN_FLAG",
-                "LAST_ACTION_TYPE",
-                "CREATE_USER_ID",
-                "CREATE_DTM",
-                "LAST_UPDATE_USER_ID",
-                "LAST_UPDATE_DTM",
-                "LAST_LOGIN_ATTEMPT",
-                "ACCESS_ALL_BRANCH_FLAG",
-                "HOME_BRANCH",
-                "HOME_BANK",
-                "LOGIN_RETRY_COUNT",
-                "LAST_CHANGE_PASSWORD",
-                "DELETE_FLAG",
-                "LAST_LOGIN_SUCCESS",
-                "LAST_LOGIN_FAILED",
-            ]
+            columns = ["Record_Type","USER_ID","LOGIN_NAME","FULL_NAME","PASSWORD","LOCKED_FLAG","FIRST_LOGIN_FLAG","LAST_ACTION_TYPE","CREATE_USER_ID","CREATE_DTM","LAST_UPDATE_USER_ID",
+                    "LAST_UPDATE_DTM","LAST_LOGIN_ATTEMPT","ACCESS_ALL_BRANCH_FLAG","HOME_BRANCH","HOME_BANK","LOGIN_RETRY_COUNT","LAST_CHANGE_PASSWORD","DELETE_FLAG",
+                    "LAST_LOGIN_SUCCESS","LAST_LOGIN_FAILED"]
             tbl_user_df = pd.DataFrame(data, columns=columns)
-            tbl_user_df = (
-                tbl_user_df.iloc[1:-1]
-                .apply(lambda row: row.str.strip())
-                .reset_index(drop=True)
-            )
+            tbl_user_df = (tbl_user_df.iloc[1:-1].apply(lambda row: row.str.strip()).reset_index(drop=True))
 
             # FILE: ICAS_TBL_USER_GROUP, ICAS_TBL_USER_BANK_BRANCH, ICAS_TBL_GROUP
             tbl_user_group_df, tbl_user_bank_df, _ = self.collect_depend_file(i)
 
-            entitlement_name = pd.merge(
-                tbl_user_df, tbl_user_group_df, on="USER_ID", how="left"
-            )
+            # Merge file: ICAS_TBL_USER_GROUP with ICAS_TBL_USER
+            entitlement_name = pd.merge(tbl_user_df, tbl_user_group_df, on="USER_ID", how="left", validate="m:1")
+            ## entitlement_name = pd.merge(tbl_user_df, tbl_user_group_df, on="USER_ID", how="left",
             entitlement_name = entitlement_name.fillna("NA")
-            entitlement_name_group = (
-                entitlement_name.groupby("USER_ID")["GROUP_ID"]
-                .apply(lambda row: "+".join(map(str, sorted(set(row)))))
-                .reset_index()
-            )
-            entitlement_name_group = entitlement_name_group.replace(
-                to_replace=r"NA\+|\+NA(?!;)", value="", regex=True
-            )
+            entitlement_name_group = (entitlement_name.groupby("USER_ID")["GROUP_ID"].apply(lambda row: "+".join(map(str, sorted(set(row))))).reset_index())
+            entitlement_name_group = entitlement_name_group.replace(to_replace=r"NA\+|\+NA(?!;)", value="", regex=True)
 
             # Merge file: ICAS_TBL_USER with ICAS_TBL_USER_GROUP
-            result_ica = pd.merge(entitlement_name_group, tbl_user_df, on="USER_ID")
-            result_ica = result_ica[
-                [
-                    "USER_ID",
-                    "LOGIN_NAME",
-                    "GROUP_ID",
-                    "LOCKED_FLAG",
-                    "FULL_NAME",
-                    "CREATE_DTM",
-                    "LAST_LOGIN_ATTEMPT",
-                    "LAST_UPDATE_DTM",
-                ]
-            ]
+            result_ica = pd.merge(entitlement_name_group, tbl_user_df, on="USER_ID", how="left", validate="m:1")
+            ## result_ica = pd.merge(entitlement_name_group, tbl_user_df, on="USER_ID")
+            result_ica = result_ica[["USER_ID","LOGIN_NAME","GROUP_ID","LOCKED_FLAG","FULL_NAME","CREATE_DTM","LAST_LOGIN_ATTEMPT","LAST_UPDATE_DTM"]]
 
             # Merge file: ICAS_TBL_USER with ICAS_TBL_USER_BANK_BRANCH
-            branch_code = pd.merge(
-                tbl_user_df, tbl_user_bank_df, on="USER_ID", how="left"
-            )
-            branch_code = branch_code[
-                ["USER_ID", "HOME_BANK", "HOME_BRANCH", "BRANCH_CODE"]
-            ]
+            branch_code = pd.merge(tbl_user_df, tbl_user_bank_df, on="USER_ID", how="left", validate="1:m")
+            ## branch_code = pd.merge(tbl_user_df, tbl_user_bank_df, on="USER_ID", how="left")
+            branch_code = branch_code[["USER_ID", "HOME_BANK", "HOME_BRANCH", "BRANCH_CODE"]]
             branch_code["HOME_BANK"] = branch_code["HOME_BANK"].fillna("NA")
             branch_code["HOME_BRANCH"] = branch_code["HOME_BRANCH"].fillna("NA")
             branch_code["BRANCH_CODE"] = branch_code["BRANCH_CODE"].fillna("NA")
-            branch_code["BANK+BRANCH"] = (
-                branch_code[["HOME_BANK", "HOME_BRANCH", "BRANCH_CODE"]]
-                .astype(str)
-                .agg("#".join, axis=1)
-            )
+            branch_code["BANK+BRANCH"] = (branch_code[["HOME_BANK", "HOME_BRANCH", "BRANCH_CODE"]].astype(str).agg("#".join, axis=1))
             final_branch_code = branch_code[["USER_ID", "BANK+BRANCH"]]
-            final_ica = pd.merge(
-                result_ica, final_branch_code, on="USER_ID", how="left"
-            )
+            final_ica = pd.merge(result_ica, final_branch_code, on="USER_ID", how="left", validate='1:1')
+            ## final_ica = pd.merge(result_ica, final_branch_code, on="USER_ID", how="left")
 
             date_time_col = ["CREATE_DTM", "LAST_LOGIN_ATTEMPT", "LAST_UPDATE_DTM"]
-            for col in date_time_col:
-                final_ica[col] = final_ica[col].apply(self.parse_and_format_datetime)
+            for col in date_time_col:final_ica[col] = final_ica[col].apply(self.parse_and_format_datetime)
 
             final_ica["FULL_NAME"] = final_ica["FULL_NAME"].apply(self.clean_fullname)
-            final_ica["LOCKED_FLAG"] = final_ica["LOCKED_FLAG"].apply(
-                lambda row: "D" if row == "1" else "A"
-            )
+            final_ica["LOCKED_FLAG"] = final_ica["LOCKED_FLAG"].apply(lambda row: "D" if row == "1" else "A")
 
             # Mapping Data to Target Columns
             columns = self.logging[i]["columns"]
@@ -336,45 +223,18 @@ class ModuleICA(CallFunction):
 
         try:
             # FILE: ICAS_TBL_USER
-            data = [
-                re.sub(r"(?<!\.)\x07", "||", line.strip()).split("||")
-                for line in format_file
-            ]
+            data = [re.sub(r"(?<!\.)\x07", "||", line.strip()).split("||") for line in format_file]
             self.validate_row_length(data, [3, 5, 21])
-            columns = [
-                "Record_Type",
-                "USER_ID",
-                "LOGIN_NAME",
-                "FULL_NAME",
-                "PASSWORD",
-                "LOCKED_FLAG",
-                "FIRST_LOGIN_FLAG",
-                "LAST_ACTION_TYPE",
-                "CREATE_USER_ID",
-                "CREATE_DTM",
-                "LAST_UPDATE_USER_ID",
-                "LAST_UPDATE_DTM",
-                "LAST_LOGIN_ATTEMPT",
-                "ACCESS_ALL_BRANCH_FLAG",
-                "HOME_BRANCH",
-                "HOME_BANK",
-                "LOGIN_RETRY_COUNT",
-                "LAST_CHANGE_PASSWORD",
-                "DELETE_FLAG",
-                "LAST_LOGIN_SUCCESS",
-                "LAST_LOGIN_FAILED",
-            ]
+            columns = ["Record_Type","USER_ID","LOGIN_NAME","FULL_NAME","PASSWORD","LOCKED_FLAG","FIRST_LOGIN_FLAG","LAST_ACTION_TYPE","CREATE_USER_ID","CREATE_DTM","LAST_UPDATE_USER_ID",
+                    "LAST_UPDATE_DTM","LAST_LOGIN_ATTEMPT","ACCESS_ALL_BRANCH_FLAG","HOME_BRANCH","HOME_BANK","LOGIN_RETRY_COUNT","LAST_CHANGE_PASSWORD","DELETE_FLAG",
+                    "LAST_LOGIN_SUCCESS","LAST_LOGIN_FAILED"]
             tbl_user_df = pd.DataFrame(data, columns=columns)
-            tbl_user_df = (
-                tbl_user_df.iloc[1:-1]
-                .apply(lambda row: row.str.strip())
-                .reset_index(drop=True)
-            )
+            tbl_user_df = (tbl_user_df.iloc[1:-1].apply(lambda row: row.str.strip()).reset_index(drop=True))
 
             # FILE: ICAS_TBL_USER_GROUP, ICAS_TBL_USER_BANK_BRANCH, ICAS_TBL_GROUP
             _, tbl_user_bank_df, tbl_group_df = self.collect_depend_file(i)
 
-            # Mapping Data to Target Columns
+            # Merge file: ICAS_TBL_USER with ICAS_TBL_USER_BANK_BRANCH
             columns = self.logging[i]["columns"]
             merge_df = pd.DataFrame(columns=columns)
 
@@ -387,24 +247,17 @@ class ModuleICA(CallFunction):
 
             # Adjusting Column: group_id
             param_group_unique = tbl_group_df["GROUP_ID"].unique()
-            filter_param_group = tbl_group_df[
-                tbl_group_df["GROUP_ID"].isin(param_group_unique)
-            ]
+            filter_param_group = tbl_group_df[tbl_group_df["GROUP_ID"].isin(param_group_unique)]
             filter_param_group = filter_param_group[["GROUP_ID", "GROUP_NAME"]]
             filter_param_group.insert(0, "Parameter Name", "User Group")
-            filter_param_group.rename(
-                columns={"GROUP_ID": "Code values", "GROUP_NAME": "Decode value"},
-                inplace=True,
-            )
+            filter_param_group.rename(columns={"GROUP_ID": "Code values", "GROUP_NAME": "Decode value"},inplace=True)
             merge_df = pd.concat([merge_df, filter_param_group], ignore_index=True)
 
             # Adjusting Column: home_bank
             merge_df = pd.concat([merge_df, param_home_bank], ignore_index=True)
 
             # Adjusting Column: home_branch
-            param_home_branch_list = pd.DataFrame(
-                columns=("Parameter Name", "Code values", "Decode value")
-            )
+            param_home_branch_list = pd.DataFrame(columns=("Parameter Name", "Code values", "Decode value"))
             param_home_branch_uni = tbl_user_df["HOME_BRANCH"].unique()
             param_home_branch_list["Code values"] = param_home_branch_uni
             param_home_branch_list["Decode value"] = param_home_branch_uni
@@ -412,9 +265,7 @@ class ModuleICA(CallFunction):
             merge_df = pd.concat([merge_df, param_home_branch_list], ignore_index=True)
 
             # Adjusting Column: department
-            param_dept_list = pd.DataFrame(
-                columns=("Parameter Name", "Code values", "Decode value")
-            )
+            param_dept_list = pd.DataFrame(columns=("Parameter Name", "Code values", "Decode value"))
             param_dept_uni = tbl_user_bank_df["BRANCH_CODE"].unique()
             param_dept_list["Code values"] = param_dept_uni
             param_dept_list["Decode value"] = param_dept_uni

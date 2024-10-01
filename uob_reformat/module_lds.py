@@ -16,13 +16,11 @@ class ModuleLDS(CallFunction):
 
     async def run_process(self) -> dict:
 
-        logging.info(
-            f"Module:'{self.module}'; Manual: '{self.manual}'; Run date: '{self.batch_date}'; Store tmp: '{self.store_tmp}'; Write mode: '{self.write_mode}';"
-        )
+        logging.info(f"Module:'{self.module}'; Manual: '{self.manual}'; Run date: '{self.batch_date}'; Store tmp: '{self.store_tmp}'; Write mode: '{self.write_mode}';")
 
         result = {"module": self.module, "task": "Completed"}
         try:
-            self.colloct_setup()
+            self.collect_setup()
             self.clear_target_file()
 
             await self.check_source_file()
@@ -48,32 +46,19 @@ class ModuleLDS(CallFunction):
         return result
 
     def parse_datetime(self, date_str):
-        for fmt in (
-            "%Y-%m-%d %H:%M:%S.%f",
-            "%Y-%m-%d %H:%M:%S",
-            "%d/%m/%Y %H:%M:%S.%f",
-            "%d/%m/%Y %H:%M:%S",
-            "%Y-%m-%d",
-            "%d-%m-%Y",
-            "%Y/%m/%d",
-            "%d/%m/%Y",
-            "%m/%d/%Y",
-        ):
+        formats = ["%Y-%m-%d %H:%M:%S.%f","%Y-%m-%d %H:%M:%S","%d/%m/%Y %H:%M:%S.%f","%d/%m/%Y %H:%M:%S","%Y-%m-%d","%d-%m-%Y","%Y/%m/%d","%d/%m/%Y","%m/%d/%Y",]
+        for fmt in formats:
             try:
                 return pd.to_datetime(date_str, format=fmt)
             except ValueError:
                 continue
         return pd.NaT
 
-    def validate_row_length(
-        self, rows_list: list[list], valid_lengths: list[int] = [3, 32, 33]
-    ) -> None:
+    def validate_row_length(self, rows_list: list[list], valid_lengths: list[int] = [3, 32, 33]) -> None:
         errors = []
         for i, rows in enumerate(rows_list, 2):
             try:
-                assert (
-                    len(rows) in valid_lengths
-                ), f"row {i} does not match elements: {rows}"
+                assert (len(rows) in valid_lengths), f"row {i} does not match elements: {rows}"
             except AssertionError as err:
                 errors.append(str(err))
 
@@ -82,13 +67,7 @@ class ModuleLDS(CallFunction):
 
     def read_format_file(self, format_file) -> list:
 
-        data = [
-            re.sub(
-                r"(?<!\.),", "||", "".join(re.findall(r"\w+.*", line.strip()))
-            ).split("||")
-            for line in format_file
-            if re.findall(r"\w+.*", line.strip())
-        ]
+        data = [re.sub(r"(?<!\.),", "||", "".join(re.findall(r"\w+.*", line.strip()))).split("||") for line in format_file if re.findall(r"\w+.*", line.strip())]
 
         clean_data = []
         for rows, _data in enumerate(data):
@@ -118,20 +97,10 @@ class ModuleLDS(CallFunction):
             # Creating DataFrame
             user_df = pd.DataFrame(clean_data)
             user_df.columns = user_df.iloc[0].values
-            user_df = (
-                user_df.iloc[1:-1, :-1]
-                .apply(lambda row: row.str.strip())
-                .reset_index(drop=True)
-            )
+            user_df = (user_df.iloc[1:-1, :-1].apply(lambda row: row.str.strip()).reset_index(drop=True))
 
             # Replacing ‘null’ or Empty Strings with ‘NA’
-            user_df = user_df.map(
-                lambda row: (
-                    "NA"
-                    if isinstance(row, str) and (row.lower() == "null" or row == "")
-                    else row
-                )
-            )
+            user_df = user_df.map(lambda row: ("NA" if isinstance(row, str) and (row.lower() == "null" or row == "") else row))
 
             # Mapping Data to Target Columns
             set_value = dict.fromkeys(self.logging[i]["columns"], "NA")
@@ -142,20 +111,12 @@ class ModuleLDS(CallFunction):
                     "AccountName": user_df["UserName"],
                     "AccountType": "USR",
                     "EntitlementName": user_df["RoleID"],
-                    "AccountStatus": user_df["User_Active"].apply(
-                        lambda row: "A" if row.lower() == "active" else "D"
-                    ),
+                    "AccountStatus": user_df["User_Active"].apply(lambda row: "A" if row.lower() == "active" else "D"),
                     "IsPrivileged": "N",
                     "AccountDescription": user_df["FullName"],
-                    "LastLogin": user_df["LastLogin_Date"]
-                    .apply(self.parse_datetime)
-                    .dt.strftime("%Y%m%d%H%M%S"),
-                    "LastUpdatedDate": user_df["edit_date"]
-                    .apply(self.parse_datetime)
-                    .dt.strftime("%Y%m%d%H%M%S"),
-                    "AdditionalAttribute": user_df[
-                        ["CostCenterName", "CostCenterCode"]
-                    ].apply(lambda row: "#".join(row), axis=1),
+                    "LastLogin": user_df["LastLogin_Date"].apply(self.parse_datetime).dt.strftime("%Y%m%d%H%M%S"),
+                    "LastUpdatedDate": user_df["edit_date"].apply(self.parse_datetime).dt.strftime("%Y%m%d%H%M%S"),
+                    "AdditionalAttribute": user_df[["CostCenterName", "CostCenterCode"]].apply(lambda row: "#".join(row), axis=1),
                     "Country": "TH",
                 }
             )
@@ -181,21 +142,10 @@ class ModuleLDS(CallFunction):
             # Creating DataFrame
             param_df = pd.DataFrame(clean_data)
             param_df.columns = param_df.iloc[0].values
-            param_df = (
-                param_df.iloc[1:-1, :-1]
-                .apply(lambda row: row.str.strip())
-                .reset_index(drop=True)
-            )
+            param_df = (param_df.iloc[1:-1, :-1].apply(lambda row: row.str.strip()).reset_index(drop=True))
 
             # Replacing ‘null’ or Empty Strings with ‘NA’
-            param_df = param_df.map(
-                lambda row: (
-                    "NA"
-                    if isinstance(row, str)
-                    and (row.strip().lower() == "null" or row.strip() == "")
-                    else row
-                )
-            )
+            param_df = param_df.map(lambda row: ("NA" if isinstance(row, str) and (row.strip().lower() == "null" or row.strip() == "") else row))
 
             # Mapping Data to Target Columns
             set_value = [
@@ -216,9 +166,7 @@ class ModuleLDS(CallFunction):
                 },
             ]
             param_df = pd.DataFrame(set_value)
-            param_df = param_df.explode(["Code values", "Decode value"]).reset_index(
-                drop=True
-            )
+            param_df = param_df.explode(["Code values", "Decode value"]).reset_index(drop=True)
 
         except:
             raise
