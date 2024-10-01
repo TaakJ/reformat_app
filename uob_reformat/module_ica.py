@@ -149,14 +149,14 @@ class ModuleICA(CallFunction):
             tbl_user_group_df, tbl_user_bank_df, _ = self.collect_depend_file(i)
 
             # Merge file: ICAS_TBL_USER_GROUP with ICAS_TBL_USER
-            entitlement_name = pd.merge(tbl_user_df, tbl_user_group_df, on="USER_ID", how="left", validate="m:1")
-            ## entitlement_name = pd.merge(tbl_user_df, tbl_user_group_df, on="USER_ID", how="left",
+            entitlement_name = pd.merge(tbl_user_df, tbl_user_group_df, on="USER_ID", how="left", validate="1:m")
+            ## entitlement_name = pd.merge(tbl_user_df, tbl_user_group_df, on="USER_ID", how="left")
             entitlement_name = entitlement_name.fillna("NA")
             entitlement_name_group = (entitlement_name.groupby("USER_ID")["GROUP_ID"].apply(lambda row: "+".join(map(str, sorted(set(row))))).reset_index())
             entitlement_name_group = entitlement_name_group.replace(to_replace=r"NA\+|\+NA(?!;)", value="", regex=True)
 
             # Merge file: ICAS_TBL_USER with ICAS_TBL_USER_GROUP
-            result_ica = pd.merge(entitlement_name_group, tbl_user_df, on="USER_ID", how="left", validate="m:1")
+            result_ica = pd.merge(entitlement_name_group, tbl_user_df, on="USER_ID", how="left", validate="1:m")
             ## result_ica = pd.merge(entitlement_name_group, tbl_user_df, on="USER_ID")
             result_ica = result_ica[["USER_ID","LOGIN_NAME","GROUP_ID","LOCKED_FLAG","FULL_NAME","CREATE_DTM","LAST_LOGIN_ATTEMPT","LAST_UPDATE_DTM"]]
 
