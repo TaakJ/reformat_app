@@ -150,19 +150,16 @@ class ModuleICA(CallFunction):
 
             # Merge file: ICAS_TBL_USER_GROUP with ICAS_TBL_USER
             entitlement_name = pd.merge(tbl_user_df, tbl_user_group_df, on="USER_ID", how="left", validate="1:1")
-            ## entitlement_name = pd.merge(tbl_user_df, tbl_user_group_df, on="USER_ID", how="left")
             entitlement_name = entitlement_name.fillna("NA")
             entitlement_name_group = (entitlement_name.groupby("USER_ID")["GROUP_ID"].apply(lambda row: "+".join(map(str, sorted(set(row))))).reset_index())
             entitlement_name_group = entitlement_name_group.replace(to_replace=r"NA\+|\+NA(?!;)", value="", regex=True)
 
             # Merge file: ICAS_TBL_USER with ICAS_TBL_USER_GROUP
             result_ica = pd.merge(entitlement_name_group, tbl_user_df, on="USER_ID", how="left", validate="1:1")
-            ## result_ica = pd.merge(entitlement_name_group, tbl_user_df, on="USER_ID")
             result_ica = result_ica[["USER_ID","LOGIN_NAME","GROUP_ID","LOCKED_FLAG","FULL_NAME","CREATE_DTM","LAST_LOGIN_ATTEMPT","LAST_UPDATE_DTM"]]
 
             # Merge file: ICAS_TBL_USER with ICAS_TBL_USER_BANK_BRANCH
             branch_code = pd.merge(tbl_user_df, tbl_user_bank_df, on="USER_ID", how="left", validate="1:1")
-            ## branch_code = pd.merge(tbl_user_df, tbl_user_bank_df, on="USER_ID", how="left")
             branch_code = branch_code[["USER_ID", "HOME_BANK", "HOME_BRANCH", "BRANCH_CODE"]]
             branch_code["HOME_BANK"] = branch_code["HOME_BANK"].fillna("NA")
             branch_code["HOME_BRANCH"] = branch_code["HOME_BRANCH"].fillna("NA")
@@ -170,7 +167,6 @@ class ModuleICA(CallFunction):
             branch_code["BANK+BRANCH"] = (branch_code[["HOME_BANK", "HOME_BRANCH", "BRANCH_CODE"]].astype(str).agg("#".join, axis=1))
             final_branch_code = branch_code[["USER_ID", "BANK+BRANCH"]]
             final_ica = pd.merge(result_ica, final_branch_code, on="USER_ID", how="left", validate='1:1')
-            ## final_ica = pd.merge(result_ica, final_branch_code, on="USER_ID", how="left")
 
             date_time_col = ["CREATE_DTM", "LAST_LOGIN_ATTEMPT", "LAST_UPDATE_DTM"]
             for col in date_time_col:final_ica[col] = final_ica[col].apply(self.parse_and_format_datetime)
