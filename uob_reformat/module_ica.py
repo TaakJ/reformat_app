@@ -169,7 +169,7 @@ class ModuleICA(CallFunction):
             branch_code["BRANCH_CODE"] = branch_code["BRANCH_CODE"].fillna("NA")
             branch_code["BANK+BRANCH"] = (branch_code[["HOME_BANK", "HOME_BRANCH", "BRANCH_CODE"]].astype(str).agg("#".join, axis=1))
             final_branch_code = branch_code[["USER_ID", "BANK+BRANCH"]]
-            final_ica = pd.merge(result_ica, final_branch_code, on="USER_ID", how="left", validate='1:m')
+            final_ica = pd.merge(result_ica, final_branch_code, on="USER_ID", how="left", validate='1:1')
             ## final_ica = pd.merge(result_ica, final_branch_code, on="USER_ID", how="left")
 
             date_time_col = ["CREATE_DTM", "LAST_LOGIN_ATTEMPT", "LAST_UPDATE_DTM"]
