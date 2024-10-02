@@ -77,13 +77,17 @@ class ModuleADM(CallFunction):
             
             # Mapping Data to Target Columns
             set_value = dict.fromkeys(self.logging[i]['columns'], 'NA')
+            "EntitlementName","SecondEntitlementName","ThirdEntitlementName"
+            
             set_value.update(
                 {
                     'ApplicationCode': 'ADM',
                     'AccountOwner': user_df['User-ID'],
                     'AccountName': user_df['User-ID'],
                     'AccountType': 'USR',
-                    'EntitlementName': user_df[['Group', 'Role', 'Zone']].apply(lambda row: ';'.join(row), axis=1),
+                    'EntitlementName': user_df['Group'],
+                    'SecondEntitlementName': user_df['Role'],
+                    'ThirdEntitlementName': user_df['Zone'],
                     'AccountStatus': 'A',
                     'IsPrivileged': 'N',
                     'AccountDescription': user_df['User Full Name'],
