@@ -27,13 +27,17 @@ class CollectLog(ABC):
         pass
 
 
-class CollectParams(ABC):
 
+class CollectParams(ABC):
+    
+
+    
     def full_input(self) -> any:
         input_dir = CONFIG[self.module]["input_dir"]
         input_file = CONFIG[self.module]["input_file"]
 
-        set_dir = lambda dir, file: [join(dir, x.strip()) for x in file.split(",")]
+        def set_dir(dir, file):
+            return [join(dir, x.strip()) for x in file.split(",")]
         full_input = set_dir(input_dir, input_file)
 
         full_depend = []
@@ -48,15 +52,13 @@ class CollectParams(ABC):
         output_file = CONFIG[self.module]["output_file"]
 
         suffix = self.batch_date.strftime("%Y%m%d")
-        set_dir = lambda dir, file: [(join(dir, x.strip())if self.write_mode == "overwrite" or self.manual else join(dir, f"{Path(x.strip()).stem}_{suffix}.csv"))
-            for x in file.split(",")]
-
+        def set_dir(dir, file):
+            return [join(dir, x.strip()) if self.write_mode == "overwrite" or self.manual else join(dir, f"{Path(x.strip()).stem}_{suffix}.csv") for x in file.split(",")]
         full_target = set_dir(output_dir, output_file)
 
         return full_target
 
     def collect_setup(self) -> None:
-
         logging.info(f"Setup params/logging for module: {self.module}")
 
         log = []
@@ -70,13 +72,14 @@ class CollectParams(ABC):
             if len(full_input) == len(full_target):
                 mapping_list = list(zip(full_input, full_target))
             else:
-                mapping_list = [(input, target) for input in full_input for target in full_target]
+                mapping_list = [
+                    (input, target) for input in full_input for target in full_target
+                ]
 
             # 0: input file
             # 1: target file
             for i, files in enumerate(mapping_list, 1):
                 for select_num in [num for num in self.select_files if i == num]:
-
                     status = "succeed"
                     if set(("full_input", "full_target")).issubset(record):
                         copy_record = record.copy()
@@ -126,12 +129,9 @@ class CollectParams(ABC):
 
 
 class BackupAndClear:
-
     def clear_target_file(self) -> None:
-
         status = "skipped"
         for i, record in enumerate(self.logging):
-
             if os.path.exists(record["full_target"]):
                 try:
                     if self.backup is True:
@@ -146,7 +146,6 @@ class BackupAndClear:
             logging.info(f"Clear target file {record["full_target"]}, status {status}")
 
     def achieve_backup(self, i, full_target: str) -> None:
-
         try:
             try:
                 root_dir = join(Folder.BACKUP, self.module)
@@ -154,7 +153,6 @@ class BackupAndClear:
 
                 for date_dir in os.listdir(root_dir):
                     if date_dir <= bk_date.strftime("%Y%m%d"):
-
                         del_backup = join(root_dir, date_dir)
                         shutil.rmtree(del_backup)
 
@@ -177,18 +175,21 @@ class BackupAndClear:
             if (cmp_df["count"] >= 1).any():
                 self.genarate_backup_file(full_target, full_backup)
             else:
-                logging.info(f"No backup file {full_target} because no data was changed")
+                logging.info(
+                    f"No backup file {full_target} because no data was changed"
+                )
 
         except FileNotFoundError:
             self.genarate_backup_file(full_target, full_backup)
 
     def genarate_backup_file(self, full_target, full_backup) -> None:
-
         status = "skipped"
         try:
             shutil.copy2(full_target, full_backup)
             status = "succeed"
-            logging.info(f"Backup file from {full_target} to {full_backup}, status {status}")
+            logging.info(
+                f"Backup file from {full_target} to {full_backup}, status {status}"
+            )
 
         except Exception:
             logging.info(f"No target file {full_target}, status {status}")
@@ -197,7 +198,6 @@ class BackupAndClear:
         try:
             tmp_dir = join(Folder.TMP, self.module)
             for date_dir in os.listdir(tmp_dir):
-
                 if date_dir < self.date.strftime("%Y%m%d"):
                     full_tmp = join(tmp_dir, date_dir)
 
