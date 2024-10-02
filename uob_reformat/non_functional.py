@@ -9,7 +9,6 @@ from .functional import Convert2File
 from .setup import Folder, CONFIG
 from .exception import CustomException
 
-
 class CollectLog(ABC):
     def __init__(self) -> None:
         self._log = []
@@ -25,8 +24,6 @@ class CollectLog(ABC):
     @abstractmethod
     def logSetter(self, log: list):
         pass
-
-
 
 class CollectParams(ABC):
     
@@ -72,9 +69,7 @@ class CollectParams(ABC):
             if len(full_input) == len(full_target):
                 mapping_list = list(zip(full_input, full_target))
             else:
-                mapping_list = [
-                    (input, target) for input in full_input for target in full_target
-                ]
+                mapping_list = [(input, target) for input in full_input for target in full_target]
 
             # 0: input file
             # 1: target file
@@ -175,9 +170,7 @@ class BackupAndClear:
             if (cmp_df["count"] >= 1).any():
                 self.genarate_backup_file(full_target, full_backup)
             else:
-                logging.info(
-                    f"No backup file {full_target} because no data was changed"
-                )
+                logging.info(f"No backup file {full_target} because no data was changed")
 
         except FileNotFoundError:
             self.genarate_backup_file(full_target, full_backup)
@@ -187,9 +180,7 @@ class BackupAndClear:
         try:
             shutil.copy2(full_target, full_backup)
             status = "succeed"
-            logging.info(
-                f"Backup file from {full_target} to {full_backup}, status {status}"
-            )
+            logging.info(f"Backup file from {full_target} to {full_backup}, status {status}")
 
         except Exception:
             logging.info(f"No target file {full_target}, status {status}")
