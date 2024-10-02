@@ -2,7 +2,6 @@ import re
 import glob
 from pathlib import Path
 import pandas as pd
-from functools import reduce
 import logging
 from .non_functional import CallFunction
 from .exception import CustomException
@@ -169,7 +168,8 @@ class ModuleICA(CallFunction):
             final_ica = pd.merge(result_ica, final_branch_code, on="USER_ID", how="left", validate='1:m')
 
             date_time_col = ["CREATE_DTM", "LAST_LOGIN_ATTEMPT", "LAST_UPDATE_DTM"]
-            for col in date_time_col:final_ica[col] = final_ica[col].apply(self.parse_and_format_datetime)
+            for col in date_time_col:
+                final_ica[col] = final_ica[col].apply(self.parse_and_format_datetime)
 
             final_ica["FULL_NAME"] = final_ica["FULL_NAME"].apply(self.clean_fullname)
             final_ica["LOCKED_FLAG"] = final_ica["LOCKED_FLAG"].apply(lambda row: "D" if row == "1" else "A")
