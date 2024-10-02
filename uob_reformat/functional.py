@@ -120,7 +120,8 @@ class Convert2File:
 
             self.collect_param_file(i, format_file)
         else:
-            columns = ["ApplicationCode","AccountOwner","AccountName","AccountType","EntitlementName","SecondEntitlementName","ThirdEntitlementName","AccountStatus","IsPrivileged","AccountDescription","CreateDate","LastLogin","LastUpdatedDate","AdditionalAttribute","Country"]
+            columns = ["ApplicationCode","AccountOwner","AccountName","AccountType","EntitlementName","SecondEntitlementName","ThirdEntitlementName","AccountStatus","IsPrivileged",
+                    "AccountDescription","CreateDate","LastLogin","LastUpdatedDate","AdditionalAttribute","Country"]
             self.logging[i].update({"columns": columns})
 
             self.collect_user_file(i, format_file)
@@ -145,8 +146,9 @@ class Convert2File:
 
             new_df = remark_rows(new_df)
             self.new_df = new_df.reindex(index=self.merge_index, columns=new_df.columns).iloc[:, :-1]
-
-            df["count"] = pd.DataFrame(np.where(df.ne(self.new_df), True, df),index=df.index,columns=df.columns).apply(lambda x: (x is True).sum(), axis=1)
+            
+            diff_df = pd.DataFrame(np.where(df.ne(self.new_df), True, df), index=df.index, columns=df.columns)
+            df["count"] = diff_df.apply(lambda row: row.eq(True).sum(), axis=1)
 
         except Exception as err:
             raise Exception(err)
