@@ -46,16 +46,22 @@ class ModuleICA(CallFunction):
         logging.info(f"Stop Run Module '{self.module}'\r\n")
 
         return result
-
-    def parse_and_format_datetime(self, date_str):
-        formats = ["%y/%m/%d %H:%M","%Y-%m-%d %H:%M:%S","%Y-%m-%d %H:%M","%d/%m/%y %H:%M",]
+    
+    def parse_datetime(self, date_str):
+        formats = [
+            "%Y-%m-%d %H:%M:%S.%f", "%Y-%m-%d %H:%M:%S", "%d/%m/%Y %H:%M:%S.%f",
+            "%d/%m/%Y %H:%M:%S", "%Y-%m-%d", "%d-%m-%Y", "%Y/%m/%d", "%d/%m/%Y", "%m/%d/%Y"
+            ]
         for fmt in formats:
             try:
-                return pd.to_datetime(date_str, format=fmt).strftime("%Y%m%d%H%M%S")
+                parsed_date = pd.to_datetime(date_str, format=fmt)
+                if parsed_date.year < 2000:
+                    return 'NA'
+                return parsed_date
             except ValueError:
                 continue
-        return "Invalid Format"  # In case none of the formats match
-
+        return pd.NaT
+    
     def clean_fullname(self, name):
         name = name.replace(",", "")
         name = re.sub(r"\d+", "", name)
@@ -169,7 +175,7 @@ class ModuleICA(CallFunction):
 
             date_time_col = ["CREATE_DTM", "LAST_LOGIN_ATTEMPT", "LAST_UPDATE_DTM"]
             for col in date_time_col:
-                final_ica[col] = final_ica[col].apply(self.parse_and_format_datetime)
+                final_ica[col] = final_ica[col].apply(self.parse_datetime).dt.strftime("%Y%m%d%H%M%S")
 
             final_ica["FULL_NAME"] = final_ica["FULL_NAME"].apply(self.clean_fullname)
             final_ica["LOCKED_FLAG"] = final_ica["LOCKED_FLAG"].apply(lambda row: "D" if row == "1" else "A")
