@@ -47,7 +47,7 @@ class ModuleADM(CallFunction):
         errors = []
         for i, rows in enumerate(rows_list, 1):
             try:
-                assert len(rows) == expected_length, f"row {i} does not have {expected_length} elements: {rows}"
+                assert len(rows) == expected_length, f"row {i} does not have {expected_length} elements {rows}"
             except AssertionError as err:
                 errors.append(str(err))
                 

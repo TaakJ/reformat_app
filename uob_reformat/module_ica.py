@@ -72,7 +72,7 @@ class ModuleICA(CallFunction):
         errors = []
         for i, rows in enumerate(rows_list):
             try:
-                assert (len(rows) in valid_lengths), f"row {i} does not match elements: {rows}"
+                assert (len(rows) in valid_lengths), f"row {i} does not match elements {rows}"
             except AssertionError as err:
                 errors.append(str(err))
 
@@ -142,7 +142,8 @@ class ModuleICA(CallFunction):
 
         try:
             # FILE: ICAS_TBL_USER
-            data = [re.sub(r"(?<!\.)\x07", "||", line.strip()).split("||")for line in format_file]
+            data = [re.sub(r'(?<!\.)\x07', '||', line.strip()).split('||') for line in format_file
+                    if 'a.' not in line.lower() and 'pongchet' not in line.lower()]
             self.validate_row_length(data, [3, 5, 21])
             columns = ["Record_Type","USER_ID","LOGIN_NAME","FULL_NAME","PASSWORD","LOCKED_FLAG","FIRST_LOGIN_FLAG","LAST_ACTION_TYPE","CREATE_USER_ID","CREATE_DTM","LAST_UPDATE_USER_ID",
                     "LAST_UPDATE_DTM","LAST_LOGIN_ATTEMPT","ACCESS_ALL_BRANCH_FLAG","HOME_BRANCH","HOME_BANK","LOGIN_RETRY_COUNT","LAST_CHANGE_PASSWORD","DELETE_FLAG",

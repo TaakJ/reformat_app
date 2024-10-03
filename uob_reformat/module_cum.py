@@ -62,7 +62,7 @@ class ModuleCUM(CallFunction):
         errors = []
         for i, rows in enumerate(rows_list, 2):
             try:
-                assert len(rows) in valid_lengths, f"row {i} does not match elements: {rows}"
+                assert len(rows) in valid_lengths, f"row {i} does not match elements {rows}"
             except AssertionError as err:
                 errors.append(str(err))
                     
