@@ -203,6 +203,8 @@ class ModuleBOS(CallFunction):
                 'branch_code' : 'Code values',
                 'branch_name' : 'Decode value'
             })
+            # Replace value 'ศูนย์เงินสด' with 'Cash Hub'
+            dept_param_list.loc[dept_param_list['Decode value'] == 'ศูนย์เงินสด', 'Decode value'] = 'Cash Hub'
             
             merge_df = pd.concat([sec_param_list,app_param_list],ignore_index=True)
             merge_df = pd.concat([merge_df, dept_param_list],ignore_index=True)
