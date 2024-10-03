@@ -56,7 +56,7 @@ class ModuleICA(CallFunction):
             try:
                 parsed_date = pd.to_datetime(date_str, format=fmt)
                 if parsed_date.year < 2000:
-                    return 'NA'
+                    return pd.NaT
                 return parsed_date
             except ValueError:
                 continue
@@ -72,7 +72,7 @@ class ModuleICA(CallFunction):
         errors = []
         for i, rows in enumerate(rows_list):
             try:
-                assert (len(rows) in valid_lengths), f"row {i} does not match elements {rows}"
+                assert (len(rows) in valid_lengths), f"row {i} does not match values {rows}"
             except AssertionError as err:
                 errors.append(str(err))
 
@@ -208,9 +208,6 @@ class ModuleICA(CallFunction):
             merge_df = merge_df.drop(columns="USER_ID")
             merge_df["AccountName"] = merge_df["AccountOwner"]
             merge_df = merge_df.fillna(static_value)
-            merge_df["CreateDate"] = merge_df["CreateDate"].astype(str)
-            merge_df["LastLogin"] = merge_df["LastLogin"].astype(str)
-            merge_df["LastUpdatedDate"] = merge_df["LastUpdatedDate"].astype(str)
 
         except:
             raise

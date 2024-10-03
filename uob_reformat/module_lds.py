@@ -54,7 +54,7 @@ class ModuleLDS(CallFunction):
             try:
                 parsed_date = pd.to_datetime(date_str, format=fmt)
                 if parsed_date.year < 2000:
-                    return 'NA'
+                    return pd.NaT
                 return parsed_date
             except ValueError:
                 continue
@@ -64,7 +64,7 @@ class ModuleLDS(CallFunction):
         errors = []
         for i, rows in enumerate(rows_list, 2):
             try:
-                assert (len(rows) in valid_lengths), f"row {i} does not match elements {rows}"
+                assert (len(rows) in valid_lengths), f"row {i} does not match values {rows}"
             except AssertionError as err:
                 errors.append(str(err))
 

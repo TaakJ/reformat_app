@@ -49,7 +49,7 @@ class ModuleMOC(CallFunction):
         errors = []
         for i, rows in enumerate(rows_list, 1):
             try:
-                assert (len(rows) == expected_length), f"row {i} does not have 10 elements {rows}"
+                assert (len(rows) == expected_length), f"row {i} does not have {expected_length} values {rows}"
             except AssertionError as err:
                 errors.append(str(err))
 
