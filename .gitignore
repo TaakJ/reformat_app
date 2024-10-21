@@ -1,6 +1,6 @@
 # Byte-compiled / optimized / DLL files
 .vscode/
-.vs/
+.vs/*
 __pycache__/
 *.pytest_cache
 tmp/*
