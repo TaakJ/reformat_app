@@ -27,8 +27,6 @@ class CollectLog(ABC):
 
 class CollectParams(ABC):
     
-
-    
     def full_input(self) -> any:
         input_dir = CONFIG[self.module]["input_dir"]
         input_file = CONFIG[self.module]["input_file"]
