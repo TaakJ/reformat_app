@@ -62,7 +62,9 @@ class ModuleIIC(CallFunction):
         self.logging[i].update({"function": "collect_user_file", "status": status})
 
         try:
-            data = [re.sub(r"(?<!\.),", ",", line.strip().replace('"', "")).split(",") for line in format_file]
+            data = []
+            for line in format_file:
+                data.append([element.strip('"') for element in re.split(r',(?=(?:[^"]*"[^"]*")*[^"]*$)', line.strip())])
             self.validate_row_length(data)
 
             # Creating DataFrame
@@ -86,9 +88,11 @@ class ModuleIIC(CallFunction):
         self.logging[i].update({"function": "collect_param_file", "status": status})
 
         try:
-            data = [re.sub(r"(?<!\.),", ",", line.strip().replace('"', "")).split(",") for line in format_file]
+            data = []
+            for line in format_file:
+                data.append([element.strip('"') for element in re.split(r',(?=(?:[^"]*"[^"]*")*[^"]*$)', line.strip())])
             self.validate_row_length(data, 3)
-
+            
             # Creating DataFrame
             columns = self.logging[i]["columns"]
             param_df = pd.DataFrame(data, columns=columns)

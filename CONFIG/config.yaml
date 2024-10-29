@@ -22,7 +22,7 @@ DOC:
 DIL:
   input_dir: D:\IGAGD\DIL\DOWNLOAD
   output_dir: D:\IGAGD\DIL\UPLOAD
-  input_file: DocImage1.txt
+  input_file: DocImage.txt
   output_file: DILIGAWINT.csv, DILPARAMLIST.csv
 ICA:
   input_dir: D:\IGAGD\ICA\DOWNLOAD

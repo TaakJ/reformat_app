@@ -61,8 +61,10 @@ class ModuleLMT(CallFunction):
         status = "failed"
         self.logging[i].update({"function": "collect_user_file", "status": status})
 
-        try:
-            data = [re.sub(r"(?<!\.),", ",", line.strip().replace('"', "")).split(",") for line in format_file]
+        try:            
+            data = []
+            for line in format_file:
+                data.append([element.strip('"') for element in re.split(r',(?=(?:[^"]*"[^"]*")*[^"]*$)', line.strip())])
             self.validate_row_length(data)
 
             # Creating DataFrame
@@ -114,7 +116,7 @@ class ModuleLMT(CallFunction):
             final_lmt["AccountName"] = final_lmt["AccountOwner"]
             final_lmt = final_lmt.fillna(static_values)
             final_lmt = final_lmt[columns]
-
+            
         except:
             raise
 
@@ -128,7 +130,9 @@ class ModuleLMT(CallFunction):
         self.logging[i].update({"function": "collect_param_file", "status": status})
 
         try:
-            data = [re.sub(r"(?<!\.),", ",", line.strip().replace('"', "")).split(",") for line in format_file]
+            data = []
+            for line in format_file:
+                data.append([element.strip('"') for element in re.split(r',(?=(?:[^"]*"[^"]*")*[^"]*$)', line.strip())])
             self.validate_row_length(data)
 
             # Creating DataFrame
