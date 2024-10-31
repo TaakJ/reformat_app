@@ -1,9 +1,10 @@
-import re
 import glob
-import pandas as pd
 import logging
-from .non_functional import CallFunction
+import re
+import pandas as pd
 from .exception import CustomException
+from .non_functional import CallFunction
+
 
 class ModuleBOS(CallFunction):
 
@@ -68,7 +69,9 @@ class ModuleBOS(CallFunction):
             data = []
             if glob.glob(full_depend, recursive=True):
                 format_file = self.read_file(i, full_depend)
-                data = [re.sub(r'(?<!\.),', '||', line.strip()).split('||') for line in format_file]
+                
+                for line in format_file:
+                    data.append([element.strip('"') for element in re.split(r',(?=(?:[^"]*"[^"]*")*[^"]*$)', line.strip())])
                 self.validate_row_length(data)
             else:
                 self.logging[i].update({'err': f'File not found {full_depend}'})
@@ -96,7 +99,9 @@ class ModuleBOS(CallFunction):
         self.logging[i].update({'function': 'collect_user_file', 'status': status})
 
         try:
-            data = [re.sub(r'(?<!\.),', '||', line.strip()).split('||') for line in format_file]
+            data = [] 
+            for line in format_file:
+                data.append([element.strip('"') for element in re.split(r',(?=(?:[^"]*"[^"]*")*[^"]*$)', line.strip())])
             self.validate_row_length(data)
             
             # FILE: BOSTH 
@@ -170,7 +175,9 @@ class ModuleBOS(CallFunction):
         self.logging[i].update({'function': 'collect_param_file', 'status': status})
         
         try:
-            data = [re.sub(r'(?<!\.),', '||', line.strip()).split('||') for line in format_file]
+            data = []
+            for line in format_file:
+                data.append([element.strip('"') for element in re.split(r',(?=(?:[^"]*"[^"]*")*[^"]*$)', line.strip())])
             self.validate_row_length(data)
             
             # FILE: BOSTH
