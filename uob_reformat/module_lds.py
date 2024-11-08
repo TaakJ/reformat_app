@@ -67,28 +67,40 @@ class ModuleLDS(CallFunction):
                 assert (len(rows) in valid_lengths), f"row {i} does not match values {rows}"
             except AssertionError as err:
                 errors.append(str(err))
-
+                
         if errors:
             raise Exception("Data issue: " + "\n".join(errors))
 
     def read_format_file(self, format_file) -> list:
+        
+        def clean_and_split_line(line):
+            # Cleans and splits a line, handling quoted sections and extra spaces.
+            cleaned_line = re.sub(r"\s+", " ", line.strip())  # Remove extra spaces
+            split_line = re.split(r',(?=(?:[^"]*"[^"]*")*[^"]*$)', cleaned_line)
+            return [x.strip() for x in split_line]
 
-        data = [re.sub(r"(?<!\.),", "||", "".join(re.findall(r"\w+.*", line.strip()))).split("||") for line in format_file if re.findall(r"\w+.*", line.strip())]
+        data = []
+        for line in format_file:
+            if re.findall(r"\w+.*", line.strip()):
+                data.append(clean_and_split_line(line))
 
         clean_data = []
-        for rows, _data in enumerate(data):
-            if rows == 0:
-                clean_data += [re.sub(r"\s+", ",", ",".join(_data)).split(",")]
+        for row_index, row in enumerate(data):
+            if row_index == 0:
+                # Process the header row
+                header_row = re.sub(r"\s+", ",", ",".join(row)).split(",")
+                clean_data.append(header_row)
             else:
-                fix_value = []
-                for idx, value in enumerate(_data, 1):
-                    if idx == 1:
-                        value = re.sub(r"\s+", ",", value).split(",")
-                        fix_value.extend(value)
+                # Process subsequent rows
+                cleaned_row = []
+                for col_index, value in enumerate(row, 1):
+                    if col_index == 1:
+                        split_values = re.sub(r"\s+", ",", value).split(",")
+                        cleaned_row.extend(split_values)
                     else:
-                        fix_value.append(value)
-                clean_data.append(fix_value)
-
+                        cleaned_row.append(value)
+                clean_data.append(cleaned_row)
+                
         return clean_data
 
     def collect_user_file(self, i: int, format_file: any) -> dict:
@@ -104,7 +116,7 @@ class ModuleLDS(CallFunction):
             user_df = pd.DataFrame(clean_data)
             user_df.columns = user_df.iloc[0].values
             user_df = (user_df.iloc[1:-1, :-1].apply(lambda row: row.str.strip()).reset_index(drop=True))
-
+            
             # Replacing ‘null’ or Empty Strings with ‘NA’
             user_df = user_df.map(lambda row: ("NA" if isinstance(row, str) and (row.lower() == "null" or row == "") else row))
 
