@@ -161,34 +161,38 @@ class ModuleLDS(CallFunction):
             param_df = pd.DataFrame(clean_data)
             param_df.columns = param_df.iloc[0].values
             param_df = (param_df.iloc[1:-1, :-1].apply(lambda row: row.str.strip()).reset_index(drop=True))
-
             # Replacing ‘null’ or Empty Strings with ‘NA’
             param_df = param_df.map(lambda row: ("NA" if isinstance(row, str) and (row.strip().lower() == "null" or row.strip() == "") else row))
-
+            
             # Mapping Data to Target Columns
-            set_value = [
-                {
-                    "Parameter Name": "Role",
-                    "Code values": param_df["RoleID"].unique(),
-                    "Decode value": param_df["RoleName"].unique(),
-                },
-                {
-                    "Parameter Name": "Department",
-                    "Code values": param_df["CostCenterName"].unique(),
-                    "Decode value": param_df["CostCenterName"].unique(),
-                },
-                {
-                    "Parameter Name": "Costcenter",
-                    "Code values": param_df["CostCenterCode"].unique(),
-                    "Decode value": param_df["CostCenterName"].unique(),
-                },
-            ]
-            param_df = pd.DataFrame(set_value)
-            param_df = param_df.explode(["Code values", "Decode value"]).reset_index(drop=True)
-
-        except:
+            columns = self.logging[i]["columns"]
+            merge_df = pd.DataFrame(columns=columns)
+            # Extract unique RoleID and RoleName
+            unique_roles = param_df[['RoleID', 'RoleName']].drop_duplicates()
+            role_params = pd.DataFrame({
+                'Parameter Name': 'Role',
+                'Code values': unique_roles['RoleID'],
+                'Decode value': unique_roles['RoleName']
+            })
+            # Extract unique CostCenterName
+            unique_departments = param_df['CostCenterName'].unique()
+            dept_params = pd.DataFrame({
+                'Parameter Name': 'Department',
+                'Code values': unique_departments,
+                'Decode value': unique_departments
+            })
+            # Extract unique CostCenterCode and CostCenterName
+            unique_cost_centers = param_df[['CostCenterCode', 'CostCenterName']].drop_duplicates()
+            cost_center_params = pd.DataFrame({
+                'Parameter Name': 'Costcenter',
+                'Code values': unique_cost_centers['CostCenterCode'],
+                'Decode value': unique_cost_centers['CostCenterName']
+            })
+            merge_df = pd.concat([role_params, dept_params, cost_center_params], ignore_index=True)
+            
+        except: 
             raise
 
         status = "succeed"
-        self.logging[i].update({"data": param_df.to_dict("list"), "status": status})
+        self.logging[i].update({"data": merge_df.to_dict("list"), "status": status})
         logging.info(f"Collect param data, status: {status}")
