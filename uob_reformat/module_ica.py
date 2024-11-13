@@ -75,7 +75,6 @@ class ModuleICA(CallFunction):
                 assert (len(rows) in valid_lengths), f"row {i} does not match values {rows}"
             except AssertionError as err:
                 errors.append(str(err))
-
         if errors:
             raise Exception("Data issue: " + "\n".join(errors))
 
@@ -182,8 +181,8 @@ class ModuleICA(CallFunction):
             final_ica["LOCKED_FLAG"] = final_ica["LOCKED_FLAG"].apply(lambda row: "D" if row == "1" else "A")
 
             # Mapping Data to Target Columns
-            columns = self.logging[i]["columns"]
-            merge_df = pd.DataFrame(columns=columns)
+            target_columns = self.logging[i]["columns"]
+            merge_df = pd.DataFrame(columns=target_columns)
             static_value = {
                 "ApplicationCode": "ICA",
                 "AccountType": "USR",
@@ -235,8 +234,8 @@ class ModuleICA(CallFunction):
             _, tbl_user_bank_df, tbl_group_df = self.collect_depend_file(i)
 
             # Merge file: ICAS_TBL_USER with ICAS_TBL_USER_BANK_BRANCH
-            columns = self.logging[i]["columns"]
-            merge_df = pd.DataFrame(columns=columns)
+            target_columns = self.logging[i]["columns"]
+            merge_df = pd.DataFrame(columns=target_columns)
 
             home_bank = {
                 "Parameter Name": "HOME_BANK",

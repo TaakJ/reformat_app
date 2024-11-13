@@ -52,7 +52,6 @@ class ModuleIIC(CallFunction):
                 assert (len(rows) == expected_length), f"row {i} does not have {expected_length} values {rows}"
             except AssertionError as err:
                 errors.append(str(err))
-
         if errors:
             raise Exception("Data issue: " + "\n".join(errors))
 
@@ -68,11 +67,9 @@ class ModuleIIC(CallFunction):
             self.validate_row_length(data)
 
             # Creating DataFrame
-            columns = self.logging[i]["columns"]
-            user_df = pd.DataFrame(data, columns=columns)
+            target_columns = self.logging[i]["columns"]
+            user_df = pd.DataFrame(data, columns=target_columns)
             user_df = (user_df.iloc[1:].apply(lambda row: row.str.strip()).reset_index(drop=True))
-
-            # Replacing ‘null’ or Empty Strings with ‘NA’
             user_df = user_df.map(lambda row: ("NA" if isinstance(row, str) and (row.lower() == "null" or row == "") else row))
 
         except:
@@ -94,11 +91,9 @@ class ModuleIIC(CallFunction):
             self.validate_row_length(data, 3)
             
             # Creating DataFrame
-            columns = self.logging[i]["columns"]
-            param_df = pd.DataFrame(data, columns=columns)
+            target_columns = self.logging[i]["columns"]
+            param_df = pd.DataFrame(data, columns=target_columns)
             param_df = (param_df.iloc[1:].apply(lambda row: row.str.strip()).reset_index(drop=True))
-
-            # Replacing ‘null’ or Empty Strings with ‘NA’
             param_df = param_df.map(lambda row: ("NA" if isinstance(row, str) and (row.lower() == "null" or row == "") else row))
 
         except:

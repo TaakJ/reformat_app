@@ -53,7 +53,6 @@ class ModuleBOS(CallFunction):
                 assert len(rows) == expected_length, f"row {i} does not have {expected_length} values {rows}"
             except AssertionError as err:
                 errors.append(str(err))
-                
         if errors:
             raise Exception("Data issue: " + "\n".join(errors))
     
@@ -142,8 +141,8 @@ class ModuleBOS(CallFunction):
             })
             
             # Mapping Data to Target Columns
-            columns = self.logging[i]['columns']
-            merge_df = pd.DataFrame(columns=columns)
+            target_columns = self.logging[i]['columns']
+            merge_df = pd.DataFrame(columns=target_columns)
             static_value = {
                 'ApplicationCode' : 'BOS',
                 'AccountType' : 'USR',
@@ -160,7 +159,7 @@ class ModuleBOS(CallFunction):
             final_bos['AccountOwner'] = final_bos['AccountName']
             final_bos = final_bos.fillna(static_value)
             final_bos = final_bos.drop(columns='employee_no')
-            final_bos = final_bos[columns].sort_values(by='AccountOwner',ignore_index=True)
+            final_bos = final_bos[target_columns].sort_values(by='AccountOwner',ignore_index=True)
             
         except:
             raise
@@ -190,14 +189,14 @@ class ModuleBOS(CallFunction):
             param_df = self.collect_depend_file(i)
             
             # Mapping Data to Target Columns
-            columns = self.logging[i]['columns']
-            sec_param_list = pd.DataFrame(columns=columns)
+            target_columns = self.logging[i]['columns']
+            sec_param_list = pd.DataFrame(columns=target_columns)
             sec_parm_uni = param_df['rolename'].unique()
             sec_param_list['Code values'] = sec_parm_uni
             sec_param_list['Decode value'] = sec_parm_uni
             sec_param_list['Parameter Name'] = 'Security roles'
             
-            app_param_list = pd.DataFrame(columns=columns)
+            app_param_list = pd.DataFrame(columns=target_columns)
             app_param_uni = user_df['rolename'].unique()
             app_param_list['Code values'] = app_param_uni
             app_param_list['Decode value'] = app_param_uni

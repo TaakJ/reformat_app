@@ -67,7 +67,6 @@ class ModuleLDS(CallFunction):
                 assert (len(rows) in valid_lengths), f"row {i} does not match values {rows}"
             except AssertionError as err:
                 errors.append(str(err))
-                
         if errors:
             raise Exception("Data issue: " + "\n".join(errors))
 
@@ -116,13 +115,15 @@ class ModuleLDS(CallFunction):
             user_df = pd.DataFrame(clean_data)
             user_df.columns = user_df.iloc[0].values
             user_df = (user_df.iloc[1:-1, :-1].apply(lambda row: row.str.strip()).reset_index(drop=True))
-            
-            # Replacing ‘null’ or Empty Strings with ‘NA’
             user_df = user_df.map(lambda row: ("NA" if isinstance(row, str) and (row.lower() == "null" or row == "") else row))
-
+            
+            # Adjust column: CostCenterName
+            user_df['CostCenterName'] = user_df['CostCenterName'].apply(lambda row: ' '.join(row.replace('.', ' ').replace(',', ' ').split()).strip())
+            
             # Mapping Data to Target Columns
-            set_value = dict.fromkeys(self.logging[i]["columns"], "NA")
-            set_value.update(
+            target_columns = self.logging[i]["columns"]
+            mapping  = dict.fromkeys(target_columns, "NA")
+            mapping.update(
                 {
                     "ApplicationCode": "LDS",
                     "AccountOwner": user_df["UserName"],
@@ -138,7 +139,7 @@ class ModuleLDS(CallFunction):
                     "Country": "TH",
                 }
             )
-            user_df = user_df.assign(**set_value)
+            user_df = user_df.assign(**mapping)
             user_df = user_df.drop(user_df.iloc[:, :32].columns, axis=1)
 
         except:
@@ -161,12 +162,15 @@ class ModuleLDS(CallFunction):
             param_df = pd.DataFrame(clean_data)
             param_df.columns = param_df.iloc[0].values
             param_df = (param_df.iloc[1:-1, :-1].apply(lambda row: row.str.strip()).reset_index(drop=True))
-            # Replacing ‘null’ or Empty Strings with ‘NA’
             param_df = param_df.map(lambda row: ("NA" if isinstance(row, str) and (row.strip().lower() == "null" or row.strip() == "") else row))
             
+            # Adjust column: CostCenterName
+            param_df['CostCenterName'] = param_df['CostCenterName'].apply(lambda row: ' '.join(row.replace('.', ' ').replace(',', ' ').split()).strip())
+            
             # Mapping Data to Target Columns
-            columns = self.logging[i]["columns"]
-            merge_df = pd.DataFrame(columns=columns)
+            target_columns = self.logging[i]["columns"]
+            merge_df = pd.DataFrame(columns=target_columns)
+            
             # Extract unique RoleID and RoleName
             unique_roles = param_df[['RoleID', 'RoleName']].drop_duplicates()
             role_params = pd.DataFrame({
@@ -174,21 +178,24 @@ class ModuleLDS(CallFunction):
                 'Code values': unique_roles['RoleID'],
                 'Decode value': unique_roles['RoleName']
             })
+            
             # Extract unique CostCenterName
-            unique_departments = param_df['CostCenterName'].unique()
+            unique_dept = param_df['CostCenterName'].unique()
             dept_params = pd.DataFrame({
                 'Parameter Name': 'Department',
-                'Code values': unique_departments,
-                'Decode value': unique_departments
+                'Code values': unique_dept,
+                'Decode value': unique_dept
             })
+            
             # Extract unique CostCenterCode and CostCenterName
-            unique_cost_centers = param_df[['CostCenterCode', 'CostCenterName']].drop_duplicates()
-            cost_center_params = pd.DataFrame({
+            unique_cct = param_df[['CostCenterCode', 'CostCenterName']].drop_duplicates()
+            cct_params = pd.DataFrame({
                 'Parameter Name': 'Costcenter',
-                'Code values': unique_cost_centers['CostCenterCode'],
-                'Decode value': unique_cost_centers['CostCenterName']
+                'Code values': unique_cct['CostCenterCode'],
+                'Decode value': unique_cct['CostCenterName']
             })
-            merge_df = pd.concat([role_params, dept_params, cost_center_params], ignore_index=True)
+            
+            merge_df = pd.concat([role_params, dept_params, cct_params], ignore_index=True)
             
         except: 
             raise

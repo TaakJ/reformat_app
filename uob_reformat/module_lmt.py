@@ -1,9 +1,8 @@
+import logging
 import re
 import pandas as pd
-import logging
-from .non_functional import CallFunction
 from .exception import CustomException
-
+from .non_functional import CallFunction
 
 class ModuleLMT(CallFunction):
 
@@ -52,7 +51,6 @@ class ModuleLMT(CallFunction):
                 assert (len(rows) == expected_length or len(rows) == 1), f"row {i} does not values {expected_length} elements {rows}"
             except AssertionError as err:
                 errors.append(str(err))
-
         if errors:
             raise Exception("Data issue: " + "\n".join(errors))
 
@@ -73,21 +71,24 @@ class ModuleLMT(CallFunction):
             user_df = (user_df.iloc[1:].apply(lambda row: row.str.strip()).reset_index(drop=True))
             user_df = user_df.map(lambda row: ("NA" if isinstance(row, str) and (row.lower() == "null" or row == "") else row))
 
+            # Adjust column: Department
+            user_df['Department'] = user_df['Department'].apply(lambda row: ' '.join(row.replace('.', ' ').replace(',', ' ').split()).strip())
+            
             # Adjust column: SecurityRoles, ApplicationRoles, ProgramTemplate
             user_df.loc[:, ["SecurityRoles", "ApplicationRoles", "ProgramTemplate"]] = (user_df.loc[:, ["SecurityRoles", "ApplicationRoles", "ProgramTemplate"]].fillna("NA"))
             user_df = user_df.drop_duplicates().reset_index(drop=True)
-
+            
             # Group by specified columns and aggregate
             group_user_df = (user_df.groupby(["DisplayName", "EmployeeNo", "Username", "Department"]).agg(lambda row: "+".join(map(str, sorted(set(row))))).reset_index())
-
+            
             # Adjust column: Username
             group_user_df["Username"] = group_user_df["Username"].apply(lambda row: (row.replace("NTTHPDOM\\", "") if isinstance(row, str) else row))
-
+            
             # Adjust column: SecurityRoles, ApplicationRoles, ProgramTemplate
             group_user_df["Roles"] = group_user_df[["SecurityRoles", "ApplicationRoles", "ProgramTemplate"]].apply(lambda row: ";".join(filter(pd.notna, map(str, row))), axis=1)
             group_user_df["Roles"] = group_user_df["Roles"].replace(to_replace=r"NA\+|\+NA(?!;)", value="", regex=True)
             group_user_df = group_user_df.drop(group_user_df.loc[:, ["SecurityRoles", "ApplicationRoles", "ProgramTemplate"]],axis=1,)
-
+            
             # Rename columns
             group_user_df = group_user_df.rename(columns={
                     "Username": "AccountOwner",
@@ -96,10 +97,10 @@ class ModuleLMT(CallFunction):
                     "Department": "AdditionalAttribute",
                 }
             )
-
+            
             # Mapping Data to Target Columns
-            columns = self.logging[i]["columns"]
-            merge_df = pd.DataFrame(columns=columns)
+            target_columns = self.logging[i]["columns"]
+            merge_df = pd.DataFrame(columns=target_columns)
             static_values = {
                 "ApplicationCode": "LMT",
                 "AccountType": "USR",
@@ -112,10 +113,11 @@ class ModuleLMT(CallFunction):
                 "LastUpdatedDate": "NA",
                 "Country": "TH",
             }
+            
             final_lmt = pd.merge(group_user_df, merge_df, on=["AccountOwner","EntitlementName","AccountDescription","AdditionalAttribute",],how="left", validate='1:1')
             final_lmt["AccountName"] = final_lmt["AccountOwner"]
             final_lmt = final_lmt.fillna(static_values)
-            final_lmt = final_lmt[columns]
+            final_lmt = final_lmt[target_columns]
             
         except:
             raise
@@ -140,33 +142,45 @@ class ModuleLMT(CallFunction):
             param_df.columns = param_df.iloc[0].values
             param_df = (param_df.iloc[1:].apply(lambda row: row.str.strip()).reset_index(drop=True))
             param_df = param_df.map(lambda row: ("NA" if isinstance(row, str) and (row.lower() == "null" or row == "") else row))
-
+            
             # Mapping Data to Target Columns
-            set_value = [
-                {
-                    "Parameter Name": "Security Roles",
-                    "Code values": param_df["SecurityRoles"].unique(),
-                    "Decode value": param_df["SecurityRoles"].unique(),
-                },
-                {
-                    "Parameter Name": "Application Roles",
-                    "Code values": param_df["ApplicationRoles"].unique(),
-                    "Decode value": param_df["ApplicationRoles"].unique(),
-                },
-                {
-                    "Parameter Name": "Program Template",
-                    "Code values": param_df["ProgramTemplate"].unique(),
-                    "Decode value": param_df["ProgramTemplate"].unique(),
-                },
-                {
-                    "Parameter Name": "Department",
-                    "Code values": param_df["Department"].unique(),
-                    "Decode value": param_df["Department"].unique(),
-                },
-            ]
-            merge_df = pd.DataFrame(set_value)
-            merge_df = merge_df.explode(["Code values", "Decode value"]).reset_index(drop=True)
-
+            target_columns = self.logging[i]["columns"]
+            merge_df = pd.DataFrame(columns=target_columns)
+            
+            # Extract unique SecurityRoles
+            unique_sec = param_df['SecurityRoles'].unique()
+            sec_params = pd.DataFrame({
+                'Parameter Name': 'Security Roles',
+                'Code values': unique_sec,
+                'Decode value': unique_sec
+            })
+            
+            # Extract unique ApplicationRoles
+            unique_app = param_df['ApplicationRoles'].unique()
+            app_params = pd.DataFrame({
+                'Parameter Name': 'Application Roles',
+                'Code values': unique_app,
+                'Decode value': unique_app
+            })
+            
+            # Extract unique ProgramTemplate
+            unique_temp = param_df['ProgramTemplate'].unique()
+            temp_params = pd.DataFrame({
+                'Parameter Name': 'Program Template',
+                'Code values': unique_temp,
+                'Decode value': unique_temp
+            })
+            
+            # Extract unique Department
+            unique_dept = param_df['Department'].apply(lambda row: ' '.join(row.replace('.', ' ').replace(',', ' ').split()).strip()).unique()
+            dept_params = pd.DataFrame({
+                'Parameter Name': 'Department',
+                'Code values': unique_dept,
+                'Decode value': unique_dept
+            })
+            
+            merge_df = pd.concat([sec_params, app_params, temp_params, dept_params], ignore_index=True)
+            
         except:
             raise
 

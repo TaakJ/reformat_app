@@ -72,7 +72,6 @@ class ModuleDIL(CallFunction):
                 assert (len(rows) == expected_length or len(rows) == 1), f"row {i} does not have {expected_length} values {rows}"
             except AssertionError as err:
                 errors.append(str(err))
-
         if errors:
             raise Exception("Data issue: " + "\n".join(errors))
 
@@ -112,8 +111,6 @@ class ModuleDIL(CallFunction):
             user_df.columns = user_df.iloc[0].values
             user_df = (user_df.iloc[1:].apply(lambda row: row.str.strip()).reset_index(drop=True))
             user_df = user_df[user_df["APPCODE"] == "LNSIGNET"].reset_index(drop=True)
-
-            # Replacing ‘null’ or Empty Strings with ‘NA’
             user_df = user_df.map(lambda row: ("NA" if isinstance(row, str) and (row.lower() == "null" or row == "") else row))
 
             # Adjusting Columns
@@ -121,8 +118,9 @@ class ModuleDIL(CallFunction):
             user_df["ATTRIBUTE"] = user_df.apply(self.attribute_column, axis=1)
 
             # Mapping Data to Target Columns
-            set_value = dict.fromkeys(self.logging[i]["columns"], "NA")
-            set_value.update(
+            target_columns  = self.logging[i]["columns"]
+            mapping = dict.fromkeys(target_columns, "NA")
+            mapping.update(
                 {
                     "ApplicationCode": "DIL",
                     "AccountOwner": user_df["USERNAME"],
@@ -135,7 +133,7 @@ class ModuleDIL(CallFunction):
                     "Country": "TH",
                 }
             )
-            user_df = user_df.assign(**set_value)
+            user_df = user_df.assign(**mapping)
             user_df = user_df.drop(user_df.iloc[:, :12].columns, axis=1)
 
         except:
@@ -159,15 +157,13 @@ class ModuleDIL(CallFunction):
             param_df.columns = param_df.iloc[0].values
             param_df = (param_df.iloc[1:].apply(lambda row: row.str.strip()).reset_index(drop=True))
             param_df = param_df[param_df["APPCODE"] == "LNSIGNET"].reset_index(drop=True)
-
-            # Replacing ‘null’ or Empty Strings with ‘NA’
             param_df = param_df.map(lambda row: ("NA"if isinstance(row, str) and (row.lower() == "null" or row == "") else row))
 
             # Adjusting Columns
             param_df[["NAME", "DEPARTMENT"]] = param_df.apply(self.split_column, axis=1, result_type="expand")
 
             # Mapping Data to Target Columns
-            set_value = [
+            mapping = [
                 {
                     "Parameter Name": "Department",
                     "Code values": param_df["DEPARTMENT"].unique(),
@@ -184,7 +180,7 @@ class ModuleDIL(CallFunction):
                     "Decode value": ["Inquiry", "Admin", "Index + Scan"],
                 },
             ]
-            param_df = pd.DataFrame(set_value)
+            param_df = pd.DataFrame(mapping)
             param_df = param_df.explode(["Code values", "Decode value"]).reset_index(drop=True)
 
         except:

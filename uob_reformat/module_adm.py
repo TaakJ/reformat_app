@@ -50,7 +50,6 @@ class ModuleADM(CallFunction):
                 assert len(rows) == expected_length, f"row {i} does not have {expected_length} values {rows}"
             except AssertionError as err:
                 errors.append(str(err))
-                
         if errors:
             raise Exception("Data issue: " + "\n".join(errors))
         
@@ -67,8 +66,6 @@ class ModuleADM(CallFunction):
             columns = ['User-ID','User Full Name','Department code','Employee ID','Group','Zone','Role']
             user_df = pd.DataFrame(data, columns=columns)
             user_df = user_df.apply(lambda row: row.str.strip()).reset_index(drop=True)
-            
-            # Replacing ‘null’ or Empty Strings with ‘NA’
             user_df = user_df.map(lambda row: 'NA' if isinstance(row, str) and (row.lower() == 'null' or row == '') else row)
             
             # Grouping by ‘User-ID’ and Aggregating
@@ -76,10 +73,9 @@ class ModuleADM(CallFunction):
             user_df = user_df.replace(to_replace=r'NA\+|\+NA(?!;)', value='', regex=True)
             
             # Mapping Data to Target Columns
-            set_value = dict.fromkeys(self.logging[i]['columns'], 'NA')
-            "EntitlementName","SecondEntitlementName","ThirdEntitlementName"
-            
-            set_value.update(
+            target_columns  = self.logging[i]["columns"]
+            mapping = dict.fromkeys(target_columns , "NA")
+            mapping.update(
                 {
                     'ApplicationCode': 'ADM',
                     'AccountOwner': user_df['User-ID'],
@@ -95,7 +91,7 @@ class ModuleADM(CallFunction):
                     'Country': 'TH',
                 }
             )
-            user_df = user_df.assign(**set_value)
+            user_df = user_df.assign(**mapping)
             user_df = user_df.drop(user_df.iloc[:, :7].columns, axis=1)
 
         except:
@@ -118,12 +114,10 @@ class ModuleADM(CallFunction):
             columns = ['User-ID','User Full Name','Department code','Employee ID','Group','Zone','Role']
             param_df = pd.DataFrame(data, columns=columns)
             param_df = param_df.apply(lambda row: row.str.strip()).reset_index(drop=True)
-            
-            # Replacing ‘null’ or Empty Strings with ‘NA’
             param_df = param_df.map(lambda row: 'NA' if isinstance(row, str) and (row.lower() == 'null' or row == '') else row)
             
             # Mapping Data to Target Columns
-            set_value = [
+            mapping = [
                 {
                     'Parameter Name': 'GroupDetail', 
                     'Code values': param_df['Group'].unique(), 
@@ -145,7 +139,7 @@ class ModuleADM(CallFunction):
                     'Decode value': param_df['Department code'].unique()
                 }
             ]
-            param_df = pd.DataFrame(set_value)
+            param_df = pd.DataFrame(mapping)
             param_df = param_df.explode(['Code values', 'Decode value']).reset_index(drop=True)
             
         except:

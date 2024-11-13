@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 
 setup(
     name='uob_reformat',
-    version='0.10',
+    version='0.11',
     description='build package reformat uob app',
     long_description=open('README.md').read() + '\n\n' + open('CHANGELOG.txt').read(),
     long_description_content_type='text/markdown',

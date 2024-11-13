@@ -94,11 +94,9 @@ class ModuleMOC(CallFunction):
             self.validate_row_length(data, 3)
 
             # Creating DataFrame
-            columns = self.logging[i]["columns"]
-            param_df = pd.DataFrame(data, columns=columns)
+            target_columns = self.logging[i]["columns"]
+            param_df = pd.DataFrame(data, columns=target_columns)
             param_df = (param_df.iloc[1:].apply(lambda row: row.str.strip()).reset_index(drop=True))
-
-            # Replacing ‘null’ or Empty Strings with ‘NA’
             param_df = param_df.map(lambda row: ("NA" if isinstance(row, str) and (row.lower() == "null" or row == "") else row))
 
         except:
