@@ -145,39 +145,30 @@ class ModuleLMT(CallFunction):
             
             # Mapping Data to Target Columns
             target_columns = self.logging[i]["columns"]
-            merge_df = pd.DataFrame(columns=target_columns)
             
             # Extract unique SecurityRoles
             unique_sec = param_df['SecurityRoles'].unique()
-            sec_params = pd.DataFrame({
-                'Parameter Name': 'Security Roles',
-                'Code values': unique_sec,
-                'Decode value': unique_sec
-            })
-            
+            sec_params = pd.DataFrame([
+                ['Security Roles', sec, sec] for sec in unique_sec
+            ], columns=target_columns)
+                        
             # Extract unique ApplicationRoles
             unique_app = param_df['ApplicationRoles'].unique()
-            app_params = pd.DataFrame({
-                'Parameter Name': 'Application Roles',
-                'Code values': unique_app,
-                'Decode value': unique_app
-            })
+            app_params = pd.DataFrame([
+                ['Application Roles', app, app] for app in unique_app
+            ], columns=target_columns)
             
             # Extract unique ProgramTemplate
             unique_temp = param_df['ProgramTemplate'].unique()
-            temp_params = pd.DataFrame({
-                'Parameter Name': 'Program Template',
-                'Code values': unique_temp,
-                'Decode value': unique_temp
-            })
+            temp_params = pd.DataFrame([
+                ['Program Template', temp, temp] for temp in unique_temp
+            ], columns=target_columns)
             
             # Extract unique Department
             unique_dept = param_df['Department'].apply(lambda row: ' '.join(row.replace('.', ' ').replace(',', ' ').split()).strip()).unique()
-            dept_params = pd.DataFrame({
-                'Parameter Name': 'Department',
-                'Code values': unique_dept,
-                'Decode value': unique_dept
-            })
+            dept_params = pd.DataFrame([
+                ['Department', dept, dept] for dept in unique_dept
+            ], columns=target_columns)
             
             merge_df = pd.concat([sec_params, app_params, temp_params, dept_params], ignore_index=True)
             

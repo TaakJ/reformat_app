@@ -59,16 +59,21 @@ class ModuleADM(CallFunction):
         self.logging[i].update({'function': 'collect_user_file', 'status': status})
 
         try:
-            data = [re.sub(r'(?<!\.)\|\|', '||', line.strip()).split('||') for line in format_file]
+            data = []
+            for line in format_file:
+                data.append([element.strip('"') for element in re.split(r'\|\|(?=(?:[^"]*"[^"]*")*[^"]*$)', line.strip())])
             self.validate_row_length(data)
             
             # Creating DataFrame
-            columns = ['User-ID','User Full Name','Department code','Employee ID','Group','Zone','Role', 'Timestamp']
+            columns = ['User-ID','User Full Name','Department code','Employee ID','Group','Zone','Role', 'Date']
             user_df = pd.DataFrame(data, columns=columns)
             user_df = user_df.apply(lambda row: row.str.strip()).reset_index(drop=True)
             user_df = user_df.map(lambda row: 'NA' if isinstance(row, str) and (row.lower() == 'null' or row == '') else row)
             
-            # Grouping by ‘User-ID’ and Aggregating
+            # Adjust column: Group
+            user_df['Group'] = user_df['Group'].apply(lambda row: ' '.join(row.replace('.', ' ').replace(',', ' ').split()).strip())
+            
+            # Group by specified columns and aggregate
             user_df = user_df.groupby('User-ID', sort=False).agg(lambda row: '+'.join(filter(pd.notna, row.unique()))).reset_index()
             user_df = user_df.replace(to_replace=r'NA\+|\+NA(?!;)', value='', regex=True)
             
@@ -93,13 +98,13 @@ class ModuleADM(CallFunction):
             )
             user_df = user_df.assign(**mapping)
             user_df = user_df.drop(user_df.iloc[:, :8].columns, axis=1)
-
+            
         except:
             raise
 
-        status = 'succeed'
-        self.logging[i].update({'data': user_df.to_dict('list'), 'status': status})
-        logging.info(f'Collect user data, status: {status}')
+        status = "succeed"
+        self.logging[i].update({"data": user_df.to_dict("list"), "status": status})
+        logging.info(f"Collect user data, status: {status}")
 
     def collect_param_file(self, i: int, format_file: any) -> dict:
 
@@ -107,44 +112,49 @@ class ModuleADM(CallFunction):
         self.logging[i].update({'function': 'collect_param_file', 'status': status})
 
         try:
-            data = [re.sub(r'(?<!\.)\|\|', '||', line.strip()).split('||') for line in format_file]
+            data = []
+            for line in format_file:
+                data.append([element.strip('"') for element in re.split(r'\|\|(?=(?:[^"]*"[^"]*")*[^"]*$)', line.strip())])
             self.validate_row_length(data)
             
             # Creating DataFrame
-            columns = ['User-ID','User Full Name','Department code','Employee ID','Group','Zone','Role', 'Timestamp']
+            columns = ['User-ID','User Full Name','Department code','Employee ID','Group','Zone','Role', 'Date']
             param_df = pd.DataFrame(data, columns=columns)
             param_df = param_df.apply(lambda row: row.str.strip()).reset_index(drop=True)
             param_df = param_df.map(lambda row: 'NA' if isinstance(row, str) and (row.lower() == 'null' or row == '') else row)
             
             # Mapping Data to Target Columns
-            mapping = [
-                {
-                    'Parameter Name': 'GroupDetail', 
-                    'Code values': param_df['Group'].unique(), 
-                    'Decode value': param_df['Group'].unique()
-                },
-                {
-                    'Parameter Name': 'RoleDetail', 
-                    'Code values': param_df['Role'].unique(), 
-                    'Decode value': param_df['Role'].unique()
-                },
-                {
-                    'Parameter Name': 'Zone', 
-                    'Code values': param_df['Zone'].unique(), 
-                    'Decode value': param_df['Zone'].unique()
-                },
-                {
-                    'Parameter Name': 'Department', 
-                    'Code values': param_df['Department code'].unique(), 
-                    'Decode value': param_df['Department code'].unique()
-                }
-            ]
-            param_df = pd.DataFrame(mapping)
-            param_df = param_df.explode(['Code values', 'Decode value']).reset_index(drop=True)
+            target_columns = self.logging[i]["columns"]
+            
+            # Extract unique Group
+            unique_group = param_df['Group'].apply(lambda row: ' '.join(row.replace('.', ' ').replace(',', ' ').split()).strip()).unique()
+            group_params = pd.DataFrame([
+                ['GroupDetail', row, row] for row in unique_group
+            ], columns=target_columns)
+
+            # Extract unique Role
+            unique_role = param_df['Role'].unique()
+            role_params = pd.DataFrame([
+                ['RoleDetail', row, row] for row in unique_role
+            ], columns=target_columns)
+            
+            # Extract unique Zone
+            unique_zone = param_df['Zone'].unique()
+            zone_params = pd.DataFrame([
+                ['Zone', row, row] for row in unique_zone
+            ], columns=target_columns)
+            
+            # Extract unique Department code
+            unique_dept = param_df['Department code'].unique()
+            dept_params = pd.DataFrame([
+                ['Department', row, row] for row in unique_dept
+            ], columns=target_columns)
+            
+            merge_df = pd.concat([group_params, role_params, zone_params, dept_params], ignore_index=True)
             
         except:
             raise
 
-        status = 'succeed'
-        self.logging[i].update({'data': param_df.to_dict('list'), 'status': status})
-        logging.info(f'Collect param data, status: {status}')
+        status = "succeed"
+        self.logging[i].update({"data": merge_df.to_dict("list"), "status": status})
+        logging.info(f"Collect user param, status: {status}")

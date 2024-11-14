@@ -169,32 +169,25 @@ class ModuleLDS(CallFunction):
             
             # Mapping Data to Target Columns
             target_columns = self.logging[i]["columns"]
-            merge_df = pd.DataFrame(columns=target_columns)
             
             # Extract unique RoleID and RoleName
             unique_roles = param_df[['RoleID', 'RoleName']].drop_duplicates()
-            role_params = pd.DataFrame({
-                'Parameter Name': 'Role',
-                'Code values': unique_roles['RoleID'],
-                'Decode value': unique_roles['RoleName']
-            })
+            role_params = pd.DataFrame([
+                ['Role', role_id, role_name] for role_id, role_name in zip(unique_roles['RoleID'], unique_roles['RoleName'])
+            ], columns=target_columns)
             
             # Extract unique CostCenterName
             unique_dept = param_df['CostCenterName'].unique()
-            dept_params = pd.DataFrame({
-                'Parameter Name': 'Department',
-                'Code values': unique_dept,
-                'Decode value': unique_dept
-            })
+            dept_params = pd.DataFrame([
+                ['Department', dept, dept] for dept in unique_dept
+            ], columns=target_columns)
             
             # Extract unique CostCenterCode and CostCenterName
             unique_cct = param_df[['CostCenterCode', 'CostCenterName']].drop_duplicates()
-            cct_params = pd.DataFrame({
-                'Parameter Name': 'Costcenter',
-                'Code values': unique_cct['CostCenterCode'],
-                'Decode value': unique_cct['CostCenterName']
-            })
-            
+            cct_params = pd.DataFrame([
+                ['Costcenter', code, name] for code, name in zip(unique_cct['CostCenterCode'], unique_cct['CostCenterName'])
+            ], columns=target_columns)
+                        
             merge_df = pd.concat([role_params, dept_params, cct_params], ignore_index=True)
             
         except: 
