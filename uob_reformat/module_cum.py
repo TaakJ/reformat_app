@@ -97,7 +97,10 @@ class ModuleCUM(CallFunction):
             user_df =  user_df.iloc[1:].apply(lambda row: row.str.strip()).reset_index(drop=True)
             user_df = user_df.map(lambda row: 'NA' if isinstance(row, str) and (row.lower() == 'null' or row == '') else row)
             
-            # Grouping by ‘USER_ID’ and Aggregating
+            # Adjust column: DEPARTMENT
+            user_df['DEPARTMENT'] = user_df['DEPARTMENT'].apply(lambda row: ' '.join(row.replace('.', ' ').replace(',', ' ').split()).strip())
+            
+            # Group by specified columns and aggregate
             user_df = user_df.groupby('USER_ID', sort=False).agg(lambda row: '+'.join(filter(pd.notna, row.unique()))).reset_index()
             user_df = user_df.replace(to_replace=r'NA\+|\+NA(?!;)', value='', regex=True)
             
@@ -146,24 +149,25 @@ class ModuleCUM(CallFunction):
             param_df = param_df.map(lambda row: 'NA' if isinstance(row, str) and (row.lower() == 'null' or row == '') else row)
             
             # Mapping Data to Target Columns
-            mapping = [
-                {
-                    'Parameter Name': 'Group_No',
-                    'Code values': param_df['GROUP_NO'].unique(),
-                    'Decode value': param_df['GROUP_NO'].unique(),
-                },
-                {
-                    'Parameter Name': 'Department',
-                    'Code values': param_df['DEPARTMENT'].unique(),
-                    'Decode value': param_df['DEPARTMENT'].unique(),
-                },
-            ]
-            param_df = pd.DataFrame(mapping)
-            param_df = param_df.explode(['Code values', 'Decode value']).reset_index(drop=True)
+            target_columns = self.logging[i]["columns"]
+            
+            # Extract unique Group
+            unique_group = param_df['GROUP_NO'].unique()
+            group_params = pd.DataFrame([
+                ['Group_No', group, group] for group in unique_group
+            ], columns=target_columns)
+
+            # Extract unique Department
+            unique_dept = param_df['DEPARTMENT'].apply(lambda row: ' '.join(row.replace('.', ' ').replace(',', ' ').split()).strip()).unique()
+            dept_params = pd.DataFrame([
+                ['Department', dept, dept] for dept in unique_dept
+            ], columns=target_columns)
+            
+            merge_df = pd.concat([group_params, dept_params], ignore_index=True)
             
         except:
             raise
         
-        status = 'succeed'
-        self.logging[i].update({'data': param_df.to_dict('list'), 'status': status})
-        logging.info(f'Collect param data, status: {status}')
+        status = "succeed"
+        self.logging[i].update({"data": merge_df.to_dict("list"), "status": status})
+        logging.info(f"Collect param data, status: {status}")

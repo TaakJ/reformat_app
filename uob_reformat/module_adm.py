@@ -129,25 +129,25 @@ class ModuleADM(CallFunction):
             # Extract unique Group
             unique_group = param_df['Group'].apply(lambda row: ' '.join(row.replace('.', ' ').replace(',', ' ').split()).strip()).unique()
             group_params = pd.DataFrame([
-                ['GroupDetail', row, row] for row in unique_group
+                ['GroupDetail', group, group] for group in unique_group
             ], columns=target_columns)
 
             # Extract unique Role
             unique_role = param_df['Role'].unique()
             role_params = pd.DataFrame([
-                ['RoleDetail', row, row] for row in unique_role
+                ['RoleDetail', role, role] for role in unique_role
             ], columns=target_columns)
             
             # Extract unique Zone
             unique_zone = param_df['Zone'].unique()
             zone_params = pd.DataFrame([
-                ['Zone', row, row] for row in unique_zone
+                ['Zone', zone, zone] for zone in unique_zone
             ], columns=target_columns)
             
             # Extract unique Department code
             unique_dept = param_df['Department code'].unique()
             dept_params = pd.DataFrame([
-                ['Department', row, row] for row in unique_dept
+                ['Department', dept, dept] for dept in unique_dept
             ], columns=target_columns)
             
             merge_df = pd.concat([group_params, role_params, zone_params, dept_params], ignore_index=True)
