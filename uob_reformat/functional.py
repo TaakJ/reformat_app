@@ -242,7 +242,7 @@ class Convert2File:
                 tmp_df = pd.DataFrame(data, columns=columns).replace([None], [""])
 
                 ## Set dataframe from raw file
-                raw_df = pd.DataFrame(record["data"]).replace([None], ["NA"])
+                raw_df = pd.DataFrame(record["data"]).fillna("NA")
 
                 ## Validate data change row by row
                 cmp_df = self.comparing_dataframe(i, tmp_df, raw_df)
@@ -354,8 +354,8 @@ class Convert2File:
                     columns = next(data)[0:]
                     new_df = pd.DataFrame(data, columns=columns).replace([None], [""])
                 else:
-                    new_df = pd.DataFrame(record["data"]).replace([None], ["NA"])
-
+                    new_df = pd.DataFrame(record["data"]).fillna("NA")
+                
                 ## Set dataframe from target file
                 try:
                     target_df = self.read_csv_file(i, record["full_target"])

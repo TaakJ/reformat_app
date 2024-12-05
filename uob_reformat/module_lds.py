@@ -4,7 +4,6 @@ import logging
 from .non_functional import CallFunction
 from .exception import CustomException
 
-
 class ModuleLDS(CallFunction):
 
     def __init__(self, params: any) -> None:
@@ -60,11 +59,11 @@ class ModuleLDS(CallFunction):
                 continue
         return pd.NaT
 
-    def validate_row_length(self, rows_list: list[list], valid_lengths: list[int] = [3, 32, 33]) -> None:
+    def validate_row_length(self, rows_list: list[list], valid_lengths: list[int] = [2, 32, 33]) -> None:
         errors = []
         for i, rows in enumerate(rows_list, 2):
             try:
-                assert (len(rows) in valid_lengths), f"row {i} does not match values {rows}"
+                assert (len(rows) in valid_lengths), f"Row {i} has data invalid. {rows}"
             except AssertionError as err:
                 errors.append(str(err))
         if errors:
@@ -72,9 +71,9 @@ class ModuleLDS(CallFunction):
 
     def read_format_file(self, format_file) -> list:
         
+        # Cleans and splits a line, handling quoted sections and extra spaces.
         def clean_and_split_line(line):
-            # Cleans and splits a line, handling quoted sections and extra spaces.
-            cleaned_line = re.sub(r"\s+", " ", line.strip())  # Remove extra spaces
+            cleaned_line = re.sub(r"\s+", " ", line.strip())
             split_line = re.split(r',(?=(?:[^"]*"[^"]*")*[^"]*$)', cleaned_line)
             return [x.strip() for x in split_line]
 
@@ -82,7 +81,7 @@ class ModuleLDS(CallFunction):
         for line in format_file:
             if re.findall(r"\w+.*", line.strip()):
                 data.append(clean_and_split_line(line))
-
+        
         clean_data = []
         for row_index, row in enumerate(data):
             if row_index == 0:
@@ -90,17 +89,17 @@ class ModuleLDS(CallFunction):
                 header_row = re.sub(r"\s+", ",", ",".join(row)).split(",")
                 clean_data.append(header_row)
             else:
-                # Process subsequent rows
+                # Process data rows
                 cleaned_row = []
                 for col_index, value in enumerate(row, 1):
                     if col_index == 1:
-                        split_values = re.sub(r"\s+", ",", value).split(",")
+                        split_values = re.split(r"\s+", value, maxsplit=1)
                         cleaned_row.extend(split_values)
                     else:
                         cleaned_row.append(value)
                 clean_data.append(cleaned_row)
                 
-        return clean_data
+        return clean_data 
 
     def collect_user_file(self, i: int, format_file: any) -> dict:
 
@@ -110,7 +109,7 @@ class ModuleLDS(CallFunction):
         try:
             clean_data = self.read_format_file(format_file)
             self.validate_row_length(clean_data)
-
+            
             # Creating DataFrame
             user_df = pd.DataFrame(clean_data)
             user_df.columns = user_df.iloc[0].values
@@ -141,7 +140,7 @@ class ModuleLDS(CallFunction):
             )
             user_df = user_df.assign(**mapping)
             user_df = user_df.drop(user_df.iloc[:, :32].columns, axis=1)
-
+            
         except:
             raise
 

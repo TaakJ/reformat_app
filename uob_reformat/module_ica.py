@@ -72,7 +72,7 @@ class ModuleICA(CallFunction):
         errors = []
         for i, rows in enumerate(rows_list):
             try:
-                assert (len(rows) in valid_lengths), f"row {i} does not match values {rows}"
+                assert (len(rows) in valid_lengths), f"Row {i} has data invalid. {rows}"
             except AssertionError as err:
                 errors.append(str(err))
         if errors:

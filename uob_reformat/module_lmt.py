@@ -48,7 +48,7 @@ class ModuleLMT(CallFunction):
         errors = []
         for i, rows in enumerate(rows_list, 1):
             try:
-                assert (len(rows) == expected_length or len(rows) == 1), f"row {i} does not values {expected_length} elements {rows}"
+                assert (len(rows) == expected_length or len(rows) == 1), f"Row {i} has data invalid. {rows}"
             except AssertionError as err:
                 errors.append(str(err))
         if errors:
