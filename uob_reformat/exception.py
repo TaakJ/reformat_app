@@ -36,16 +36,22 @@ class CustomException(Exception):
             except OSError:
                 pass
             
+        # Configure both console and file logging
+        logger = logging.getLogger(log_name)
+        logger.setLevel(logging.ERROR)
+
+        # Console handler
+        console_handler = logging.StreamHandler()
+        console_handler.setLevel(logging.ERROR)
+        console_handler.setFormatter(logging.Formatter(fmt=log_format, datefmt='%Y/%m/%d %H:%M:%S'))
+        logger.addHandler(console_handler)
+        
+        # File handler
         file_handler = logging.FileHandler(filename, mode='a', encoding='utf-8')
         file_handler.setLevel(logging.ERROR)
-        formatter = logging.Formatter(fmt=log_format,datefmt='%Y/%m/%d %H:%M:%S')
-        file_handler.setFormatter(formatter)
-        
-        logger = logging.getLogger(log_name)
-        logger.setLevel(logging.INFO)
+        file_handler.setFormatter(logging.Formatter(fmt=log_format, datefmt='%Y/%m/%d %H:%M:%S'))
         logger.addHandler(file_handler)
-            
-        logger.file_handler = file_handler
+        
         return logger
 
     def generate_error(self) -> any:
