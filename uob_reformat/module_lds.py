@@ -59,7 +59,7 @@ class ModuleLDS(CallFunction):
                 continue
         return pd.NaT
 
-    def validate_row_length(self, rows_list: list[list], valid_lengths: list[int] = [2, 32, 33]) -> None:
+    def validate_row_length(self, rows_list: list[list], valid_lengths: list[int] = [32, 33]) -> None:
         errors = []
         for i, rows in enumerate(rows_list, 2):
             try:
@@ -71,36 +71,30 @@ class ModuleLDS(CallFunction):
 
     def read_format_file(self, format_file) -> list:
         
-        # Cleans and splits a line, handling quoted sections and extra spaces.
         def clean_and_split_line(line):
-            cleaned_line = re.sub(r"\s+", " ", line.strip())
-            split_line = re.split(r',(?=(?:[^"]*"[^"]*")*[^"]*$)', cleaned_line)
+            # Remove newlines and whitespace, handle quoted strings
+            cleaned_line = re.sub(r'\n\s*\w+', '', line).strip()
+            cleaned_line = re.sub(r"\s+", " ", cleaned_line)
+            split_line = re.split(r',(?=(?:[^"]*"[^"]*")*[^"]*$)', cleaned_line, flags=re.DOTALL)
             return [x.strip() for x in split_line]
-
-        data = []
-        for line in format_file:
-            if re.findall(r"\w+.*", line.strip()):
-                data.append(clean_and_split_line(line))
-        
+    
         clean_data = []
-        for row_index, row in enumerate(data):
-            if row_index == 0:
-                # Process the header row
-                header_row = re.sub(r"\s+", ",", ",".join(row)).split(",")
-                clean_data.append(header_row)
-            else:
-                # Process data rows
-                cleaned_row = []
-                for col_index, value in enumerate(row, 1):
-                    if col_index == 1:
-                        split_values = re.split(r"\s+", value, maxsplit=1)
-                        cleaned_row.extend(split_values)
-                    else:
-                        cleaned_row.append(value)
-                clean_data.append(cleaned_row)
+        for line in format_file:
+            if re.match(r"\w+", line.strip()):
+                split_line = clean_and_split_line(line)
                 
-        return clean_data 
-
+                if len(split_line) >= 31:    
+                    cleaned_row = []
+                    for i, value in enumerate(split_line):
+                        if i == 0:
+                            split_values = re.split(r"\s+", value, maxsplit=1)
+                            cleaned_row.extend(split_values)
+                        else:
+                            cleaned_row.append(value)
+                    clean_data.append(cleaned_row)
+                    
+        return clean_data
+    
     def collect_user_file(self, i: int, format_file: any) -> dict:
 
         status = "failed"
@@ -110,10 +104,16 @@ class ModuleLDS(CallFunction):
             clean_data = self.read_format_file(format_file)
             self.validate_row_length(clean_data)
             
+            # Pad rows with None values to ensure each row has 33 elements
+            clean_data = [row + [None] * (33 - len(row)) for row in clean_data]
+            
             # Creating DataFrame
-            user_df = pd.DataFrame(clean_data)
-            user_df.columns = user_df.iloc[0].values
-            user_df = (user_df.iloc[1:-1, :-1].apply(lambda row: row.str.strip()).reset_index(drop=True))
+            columns = ["Rownum", "UserID", "UserName", "FullName", "Email", "Approve_Limit", "User_Active", "User_status", "RoleID", "RoleName", "RLOC", "WLOC", 
+            "Role_Active", "Role_status", "CostCenterCode", "CostCenterName", "BranchCode", "CostCenterNameThai", "Costcenter_Effect", "Costcenter_Expire",
+            "Costcenter_Active", "Costcenter_status", "SectorID", "SectorName", "Sector_Effect", "Sector_Expire", "Sector_Active", "Sector_status", 
+            "LastLogin_Date", "edit_name", "edit_date", "Remark","Exceed_column"]
+            user_df = pd.DataFrame(clean_data, columns=columns)
+            user_df = user_df.iloc[:, :-1].apply(lambda row: row.str.strip()).reset_index(drop=True)
             user_df = user_df.map(lambda row: ("NA" if isinstance(row, str) and (row.lower() == "null" or row == "") else row))
             
             # Adjust column: CostCenterName
@@ -156,11 +156,17 @@ class ModuleLDS(CallFunction):
         try:
             clean_data = self.read_format_file(format_file)
             self.validate_row_length(clean_data)
-
+            
+            # Pad rows with None values to ensure each row has 33 elements
+            clean_data = [row + [None] * (33 - len(row)) for row in clean_data]
+            
             # Creating DataFrame
-            param_df = pd.DataFrame(clean_data)
-            param_df.columns = param_df.iloc[0].values
-            param_df = (param_df.iloc[1:-1, :-1].apply(lambda row: row.str.strip()).reset_index(drop=True))
+            columns = ["Rownum", "UserID", "UserName", "FullName", "Email", "Approve_Limit", "User_Active", "User_status", "RoleID", "RoleName", "RLOC", "WLOC", 
+            "Role_Active", "Role_status", "CostCenterCode", "CostCenterName", "BranchCode", "CostCenterNameThai", "Costcenter_Effect", "Costcenter_Expire",
+            "Costcenter_Active", "Costcenter_status", "SectorID", "SectorName", "Sector_Effect", "Sector_Expire", "Sector_Active", "Sector_status", 
+            "LastLogin_Date", "edit_name", "edit_date", "Remark", "Exceed"]
+            param_df = pd.DataFrame(clean_data, columns=columns)
+            param_df = param_df.iloc[:, :-1].apply(lambda row: row.str.strip()).reset_index(drop=True)
             param_df = param_df.map(lambda row: ("NA" if isinstance(row, str) and (row.strip().lower() == "null" or row.strip() == "") else row))
             
             # Adjust column: CostCenterName
