@@ -56,11 +56,10 @@ class CustomException(Exception):
 
     def generate_error(self) -> any:
         for i in range(len(self.err)):
-            module      = self.err[i]['module']
-            full_target = self.err[i].get('full_target')
-            status      = self.err[i]['status']
-            func        = self.err[i]['function']
-            err         = self.err[i].get('err')
+            # func = self.err[i]['function']
+            # full_input = self.err[i]['full_input']
+            err = self.err[i].get('err')
             if err is not None:
-                err_msg = f"Module: '{module}'; File: '{full_target}'; Function: '{func}'; Status: '{status}'; ERROR: {err}"
+                # err_msg = f"[Func] {func} \n[SOURCE] {full_input} \n[ERROR] {err}"
+                err_msg = err
                 yield err_msg

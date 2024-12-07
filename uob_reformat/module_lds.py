@@ -3,6 +3,7 @@ import pandas as pd
 import logging
 from .non_functional import CallFunction
 from .exception import CustomException
+# import traceback
 
 class ModuleLDS(CallFunction):
 
@@ -14,7 +15,8 @@ class ModuleLDS(CallFunction):
         self._log = log
 
     async def run_process(self) -> dict:
-
+        
+        logging.getLogger(__name__)
         logging.info(f"Module:'{self.module}'; Manual: '{self.manual}'; Run date: '{self.batch_date}'; Store tmp: '{self.store_tmp}'; Write mode: '{self.write_mode}';")
 
         result = {"module": self.module, "task": "Completed"}
@@ -141,7 +143,7 @@ class ModuleLDS(CallFunction):
             user_df = user_df.assign(**mapping)
             user_df = user_df.drop(user_df.iloc[:, :32].columns, axis=1)
             
-        except:
+        except:   
             raise
 
         status = "succeed"
@@ -195,7 +197,7 @@ class ModuleLDS(CallFunction):
                         
             merge_df = pd.concat([role_params, dept_params, cct_params], ignore_index=True)
             
-        except: 
+        except:
             raise
 
         status = "succeed"
