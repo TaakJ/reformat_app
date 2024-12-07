@@ -1,17 +1,18 @@
-import logging
-import re
-from pathlib import Path
-from os.path import join
-import os
+import csv
 import glob
-import pandas as pd
+import logging
+import os
+import re
+import traceback
+from io import StringIO
+from itertools import chain, tee
+from os.path import join
+from pathlib import Path
+import chardet
 import numpy as np
 import openpyxl
-import chardet
-from io import StringIO
-from itertools import tee, chain
+import pandas as pd
 import xlrd
-import csv
 from .exception import CustomException
 from .setup import Folder
 
@@ -29,7 +30,7 @@ class Convert2File:
                 status = "found"
             else:
                 status = "not_found"
-                record.update({"err": f"File not found {record['full_input']}"})
+                record.update({"err": f"[File not found] at {record['full_input']}"})
 
             record.update({"status": status})
             logging.info(f"Check source file: {record['full_input']}, for package: {record['package']}, status: {status}")
@@ -49,12 +50,15 @@ class Convert2File:
                 types = Path(full_input).suffix
 
                 if [".xlsx", ".xls"].__contains__(types):
+                    # Check if the file type is an Excel file
                     format_file = self.read_excel_file(i, full_input)
                 else:
+                    # Read other types of files
                     format_file = self.read_file(i, full_input)
-
+                
+                # Extracte data from file
                 self.get_extract_file(i, format_file)
-
+                
             except Exception as err:
                 record.update({"err": err})
 
@@ -65,43 +69,55 @@ class Convert2File:
 
         status = "failed"
         self.logging[i].update({"function": "read_excel_file", "status": status})
-
+        
         try:
             logging.info(f"Read format excel file: {full_input}, for package: {self.logging[i]['package']}")
+            # Open the Excel workbook
             format_file = xlrd.open_workbook(full_input)
-
+            
         except Exception as err:
-            raise Exception(err)
-
+            # Extract the traceback to get error details
+            error_frame = traceback.extract_tb(err.__traceback__)[-1]
+            _, line_no, function, _ = error_frame
+            err_msg = f"[Data issue] {str(err)}, found at function:{function}, line:{line_no}"
+            raise Exception(err_msg)
+        
         status = "succeed"
         self.logging[i].update({"status": status})
-
+        
         return format_file
-
+    
     def read_file(self, i: int, full_input: str) -> any:
 
         status = "failed"
         self.logging[i].update({"function": "read_file", "status": status})
-
+        
         try:
             logging.info(f"Read format text/csv file: {full_input}, for run: {self.logging[i]['package']}")
-
+            
+            # Open the file in binary mode
             with open(full_input, "rb") as f:
                 file = f.read()
                 encoding_result = chardet.detect(file)
             detected_encoding = encoding_result["encoding"]
             content = file.decode(detected_encoding)
-
+            
+            # Check if the detected encoding is utf or ascii
             match_encoding = re.findall(r"utf|ascii", detected_encoding, re.IGNORECASE)
             if match_encoding == []:
                 detected_encoding = "tis-620"
                 with open(full_input, "r", encoding=detected_encoding) as f:
                     content = f.read()
-
+                    
+            # Store the content
             format_file = StringIO(content)
-
-        except (LookupError, UnicodeDecodeError, TypeError) as err:
-            raise Exception(err)
+            
+        except Exception as err:
+            # Extract the traceback to get error details
+            error_frame = traceback.extract_tb(err.__traceback__)[-1]
+            _, line_no, function, _ = error_frame
+            err_msg = f"[Data issue] {str(err)}, found at function:{function}, line:{line_no}"
+            raise Exception(err_msg)
 
         status = "succeed"
         self.logging[i].update({"status": status})
@@ -117,13 +133,15 @@ class Convert2File:
         if re.search(r"PARAMLIST", full_target) is not None:
             columns = ["Parameter Name", "Code values", "Decode value"]
             self.logging[i].update({"columns": columns})
-
+            
+            # Collect parameter file 
             self.collect_param_file(i, format_file)
         else:
             columns = ["ApplicationCode","AccountOwner","AccountName","AccountType","EntitlementName","SecondEntitlementName","ThirdEntitlementName","AccountStatus","IsPrivileged",
                     "AccountDescription","CreateDate","LastLogin","LastUpdatedDate","AdditionalAttribute","Country"]
             self.logging[i].update({"columns": columns})
 
+            # Collect user file data
             self.collect_user_file(i, format_file)
 
     def comparing_dataframe(self, i: int, df: pd.DataFrame, new_df: pd.DataFrame) -> pd.DataFrame:
@@ -151,7 +169,11 @@ class Convert2File:
             df["count"] = diff_df.apply(lambda row: row.eq(True).sum(), axis=1)
 
         except Exception as err:
-            raise Exception(err)
+            # Extract the traceback to get error details
+            error_frame = traceback.extract_tb(err.__traceback__)[-1]
+            _, line_no, function, _ = error_frame
+            err_msg = f"[Data issue] {str(err)}, found at function:{function}, line:{line_no}"
+            raise Exception(err_msg)
 
         status = "succeed"
         self.logging[i].update({"status": status})
@@ -212,7 +234,11 @@ class Convert2File:
             cdc = df.to_dict(orient="index")
 
         except Exception as err:
-            raise Exception(err)
+            # Extract the traceback to get error details
+            error_frame = traceback.extract_tb(err.__traceback__)[-1]
+            _, line_no, function, _ = error_frame
+            err_msg = f"[Data issue] {str(err)}, found at function:{function}, line:{line_no}"
+            raise Exception(err_msg)
 
         status = "succeed"
         self.logging[i].update({"status": status})
@@ -436,7 +462,6 @@ class Convert2File:
                 for idx, value in cdc.items():
                     if value.get("remark") is not None:
                         if idx in self.update_rows.keys():
-                            # logging.info(f"{value['remark']} rows: ({idx}) in target file, Updating records: ({self.update_rows[idx]})")
                             value.popitem()
                             rows.update({idx: value})
 
@@ -466,8 +491,13 @@ class Convert2File:
                 writer.close()
 
         except Exception as err:
-            raise Exception(err)
+            # Extract the traceback to get error details
+            error_frame = traceback.extract_tb(err.__traceback__)[-1]
+            _, line_no, function, _ = error_frame
+            err_msg = f"[Data issue] {str(err)}, found at function:{function}, line:{line_no}"
+            raise Exception(err_msg)
 
         status = "succeed"
         self.logging[i].update({"status": status})
+        
         return status

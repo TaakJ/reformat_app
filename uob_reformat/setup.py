@@ -1,11 +1,12 @@
 import argparse
 import logging
 import logging.config
-import yaml
 import os
-from os.path import join
 import shutil
 from datetime import datetime, timedelta
+from os.path import join
+import yaml
+
 
 class ArgumentParams:
     SHORT_NAME = 'short_name'
@@ -34,44 +35,49 @@ def setup_folder() -> None:
 def setup_config() -> dict:
     config_yaml = None
     config_dir = Folder._CONFIG_DIR
-
-    if os.path.exists(config_dir):
-        with open(config_dir,'rb') as conf:
-            config_yaml = yaml.safe_load(conf.read())
-    else:
-        raise FileNotFoundError(f"Yaml config file path: {config_dir} doesn't exist.")
+    
+    if not os.path.exists(config_dir):
+        raise FileNotFoundError(f"YAML config file path: {config_dir} doesn't exist.")
+    
+    with open(config_dir, 'rb') as conf:
+        config_yaml = yaml.safe_load(conf.read())
+    
     return config_yaml
 
 def setup_log() -> None:
+    
     config_yaml = None
     date = datetime.now().strftime('%Y%m%d')
     file = 'log_status.log'
     
-    log_dir = Folder.LOG + date
-    if not os.path.exists(log_dir):
-        try:
-            os.makedirs(log_dir)
-        except OSError:
-            pass
-
+    # Create log directory if it doesn't exist
+    log_dir = join(Folder.LOG, date)
+    os.makedirs(log_dir, exist_ok=True)
+    
+    # Load YAML config
     if os.path.exists(Folder._LOGGER_CONFIG_DIR):
         with open(Folder._LOGGER_CONFIG_DIR,'rb') as logger:
             config_yaml = yaml.safe_load(logger.read())
             
             if 'file' in config_yaml['root']['handlers']:
+                # Update file handlers with the new log file path
                 for i in config_yaml['handlers'].keys():
                     if 'filename' in config_yaml['handlers'][i]:
                         config_yaml['handlers'][i]['filename'] = join(log_dir, file)
             else:
+                # Remove file handler if not configured correctly
                 config_yaml['handlers'].pop('file')
-                
+            
+            # Apply the logging configuration
             logging.config.dictConfig(config_yaml)
     else:
         raise FileNotFoundError(f"Yaml file file_path: {Folder._LOGGER_CONFIG_DIR} doesn't exist.")
     
 def clear_log() -> None:
-    bk_date = datetime.now() - timedelta(days=7) 
     
+    bk_date = datetime.now() - timedelta(days=7)
+    
+    # Define backup date, logs older than 7 days will be cleared
     for date_dir in os.listdir(Folder.LOG):
         if date_dir <= bk_date.strftime('%Y%m%d'):
             log_dir = join(Folder.LOG, date_dir)

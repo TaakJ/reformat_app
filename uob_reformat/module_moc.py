@@ -1,9 +1,9 @@
-import re
-import pandas as pd
 import logging
-from .non_functional import CallFunction
+import re
+import traceback
+import pandas as pd
 from .exception import CustomException
-
+from .non_functional import CallFunction
 
 class ModuleMOC(CallFunction):
 
@@ -15,46 +15,53 @@ class ModuleMOC(CallFunction):
         self._log = log
 
     async def run_process(self) -> dict:
-
+        
+        # Initialize the logger
+        logging.getLogger(__name__)
         logging.info(f"Module:'{self.module}'; Manual: '{self.manual}'; Run date: '{self.batch_date}'; Store tmp: '{self.store_tmp}'; Write mode: '{self.write_mode}';")
-
-        result = {"module": self.module, "task": "Completed"}
+        
         try:
+            # Collect setup
             self.collect_setup()
+            # Clear target files
             self.clear_target_file()
-
+            # Task check source file
             await self.check_source_file()
+            # Task separate data file
             await self.separate_data_file()
+            # Task generate tmp files
             if self.store_tmp is True:
                 await self.generate_tmp_file()
+            # Task generate target files
             await self.generate_target_file()
-
+            
         except CustomException as err:
-            logging.error("See Error Details: log_error.log")
-
+            
+            # Log error details
+            logging.error("See Error details at log_error.log")
             logger = err.setup_errorlog(log_name=__name__)
+            
             while True:
                 try:
                     logger.error(next(err))
                 except StopIteration:
                     break
-
-            result.update({"task": "Uncompleted"})
-
+                
         logging.info(f"Stop Run Module '{self.module}'\r\n")
-
-        return result
-
-    def validate_row_length(self, rows_list: list[list], expected_length: int = 15) -> None:
+        
+    def validate_row_length(self, rows_list: list[list], expected_length: int=15) -> None:
+        
         errors = []
         for i, rows in enumerate(rows_list, 1):
             try:
+                # Assert that the length of the row matches the expected length
                 assert (len(rows) == expected_length), f"Row {i} has data invalid. {rows}"
+                
             except AssertionError as err:
                 errors.append(str(err))
-
+                
         if errors:
-            raise Exception("Data issue: " + "\n".join(errors))
+            raise Exception("\n".join(errors))
 
     def collect_user_file(self, i: int, format_file: any) -> dict:
 
@@ -76,7 +83,11 @@ class ModuleMOC(CallFunction):
             user_df = user_df.map(lambda row: ("NA" if isinstance(row, str) and (row.lower() == "null" or row == "") else row))
 
         except Exception as err:
-            raise Exception(err)
+            # Extract details from the traceback
+            error_frame = traceback.extract_tb(err.__traceback__)[-1]
+            _, line_no, function, _ = error_frame
+            err_msg = f"[Data issue] {str(err)}, found at function:{function}, line:{line_no}"
+            raise Exception(err_msg)
 
         status = "succeed"
         self.logging[i].update({"data": user_df.to_dict("list"), "status": status})
@@ -99,8 +110,12 @@ class ModuleMOC(CallFunction):
             param_df = (param_df.iloc[1:].apply(lambda row: row.str.strip()).reset_index(drop=True))
             param_df = param_df.map(lambda row: ("NA" if isinstance(row, str) and (row.lower() == "null" or row == "") else row))
 
-        except:
-            raise
+        except Exception as err:
+            ## Extract the traceback to get error details
+            error_frame = traceback.extract_tb(err.__traceback__)[-1]
+            _, line_no, function, _ = error_frame
+            err_msg = f"[Data issue] {str(err)}, found at function:{function}, line:{line_no}"
+            raise Exception(err_msg)
 
         status = "succeed"
         self.logging[i].update({"data": param_df.to_dict("list"), "status": status})

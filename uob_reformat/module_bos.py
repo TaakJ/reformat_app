@@ -1,10 +1,10 @@
 import glob
 import logging
 import re
+import traceback
 import pandas as pd
 from .exception import CustomException
 from .non_functional import CallFunction
-
 
 class ModuleBOS(CallFunction):
 
@@ -16,45 +16,53 @@ class ModuleBOS(CallFunction):
         self._log = log
 
     async def run_process(self) -> dict:
-
+        
+        # Initialize the logger
+        logging.getLogger(__name__)
         logging.info(f"Module:'{self.module}'; Manual: '{self.manual}'; Run date: '{self.batch_date}'; Store tmp: '{self.store_tmp}'; Write mode: '{self.write_mode}';")
-
-        result = {'module': self.module, 'task': 'Completed'}
+        
         try:
+            # Collect setup
             self.collect_setup()
+            # Clear target files
             self.clear_target_file()
-            
+            # Task check source file
             await self.check_source_file()
+            # Task separate data file
             await self.separate_data_file()
+            # Task generate tmp files
             if self.store_tmp is True:
                 await self.generate_tmp_file()
+            # Task generate target files
             await self.generate_target_file()
-
-        except CustomException as err:
-            logging.error('See Error Details: log_error.log')
             
+        except CustomException as err:
+            
+            # Log error details
+            logging.error("See Error details at log_error.log")
             logger = err.setup_errorlog(log_name=__name__)
+            
             while True:
                 try:
                     logger.error(next(err))
                 except StopIteration:
                     break
 
-            result.update({'task': 'Uncompleted'})
-
         logging.info(f"Stop Run Module '{self.module}'\r\n")
-        
-        return result
     
     def validate_row_length(self, rows_list: list[list], expected_length: int = 6) -> None:
+        
         errors = []
         for i, rows in enumerate(rows_list, 1):
             try:
+                # Assert that the length of the row matches the expected length
                 assert len(rows) == expected_length, f"Row {i} has data invalid. {rows}"
+                
             except AssertionError as err:
                 errors.append(str(err))
+                
         if errors:
-            raise Exception("Data issue: " + "\n".join(errors))
+            raise Exception("\n".join(errors))
     
     def collect_depend_file(self, i: int) -> pd.DataFrame:
         
@@ -73,7 +81,7 @@ class ModuleBOS(CallFunction):
                     data.append([element.strip('"') for element in re.split(r',(?=(?:[^"]*"[^"]*")*[^"]*$)', line.strip())])
                 self.validate_row_length(data)
             else:
-                self.logging[i].update({'err': f'File not found {full_depend}'})
+                self.logging[i].update({'err': f'[File not found] at {full_depend}'})
                 
         if 'err' in self.logging[i]:
             raise CustomException(err=self.logging)
@@ -161,8 +169,12 @@ class ModuleBOS(CallFunction):
             final_bos = final_bos.drop(columns='employee_no')
             final_bos = final_bos[target_columns].sort_values(by='AccountOwner',ignore_index=True)
             
-        except:
-            raise
+        except Exception as err:
+            # Extract the traceback to get error details
+            error_frame = traceback.extract_tb(err.__traceback__)[-1]
+            _, line_no, function, _ = error_frame
+            err_msg = f"[Data issue] {str(err)}, found at function:{function}, line:{line_no}"
+            raise Exception(err_msg)
 
         status = 'succeed'
         self.logging[i].update({'data': final_bos.to_dict('list'), 'status': status})
@@ -215,8 +227,12 @@ class ModuleBOS(CallFunction):
             merge_df = pd.concat([sec_param_list,app_param_list],ignore_index=True)
             merge_df = pd.concat([merge_df, dept_param_list],ignore_index=True)
             
-        except:
-            raise
+        except Exception as err:
+            # Extract the traceback to get error details
+            error_frame = traceback.extract_tb(err.__traceback__)[-1]
+            _, line_no, function, _ = error_frame
+            err_msg = f"[Data issue] {str(err)}, found at function:{function}, line:{line_no}"
+            raise Exception(err_msg)
         
         status = 'succeed'
         self.logging[i].update({'data': merge_df.to_dict('list'), 'status': status})

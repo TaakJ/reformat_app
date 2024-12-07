@@ -12,7 +12,6 @@ from .module_moc import ModuleMOC
 from .setup import PARAMS, setup_folder, setup_log, clear_log
 from datetime import datetime
 
-
 class RunModule:
     def __init__(self) -> None:
         for key, value in PARAMS.items():
@@ -25,13 +24,13 @@ class RunModule:
 
         self.loop = asyncio.new_event_loop()
         asyncio.set_event_loop(self.loop)
-        self.results = self.loop.run_until_complete(self.mapping_module())
+        self.loop.run_until_complete(self.mapping_module())
 
     async def mapping_module(self):
         coros = []
         for module in self.source:
             setattr(self, "module", module)
-
+            
             if module == "ADM":
                 tasks = ModuleADM(self)
                 run = asyncio.create_task(tasks.run_process())

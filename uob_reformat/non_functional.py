@@ -198,6 +198,5 @@ class BackupAndClear:
         except OSError:
             pass
 
-
 class CallFunction(Convert2File, CollectLog, CollectParams, BackupAndClear):
     pass

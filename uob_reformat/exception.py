@@ -56,10 +56,6 @@ class CustomException(Exception):
 
     def generate_error(self) -> any:
         for i in range(len(self.err)):
-            # func = self.err[i]['function']
-            # full_input = self.err[i]['full_input']
-            err = self.err[i].get('err')
-            if err is not None:
-                # err_msg = f"[Func] {func} \n[SOURCE] {full_input} \n[ERROR] {err}"
-                err_msg = err
+            err_msg = self.err[i].get('err')
+            if err_msg is not None:
                 yield err_msg
