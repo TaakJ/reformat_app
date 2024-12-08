@@ -72,6 +72,8 @@ class ModuleIIC(CallFunction):
             data = []
             for line in format_file:
                 data.append([element.strip('"') for element in re.split(r',(?=(?:[^"]*"[^"]*")*[^"]*$)', line.strip())])
+                
+            # verify data length 
             self.validate_row_length(data)
 
             # Creating DataFrame
@@ -100,6 +102,8 @@ class ModuleIIC(CallFunction):
             data = []
             for line in format_file:
                 data.append([element.strip('"') for element in re.split(r',(?=(?:[^"]*"[^"]*")*[^"]*$)', line.strip())])
+                
+            # verify data length 
             self.validate_row_length(data, 3)
             
             # Creating DataFrame

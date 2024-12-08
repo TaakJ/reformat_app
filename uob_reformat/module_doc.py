@@ -106,6 +106,8 @@ class ModuleDOC(CallFunction):
                     clean_data.append(fix_value)
                 else:
                     continue
+                
+            # verify data length 
             self.validate_row_length(clean_data)
 
             # Creating DataFrame

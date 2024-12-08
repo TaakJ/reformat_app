@@ -64,7 +64,7 @@ class ModuleLDS(CallFunction):
                 continue
         return pd.NaT
 
-    def validate_row_length(self, rows_list: list[list], valid_lengths: list[int] =[32,33]) -> None:
+    def validate_row_length(self, rows_list: list[list], valid_lengths: list[int]=[32,33]) -> None:
         
         errors = []
         for i, rows in enumerate(rows_list, 2):
@@ -111,6 +111,8 @@ class ModuleLDS(CallFunction):
 
         try:
             clean_data = self.read_format_file(format_file)
+            
+            # verify data length 
             self.validate_row_length(clean_data)
             
             # Pad rows with None values to ensure each row has 33 elements
@@ -168,6 +170,8 @@ class ModuleLDS(CallFunction):
 
         try:
             clean_data = self.read_format_file(format_file)
+            
+            # verify data length 
             self.validate_row_length(clean_data)
             
             # Pad rows with None values to ensure each row has 33 elements

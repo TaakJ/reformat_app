@@ -72,11 +72,16 @@ class ModuleADM(CallFunction):
             data = []
             for line in format_file:
                 data.append([element.strip('"') for element in re.split(r'\|\|(?=(?:[^"]*"[^"]*")*[^"]*$)', line.strip())])
-            self.validate_row_length(data)
+            
+            # Pad rows with None values to ensure each row has 8 elements
+            clean_data = [row + [None] * (8 - len(row)) for row in data]
+            
+            # verify data length 
+            self.validate_row_length(clean_data)
             
             # Creating DataFrame
             columns = ['User-ID','User Full Name','Department code','Employee ID','Group','Zone','Role', 'Date']
-            user_df = pd.DataFrame(data, columns=columns)
+            user_df = pd.DataFrame(clean_data, columns=columns)
             user_df = user_df.apply(lambda row: row.str.strip()).reset_index(drop=True)
             user_df = user_df.map(lambda row: 'NA' if isinstance(row, str) and (row.lower() == 'null' or row == '') else row)
             
@@ -129,11 +134,16 @@ class ModuleADM(CallFunction):
             data = []
             for line in format_file:
                 data.append([element.strip('"') for element in re.split(r'\|\|(?=(?:[^"]*"[^"]*")*[^"]*$)', line.strip())])
-            self.validate_row_length(data)
+            
+            # Pad rows with None values to ensure each row has 8 elements
+            clean_data = [row + [None] * (8 - len(row)) for row in data]
+            
+            # verify data length 
+            self.validate_row_length(clean_data)
             
             # Creating DataFrame
             columns = ['User-ID','User Full Name','Department code','Employee ID','Group','Zone','Role', 'Date']
-            param_df = pd.DataFrame(data, columns=columns)
+            param_df = pd.DataFrame(clean_data, columns=columns)
             param_df = param_df.apply(lambda row: row.str.strip()).reset_index(drop=True)
             param_df = param_df.map(lambda row: 'NA' if isinstance(row, str) and (row.lower() == 'null' or row == '') else row)
             

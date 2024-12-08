@@ -63,7 +63,7 @@ class ModuleCUM(CallFunction):
                 continue
         return pd.NaT
     
-    def validate_row_length(self, rows_list: list[list], valid_lengths: list[int] = [1,14]) -> None:
+    def validate_row_length(self, rows_list: list[list], valid_lengths: list[int]=[1,14]) -> None:
         
         errors = []
         for i, rows in enumerate(rows_list, 2):
@@ -98,6 +98,8 @@ class ModuleCUM(CallFunction):
         
         try:
             clean_data = self.read_format_file(format_file)
+            
+            # verify data length 
             self.validate_row_length(clean_data)
             
             # Creating DataFrame
@@ -153,6 +155,8 @@ class ModuleCUM(CallFunction):
         
         try:
             clean_data = self.read_format_file(format_file)
+            
+            # verify data length 
             self.validate_row_length(clean_data)
             
             # Creating DataFrame

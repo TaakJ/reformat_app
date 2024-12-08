@@ -115,20 +115,26 @@ class ModuleICA(CallFunction):
         self.logging[i].update({"function": "collect_depend_file", "status": status})
 
         try:
-            # FILE: ICAS_TBL_USER_GROUP
+            # verify data length 
             self.validate_row_length(tbl["ICAS_TBL_USER_GROUP"], [3, 5, 7])
+            
+            # FILE: ICAS_TBL_USER_GROUP
             columns = ["Record_Type","GROUP_ID","USER_ID","CREATE_USER_ID","CREATE_DTM","LAST_UPDATE_USER_ID","LAST_UPDATE_DTM"]
             tbl_user_group_df = pd.DataFrame(tbl["ICAS_TBL_USER_GROUP"], columns=columns)
             tbl_user_group_df = (tbl_user_group_df.iloc[1:-1].apply(lambda row: row.str.strip()).reset_index(drop=True))
 
-            # FILE: ICAS_TBL_USER_BANK_BRANCH
+            # verify data length 
             self.validate_row_length(tbl["ICAS_TBL_USER_BANK_BRANCH"], [3, 5, 9])
+            
+            # FILE: ICAS_TBL_USER_BANK_BRANCH
             columns = ["Record_Type","USER_ID","BANK_CODE","BRANCH_CODE","SUB_SYSTEM_ID","ACCESS_ALL_BRANCH_IN_HUB","DEFAULT_BRANCH_FLAG","CREATE_USER_ID","CREATE_DTM"]
             tbl_user_bank_df = pd.DataFrame(tbl["ICAS_TBL_USER_BANK_BRANCH"], columns=columns)
             tbl_user_bank_df = (tbl_user_bank_df.iloc[1:-1].apply(lambda row: row.str.strip()).reset_index(drop=True))
 
-            # FILE: ICAS_TBL_GROUP
+            # verify data length 
             self.validate_row_length(tbl["ICAS_TBL_GROUP"], [3, 5, 14])
+            
+            # FILE: ICAS_TBL_GROUP
             columns = ["Record_Type","GROUP_ID","SUB_SYSTEM_ID","GROUP_NAME","RESTRICTION","ABLE_TO_REVERIFY_FLAG","DESCRIPTION","DEFAULT_FINAL_RESULT","DELETE_FLAG","CREATE_USER_ID",
                     "CREATE_DTM","LAST_UPDATE_USER_ID","LAST_UPDATE_DTM","DELETE_DTM"]
             tbl_group_df = pd.DataFrame(tbl["ICAS_TBL_GROUP"], columns=columns)
@@ -151,7 +157,10 @@ class ModuleICA(CallFunction):
             # FILE: ICAS_TBL_USER
             data = [re.sub(r'(?<!\.)\x07', '||', line.strip()).split('||') for line in format_file
                     if 'a.' not in line.lower() and 'pongchet' not in line.lower()]
+            
+            # verify data length 
             self.validate_row_length(data, [3, 5, 21])
+            
             columns = ["Record_Type","USER_ID","LOGIN_NAME","FULL_NAME","PASSWORD","LOCKED_FLAG","FIRST_LOGIN_FLAG","LAST_ACTION_TYPE","CREATE_USER_ID","CREATE_DTM","LAST_UPDATE_USER_ID",
                     "LAST_UPDATE_DTM","LAST_LOGIN_ATTEMPT","ACCESS_ALL_BRANCH_FLAG","HOME_BRANCH","HOME_BANK","LOGIN_RETRY_COUNT","LAST_CHANGE_PASSWORD","DELETE_FLAG",
                     "LAST_LOGIN_SUCCESS","LAST_LOGIN_FAILED"]
@@ -235,7 +244,10 @@ class ModuleICA(CallFunction):
         try:
             # FILE: ICAS_TBL_USER
             data = [re.sub(r"(?<!\.)\x07", "||", line.strip()).split("||") for line in format_file]
+            
+            # verify data length 
             self.validate_row_length(data, [3, 5, 21])
+            
             columns = ["Record_Type","USER_ID","LOGIN_NAME","FULL_NAME","PASSWORD","LOCKED_FLAG","FIRST_LOGIN_FLAG","LAST_ACTION_TYPE","CREATE_USER_ID","CREATE_DTM","LAST_UPDATE_USER_ID",
                     "LAST_UPDATE_DTM","LAST_LOGIN_ATTEMPT","ACCESS_ALL_BRANCH_FLAG","HOME_BRANCH","HOME_BANK","LOGIN_RETRY_COUNT","LAST_CHANGE_PASSWORD","DELETE_FLAG",
                     "LAST_LOGIN_SUCCESS","LAST_LOGIN_FAILED"]

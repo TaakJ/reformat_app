@@ -112,6 +112,8 @@ class ModuleDIL(CallFunction):
 
         try:
             clean_data = self.read_format_file(format_file)
+            
+            # verify data length 
             self.validate_row_length(clean_data)
 
             # Creating DataFrame
@@ -162,6 +164,8 @@ class ModuleDIL(CallFunction):
 
         try:
             clean_data = self.read_format_file(format_file)
+            
+            # verify data length 
             self.validate_row_length(clean_data)
 
             # Creating DataFrame

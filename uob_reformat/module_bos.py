@@ -50,7 +50,7 @@ class ModuleBOS(CallFunction):
 
         logging.info(f"Stop Run Module '{self.module}'\r\n")
     
-    def validate_row_length(self, rows_list: list[list], expected_length: int = 6) -> None:
+    def validate_row_length(self, rows_list: list[list], expected_length: int=6) -> None:
         
         errors = []
         for i, rows in enumerate(rows_list, 1):
@@ -79,6 +79,8 @@ class ModuleBOS(CallFunction):
                 
                 for line in format_file:
                     data.append([element.strip('"') for element in re.split(r',(?=(?:[^"]*"[^"]*")*[^"]*$)', line.strip())])
+                
+                # verify data length 
                 self.validate_row_length(data)
             else:
                 self.logging[i].update({'err': f'[File not found] at {full_depend}'})
@@ -109,6 +111,8 @@ class ModuleBOS(CallFunction):
             data = [] 
             for line in format_file:
                 data.append([element.strip('"') for element in re.split(r',(?=(?:[^"]*"[^"]*")*[^"]*$)', line.strip())])
+            
+            # verify data length 
             self.validate_row_length(data)
             
             # FILE: BOSTH 
@@ -189,6 +193,8 @@ class ModuleBOS(CallFunction):
             data = []
             for line in format_file:
                 data.append([element.strip('"') for element in re.split(r',(?=(?:[^"]*"[^"]*")*[^"]*$)', line.strip())])
+            
+            # verify data length 
             self.validate_row_length(data)
             
             # FILE: BOSTH
