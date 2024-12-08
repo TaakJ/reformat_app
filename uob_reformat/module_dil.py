@@ -36,7 +36,6 @@ class ModuleDIL(CallFunction):
             await self.generate_target_file()
 
         except CustomException as err:
-            
             # Log error details
             logging.error("See Error details at log_error.log")
             logger = err.setup_errorlog(log_name=__name__)
@@ -47,63 +46,7 @@ class ModuleDIL(CallFunction):
                 except StopIteration:
                     break
 
-        logging.info(f"Stop Run Module '{self.module}'\r\n")
-
-    def split_column(self, row: any) -> any:
-        comma = row["NAME"].split(",")
-        if len(comma) == 3:
-            name, department, _ = comma
-        elif len(comma) == 2:
-            name, department = comma
-        else:
-            name = row["NAME"]
-            department = "NA"
-
-        return name.strip(), department.strip()
-
-    def attribute_column(self, row: any) -> str:
-        if (row["ADD_ID"] == "0" and row["EDIT_ID"] == "0" and row["ADD_DOC"] == "0" and row["EDIT_DOC"] == "0" and row["SCAN"] == "0" and row["ADD_USER"] == "1"):
-            return "Admin"
-        elif (row["ADD_ID"] == "1" and row["EDIT_ID"] == "1" and row["ADD_DOC"] == "1" and row["EDIT_DOC"] == "1" and row["SCAN"] == "1" and row["ADD_USER"] == "0"):
-            return "Index+Scan"
-        else:
-            return "Inquiry"
-
-    def validate_row_length(self, rows_list: list[list], expected_length: int=10) -> None:
-        
-        errors = []
-        for i, rows in enumerate(rows_list, 7):
-            try:
-                # Assert that the length of the row matches the expected length
-                assert (len(rows) == expected_length or len(rows) == 1), f"Row {i} has data invalid. {rows}"
-                
-            except AssertionError as err:
-                errors.append(str(err))
-                
-        if errors:
-            raise Exception("\n".join(errors))
-
-    def read_format_file(self, format_file) -> list:
-
-        data = [re.sub(r"(?<!\.)\s{3,}", "||", "".join(re.findall(r"\w+.*", line.strip()))).split("||") for line in format_file if re.findall(r"\w+.*", line.strip())]
-
-        clean_data = []
-        for rows, _data in enumerate(data):
-            if rows == 4:
-                clean_data += [re.sub(r"\s+", ",", ",".join(_data)).split(",")]
-            elif rows >= 5:
-                fix_value = []
-                for idx, value in enumerate(_data, 1):
-                    if idx == 4:
-                        value = re.sub(r"\s+", ",", value).split(",")
-                        fix_value.extend(value)
-                    else:
-                        fix_value.append(value)
-                clean_data.append(fix_value)
-            else:
-                continue
-
-        return clean_data
+        logging.info(f"Stop Run Module '{self.module}'\n")
 
     def collect_user_file(self, i: int, format_file: any) -> dict:
 
@@ -209,3 +152,57 @@ class ModuleDIL(CallFunction):
         status = "succeed"
         self.logging[i].update({"data": param_df.to_dict("list"), "status": status})
         logging.info(f"Collect param data, status: {status}")
+
+    def read_format_file(self, format_file) -> list:
+
+        data = [re.sub(r"(?<!\.)\s{3,}", "||", "".join(re.findall(r"\w+.*", line.strip()))).split("||") for line in format_file if re.findall(r"\w+.*", line.strip())]
+
+        clean_data = []
+        for rows, _data in enumerate(data):
+            if rows == 4:
+                clean_data += [re.sub(r"\s+", ",", ",".join(_data)).split(",")]
+            elif rows >= 5:
+                fix_value = []
+                for idx, value in enumerate(_data, 1):
+                    if idx == 4:
+                        value = re.sub(r"\s+", ",", value).split(",")
+                        fix_value.extend(value)
+                    else:
+                        fix_value.append(value)
+                clean_data.append(fix_value)
+            else:
+                continue
+
+        return clean_data
+    
+    def validate_row_length(self, rows_list: list[list], expected_length: int=10) -> None:
+        # Assert that the length of the row matches the expected length
+        errors = []
+        for i, rows in enumerate(rows_list, 7):
+            try:
+                assert (len(rows) == expected_length or len(rows) == 1), f"Row {i} has data invalid. value:{rows}"
+            except AssertionError as err:
+                errors.append(str(err))
+                
+        if errors:
+            raise Exception("\n".join(errors))
+        
+    def split_column(self, row: any) -> any:
+        comma = row["NAME"].split(",")
+        if len(comma) == 3:
+            name, department, _ = comma
+        elif len(comma) == 2:
+            name, department = comma
+        else:
+            name = row["NAME"]
+            department = "NA"
+
+        return name.strip(), department.strip()
+
+    def attribute_column(self, row: any) -> str:
+        if (row["ADD_ID"] == "0" and row["EDIT_ID"] == "0" and row["ADD_DOC"] == "0" and row["EDIT_DOC"] == "0" and row["SCAN"] == "0" and row["ADD_USER"] == "1"):
+            return "Admin"
+        elif (row["ADD_ID"] == "1" and row["EDIT_ID"] == "1" and row["ADD_DOC"] == "1" and row["EDIT_DOC"] == "1" and row["SCAN"] == "1" and row["ADD_USER"] == "0"):
+            return "Index+Scan"
+        else:
+            return "Inquiry"

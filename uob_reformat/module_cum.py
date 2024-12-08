@@ -35,7 +35,6 @@ class ModuleCUM(CallFunction):
             await self.generate_target_file()
 
         except CustomException as err:
-            
             # Log error details
             logging.error("See Error details at log_error.log")
             logger = err.setup_errorlog(log_name=__name__)
@@ -46,50 +45,7 @@ class ModuleCUM(CallFunction):
                 except StopIteration:
                     break
 
-        logging.info(f"Stop Run Module '{self.module}'\r\n")
-    
-    def parse_datetime(self, date_str):
-        formats = [
-            "%Y-%m-%d %H:%M:%S.%f", "%Y-%m-%d %H:%M:%S", "%d/%m/%Y %H:%M:%S.%f",
-            "%d/%m/%Y %H:%M:%S", "%Y-%m-%d", "%d-%m-%Y", "%Y/%m/%d", "%d/%m/%Y", "%m/%d/%Y"
-            ]
-        for fmt in formats:
-            try:
-                parsed_date = pd.to_datetime(date_str, format=fmt)
-                if parsed_date.year < 2000:
-                    return pd.NaT
-                return parsed_date
-            except ValueError:
-                continue
-        return pd.NaT
-    
-    def validate_row_length(self, rows_list: list[list], valid_lengths: list[int]=[1,14]) -> None:
-        
-        errors = []
-        for i, rows in enumerate(rows_list, 2):
-            try:
-                # Assert that the length of the row matches the expected length
-                assert len(rows) in valid_lengths, f"Row {i} has data invalid. {rows}"
-                
-            except AssertionError as err:
-                errors.append(str(err))
-                
-        if errors:
-            raise Exception("\n".join(errors))
-    
-    def read_format_file(self, format_file) -> list:
-        
-        data = []
-        sheet_list = [sheet for sheet in format_file.sheet_names()]
-        
-        for sheets in sheet_list:
-            cells = format_file.sheet_by_name(sheets)
-            for row in range(0, cells.nrows):
-                by_sheets = [str(cells.cell(row, col).value).strip() for col in range(cells.ncols)][1:]
-                if not all(empty == '' for empty in by_sheets):
-                    data.append(by_sheets)
-                    
-        return data
+        logging.info(f"Stop Run Module '{self.module}'\n")
 
     def collect_user_file(self, i: int, format_file: any) -> dict:
 
@@ -192,3 +148,44 @@ class ModuleCUM(CallFunction):
         status = "succeed"
         self.logging[i].update({"data": merge_df.to_dict("list"), "status": status})
         logging.info(f"Collect param data, status: {status}")
+        
+    def read_format_file(self, format_file) -> list:
+        
+        data = []
+        sheet_list = [sheet for sheet in format_file.sheet_names()]
+        
+        for sheets in sheet_list:
+            cells = format_file.sheet_by_name(sheets)
+            for row in range(0, cells.nrows):
+                by_sheets = [str(cells.cell(row, col).value).strip() for col in range(cells.ncols)][1:]
+                if not all(empty == '' for empty in by_sheets):
+                    data.append(by_sheets)
+                    
+        return data
+    
+    def validate_row_length(self, rows_list: list[list], valid_lengths: list[int]=[1,14]) -> None:
+        # Assert that the length of the row matches the expected length
+        errors = []
+        for i, rows in enumerate(rows_list, 2):
+            try:
+                assert len(rows) in valid_lengths, f"Row {i} has data invalid. value:{rows}"
+            except AssertionError as err:
+                errors.append(str(err))
+                
+        if errors:
+            raise Exception("\n".join(errors))
+        
+    def parse_datetime(self, date_str):
+        formats = [
+            "%Y-%m-%d %H:%M:%S.%f", "%Y-%m-%d %H:%M:%S", "%d/%m/%Y %H:%M:%S.%f",
+            "%d/%m/%Y %H:%M:%S", "%Y-%m-%d", "%d-%m-%Y", "%Y/%m/%d", "%d/%m/%Y", "%m/%d/%Y"
+            ]
+        for fmt in formats:
+            try:
+                parsed_date = pd.to_datetime(date_str, format=fmt)
+                if parsed_date.year < 2000:
+                    return pd.NaT
+                return parsed_date
+            except ValueError:
+                continue
+        return pd.NaT

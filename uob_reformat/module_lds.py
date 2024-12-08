@@ -36,7 +36,6 @@ class ModuleLDS(CallFunction):
             await self.generate_target_file()
 
         except CustomException as err:
-            
             # Log error details
             logging.error("See Error details at log_error.log")
             logger = err.setup_errorlog(log_name=__name__)
@@ -47,62 +46,7 @@ class ModuleLDS(CallFunction):
                 except StopIteration:
                     break
                 
-        logging.info(f"Stop Run Module '{self.module}'\r\n")
-
-    def parse_datetime(self, date_str):
-        formats = [
-            "%Y-%m-%d %H:%M:%S.%f", "%Y-%m-%d %H:%M:%S", "%d/%m/%Y %H:%M:%S.%f",
-            "%d/%m/%Y %H:%M:%S", "%Y-%m-%d", "%d-%m-%Y", "%Y/%m/%d", "%d/%m/%Y", "%m/%d/%Y"
-            ]
-        for fmt in formats:
-            try:
-                parsed_date = pd.to_datetime(date_str, format=fmt)
-                if parsed_date.year < 2000:
-                    return pd.NaT
-                return parsed_date
-            except ValueError:
-                continue
-        return pd.NaT
-
-    def validate_row_length(self, rows_list: list[list], valid_lengths: list[int]=[32,33]) -> None:
-        
-        errors = []
-        for i, rows in enumerate(rows_list, 2):
-            try:
-                # Assert that the length of the row matches the expected length
-                assert (len(rows) in valid_lengths), f"Row {i} has data invalid. {rows}"
-                
-            except AssertionError as err:
-                errors.append(str(err))
-        
-        if errors:
-            raise Exception("\n".join(errors))
-
-    def read_format_file(self, format_file) -> list:
-        
-        def clean_and_split_line(line):
-            # Remove newlines and whitespace, handle quoted strings
-            cleaned_line = re.sub(r'\n\s*\w+', '', line).strip()
-            cleaned_line = re.sub(r"\s+", " ", cleaned_line)
-            split_line = re.split(r',(?=(?:[^"]*"[^"]*")*[^"]*$)', cleaned_line, flags=re.DOTALL)
-            return [x.strip() for x in split_line]
-    
-        clean_data = []
-        for line in format_file:
-            if re.match(r"\w+", line.strip()):
-                split_line = clean_and_split_line(line)
-                
-                if len(split_line) >= 31:    
-                    cleaned_row = []
-                    for i, value in enumerate(split_line):
-                        if i == 0:
-                            split_values = re.split(r"\s+", value, maxsplit=1)
-                            cleaned_row.extend(split_values)
-                        else:
-                            cleaned_row.append(value)
-                    clean_data.append(cleaned_row)
-                    
-        return clean_data
+        logging.info(f"Stop Run Module '{self.module}'\n")
     
     def collect_user_file(self, i: int, format_file: any) -> dict:
 
@@ -129,6 +73,9 @@ class ModuleLDS(CallFunction):
             
             # Adjust column: CostCenterName
             user_df['CostCenterName'] = user_df['CostCenterName'].apply(lambda row: ' '.join(row.replace('.', ' ').replace(',', ' ').split()).strip())
+            
+            # verify Email
+            user_df.apply(lambda row: self.validate_email(row), axis=1)
             
             # Mapping Data to Target Columns
             target_columns = self.logging[i]["columns"]
@@ -189,6 +136,9 @@ class ModuleLDS(CallFunction):
             # Adjust column: CostCenterName
             param_df['CostCenterName'] = param_df['CostCenterName'].apply(lambda row: ' '.join(row.replace('.', ' ').replace(',', ' ').split()).strip())
             
+            # verify Email
+            param_df.apply(lambda row: self.validate_email(row), axis=1)
+            
             # Mapping Data to Target Columns
             target_columns = self.logging[i]["columns"]
             
@@ -222,3 +172,61 @@ class ModuleLDS(CallFunction):
         status = "succeed"
         self.logging[i].update({"data": merge_df.to_dict("list"), "status": status})
         logging.info(f"Collect param data, status: {status}")
+        
+    def read_format_file(self, format_file) -> list:
+        # Remove newlines and whitespace, handle quoted strings
+        def clean_and_split_line(line):
+            cleaned_line = re.sub(r'\n\s*\w+', '', line).strip()
+            cleaned_line = re.sub(r"\s+", " ", cleaned_line)
+            split_line = re.split(r',(?=(?:[^"]*"[^"]*")*[^"]*$)', cleaned_line, flags=re.DOTALL)
+            return [x.strip() for x in split_line]
+    
+        clean_data = []
+        for line in format_file:
+            if re.match(r"\w+", line.strip()):
+                split_line = clean_and_split_line(line)
+                
+                if len(split_line) >= 31:    
+                    cleaned_row = []
+                    for i, value in enumerate(split_line):
+                        if i == 0:
+                            split_values = re.split(r"\s+", value, maxsplit=1)
+                            cleaned_row.extend(split_values)
+                        else:
+                            cleaned_row.append(value)
+                    clean_data.append(cleaned_row)
+                    
+        return clean_data
+    
+    def validate_row_length(self, rows_list: list[list], valid_lengths: list[int]=[32,33]) -> None:
+        # Assert that the length of the row matches the expected length
+        errors = []
+        for i, rows in enumerate(rows_list, 2):
+            try:
+                assert (len(rows) in valid_lengths), f"Row {i} has data invalid. value:{rows}"
+            except AssertionError as err:
+                errors.append(str(err))
+                
+        if errors:
+            raise Exception("\n".join(errors))
+    
+    def validate_email(self, row):
+        # Verify the email
+        regex = r"^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$"
+        if re.match(regex, row['Email']) is None:
+            raise Exception(f"Row {row['Rownum']} has Email invalid. value:'{row['Email']}'")
+    
+    def parse_datetime(self, date_str):
+        formats = [
+            "%Y-%m-%d %H:%M:%S.%f", "%Y-%m-%d %H:%M:%S", "%d/%m/%Y %H:%M:%S.%f",
+            "%d/%m/%Y %H:%M:%S", "%Y-%m-%d", "%d-%m-%Y", "%Y/%m/%d", "%d/%m/%Y", "%m/%d/%Y"
+            ]
+        for fmt in formats:
+            try:
+                parsed_date = pd.to_datetime(date_str, format=fmt)
+                if parsed_date.year < 2000:
+                    return pd.NaT
+                return parsed_date
+            except ValueError:
+                continue
+        return pd.NaT

@@ -37,7 +37,6 @@ class ModuleBOS(CallFunction):
             await self.generate_target_file()
             
         except CustomException as err:
-            
             # Log error details
             logging.error("See Error details at log_error.log")
             logger = err.setup_errorlog(log_name=__name__)
@@ -48,59 +47,7 @@ class ModuleBOS(CallFunction):
                 except StopIteration:
                     break
 
-        logging.info(f"Stop Run Module '{self.module}'\r\n")
-    
-    def validate_row_length(self, rows_list: list[list], expected_length: int=6) -> None:
-        
-        errors = []
-        for i, rows in enumerate(rows_list, 1):
-            try:
-                # Assert that the length of the row matches the expected length
-                assert len(rows) == expected_length, f"Row {i} has data invalid. {rows}"
-                
-            except AssertionError as err:
-                errors.append(str(err))
-                
-        if errors:
-            raise Exception("\n".join(errors))
-    
-    def collect_depend_file(self, i: int) -> pd.DataFrame:
-        
-        logging.info('Lookup depend file')
-        
-        status = 'failed'
-        self.logging[i].update({'function': 'collect_depend_file', 'status': status})
-        
-        for full_depend in self.logging[i]['full_depend']:
-            
-            data = []
-            if glob.glob(full_depend, recursive=True):
-                format_file = self.read_file(i, full_depend)
-                
-                for line in format_file:
-                    data.append([element.strip('"') for element in re.split(r',(?=(?:[^"]*"[^"]*")*[^"]*$)', line.strip())])
-                
-                # verify data length 
-                self.validate_row_length(data)
-            else:
-                self.logging[i].update({'err': f'[File not found] at {full_depend}'})
-                
-        if 'err' in self.logging[i]:
-            raise CustomException(err=self.logging)
-        
-        try:
-            # Creating DataFrame
-            param_df = pd.DataFrame(data)
-            param_df.columns = param_df.iloc[0].values
-            param_df = param_df.iloc[1:].apply(lambda row: row.str.strip()).reset_index(drop=True)
-            
-        except Exception as err:
-            raise Exception(err)
-        
-        status = 'succeed'
-        self.logging[i].update({'status': status})
-        
-        return param_df
+        logging.info(f"Stop Run Module '{self.module}'\n")
         
     def collect_user_file(self, i: int, format_file: any) -> dict:
 
@@ -243,3 +190,54 @@ class ModuleBOS(CallFunction):
         status = 'succeed'
         self.logging[i].update({'data': merge_df.to_dict('list'), 'status': status})
         logging.info(f'Collect param data, status: {status}')
+        
+            
+    def validate_row_length(self, rows_list: list[list], expected_length: int=6) -> None:
+        # Assert that the length of the row matches the expected length
+        errors = []
+        for i, rows in enumerate(rows_list, 1):
+            try:
+                assert len(rows) == expected_length, f"Row {i} has data invalid. value:{rows}"
+            except AssertionError as err:
+                errors.append(str(err))
+                
+        if errors:
+            raise Exception("\n".join(errors))
+        
+    def collect_depend_file(self, i: int) -> pd.DataFrame:
+        
+        logging.info('Lookup depend file')
+        
+        status = 'failed'
+        self.logging[i].update({'function': 'collect_depend_file', 'status': status})
+        
+        for full_depend in self.logging[i]['full_depend']:
+            
+            data = []
+            if glob.glob(full_depend, recursive=True):
+                format_file = self.read_file(i, full_depend)
+                
+                for line in format_file:
+                    data.append([element.strip('"') for element in re.split(r',(?=(?:[^"]*"[^"]*")*[^"]*$)', line.strip())])
+                
+                # verify data length 
+                self.validate_row_length(data)
+            else:
+                self.logging[i].update({'err': f'[File not found] at {full_depend}'})
+                
+        if 'err' in self.logging[i]:
+            raise CustomException(err=self.logging)
+        
+        try:
+            # Creating DataFrame
+            param_df = pd.DataFrame(data)
+            param_df.columns = param_df.iloc[0].values
+            param_df = param_df.iloc[1:].apply(lambda row: row.str.strip()).reset_index(drop=True)
+            
+        except Exception as err:
+            raise Exception(err)
+        
+        status = 'succeed'
+        self.logging[i].update({'status': status})
+        
+        return param_df

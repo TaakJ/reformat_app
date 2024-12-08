@@ -36,7 +36,6 @@ class ModuleMOC(CallFunction):
             await self.generate_target_file()
             
         except CustomException as err:
-            
             # Log error details
             logging.error("See Error details at log_error.log")
             logger = err.setup_errorlog(log_name=__name__)
@@ -47,21 +46,7 @@ class ModuleMOC(CallFunction):
                 except StopIteration:
                     break
                 
-        logging.info(f"Stop Run Module '{self.module}'\r\n")
-        
-    def validate_row_length(self, rows_list: list[list], expected_length: int=15) -> None:
-        
-        errors = []
-        for i, rows in enumerate(rows_list, 1):
-            try:
-                # Assert that the length of the row matches the expected length
-                assert (len(rows) == expected_length), f"Row {i} has data invalid. {rows}"
-                
-            except AssertionError as err:
-                errors.append(str(err))
-                
-        if errors:
-            raise Exception("\n".join(errors))
+        logging.info(f"Stop Run Module '{self.module}'\n")
 
     def collect_user_file(self, i: int, format_file: any) -> dict:
 
@@ -124,3 +109,15 @@ class ModuleMOC(CallFunction):
         status = "succeed"
         self.logging[i].update({"data": param_df.to_dict("list"), "status": status})
         logging.info(f"Collect param data, status: {status}")
+
+    def validate_row_length(self, rows_list: list[list], expected_length: int=15) -> None:
+        # Assert that the length of the row matches the expected length
+        errors = []
+        for i, rows in enumerate(rows_list, 1):
+            try:
+                assert (len(rows) == expected_length), f"Row {i} has data invalid. value:{rows}"
+            except AssertionError as err:
+                errors.append(str(err))
+                
+        if errors:
+            raise Exception("\n".join(errors))

@@ -38,7 +38,6 @@ class ModuleICA(CallFunction):
             await self.generate_target_file()
 
         except CustomException as err:
-            
             # Log error details
             logging.error("See Error details at log_error.log")
             logger = err.setup_errorlog(log_name=__name__)
@@ -49,104 +48,7 @@ class ModuleICA(CallFunction):
                 except StopIteration:
                     break
 
-        logging.info(f"Stop Run Module '{self.module}'\r\n")
-    
-    def parse_datetime(self, date_str):
-        formats = [
-            "%Y-%m-%d %H:%M:%S.%f", "%Y-%m-%d %H:%M:%S", "%d/%m/%Y %H:%M:%S.%f",
-            "%d/%m/%Y %H:%M:%S", "%Y-%m-%d", "%d-%m-%Y", "%Y/%m/%d", "%d/%m/%Y", "%m/%d/%Y"
-            ]
-        for fmt in formats:
-            try:
-                parsed_date = pd.to_datetime(date_str, format=fmt)
-                if parsed_date.year < 2000:
-                    return pd.NaT
-                return parsed_date
-            except ValueError:
-                continue
-        return pd.NaT
-    
-    def clean_fullname(self, name):
-        name = name.replace(",", "")
-        name = re.sub(r"\d+", "", name)
-        name = name.strip()
-        return name
-
-    def validate_row_length(self, rows_list: list[list], valid_lengths: list[int]) -> None:
-        
-        errors = []
-        for i, rows in enumerate(rows_list):
-            try:
-                # Assert that the length of the row matches the expected length
-                assert (len(rows) in valid_lengths), f"Row {i} has data invalid. {rows}"
-                
-            except AssertionError as err:
-                errors.append(str(err))
-        
-        if errors:
-            raise Exception("\n".join(errors))
-
-    def collect_depend_file(self, i: int) -> pd.DataFrame:
-
-        logging.info("Lookup depend file")
-
-        tbl = {}
-        for full_depend in self.logging[i]["full_depend"]:
-
-            data = []
-            if glob.glob(full_depend, recursive=True):
-
-                format_file = self.read_file(i, full_depend)
-                for line in format_file:
-                    data += [re.sub(r"(?<!\.)\x07", "||", line.strip()).split("||")]
-
-                tbl_name = Path(full_depend).name
-                if tbl_name in tbl:
-                    tbl[tbl_name].extend(data)
-                else:
-                    tbl[tbl_name] = data
-            else:
-                self.logging[i].update({"err": f"[File not found] at {full_depend}"})
-
-            if "err" in self.logging[i]:
-                raise CustomException(err=self.logging)
-
-        status = "failed"
-        self.logging[i].update({"function": "collect_depend_file", "status": status})
-
-        try:
-            # verify data length 
-            self.validate_row_length(tbl["ICAS_TBL_USER_GROUP"], [3, 5, 7])
-            
-            # FILE: ICAS_TBL_USER_GROUP
-            columns = ["Record_Type","GROUP_ID","USER_ID","CREATE_USER_ID","CREATE_DTM","LAST_UPDATE_USER_ID","LAST_UPDATE_DTM"]
-            tbl_user_group_df = pd.DataFrame(tbl["ICAS_TBL_USER_GROUP"], columns=columns)
-            tbl_user_group_df = (tbl_user_group_df.iloc[1:-1].apply(lambda row: row.str.strip()).reset_index(drop=True))
-
-            # verify data length 
-            self.validate_row_length(tbl["ICAS_TBL_USER_BANK_BRANCH"], [3, 5, 9])
-            
-            # FILE: ICAS_TBL_USER_BANK_BRANCH
-            columns = ["Record_Type","USER_ID","BANK_CODE","BRANCH_CODE","SUB_SYSTEM_ID","ACCESS_ALL_BRANCH_IN_HUB","DEFAULT_BRANCH_FLAG","CREATE_USER_ID","CREATE_DTM"]
-            tbl_user_bank_df = pd.DataFrame(tbl["ICAS_TBL_USER_BANK_BRANCH"], columns=columns)
-            tbl_user_bank_df = (tbl_user_bank_df.iloc[1:-1].apply(lambda row: row.str.strip()).reset_index(drop=True))
-
-            # verify data length 
-            self.validate_row_length(tbl["ICAS_TBL_GROUP"], [3, 5, 14])
-            
-            # FILE: ICAS_TBL_GROUP
-            columns = ["Record_Type","GROUP_ID","SUB_SYSTEM_ID","GROUP_NAME","RESTRICTION","ABLE_TO_REVERIFY_FLAG","DESCRIPTION","DEFAULT_FINAL_RESULT","DELETE_FLAG","CREATE_USER_ID",
-                    "CREATE_DTM","LAST_UPDATE_USER_ID","LAST_UPDATE_DTM","DELETE_DTM"]
-            tbl_group_df = pd.DataFrame(tbl["ICAS_TBL_GROUP"], columns=columns)
-            tbl_group_df = (tbl_group_df.iloc[1:-1].apply(lambda row: row.str.strip()).reset_index(drop=True))
-
-        except:
-            raise
-
-        status = "succeed"
-        self.logging[i].update({"status": status})
-
-        return tbl_user_group_df, tbl_user_bank_df, tbl_group_df
+        logging.info(f"Stop Run Module '{self.module}'\n")
 
     def collect_user_file(self, i: int, format_file: any) -> str:
 
@@ -305,3 +207,98 @@ class ModuleICA(CallFunction):
         status = "succeed"
         self.logging[i].update({"data": merge_df.to_dict("list"), "status": status})
         logging.info(f"Collect param data, status: {status}")
+        
+    def validate_row_length(self, rows_list: list[list], valid_lengths: list[int]) -> None:
+        # Assert that the length of the row matches the expected length
+        errors = []
+        for i, rows in enumerate(rows_list):
+            try:
+                assert (len(rows) in valid_lengths), f"Row {i} has data invalid. value:{rows}"
+            except AssertionError as err:
+                errors.append(str(err))
+        
+        if errors:
+            raise Exception("\n".join(errors))
+        
+    def collect_depend_file(self, i: int) -> pd.DataFrame:
+
+        logging.info("Lookup depend file")
+
+        tbl = {}
+        for full_depend in self.logging[i]["full_depend"]:
+
+            data = []
+            if glob.glob(full_depend, recursive=True):
+
+                format_file = self.read_file(i, full_depend)
+                for line in format_file:
+                    data += [re.sub(r"(?<!\.)\x07", "||", line.strip()).split("||")]
+
+                tbl_name = Path(full_depend).name
+                if tbl_name in tbl:
+                    tbl[tbl_name].extend(data)
+                else:
+                    tbl[tbl_name] = data
+            else:
+                self.logging[i].update({"err": f"[File not found] at {full_depend}"})
+
+            if "err" in self.logging[i]:
+                raise CustomException(err=self.logging)
+
+        status = "failed"
+        self.logging[i].update({"function": "collect_depend_file", "status": status})
+
+        try:
+            # verify data length 
+            self.validate_row_length(tbl["ICAS_TBL_USER_GROUP"], [3, 5, 7])
+            
+            # FILE: ICAS_TBL_USER_GROUP
+            columns = ["Record_Type","GROUP_ID","USER_ID","CREATE_USER_ID","CREATE_DTM","LAST_UPDATE_USER_ID","LAST_UPDATE_DTM"]
+            tbl_user_group_df = pd.DataFrame(tbl["ICAS_TBL_USER_GROUP"], columns=columns)
+            tbl_user_group_df = (tbl_user_group_df.iloc[1:-1].apply(lambda row: row.str.strip()).reset_index(drop=True))
+
+            # verify data length 
+            self.validate_row_length(tbl["ICAS_TBL_USER_BANK_BRANCH"], [3, 5, 9])
+            
+            # FILE: ICAS_TBL_USER_BANK_BRANCH
+            columns = ["Record_Type","USER_ID","BANK_CODE","BRANCH_CODE","SUB_SYSTEM_ID","ACCESS_ALL_BRANCH_IN_HUB","DEFAULT_BRANCH_FLAG","CREATE_USER_ID","CREATE_DTM"]
+            tbl_user_bank_df = pd.DataFrame(tbl["ICAS_TBL_USER_BANK_BRANCH"], columns=columns)
+            tbl_user_bank_df = (tbl_user_bank_df.iloc[1:-1].apply(lambda row: row.str.strip()).reset_index(drop=True))
+
+            # verify data length 
+            self.validate_row_length(tbl["ICAS_TBL_GROUP"], [3, 5, 14])
+            
+            # FILE: ICAS_TBL_GROUP
+            columns = ["Record_Type","GROUP_ID","SUB_SYSTEM_ID","GROUP_NAME","RESTRICTION","ABLE_TO_REVERIFY_FLAG","DESCRIPTION","DEFAULT_FINAL_RESULT","DELETE_FLAG","CREATE_USER_ID",
+                    "CREATE_DTM","LAST_UPDATE_USER_ID","LAST_UPDATE_DTM","DELETE_DTM"]
+            tbl_group_df = pd.DataFrame(tbl["ICAS_TBL_GROUP"], columns=columns)
+            tbl_group_df = (tbl_group_df.iloc[1:-1].apply(lambda row: row.str.strip()).reset_index(drop=True))
+
+        except:
+            raise
+
+        status = "succeed"
+        self.logging[i].update({"status": status})
+
+        return tbl_user_group_df, tbl_user_bank_df, tbl_group_df
+    
+    def parse_datetime(self, date_str):
+        formats = [
+            "%Y-%m-%d %H:%M:%S.%f", "%Y-%m-%d %H:%M:%S", "%d/%m/%Y %H:%M:%S.%f",
+            "%d/%m/%Y %H:%M:%S", "%Y-%m-%d", "%d-%m-%Y", "%Y/%m/%d", "%d/%m/%Y", "%m/%d/%Y"
+            ]
+        for fmt in formats:
+            try:
+                parsed_date = pd.to_datetime(date_str, format=fmt)
+                if parsed_date.year < 2000:
+                    return pd.NaT
+                return parsed_date
+            except ValueError:
+                continue
+        return pd.NaT
+    
+    def clean_fullname(self, name):
+        name = name.replace(",", "")
+        name = re.sub(r"\d+", "", name)
+        name = name.strip()
+        return name
