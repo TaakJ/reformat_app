@@ -77,12 +77,6 @@ class ModuleLDS(CallFunction):
             # Adjust column: CostCenterName
             user_df['CostCenterName'] = user_df['CostCenterName'].apply(lambda row: ' '.join(row.replace('.', ' ').replace(',', ' ').split()).strip())
             
-            # verify Email
-            verify_email = user_df[~user_df['Email'].apply(self.validate_email)]
-            errors = [f"Row {row['Rownum']} has invalid email value: [{row['Email']}]"  for _, row in verify_email.iterrows()]
-            if errors:
-                raise Exception("\n".join(errors))
-            
             # Mapping Data to Target Columns
             target_columns = self.logging[i]["columns"]
             mapping  = dict.fromkeys(target_columns, "NA")
@@ -141,12 +135,6 @@ class ModuleLDS(CallFunction):
             
             # Adjust column: CostCenterName
             param_df['CostCenterName'] = param_df['CostCenterName'].apply(lambda row: ' '.join(row.replace('.', ' ').replace(',', ' ').split()).strip())
-            
-            # verify Email
-            verify_email = param_df[~param_df['Email'].apply(self.validate_email)]
-            errors = [f"Row {row['Rownum']} has invalid email value: [{row['Email']}]"  for _, row in verify_email.iterrows()]
-            if errors:
-                raise Exception("\n".join(errors))
             
             # Mapping Data to Target Columns
             target_columns = self.logging[i]["columns"]
@@ -218,11 +206,6 @@ class ModuleLDS(CallFunction):
                 
         if errors:
             raise Exception("\n".join(errors))
-    
-    def validate_email(self, email):
-        # Verify the email
-        pattern = r"^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$"
-        return re.match(pattern, email) is not None
         
     def parse_datetime(self, date_str):
         formats = [
