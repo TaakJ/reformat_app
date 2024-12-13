@@ -1,9 +1,12 @@
 import logging
 import re
 import traceback
+
 import pandas as pd
+
 from .exception import CustomException
 from .non_functional import CallFunction
+
 
 class ModuleLDS(CallFunction):
 
@@ -75,7 +78,10 @@ class ModuleLDS(CallFunction):
             user_df['CostCenterName'] = user_df['CostCenterName'].apply(lambda row: ' '.join(row.replace('.', ' ').replace(',', ' ').split()).strip())
             
             # verify Email
-            user_df.apply(lambda row: self.validate_email(row), axis=1)
+            verify_email = user_df[~user_df['Email'].apply(self.validate_email)]
+            errors = [f"Row {row['Rownum']} has invalid email value: [{row['Email']}]"  for _, row in verify_email.iterrows()]
+            if errors:
+                raise Exception("\n".join(errors))
             
             # Mapping Data to Target Columns
             target_columns = self.logging[i]["columns"]
@@ -137,7 +143,10 @@ class ModuleLDS(CallFunction):
             param_df['CostCenterName'] = param_df['CostCenterName'].apply(lambda row: ' '.join(row.replace('.', ' ').replace(',', ' ').split()).strip())
             
             # verify Email
-            param_df.apply(lambda row: self.validate_email(row), axis=1)
+            verify_email = param_df[~param_df['Email'].apply(self.validate_email)]
+            errors = [f"Row {row['Rownum']} has invalid email value: [{row['Email']}]"  for _, row in verify_email.iterrows()]
+            if errors:
+                raise Exception("\n".join(errors))
             
             # Mapping Data to Target Columns
             target_columns = self.logging[i]["columns"]
@@ -210,12 +219,11 @@ class ModuleLDS(CallFunction):
         if errors:
             raise Exception("\n".join(errors))
     
-    def validate_email(self, row):
+    def validate_email(self, email):
         # Verify the email
-        regex = r"^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$"
-        if re.match(regex, row['Email']) is None:
-            raise Exception(f"Row {row['Rownum']} has Email invalid. value:'{row['Email']}'")
-    
+        pattern = r"^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$"
+        return re.match(pattern, email) is not None
+        
     def parse_datetime(self, date_str):
         formats = [
             "%Y-%m-%d %H:%M:%S.%f", "%Y-%m-%d %H:%M:%S", "%d/%m/%Y %H:%M:%S.%f",
