@@ -74,6 +74,9 @@ class ModuleLDS(CallFunction):
             user_df = user_df.iloc[:, :-1].apply(lambda row: row.str.strip()).reset_index(drop=True)
             user_df = user_df.map(lambda row: ("NA" if isinstance(row, str) and (row.lower() == "null" or row == "") else row))
             
+            # Filter column: User_Active
+            user_df = user_df[user_df['User_Active'].str.lower() == 'active'].reset_index(drop=True)
+            
             # Adjust column: CostCenterName
             user_df['CostCenterName'] = user_df['CostCenterName'].apply(lambda row: ' '.join(row.replace('.', ' ').replace(',', ' ').split()).strip())
             
@@ -87,7 +90,7 @@ class ModuleLDS(CallFunction):
                     "AccountName": user_df["UserName"],
                     "AccountType": "USR",
                     "EntitlementName": user_df["RoleID"],
-                    "AccountStatus": user_df["User_Active"].apply(lambda row: "A" if row.lower() == "active" else "D"),
+                    "AccountStatus": user_df["User_Active"].apply(lambda row: "A" if row.lower() == "active" else row),
                     "IsPrivileged": "N",
                     "AccountDescription": user_df["FullName"],
                     "LastLogin": user_df["LastLogin_Date"].apply(self.parse_datetime).dt.strftime("%Y%m%d%H%M%S"),
@@ -133,6 +136,9 @@ class ModuleLDS(CallFunction):
             param_df = param_df.iloc[:, :-1].apply(lambda row: row.str.strip()).reset_index(drop=True)
             param_df = param_df.map(lambda row: ("NA" if isinstance(row, str) and (row.strip().lower() == "null" or row.strip() == "") else row))
             
+            # Filter column: User_Active
+            param_df = param_df[param_df['User_Active'].str.lower() == 'active'].reset_index(drop=True)
+            
             # Adjust column: CostCenterName
             param_df['CostCenterName'] = param_df['CostCenterName'].apply(lambda row: ' '.join(row.replace('.', ' ').replace(',', ' ').split()).strip())
             
@@ -154,7 +160,7 @@ class ModuleLDS(CallFunction):
             # Extract unique CostCenterCode and CostCenterName
             unique_cct = param_df[['CostCenterCode', 'CostCenterName']].drop_duplicates()
             cct_params = pd.DataFrame([
-                ['Costcenter', code, name] for code, name in zip(unique_cct['CostCenterCode'], unique_cct['CostCenterName'])
+                ['Costcenter', code, f"{name} ({code})"] for code, name in zip(unique_cct['CostCenterCode'], unique_cct['CostCenterName'])
             ], columns=target_columns)
                         
             merge_df = pd.concat([role_params, dept_params, cct_params], ignore_index=True)
